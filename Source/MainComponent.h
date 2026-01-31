@@ -341,7 +341,7 @@ public:
                 auto outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualOut / audioLength);
 
                 // Draw shade
-                g.setColour (juce::Colours::white.withAlpha (0.1f));
+                g.setColour (juce::Colours::white.withAlpha (0.3f));
                 g.fillRect (juce::Rectangle<float> (inX, (float)waveformBounds.getY(), outX - inX, (float)waveformBounds.getHeight()));
 
                 // Draw lines
@@ -360,7 +360,12 @@ public:
             // Draw mouse cursor line if active
             if (mouseCursorX != -1)
             {
-                g.setColour (juce::Colours::lightgrey.withAlpha(0.5f)); // Distinct color and transparency
+                // Wider, translucent shadow line
+                g.setColour (juce::Colours::darkgrey.withAlpha(0.2f)); // Wider shadow effect
+                g.fillRect (mouseCursorX - 2, waveformBounds.getY(), 5, waveformBounds.getHeight()); // 5 pixels wide
+
+                // Thin mouse cursor line
+                g.setColour (juce::Colours::lightgrey.withAlpha(0.7f)); // Distinct color and transparency
                 g.drawVerticalLine (mouseCursorX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
             }
         }
