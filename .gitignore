@@ -1,2 +1,73 @@
+# CMake generated files and directories
+build/
+build-release/
 cmake-build-debug/
+_deps/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install/
+Makefile
+*.cmake
+build.ninja
+.ninja_deps
+.ninja_log
+cpm-package-lock.cmake
+
+# Compiled Object files, libraries, and executables
+*.o
+*.obj
+*.lo
+*.la
+*.so
+*.a
+*.dll
+*.lib
+*.exe
+*.out
+*.app
+*.ipa
+*.ap_
+
+# Editor and IDE files
 .idea/
+*.swp
+*~
+*#
+.#*
+*.bak
+*.orig
+*.rej
+*.user
+*.suo
+*.ncb
+*.aps
+*.dsp
+*.dsw
+*.plg
+*.vcproj
+*.vcxproj*
+*.sln
+*.filters
+*.opendbl
+*.xcodeproj
+*.xcworkspace
+*.xcscheme
+*.DS_Store
+Thumbs.db
+*.bin
+
+# Dependency directories
+bin/
+obj/
+pkg/
+
+# Logs and temporary files
+*.log
+*.tmp
+temp/
+tmp/
+
+# Any sensitive files (add more if necessary)
+# secrets.h
+# config.h
