@@ -1,8 +1,9 @@
 #pragma once
 
 #include <juce_audio_utils/juce_audio_utils.h>
-#include "DrunkDrawnLookAndFeel.h"
+
 #include "LoopButton.h" // Include the custom LoopButton header
+#include "ModernLookAndFeel.h"
 
 class MainComponent  : public juce::AudioAppComponent,
                        public juce::ChangeListener,
@@ -27,41 +28,47 @@ public:
         thumbnail.addChangeListener (this);
 
         // 2. Look and Feel - Set up the "Sorta" Brand Colors
-        setLookAndFeel (&drunkLF);
-        drunkLF.setButtonOnColorRange({ juce::Colour(0xffff1493), 0.08f, 0.12f, 0.1f }); // Hot Pink
-        drunkLF.setButtonOutlineColorRange({ juce::Colour(0xff00ffff), 0.1f, 0.15f, 0.15f }); // Cyan
-        drunkLF.setTextColorRange({ juce::Colour(0xff00ffff), 0.0f, 0.0f, 0.1f }); // High Contrast Cyan
+        setLookAndFeel (&modernLF);
+        modernLF.setBaseOffColor(juce::Colour(0xff3a3a3a)); // Dark Grey
+        modernLF.setBaseOnColor(juce::Colour(0xff00bfff));  // Deep Sky Blue
+        modernLF.setTextColor(juce::Colours::white);
 
         // 3. UI Components with [Shortcuts] in labels
         addAndMakeVisible (openButton);
         openButton.setButtonText ("[D]ir");
-        openButton.setName ("dirBtn"); // Name is used as a random seed for wobble
+
         openButton.onClick = [this] { openButtonClicked(); };
 
         addAndMakeVisible (playStopButton);
         updateButtonText();
-        playStopButton.setName ("playBtn");
+
         playStopButton.onClick = [this] { playStopButtonClicked(); };
         playStopButton.setEnabled (false);
 
         addAndMakeVisible (modeButton);
         modeButton.setButtonText ("[V]iew");
-        modeButton.setName ("viewBtn");
+        modeButton.setClickingTogglesState (true); // Make it a toggle button
+
         modeButton.onClick = [this] {
-            currentMode = (currentMode == ViewMode::Classic) ? ViewMode::Overlay : ViewMode::Classic;
+            // Update currentMode based on the button's toggle state
+            currentMode = modeButton.getToggleState() ? ViewMode::Overlay : ViewMode::Classic;
+            
+            // Update button text to reflect current mode for better feedback
+            modeButton.setButtonText (currentMode == ViewMode::Classic ? "[V]iew 1" : "[V]iew 2");
+            
             resized();
             repaint();
         };
 
         addAndMakeVisible (exitButton);
         exitButton.setButtonText ("[Q]uit");
-        exitButton.setName ("exitBtn");
+
         exitButton.setColour (juce::TextButton::buttonColourId, juce::Colours::darkred);
         exitButton.onClick = [] { juce::JUCEApplication::getInstance()->systemRequestedQuit(); };
 
         addAndMakeVisible (statsButton);
         statsButton.setButtonText ("[S]tats");
-        statsButton.setName ("statsBtn");
+
         statsButton.setClickingTogglesState (true);
         statsButton.onClick = [this] {
             showStats = statsButton.getToggleState();
@@ -70,19 +77,19 @@ public:
 
         addAndMakeVisible (loopButton);
         loopButton.setButtonText ("[L]oop");
-        loopButton.setName ("loopBtn");
+
         loopButton.setClickingTogglesState (true);
         loopButton.onClick = [this] { shouldLoop = loopButton.getToggleState(); };
 
         addAndMakeVisible (loopInButton);
         loopInButton.setButtonText ("[I]n");
-        loopInButton.setName ("loopInBtn");
+
         loopInButton.onLeftClick = [this] { loopInPosition = transportSource.getCurrentPosition(); repaint(); };
         loopInButton.onRightClick = [this] { currentPlacementMode = PlacementMode::LoopIn; repaint(); };
 
         addAndMakeVisible (loopOutButton);
         loopOutButton.setButtonText ("[O]ut");
-        loopOutButton.setName ("loopOutBtn");
+
         loopOutButton.onLeftClick = [this] { loopOutPosition = transportSource.getCurrentPosition(); repaint(); };
         loopOutButton.onRightClick = [this] { currentPlacementMode = PlacementMode::LoopOut; repaint(); };
 
@@ -91,6 +98,7 @@ public:
         statsDisplay.setMultiLine (true);
         statsDisplay.setWantsKeyboardFocus (false); // Prevents debug window from eating shortcuts
         statsDisplay.setColour (juce::TextEditor::backgroundColourId, juce::Colours::black.withAlpha(0.5f));
+        statsDisplay.setColour (juce::TextEditor::textColourId, juce::Colours::white); // Ensure text is 100% opaque white
         statsDisplay.setVisible (false);
 
         setSize (800, 400);
@@ -427,45 +435,76 @@ public:
 
     void resized() override
     {
-        auto bounds = getLocalBounds();
+        auto totalBounds = getLocalBounds();
+        auto currentWorkingBounds = totalBounds; // This will be consumed by buttons to define central area
 
-        auto bottomArea = bounds.removeFromBottom (50).reduced (5);
-        modeButton.setBounds (bottomArea.removeFromRight (80));
-        bottomArea.removeFromRight (5);
-        loopButton.setBounds (bottomArea.removeFromRight (80)); // Added loopButton
-        bottomArea.removeFromRight (5); // Separator
-        statsButton.setBounds (bottomArea.removeFromRight (80));
+        // --- Calculate Button Layout first, consuming space ---
 
-        auto topRow = bounds.removeFromTop (50).reduced (5);
-        exitButton.setBounds (topRow.removeFromRight (80));
-        openButton.setBounds (topRow.removeFromLeft (80));
-        topRow.removeFromLeft (5);
-        playStopButton.setBounds (topRow.removeFromLeft (80));
-        topRow.removeFromLeft (5); // Separator
-        loopButton.setBounds (topRow.removeFromLeft (80)); // Placed after playStopButton
-        topRow.removeFromLeft (5); // Separator
-        loopInButton.setBounds (topRow.removeFromLeft (80));
-        topRow.removeFromLeft (5); // Separator
-        loopOutButton.setBounds (topRow.removeFromLeft (80));
+        // Top Row Buttons area
+        auto topButtonsArea = currentWorkingBounds.removeFromTop (50).reduced (5);
+        // Store the final bottom edge of top buttons for later reference
+        int topButtonsBottomEdge = topButtonsArea.getBottom(); 
 
+        // Bottom Row Buttons area
+        auto bottomButtonsArea = currentWorkingBounds.removeFromBottom (50).reduced (5);
+        // Store the final top edge of bottom buttons for later reference
+        int bottomButtonsTopEdge = bottomButtonsArea.getY(); 
+
+        // --- Position ALL Buttons ---
+        // Top row
+        exitButton.setBounds (topButtonsArea.removeFromRight (80));
+        openButton.setBounds (topButtonsArea.removeFromLeft (80));
+        topButtonsArea.removeFromLeft (5); // Spacer
+        playStopButton.setBounds (topButtonsArea.removeFromLeft (80));
+        topButtonsArea.removeFromLeft (5); // Spacer
+        loopButton.setBounds (topButtonsArea.removeFromLeft (80));
+        topButtonsArea.removeFromLeft (5); // Spacer
+        loopInButton.setBounds (topButtonsArea.removeFromLeft (80));
+        topButtonsArea.removeFromLeft (5); // Spacer
+        loopOutButton.setBounds (topButtonsArea.removeFromLeft (80));
+
+        // Bottom row
+        modeButton.setBounds (bottomButtonsArea.removeFromRight (80));
+        bottomButtonsArea.removeFromRight (5); // Spacer
+        statsButton.setBounds (bottomButtonsArea.removeFromRight (80));
+
+        // --- Determine Waveform Bounds based on Mode ---
+        if (currentMode == ViewMode::Classic)
+        {
+            // In Classic mode, waveform occupies the remaining 'currentWorkingBounds'
+            waveformBounds = currentWorkingBounds.reduced (10, 0); 
+        }
+        else // ViewMode::Overlay
+        {
+            // In Overlay mode, waveform takes the full window space
+            waveformBounds = totalBounds; 
+        }
+
+        // --- Position Stats Display (always floating over waveform) ---
         if (showStats)
         {
             statsDisplay.setVisible (true);
-            statsBounds = bounds.removeFromBottom (100).reduced (10, 5);
-            statsDisplay.setBounds (statsBounds);
-        }
-        else { statsDisplay.setVisible (false); }
+            int statsHeight = 100;
+            int padding = 10;      // Consistent padding variable
 
-        if (currentMode == ViewMode::Classic)
-        {
-            waveformBounds = bounds.reduced (10, 0);
-            drunkLF.setBaseAlpha(1.0f); // Solid buttons
+            statsBounds = juce::Rectangle<int> (
+                waveformBounds.getX() + padding, // X position: left aligned with waveformBounds, plus padding
+                bottomButtonsTopEdge - statsHeight - padding, // Y position: above bottom buttons
+                waveformBounds.getWidth() - (2 * padding), // Width: full width of waveformBounds, minus padding on both sides
+                statsHeight
+            );
+            statsDisplay.setBounds (statsBounds);
+            statsDisplay.toFront(true);
         }
         else
         {
-            waveformBounds = getLocalBounds();
-            drunkLF.setBaseAlpha(1.0f); // Make semi-transparent button backgrounds solid
+            statsDisplay.setVisible (false);
         }
+
+        // --- Ensure all buttons are visible ---
+        openButton.setVisible(true); playStopButton.setVisible(true); modeButton.setVisible(true);
+        exitButton.setVisible(true); statsButton.setVisible(true); loopButton.setVisible(true);
+        loopInButton.setVisible(true); loopOutButton.setVisible(true);
     }
 
 private:
@@ -475,7 +514,9 @@ private:
     juce::AudioThumbnailCache thumbnailCache;
     juce::AudioThumbnail thumbnail;
 
-    DrunkDrawnLookAndFeel drunkLF; //
+    ModernLookAndFeel modernLF;
+
+
     juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton;
     LoopButton loopInButton, loopOutButton;
     juce::TextEditor statsDisplay;

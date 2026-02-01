@@ -1,47 +1,13 @@
 #pragma once
 
-#include "DrunkDrawnLookAndFeel.h"
-
 //==============================================================================
 /**
-    Example component demonstrating the DrunkDrawnLookAndFeel
 */
 class ExampleAudioSorterUI : public juce::Component
 {
 public:
     ExampleAudioSorterUI()
     {
-        // Setup the custom look and feel with your color scheme
-        customLF.setButtonOffColorRange({
-            juce::Colour(0xff3a3a3a),  // Dark grey base
-            0.05f, 0.1f, 0.15f         // Subtle variations
-        });
-        
-        customLF.setButtonOnColorRange({
-            juce::Colour(0xffff1493),  // Hot pink base (matching your waveform)
-            0.08f, 0.12f, 0.1f         // Pink variations
-        });
-        
-        customLF.setButtonOutlineColorRange({
-            juce::Colour(0xff00ffff),  // Cyan/teal base (matching your border)
-            0.1f, 0.15f, 0.15f         // Color variations
-        });
-        
-        customLF.setTextColorRange({
-            juce::Colours::white,
-            0.0f, 0.0f, 0.08f          // Mostly white with slight brightness variation
-        });
-        
-        // Adjust wobble settings - play with these values!
-        DrunkDrawnLookAndFeel::WobbleSettings wobble;
-        wobble.edgeWobble = 4.0f;              // Increase for more drunk effect
-        wobble.cornerRadiusVariation = 0.4f;   // 0.0 = uniform corners, 1.0 = wild
-        wobble.controlPointVariation = 0.6f;   // How drunk the curves are
-        wobble.segmentsPerSide = 10;           // More = more detailed wobble
-        wobble.strokeWidthVariation = 0.3f;    // Variation in outline thickness
-        wobble.rotationVariation = 2.0f;       // Slight rotation (degrees)
-        customLF.setWobbleSettings(wobble);
-        
         // Create buttons - Single click buttons
         openButton.setButtonText("Open");
         openButton.setName("openBtn");  // Unique name for consistent randomization
@@ -93,16 +59,12 @@ public:
         textEditor.setName("fileNameEditor");
         addAndMakeVisible(textEditor);
         
-        // Apply the custom look and feel to all components
-        setLookAndFeel(&customLF);
+
         
         setSize(800, 600);
     }
     
-    ~ExampleAudioSorterUI() override
-    {
-        setLookAndFeel(nullptr);
-    }
+    ~ExampleAudioSorterUI() override {}
     
     void paint(juce::Graphics& g) override
     {
@@ -160,7 +122,7 @@ public:
     }
 
 private:
-    DrunkDrawnLookAndFeel customLF;
+
     
     juce::TextButton openButton;
     juce::TextButton exitButton;
