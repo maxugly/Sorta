@@ -20,11 +20,14 @@ public:
     public:
         MainWindow (juce::String name) : DocumentWindow (name, juce::Colours::black, allButtons)
         {
-            setUsingNativeTitleBar (true);
+            setUsingNativeTitleBar (false); // Disable native title bar - we handle window controls ourselves
             setContentOwned (new MainComponent(), true);
             setResizable (true, true);
             centreWithSize (getWidth(), getHeight());
             setVisible (true);
+            
+            // Start in fullscreen
+            setFullScreen (true);
         }
 
         void closeButtonPressed() override { juce::JUCEApplication::getInstance()->systemRequestedQuit(); }

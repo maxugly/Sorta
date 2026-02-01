@@ -13,6 +13,7 @@ public:
     enum class ViewMode { Classic, Overlay };
     enum class PlacementMode { None, LoopIn, LoopOut };
     enum class ChannelViewMode { Mono, Stereo };
+    enum class ThumbnailQuality { Low, Medium, High };
 
     MainComponent() : thumbnailCache (5),
                       thumbnail (512, formatManager, thumbnailCache),
@@ -72,8 +73,27 @@ public:
             repaint();
         };
 
+        // Quality Button
+        addAndMakeVisible (qualityButton);
+        qualityButton.setButtonText ("[Q]ual");
+        qualityButton.onClick = [this] {
+            // Cycle through quality modes
+            if (currentQuality == ThumbnailQuality::High)
+                currentQuality = ThumbnailQuality::Medium;
+            else if (currentQuality == ThumbnailQuality::Medium)
+                currentQuality = ThumbnailQuality::Low;
+            else
+                currentQuality = ThumbnailQuality::High;
+            
+            updateQualityButtonText();
+            repaint();
+        };
+        
+        // Set initial quality button text
+        updateQualityButtonText();
+
         addAndMakeVisible (exitButton);
-        exitButton.setButtonText ("[Q]uit");
+        exitButton.setButtonText ("[E]xit");
 
         exitButton.setColour (juce::TextButton::buttonColourId, juce::Colours::darkred);
         exitButton.onClick = [] { juce::JUCEApplication::getInstance()->systemRequestedQuit(); };
@@ -129,7 +149,32 @@ public:
         statsDisplay.setColour (juce::TextEditor::textColourId, juce::Colours::white); // Ensure text is 100% opaque white
         statsDisplay.setVisible (false);
 
+        // Minimize Button
+        addAndMakeVisible (minimizeButton);
+        minimizeButton.setButtonText ("[M]in");
+        minimizeButton.onClick = [this] { 
+            if (auto* peer = getPeer())
+                peer->setMinimised(true);
+        };
+
+        // Fullscreen/Window Toggle Button
+        addAndMakeVisible (fullscreenButton);
+        fullscreenButton.setButtonText ("[F]ull");
+        fullscreenButton.onClick = [this] { 
+            if (auto* peer = getPeer())
+            {
+                bool isCurrentlyFullscreen = peer->isFullScreen();
+                peer->setFullScreen(!isCurrentlyFullscreen);
+                fullscreenButton.setButtonText(isCurrentlyFullscreen ? "[F]ull" : "[W]in");
+            }
+        };
+
         setSize (800, 400);
+        
+        // Start in fullscreen without title bar
+        if (auto* peer = getPeer())
+            peer->setFullScreen(true);
+        
         setAudioChannels (0, 2);
         startTimerHz (60);
         setWantsKeyboardFocus (true); // Needed for key listeners
@@ -251,14 +296,17 @@ public:
 
         auto keyCode = key.getTextCharacter();
         if (key == juce::KeyPress::spaceKey) { playStopButtonClicked(); return true; }
-        if (keyCode == 'q' || keyCode == 'Q') { juce::JUCEApplication::getInstance()->systemRequestedQuit(); return true; }
+        if (keyCode == 'e' || keyCode == 'E') { juce::JUCEApplication::getInstance()->systemRequestedQuit(); return true; }
         if (keyCode == 'd' || keyCode == 'D') { openButtonClicked(); return true; } // Changed from 'o' to 'd'
         if (keyCode == 's' || keyCode == 'S') { statsButton.triggerClick(); return true; }
         if (keyCode == 'v' || keyCode == 'V') { modeButton.triggerClick(); return true; }
         if (keyCode == 'c' || keyCode == 'C') { channelViewButton.triggerClick(); return true; }
+        if (keyCode == 'q' || keyCode == 'Q') { qualityButton.triggerClick(); return true; }
         if (keyCode == 'l' || keyCode == 'L') { loopButton.triggerClick(); return true; }
         if (keyCode == 'i' || keyCode == 'I') { loopInPosition = transportSource.getCurrentPosition(); repaint(); return true; }
         if (keyCode == 'o' || keyCode == 'O') { loopOutPosition = transportSource.getCurrentPosition(); repaint(); return true; }
+        if (keyCode == 'm' || keyCode == 'M') { minimizeButton.triggerClick(); return true; }
+        if (keyCode == 'f' || keyCode == 'F') { fullscreenButton.triggerClick(); return true; }
 
 
         return false;
@@ -374,18 +422,47 @@ public:
 
         if (thumbnail.getNumChannels() > 0)
         {
-            // Draw waveform based on channel view mode
+            // Determine sample resolution based on quality setting
+            int pixelsPerSample = 1;
+            if (currentQuality == ThumbnailQuality::Low)
+                pixelsPerSample = 4; // Draw every 4th pixel
+            else if (currentQuality == ThumbnailQuality::Medium)
+                pixelsPerSample = 2; // Draw every 2nd pixel
+            // High quality uses pixelsPerSample = 1 (every pixel)
+
+            // Draw waveform based on channel view mode and quality
             if (currentChannelViewMode == ChannelViewMode::Mono || thumbnail.getNumChannels() == 1)
             {
                 // Draw only the first channel (mono view)
                 g.setColour (juce::Colours::deeppink);
-                thumbnail.drawChannel (g, waveformBounds, 0.0, thumbnail.getTotalLength(), 0, 1.0f);
+                
+                if (pixelsPerSample > 1)
+                {
+                    // Low/Medium quality: draw with reduced resolution
+                    drawReducedQualityWaveform(g, 0, pixelsPerSample);
+                }
+                else
+                {
+                    // High quality: use JUCE's built-in drawing
+                    thumbnail.drawChannel (g, waveformBounds, 0.0, thumbnail.getTotalLength(), 0, 1.0f);
+                }
             }
             else // Stereo view
             {
                 // Draw all available channels
                 g.setColour (juce::Colours::deeppink);
-                thumbnail.drawChannels (g, waveformBounds, 0.0, thumbnail.getTotalLength(), 1.0f);
+                
+                if (pixelsPerSample > 1)
+                {
+                    // Low/Medium quality: draw with reduced resolution for all channels
+                    for (int ch = 0; ch < thumbnail.getNumChannels(); ++ch)
+                        drawReducedQualityWaveform(g, ch, pixelsPerSample);
+                }
+                else
+                {
+                    // High quality: use JUCE's built-in drawing
+                    thumbnail.drawChannels (g, waveformBounds, 0.0, thumbnail.getTotalLength(), 1.0f);
+                }
             }
 
             auto audioLength = (float)thumbnail.getTotalLength();
@@ -536,6 +613,11 @@ public:
         // --- Position ALL Buttons ---
         // Top row
         exitButton.setBounds (topButtonsArea.removeFromRight (80));
+        topButtonsArea.removeFromRight (5); // Spacer
+        fullscreenButton.setBounds (topButtonsArea.removeFromRight (80));
+        topButtonsArea.removeFromRight (5); // Spacer
+        minimizeButton.setBounds (topButtonsArea.removeFromRight (80));
+        topButtonsArea.removeFromRight (5); // Spacer
         openButton.setBounds (topButtonsArea.removeFromLeft (80));
         topButtonsArea.removeFromLeft (5); // Spacer
         playStopButton.setBounds (topButtonsArea.removeFromLeft (80));
@@ -552,6 +634,8 @@ public:
         statsButton.setBounds (bottomButtonsArea.removeFromRight (80));
         bottomButtonsArea.removeFromRight (5); // Spacer
         channelViewButton.setBounds (bottomButtonsArea.removeFromRight (80));
+        bottomButtonsArea.removeFromRight (5); // Spacer
+        qualityButton.setBounds (bottomButtonsArea.removeFromRight (80));
 
         // --- Determine Waveform Bounds based on Mode ---
         if (currentMode == ViewMode::Classic)
@@ -589,7 +673,8 @@ public:
         // --- Ensure all buttons are visible ---
         openButton.setVisible(true); playStopButton.setVisible(true); modeButton.setVisible(true);
         exitButton.setVisible(true); statsButton.setVisible(true); loopButton.setVisible(true);
-        loopInButton.setVisible(true); loopOutButton.setVisible(true);
+        loopInButton.setVisible(true); loopOutButton.setVisible(true); channelViewButton.setVisible(true);
+        qualityButton.setVisible(true); minimizeButton.setVisible(true); fullscreenButton.setVisible(true);
     }
 
 private:
@@ -602,7 +687,7 @@ private:
     ModernLookAndFeel modernLF;
 
 
-    juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton;
+    juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton, minimizeButton, fullscreenButton;
     LoopButton loopInButton, loopOutButton;
     juce::TextEditor statsDisplay;
     std::unique_ptr<juce::FileChooser> chooser; // <--- The fix for your error!
@@ -616,6 +701,45 @@ private:
     PlacementMode currentPlacementMode = PlacementMode::None;
     int mouseCursorX = -1, mouseCursorY = -1; // -1 indicates no active hover
     ChannelViewMode currentChannelViewMode = ChannelViewMode::Mono; // Default to mono view
+    ThumbnailQuality currentQuality = ThumbnailQuality::Low; // Default to low quality for performance
+
+    // Update quality button text based on current quality mode
+    void updateQualityButtonText()
+    {
+        if (currentQuality == ThumbnailQuality::High)
+            qualityButton.setButtonText("[Q]ual H");
+        else if (currentQuality == ThumbnailQuality::Medium)
+            qualityButton.setButtonText("[Q]ual M");
+        else
+            qualityButton.setButtonText("[Q]ual L");
+    }
+
+    // Draw waveform with reduced quality for better performance
+    void drawReducedQualityWaveform(juce::Graphics& g, int channel, int pixelsPerSample)
+    {
+        auto audioLength = thumbnail.getTotalLength();
+        if (audioLength <= 0.0)
+            return;
+
+        auto width = waveformBounds.getWidth();
+        auto height = waveformBounds.getHeight();
+        auto centerY = waveformBounds.getCentreY();
+
+        // Draw vertical lines at reduced intervals
+        for (int x = 0; x < width; x += pixelsPerSample)
+        {
+            auto proportion = (double)x / (double)width;
+            auto time = proportion * audioLength;
+            
+            float minVal, maxVal;
+            thumbnail.getApproximateMinMax(time, time + (audioLength / width) * pixelsPerSample, channel, minVal, maxVal);
+            
+            auto topY = centerY - (maxVal * height * 0.5f);
+            auto bottomY = centerY - (minVal * height * 0.5f);
+            
+            g.drawVerticalLine(waveformBounds.getX() + x, topY, bottomY);
+        }
+    }
 
     // Update loop button colors based on placement mode and loop point status
     void updateLoopButtonColors()
