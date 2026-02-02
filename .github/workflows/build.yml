@@ -9,7 +9,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y libgtk-3-dev libasound2-dev libjack-jackd2-dev
+          sudo apt install -y libgtk-3-dev libasound2-dev libjack-jackd2-dev g++ pkg-config libgtk-3-dev
       - name: Configure CMake
         run: cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=g++-15 .
       - name: Build with Ninja
