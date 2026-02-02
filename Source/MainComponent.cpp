@@ -102,6 +102,21 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   statsDisplay.setColour (juce::TextEditor::textColourId, juce::Colours::white);
   statsDisplay.setVisible (false);
 
+  addAndMakeVisible(loopInLabel);
+  loopInLabel.setJustificationType(juce::Justification::centred);
+  loopInLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+  loopInLabel.setColour(juce::Label::backgroundColourId, juce::Colours::black.withAlpha(0.3f));
+  loopInLabel.setFont(juce::FontOptions(14.0f));
+
+  addAndMakeVisible(loopOutLabel);
+  loopOutLabel.setJustificationType(juce::Justification::centred);
+  loopOutLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+  loopOutLabel.setColour(juce::Label::backgroundColourId, juce::Colours::black.withAlpha(0.3f));
+  loopOutLabel.setFont(juce::FontOptions(14.0f));
+
+  loopInLabel.setText("In: --:--:--:---", juce::dontSendNotification);
+  loopOutLabel.setText("Out: --:--:--:---", juce::dontSendNotification);
+
   setSize (800, 400);
 
   setAudioChannels (0, 2);
@@ -119,7 +134,8 @@ void MainComponent::updateLoopButtonColors() {
   else {loopInButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff3a3a3a)); }
   if (currentPlacementMode == PlacementMode::LoopOut) {loopOutButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xffff1493));}
   else if (loopOutPosition > -1.0) {loopOutButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff0066cc)); }
-  else {loopOutButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff3a3a3a)); }}
+  else {loopOutButton.setColour(juce::TextButton::buttonColourId, juce::Colour(0xff3a3a3a)); }
+  updateLoopLabels();}
 
 MainComponent::~MainComponent() {
   shutdownAudio();
@@ -204,8 +220,8 @@ if (thumbnail.getTotalLength() > 0.0) {
     if (keyCode == 'c' || keyCode == 'C') { channelViewButton.triggerClick(); return true; }
     if (keyCode == 'q' || keyCode == 'Q') { qualityButton.triggerClick(); return true; }
     if (keyCode == 'l' || keyCode == 'L') { loopButton.triggerClick(); return true; }
-    if (keyCode == 'i' || keyCode == 'I') { loopInPosition = transportSource.getCurrentPosition(); repaint(); return true; }
-    if (keyCode == 'o' || keyCode == 'O') { loopOutPosition = transportSource.getCurrentPosition(); repaint(); return true; }
+    if (keyCode == 'i' || keyCode == 'I') { loopInPosition = transportSource.getCurrentPosition(); updateLoopButtonColors(); updateLoopLabels(); repaint(); return true; }
+    if (keyCode == 'o' || keyCode == 'O') { loopOutPosition = transportSource.getCurrentPosition(); updateLoopButtonColors(); updateLoopLabels(); repaint(); return true; }
     return false; }
 
 void MainComponent::seekToPosition (int x) {
@@ -229,6 +245,7 @@ void MainComponent::mouseUp (const juce::MouseEvent& e) {
           currentPlacementMode = PlacementMode::None;
           updateLoopButtonColors();
           repaint(); }}
+
 void MainComponent::mouseDown (const juce::MouseEvent& e) {
   if (e.mods.isRightButtonDown()) return;
   if (currentPlacementMode == PlacementMode::None && waveformBounds.contains (e.getMouseDownPosition()))
@@ -375,52 +392,110 @@ void MainComponent::paint (juce::Graphics& g) {
     200, 20,
     juce::Justification::right); }}}
 
-void MainComponent::resized() {
-  auto totalBounds = getLocalBounds();
-  auto currentWorkingBounds = totalBounds;
-  auto topButtonsArea = currentWorkingBounds.removeFromTop (50).reduced (5);
-  int topButtonsBottomEdge = topButtonsArea.getBottom();  auto bottomButtonsArea = currentWorkingBounds.removeFromBottom (50).reduced (5);
-  int bottomButtonsTopEdge = bottomButtonsArea.getY();  exitButton.setBounds (topButtonsArea.removeFromRight (80));
-  topButtonsArea.removeFromRight (5);
-  topButtonsArea.removeFromRight (5);
-  topButtonsArea.removeFromRight (5);
-  openButton.setBounds (topButtonsArea.removeFromLeft (80));
-  topButtonsArea.removeFromLeft (5);
-  playStopButton.setBounds (topButtonsArea.removeFromLeft (80));
-  topButtonsArea.removeFromLeft (5);
-  loopButton.setBounds (topButtonsArea.removeFromLeft (80));
-  topButtonsArea.removeFromLeft (5);
-  loopInButton.setBounds (topButtonsArea.removeFromLeft (80));
-  topButtonsArea.removeFromLeft (5);
-  loopOutButton.setBounds (topButtonsArea.removeFromLeft (80));
-  modeButton.setBounds (bottomButtonsArea.removeFromRight (80));
-  bottomButtonsArea.removeFromRight (5);
-  statsButton.setBounds (bottomButtonsArea.removeFromRight (80));
-  bottomButtonsArea.removeFromRight (5);
-  channelViewButton.setBounds (bottomButtonsArea.removeFromRight (80));
-  bottomButtonsArea.removeFromRight (5);
-  qualityButton.setBounds (bottomButtonsArea.removeFromRight (80));
-  if (currentMode == ViewMode::Classic) {
-  waveformBounds = currentWorkingBounds.reduced (10, 0);  }
-  else {
-  waveformBounds = totalBounds; }
-  if (showStats) {
-    statsDisplay.setVisible (true);
-    int statsHeight = 100;
-    int padding = 10;
-    statsBounds = juce::Rectangle<int> (
-      waveformBounds.getX() + padding,
-      topButtonsBottomEdge + padding,
-      waveformBounds.getWidth() - (2 * padding),
-      statsHeight);
-    statsDisplay.setBounds (statsBounds);
-    statsDisplay.toFront(true);  }
-  else {
-  statsDisplay.setVisible (false); }
-  openButton.setVisible(true); playStopButton.setVisible(true); modeButton.setVisible(true);
-  exitButton.setVisible(true); statsButton.setVisible(true); loopButton.setVisible(true);
-  loopInButton.setVisible(true); loopOutButton.setVisible(true); channelViewButton.setVisible(true);
-  qualityButton.setVisible(true); }
+void MainComponent::updateLoopLabels() {
+  if (loopInPosition >= 0.0)
+    loopInLabel.setText("In: " + formatTime(loopInPosition), juce::dontSendNotification);
+  else
+    loopInLabel.setText("In: --:--:--:---", juce::dontSendNotification);
+  if (loopOutPosition >= 0.0)
+    loopOutLabel.setText("Out: " + formatTime(loopOutPosition), juce::dontSendNotification);
+  else
+    loopOutLabel.setText("Out: --:--:--:---", juce::dontSendNotification); }
+
+    void MainComponent::resized()
+    {
+      auto bounds = getLocalBounds();
+
+      // Top row (50px)
+      auto topRow = bounds.removeFromTop(50).reduced(5);
+      openButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(5);
+      playStopButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(5);
+      modeButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(5);
+      statsButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(5);
+      exitButton.setBounds(topRow.removeFromRight(80)); topRow.removeFromRight(5);
+      fullscreenButton.setBounds(topRow.removeFromRight(80)); topRow.removeFromRight(5);
+
+      // Loop row (50px) — middle
+      auto loopRow = bounds.removeFromTop(50).reduced(5);
+      loopButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(5);
+      loopInButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(5);
+      loopInLabel.setBounds(loopRow.removeFromLeft(150)); loopRow.removeFromLeft(5);
+      loopOutButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(5);
+      loopOutLabel.setBounds(loopRow.removeFromLeft(150));
+
+      // Bottom row (50px) — anchored to bottom
+      auto bottomRow = bounds.removeFromBottom(50).reduced(5);
+      qualityButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(5);
+      channelViewButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(5);
+      statsButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(5);
+      modeButton.setBounds(bottomRow.removeFromRight(80));
+
+      // Waveform fills the middle
+      waveformBounds = bounds.reduced(10);
+
+      // Stats overlay
+      if (showStats)
+      {
+        statsBounds = waveformBounds.removeFromTop(120).reduced(10);
+        statsDisplay.setBounds(statsBounds);
+        statsDisplay.setVisible(true);
+        statsDisplay.toFront(true);
+      }
+      else
+      {
+        statsDisplay.setVisible(false);
+      }
+    }
+
+juce::FlexBox MainComponent::getTopRowFlexBox()
+{
+  juce::FlexBox row;
+  row.flexDirection = juce::FlexBox::Direction::row;
+  row.justifyContent = juce::FlexBox::JustifyContent::flexStart;
+  row.alignItems = juce::FlexBox::AlignItems::center;
+
+  auto addBtn = [&](juce::Button& btn, float width = 80.0f) {
+    juce::FlexItem item(btn);
+    item.flexBasis = width;
+    item.flexGrow = 0.0f;
+    item.flexShrink = 0.0f;
+    item.margin = juce::FlexItem::Margin(0, 5, 0, 0);
+    row.items.add(item);
+  };
+
+  addBtn(openButton);
+  addBtn(playStopButton);
+  addBtn(modeButton);
+  addBtn(statsButton);
+  // addBtn(exitButton); // if you want it here
+
+  return row;
+}
+
+juce::FlexBox MainComponent::getLoopRowFlexBox()
+{
+  juce::FlexBox row;
+  row.flexDirection = juce::FlexBox::Direction::row;
+  row.justifyContent = juce::FlexBox::JustifyContent::flexStart;
+  row.alignItems = juce::FlexBox::AlignItems::center;
+
+  auto addItem = [&](juce::Component& comp, float width) {
+    juce::FlexItem item(comp);
+    item.flexBasis = width;
+    item.flexGrow = 0.0f;
+    item.flexShrink = 0.0f;
+    item.margin = juce::FlexItem::Margin(0, 5, 0, 0);
+    row.items.add(item);
+  };
+
+  addItem(loopButton, 80.0f);
+  addItem(loopInButton, 80.0f);
+  addItem(loopInLabel, 150.0f);
+  addItem(loopOutButton, 80.0f);
+  addItem(loopOutLabel, 150.0f);
+
+  return row;
+}
 
 void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRate) {
   transportSource.prepareToPlay (samplesPerBlockExpected, sampleRate); }
@@ -430,3 +505,27 @@ void MainComponent::changeListenerCallback (juce::ChangeBroadcaster*) {
 
 void MainComponent::releaseResources() {
   transportSource.releaseResources(); }
+
+  juce::FlexBox MainComponent::getBottomRowFlexBox()
+  {
+    juce::FlexBox row;
+    row.flexDirection = juce::FlexBox::Direction::row;
+    row.justifyContent = juce::FlexBox::JustifyContent::flexEnd;  // right-align for variety
+    row.alignItems = juce::FlexBox::AlignItems::center;
+
+    auto addBtn = [&](juce::Button& btn, float width = 80.0f) {
+      juce::FlexItem item(btn);
+      item.flexBasis = width;
+      item.flexGrow = 0.0f;
+      item.flexShrink = 0.0f;
+      item.margin = juce::FlexItem::Margin(0, 5, 0, 0);
+      row.items.add(item);
+    };
+
+    addBtn(qualityButton);
+    addBtn(channelViewButton);
+    addBtn(statsButton);
+    addBtn(modeButton);
+
+    return row;
+  }

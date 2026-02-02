@@ -1,10 +1,26 @@
 #pragma once
 
 #include <juce_audio_utils/juce_audio_utils.h>
-
-#include "LoopButton.h"
 #include "ModernLookAndFeel.h"
 
+class LoopButton : public juce::TextButton
+{
+public:
+  std::function<void()> onLeftClick;
+  std::function<void()> onRightClick;
+  LoopButton (const juce::String& name = {}) : juce::TextButton (name) {}
+
+private:
+  void mouseUp (const juce::MouseEvent& event) override {
+    if (isEnabled()) {
+      if (event.mods.isRightButtonDown()) {
+        if (onRightClick) onRightClick();}
+      else if (event.mods.isLeftButtonDown()) {
+        if (onLeftClick) onLeftClick(); }}
+    juce::TextButton::mouseUp(event); }
+    
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LoopButton)};
+    
 class MainComponent  : public juce::AudioAppComponent,
                        public juce::ChangeListener,
                        public juce::Timer {
@@ -49,7 +65,9 @@ public:
 
     void paint (juce::Graphics& g);
 
-    void resized(); 
+    void resized();
+
+    void updateLoopLabels();
 
 private:
     juce::AudioFormatManager formatManager;
@@ -57,23 +75,30 @@ private:
     juce::AudioTransportSource transportSource;
     juce::AudioThumbnailCache thumbnailCache;
     juce::AudioThumbnail thumbnail;
+    juce::FlexBox getBottomRowFlexBox();
 
     ModernLookAndFeel modernLF;
 
     juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton, fullscreenButton;
-    LoopButton loopInButton, loopOutButton;
     juce::TextEditor statsDisplay;
-    std::unique_ptr<juce::FileChooser> chooser;
+    juce::Label loopInLabel, loopOutLabel;
     juce::Rectangle<int> waveformBounds, statsBounds;
+    juce::FlexBox getTopRowFlexBox();
+    juce::FlexBox getLoopRowFlexBox();
+
+    std::unique_ptr<juce::FileChooser> chooser;
+
     ViewMode currentMode = ViewMode::Classic;
+    ChannelViewMode currentChannelViewMode = ChannelViewMode::Mono;
+    ThumbnailQuality currentQuality = ThumbnailQuality::Low;
+    PlacementMode currentPlacementMode = PlacementMode::None;
     bool showStats = false;
     bool shouldLoop = false;
     double loopInPosition = -1.0;
     double loopOutPosition = -1.0;
-    PlacementMode currentPlacementMode = PlacementMode::None;
     int mouseCursorX = -1, mouseCursorY = -1;
-    ChannelViewMode currentChannelViewMode = ChannelViewMode::Mono;
-    ThumbnailQuality currentQuality = ThumbnailQuality::Low;
+
+    LoopButton loopInButton, loopOutButton;
 
     void updateQualityButtonText();
     void drawReducedQualityWaveform(juce::Graphics& g, int channel, int pixelsPerSample);
