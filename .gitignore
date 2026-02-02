@@ -1,19 +1,7 @@
 # CMake generated files and directories
 build/
 build-release/
-cmake-build-debug/
-_deps/
-CMakeCache.txt
-CMakeFiles/
-cmake_install.cmake
-install/
-Makefile
-*.cmake
-build.ninja
-.ninja_deps
-.ninja_log
-cpm-package-lock.cmake
-CMakelist.txt.-03
+CMakeLists.txt.user*
 
 # Compiled Object files, libraries, and executables
 *.o
@@ -68,16 +56,3 @@ pkg/
 *.tmp
 temp/
 tmp/
-
-# Any sensitive files (add more if necessary)
-# secrets.h
-# config.h
-Source/ExampleAudioSorterUI.h
-Source/ExampleAudioSorterUI.h
-svelte_tauri_version.png
-originalTauriSvelteSortaOverview.md
-SETTINGS_GUIDE.md
-CMakeLists.txt.-03
-Source/ExampleAudioSorterUI.h.d
-Source/ExampleAudioSorterUI.h
-notes
