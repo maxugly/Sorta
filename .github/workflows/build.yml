@@ -15,7 +15,7 @@ jobs:
       - name: Build with Ninja
         run: ninja -C build
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: sorta-build
           path: build/Sorta
