@@ -1,4 +1,5 @@
 #include "MainComponent.h"
+#include "Config.h"
 
 MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManager, thumbnailCache),
 								 loopInButton("Loop In Button"), loopOutButton("Loop Out Button") {
@@ -116,7 +117,7 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   loopInLabel.setText("In: --:--:--:---", juce::dontSendNotification);
   loopOutLabel.setText("Out: --:--:--:---", juce::dontSendNotification);
 
-  setSize (800, 400);
+  setSize(Config::initialWindowWidth, Config::initialWindowHeight);
 
   setAudioChannels (0, 2);
   startTimerHz (60);
@@ -427,7 +428,7 @@ void MainComponent::resized() {
   waveformBounds = bounds.reduced(10);
 
   if (showStats) {
-    statsBounds = waveformBounds.withHeight(100).reduced(10);  // fixed height, not removeFromTop
+    statsBounds = waveformBounds.withHeight(100).reduced(10);
     statsDisplay.setBounds(statsBounds);
     statsDisplay.setVisible(true);
     statsDisplay.toFront(true); }
@@ -496,26 +497,22 @@ void MainComponent::changeListenerCallback (juce::ChangeBroadcaster*) {
 void MainComponent::releaseResources() {
   transportSource.releaseResources(); }
 
-  juce::FlexBox MainComponent::getBottomRowFlexBox()
-  {
-    juce::FlexBox row;
-    row.flexDirection = juce::FlexBox::Direction::row;
-    row.justifyContent = juce::FlexBox::JustifyContent::flexEnd;  // right-align for variety
-    row.alignItems = juce::FlexBox::AlignItems::center;
+juce::FlexBox MainComponent::getBottomRowFlexBox() {
+  juce::FlexBox row;
+  row.flexDirection = juce::FlexBox::Direction::row;
+  row.justifyContent = juce::FlexBox::JustifyContent::flexEnd;
+  row.alignItems = juce::FlexBox::AlignItems::center;
 
-    auto addBtn = [&](juce::Button& btn, float width = 80.0f) {
-      juce::FlexItem item(btn);
-      item.flexBasis = width;
-      item.flexGrow = 0.0f;
-      item.flexShrink = 0.0f;
-      item.margin = juce::FlexItem::Margin(0, 5, 0, 0);
-      row.items.add(item);
-    };
+  auto addBtn = [&](juce::Button& btn, float width = 80.0f) {
+    juce::FlexItem item(btn);
+    item.flexBasis = width;
+    item.flexGrow = 0.0f;
+    item.flexShrink = 0.0f;
+    item.margin = juce::FlexItem::Margin(0, 5, 0, 0);
+    row.items.add(item); };
 
-    addBtn(qualityButton);
-    addBtn(channelViewButton);
-    addBtn(statsButton);
-    addBtn(modeButton);
-
-    return row;
-  }
+  addBtn(qualityButton);
+  addBtn(channelViewButton);
+  addBtn(statsButton);
+  addBtn(modeButton);
+  return row; }
