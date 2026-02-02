@@ -30,7 +30,7 @@ include(cmake/CPM.cmake)
 CPMAddPackage(
         NAME juce
         GITHUB_REPOSITORY juce-framework/JUCE
-        GIT_TAG origin/master
+        GIT_TAG 8.0.12
 )
 
 juce_add_gui_app(Sorta

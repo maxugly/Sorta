@@ -1,0 +1,21 @@
+# .github/workflows/build.yml
+name: Build on Linux
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libgtk-3-dev libasound2-dev libjack-jackd2-dev
+      - name: Configure CMake
+        run: cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=g++-15 .
+      - name: Build with Ninja
+        run: ninja -C build
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sorta-build
+          path: build/Sorta
