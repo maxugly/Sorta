@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 
 project(Sorta VERSION 0.0.0001)
 
+message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
 if (UNIX AND NOT APPLE)
     find_package(PkgConfig REQUIRED)
 
