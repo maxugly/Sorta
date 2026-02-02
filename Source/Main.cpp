@@ -1,43 +1,31 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "MainComponent.h"
 
-class GuiAppApplication : public juce::JUCEApplication
-{
+class GuiAppApplication : public juce::JUCEApplication {
 public:
-    GuiAppApplication() {}
-    const juce::String getApplicationName() override       { return "Sorta++"; }
-    const juce::String getApplicationVersion() override    { return "0.0.001"; }
+  GuiAppApplication() {}
 
-    void initialise (const juce::String& commandLine) override
-    {
-        mainWindow.reset (new MainWindow (getApplicationName()));
-    }
+  const juce::String getApplicationName() override       { return "Sorta++"; }
+  const juce::String getApplicationVersion() override    { return "0.0.001"; }
 
-    void shutdown() override { mainWindow.reset(); }
+  void initialise (const juce::String& commandLine) override {
+    mainWindow.reset (new MainWindow (getApplicationName())); }
 
-    class MainWindow : public juce::DocumentWindow
-    {
-    public:
-        MainWindow (juce::String name) : DocumentWindow (name, juce::Colours::black, allButtons)
-        {
-            setUsingNativeTitleBar (false); // Disable native title bar - we handle window controls ourselves
-            setContentOwned (new MainComponent(), true);
-            setResizable (true, true);
-            centreWithSize (getWidth(), getHeight());
-            setVisible (true);
-            
-            // Start in fullscreen
-            setFullScreen (true);
-        }
+  void shutdown() override { mainWindow.reset(); }
 
-        void closeButtonPressed() override { juce::JUCEApplication::getInstance()->systemRequestedQuit(); }
+class MainWindow : public juce::DocumentWindow {
+public:
+  MainWindow (juce::String name) : DocumentWindow (name, juce::Colours::black, allButtons) {
+    //setUsingNativeTitleBar (false);
+    setContentOwned (new MainComponent(), true);
+    setResizable (true, true);
+    centreWithSize (getWidth(), getHeight());
+    setVisible (true);
+    setFullScreen (false); }
 
-    private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
-    };
+  void closeButtonPressed() override { juce::JUCEApplication::getInstance()->systemRequestedQuit(); }
 
 private:
-    std::unique_ptr<MainWindow> mainWindow;
-};
-
-START_JUCE_APPLICATION (GuiAppApplication)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow) };
+  std::unique_ptr<MainWindow> mainWindow; };
+  START_JUCE_APPLICATION (GuiAppApplication)

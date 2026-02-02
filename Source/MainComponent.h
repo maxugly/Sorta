@@ -3,8 +3,7 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include "ModernLookAndFeel.h"
 
-class LoopButton : public juce::TextButton
-{
+class LoopButton : public juce::TextButton {
 public:
   std::function<void()> onLeftClick;
   std::function<void()> onRightClick;
@@ -18,93 +17,78 @@ private:
       else if (event.mods.isLeftButtonDown()) {
         if (onLeftClick) onLeftClick(); }}
     juce::TextButton::mouseUp(event); }
-    
+
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LoopButton)};
-    
+
 class MainComponent  : public juce::AudioAppComponent,
                        public juce::ChangeListener,
                        public juce::Timer {
-                       
+
 public:
-    enum class ViewMode { Classic, Overlay };
-    enum class PlacementMode { None, LoopIn, LoopOut };
-    enum class ChannelViewMode { Mono, Stereo };
-    enum class ThumbnailQuality { Low, Medium, High };
+  enum class ViewMode { Classic, Overlay };
+  enum class PlacementMode { None, LoopIn, LoopOut };
+  enum class ChannelViewMode { Mono, Stereo };
+  enum class ThumbnailQuality { Low, Medium, High };
 
-	MainComponent();
+  MainComponent();
 
-    ~MainComponent() override;
+  ~MainComponent() override;
+  void mouseDown (const juce::MouseEvent& e) override;
+  void mouseDrag (const juce::MouseEvent& e) override;
+  void mouseMove (const juce::MouseEvent& e) override;
+  void mouseUp (const juce::MouseEvent& e) override;
+  void openButtonClicked();
 
-    void mouseDown (const juce::MouseEvent& e) override;
+  void seekToPosition (int x);
+  bool keyPressed (const juce::KeyPress& key) override;
+  void playStopButtonClicked();
+  void updateButtonText();
+  void updateLoopLabels();
+  void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
 
-    void mouseDrag (const juce::MouseEvent& e) override;
-
-    void mouseMove (const juce::MouseEvent& e) override;
-
-    void mouseUp (const juce::MouseEvent& e) override;
-
-    void seekToPosition (int x);
-
-    bool keyPressed (const juce::KeyPress& key) override;
-
-    void openButtonClicked();
-
-    void playStopButtonClicked();
-
-    void updateButtonText();
-
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
-
-    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill);
-
-    void releaseResources() override;
-
-    void changeListenerCallback (juce::ChangeBroadcaster*) override;
-
-    void timerCallback();
-
-    void paint (juce::Graphics& g);
-
-    void resized();
-
-    void updateLoopLabels();
+  void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill);
+  void releaseResources() override;
+  void changeListenerCallback (juce::ChangeBroadcaster*) override;
+  void timerCallback();
+  void paint (juce::Graphics& g);
+  void resized();
 
 private:
-    juce::AudioFormatManager formatManager;
-    std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
-    juce::AudioTransportSource transportSource;
-    juce::AudioThumbnailCache thumbnailCache;
-    juce::AudioThumbnail thumbnail;
-    juce::FlexBox getBottomRowFlexBox();
+  juce::AudioFormatManager formatManager;
+  std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
+  juce::AudioTransportSource transportSource;
+  juce::AudioThumbnailCache thumbnailCache;
+  juce::AudioThumbnail thumbnail;
+  juce::FlexBox getBottomRowFlexBox();
 
-    ModernLookAndFeel modernLF;
+  ModernLookAndFeel modernLF;
 
-    juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton, fullscreenButton;
-    juce::TextEditor statsDisplay;
-    juce::Label loopInLabel, loopOutLabel;
-    juce::Rectangle<int> waveformBounds, statsBounds;
-    juce::FlexBox getTopRowFlexBox();
-    juce::FlexBox getLoopRowFlexBox();
+  juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton;
+  juce::TextEditor statsDisplay;
+  juce::Label loopInLabel, loopOutLabel;
+  juce::Rectangle<int> waveformBounds, statsBounds;
+  juce::FlexBox getTopRowFlexBox();
+  juce::FlexBox getLoopRowFlexBox();
 
-    std::unique_ptr<juce::FileChooser> chooser;
+  std::unique_ptr<juce::FileChooser> chooser;
 
-    ViewMode currentMode = ViewMode::Classic;
-    ChannelViewMode currentChannelViewMode = ChannelViewMode::Mono;
-    ThumbnailQuality currentQuality = ThumbnailQuality::Low;
-    PlacementMode currentPlacementMode = PlacementMode::None;
-    bool showStats = false;
-    bool shouldLoop = false;
-    double loopInPosition = -1.0;
-    double loopOutPosition = -1.0;
-    int mouseCursorX = -1, mouseCursorY = -1;
+  ViewMode currentMode = ViewMode::Classic;
+  ChannelViewMode currentChannelViewMode = ChannelViewMode::Mono;
+  ThumbnailQuality currentQuality = ThumbnailQuality::Low;
+  PlacementMode currentPlacementMode = PlacementMode::None;
+  bool showStats = false;
+  bool shouldLoop = false;
+  double loopInPosition = -1.0;
+  double loopOutPosition = -1.0;
+  int mouseCursorX = -1, mouseCursorY = -1;
 
-    LoopButton loopInButton, loopOutButton;
+  LoopButton loopInButton, loopOutButton;
 
-    void updateQualityButtonText();
-    void drawReducedQualityWaveform(juce::Graphics& g, int channel, int pixelsPerSample);
-    void updateLoopButtonColors();
+  void updateQualityButtonText();
+  void drawReducedQualityWaveform(juce::Graphics& g, int channel, int pixelsPerSample);
+  void updateLoopButtonColors();
 
-    juce::String formatTime(double seconds);
+  juce::String formatTime(double seconds);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
