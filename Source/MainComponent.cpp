@@ -102,30 +102,28 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   statsDisplay.setColour (juce::TextEditor::textColourId, Config::statsDisplayTextColour);
   statsDisplay.setVisible (false);
 
-  // Setup loopInEditor
   addAndMakeVisible (loopInEditor);
-  loopInEditor.setReadOnly (false); // Allow editing
-  loopInEditor.setJustification(juce::Justification::centred); // Centred to match text boxes
+  loopInEditor.setReadOnly (false);
+  loopInEditor.setJustification(juce::Justification::centred);
   loopInEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
   loopInEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
   loopInEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
   loopInEditor.setMultiLine (false);
   loopInEditor.setReturnKeyStartsNewLine (false);
-  loopInEditor.addListener (this); // MainComponent is now a listener
+  loopInEditor.addListener (this);
 
-  // Setup loopOutEditor
   addAndMakeVisible (loopOutEditor);
-  loopOutEditor.setReadOnly (false); // Allow editing
-  loopOutEditor.setJustification(juce::Justification::centred); // Centred to match text boxes
+  loopOutEditor.setReadOnly (false);
+  loopOutEditor.setJustification(juce::Justification::centred);
   loopOutEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
   loopOutEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
   loopOutEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
   loopOutEditor.setMultiLine (false);
   loopOutEditor.setReturnKeyStartsNewLine (false);
-  loopOutEditor.addListener (this); // MainComponent is now a listener
+  loopOutEditor.addListener (this);
 
 
-  updateLoopLabels(); // Initialize loop editor text
+  updateLoopLabels();
   setSize(Config::initialWindowWidth, Config::initialWindowHeight);
 
   setAudioChannels (0, 2);
@@ -160,23 +158,20 @@ juce::String MainComponent::formatTime(double seconds) {
   return juce::String::formatted("%02d:%02d:%02d:%03d", hours, minutes, secs, milliseconds); }
 
 double MainComponent::parseTime(const juce::String& timeString) {
-    // Expected format: HH:MM:SS:mmm
     auto parts = juce::StringArray::fromTokens(timeString, ":", "");
 
     if (parts.size() != 4)
-        return -1.0; // Invalid format
+        return -1.0;
 
     int hours = parts[0].getIntValue();
     int minutes = parts[1].getIntValue();
     int seconds = parts[2].getIntValue();
     int milliseconds = parts[3].getIntValue();
 
-    // Basic validation
     if (hours < 0 || minutes < 0 || minutes >= 60 || seconds < 0 || seconds >= 60 || milliseconds < 0 || milliseconds >= 1000)
         return -1.0;
 
-    return (double)hours * 3600.0 + (double)minutes * 60.0 + (double)seconds + (double)milliseconds / 1000.0;
-}
+    return (double)hours * 3600.0 + (double)minutes * 60.0 + (double)seconds + (double)milliseconds / 1000.0; }
 
 void MainComponent::drawReducedQualityWaveform(juce::Graphics& g, int channel, int pixelsPerSample) {
   auto audioLength = thumbnail.getTotalLength();
@@ -425,7 +420,16 @@ void MainComponent::paint (juce::Graphics& g) {
 
 // juce::TextEditor::Listener callbacks
 void MainComponent::textEditorTextChanged (juce::TextEditor& editor) {
-    // Optional: could add live validation feedback here, e.g., change color to orange if partially valid
+    double totalLength = thumbnail.getTotalLength();
+    double newPosition = parseTime(editor.getText());
+
+    if (newPosition >= 0.0 && newPosition <= totalLength) {
+        editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Valid and in range
+    } else if (newPosition == -1.0) {
+        editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Completely invalid format
+    } else {
+        editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Valid format but out of range
+    }
 }
 
 void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
@@ -438,7 +442,8 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
             repaint();
         } else {
             editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
-            //editor.setText(formatTime(loopInPosition), juce::dontSendNotification); // Revert? Or let user correct
+            editor.setText(formatTime(loopInPosition), juce::dontSendNotification); // Revert to last valid
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
         }
     } else if (&editor == &loopOutEditor) {
         double newPosition = parseTime(editor.getText());
@@ -449,9 +454,10 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
             repaint();
         } else {
             editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
-            //editor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Revert? Or let user correct
-        }
-    }
+            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Revert to last valid
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+        } // Closing brace for the 'else' part of loopOutEditor validation
+    } // Closing brace for the 'else if (&editor == &loopOutEditor)' block
     editor.giveAwayKeyboardFocus(); // Lose focus after pressing enter
 }
 
