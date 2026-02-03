@@ -385,10 +385,19 @@ void MainComponent::paint (juce::Graphics& g) {
   textY = bottomRowTopY - 25;
   textXLeft = playbackLeftTextX;
   textXRight = playbackRightTextX;
-  g.setColour(juce::Colours::white);
-  g.setFont(14.0f);
-  g.drawText(leftText, textXLeft, textY, 300, 20, juce::Justification::left);
-  g.drawText(rightText, textXRight, textY, juce::Justification::right); }}}
+
+  // Draw background for left text
+  g.setColour(juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
+  g.fillRect(textXLeft, textY, 300, 20); // 300 is the width, 20 is the height from original
+
+  // Draw background for right text
+  g.fillRect(textXRight, textY, 200, 20); // 200 is the width, 20 is the height from original
+
+  g.setColour(Config::playbackTextColor);
+  g.setFont(Config::playbackTextSize);
+
+  g.drawText(leftText, textXLeft, textY, 300, 20, juce::Justification::left, false);
+  g.drawText(rightText, textXRight, textY, 200, 20, juce::Justification::right, false); }}}
 
 void MainComponent::updateLoopLabels() {
   if (loopInPosition >= 0.0)

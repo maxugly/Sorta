@@ -6,14 +6,17 @@
  * parameters without having to dig through the source code.
  */
 
-namespace Config
-{
+namespace Config{
     // The margin around the entire window content, in pixels.
-    constexpr int windowBorderMargins = 10;
+    constexpr int windowBorderMargins = 15;
 
     // The initial width of the main window in pixels.
-    constexpr int initialWindowWidth = 800;
+    constexpr int initialWindowWidth = 1200;
 
     // The initial height of the main window in pixels.
-    constexpr int initialWindowHeight = 400;
-}
+    constexpr int initialWindowHeight = 800;
+
+    // Playback text settings
+    const juce::Colour playbackTextColor = juce::Colour(0xFF34FA11); // Changed to const as juce::Colour constructor is not constexpr
+    constexpr float playbackTextBackgroundAlpha = 0.7f; // 0.0f (fully transparent) to 1.0f (fully opaque)
+    constexpr int playbackTextSize = 30;}
