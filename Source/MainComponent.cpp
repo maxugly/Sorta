@@ -433,6 +433,7 @@ void MainComponent::resized() {
 
   auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(Config::windowBorderMargins);
   bottomRowTopY = bottomRow.getY();
+  contentAreaBounds = bounds.reduced(Config::windowBorderMargins); // Store the actual content area bounds here
   qualityButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
   channelViewButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
   statsButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
@@ -446,7 +447,7 @@ void MainComponent::resized() {
   else {waveformBounds = bounds.reduced(Config::windowBorderMargins);}
 
   if (showStats) {
-    statsBounds = waveformBounds.withHeight(100).reduced(10);
+    statsBounds = contentAreaBounds.withHeight(100).reduced(10); // Use contentAreaBounds
     statsDisplay.setBounds(statsBounds);
     statsDisplay.setVisible(true);
     statsDisplay.toFront(true); }

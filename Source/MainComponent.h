@@ -66,7 +66,7 @@ private:
   juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton;
   juce::TextEditor statsDisplay;
   juce::Label loopInLabel, loopOutLabel;
-  juce::Rectangle<int> waveformBounds, statsBounds;
+  juce::Rectangle<int> waveformBounds, statsBounds, contentAreaBounds; // Added contentAreaBounds
   juce::FlexBox getTopRowFlexBox();
   juce::FlexBox getLoopRowFlexBox();
 
