@@ -384,19 +384,15 @@ void MainComponent::paint (juce::Graphics& g) {
 
   textY = bottomRowTopY - 25;
   textXLeft = playbackLeftTextX;
-  textXRight = playbackRightTextX;
-
-  // Draw background for left text
-  g.setColour(juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
-  g.fillRect(textXLeft, textY, 300, 20); // 300 is the width, 20 is the height from original
-
-  // Draw background for right text
-  g.fillRect(textXRight, textY, 200, 20); // 200 is the width, 20 is the height from original
+  textXRight = playbackRightTextX; // This is the X-coordinate for the left edge of a 200-wide rect for right text.
 
   g.setColour(Config::playbackTextColor);
   g.setFont(Config::playbackTextSize);
 
+  // Draw left text
   g.drawText(leftText, textXLeft, textY, 300, 20, juce::Justification::left, false);
+
+  // Draw right text
   g.drawText(rightText, textXRight, textY, 200, 20, juce::Justification::right, false); }}}
 
 void MainComponent::updateLoopLabels() {
