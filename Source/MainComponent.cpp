@@ -12,9 +12,9 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   thumbnail.addChangeListener (this);
 
   setLookAndFeel (&modernLF);
-  modernLF.setBaseOffColor(juce::Colour(0xff3a3a3a));
-  modernLF.setBaseOnColor(juce::Colour(0xff0066cc));
-  modernLF.setTextColor(juce::Colours::white);
+  modernLF.setBaseOffColor(Config::buttonBaseColour);
+  modernLF.setBaseOnColor(Config::buttonOnColour);
+  modernLF.setTextColor(Config::buttonTextColour);
 
   addAndMakeVisible (openButton);
   openButton.setButtonText ("[D]ir");
@@ -404,16 +404,17 @@ void MainComponent::updateLoopLabels() {
 void MainComponent::resized() {
   auto bounds = getLocalBounds();
 
-  auto topRow = bounds.removeFromTop(50).reduced(Config::windowBorderMargins);
-  openButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(Config::windowBorderMargins);
-  playStopButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(Config::windowBorderMargins);
-  modeButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(Config::windowBorderMargins);
-  statsButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(Config::windowBorderMargins);
-  loopButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(Config::windowBorderMargins); // Moved here
-  exitButton.setBounds(topRow.removeFromRight(80)); topRow.removeFromRight(Config::windowBorderMargins);
+  int rowHeight = Config::buttonHeight + Config::windowBorderMargins * 2; // Make row height configurable based on button height
+  auto topRow = bounds.removeFromTop(rowHeight).reduced(Config::windowBorderMargins);
+  openButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  playStopButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  modeButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  statsButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  loopButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins); // Moved here
+  exitButton.setBounds(topRow.removeFromRight(Config::buttonWidth)); topRow.removeFromRight(Config::windowBorderMargins);
 
-  auto loopRow = bounds.removeFromTop(50).reduced(Config::windowBorderMargins);
-  loopInButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(Config::windowBorderMargins);
+  auto loopRow = bounds.removeFromTop(rowHeight).reduced(Config::windowBorderMargins);
+  loopInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
   
   // Calculate position for loopInDisplayString
   loopInTextX = loopRow.getX(); // Left edge of the space for loopIn
@@ -423,19 +424,19 @@ void MainComponent::resized() {
   loopRow.removeFromLeft(Config::windowBorderMargins); // Doubled distance
   loopRow.removeFromLeft(Config::windowBorderMargins); // ADDED: Even more distance (for loopOutButton)
 
-  loopOutButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(Config::windowBorderMargins);
+  loopOutButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
 
   // Calculate position for loopOutDisplayString
   loopOutTextX = loopRow.getX(); // Left edge of the space for loopOut
   // loopTextY is already set once, assuming numbers are on the same line
   loopRow.removeFromLeft(Config::loopTextWidth); // Preserve space (Use Config::loopTextWidth)
 
-  auto bottomRow = bounds.removeFromBottom(50).reduced(Config::windowBorderMargins);
+  auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(Config::windowBorderMargins);
   bottomRowTopY = bottomRow.getY();
-  qualityButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(Config::windowBorderMargins);
-  channelViewButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(Config::windowBorderMargins);
-  statsButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(Config::windowBorderMargins);
-  modeButton.setBounds(bottomRow.removeFromRight(80));
+  qualityButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
+  channelViewButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
+  statsButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
+  modeButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth));
 
   playbackLeftTextX = getLocalBounds().getX() + Config::windowBorderMargins;
   playbackCenterTextX = (getLocalBounds().getWidth() / 2) - (Config::playbackTextWidth / 2); // Use Config::playbackTextWidth

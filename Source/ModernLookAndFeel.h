@@ -1,14 +1,15 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "Config.h" // Include Config.h
 
 class ModernLookAndFeel : public juce::LookAndFeel_V4 {
 public:
   ModernLookAndFeel() {
-    setColour (juce::TextButton::buttonColourId, juce::Colour(0xff3a3a3a));         // Dark Grey
-    setColour (juce::TextButton::buttonOnColourId, juce::Colour(0xff00bfff));       // Deep Sky Blue
-    setColour (juce::TextButton::textColourOffId, juce::Colours::white);
-    setColour (juce::TextButton::textColourOnId, juce::Colours::white); }
+    setColour (juce::TextButton::buttonColourId, Config::buttonBaseColour);
+    setColour (juce::TextButton::buttonOnColourId, Config::buttonOnColour);
+    setColour (juce::TextButton::textColourOffId, Config::buttonTextColour);
+    setColour (juce::TextButton::textColourOnId, Config::buttonTextColour); } // Use same text colour for on/off states
 
   void setBaseOffColor(juce::Colour color) { setColour(juce::TextButton::buttonColourId, color); }
   void setBaseOnColor(juce::Colour color) { setColour(juce::TextButton::buttonOnColourId, color); }
@@ -16,25 +17,29 @@ public:
 
   void drawButtonBackground (juce::Graphics& g, juce::Button& button, const juce::Colour& backgroundColour,
                             bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override {
-    auto cornerSize = 5.0f;
-    auto bounds = button.getLocalBounds().toFloat().reduced (1.0f);
+    auto cornerSize = Config::buttonCornerRadius;
+    auto outlineThickness = Config::buttonOutlineThickness;
+    auto bounds = button.getLocalBounds().toFloat().reduced (outlineThickness / 2.0f); // Reduce by half thickness for outline
+
     auto baseColour = backgroundColour;
     if (shouldDrawButtonAsHighlighted)
-      baseColour = baseColour.brighter (0.1f);
+      baseColour = baseColour.brighter (Config::buttonHighlightedBrightnessFactor);
     if (shouldDrawButtonAsDown)
-      baseColour = baseColour.darker (0.1f);
+      baseColour = baseColour.darker (Config::buttonPressedDarknessFactor);
+
     g.setColour (baseColour);
     g.fillRoundedRectangle (bounds, cornerSize);
-    g.setColour (juce::Colour(0xff808080));                                         // Medium Grey Outline
-    g.drawRoundedRectangle (bounds, cornerSize, 1.0f); }
+
+    g.setColour (Config::buttonOutlineColour);
+    g.drawRoundedRectangle (bounds, cornerSize, outlineThickness); }
 
   juce::Font getTextButtonFont (juce::TextButton& button, int buttonHeight) override {
     juce::Font font = LookAndFeel_V4::getTextButtonFont (button, buttonHeight);
     if (button.getButtonText() == juce::CharPointer_UTF8 ("\xe2\x96\xb6") ||        // Play symbol
       button.getButtonText() == juce::CharPointer_UTF8 ("\xe2\x8f\xb8")) {          // Pause symbol
-      font.setHeight (buttonHeight * 0.7f); }                                       // Scale up to 70% of button height
+      font.setHeight (buttonHeight * Config::buttonPlayPauseTextHeightScale); }
     else {
-      font.setHeight (buttonHeight * 0.45f); }                                      // Default scale for other text
+      font.setHeight (buttonHeight * Config::buttonTextHeightScale); }
     return font; }
 
   void drawButtonText (juce::Graphics& g, juce::TextButton& button,

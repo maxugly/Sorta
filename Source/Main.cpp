@@ -16,7 +16,7 @@ public:
 class MainWindow : public juce::DocumentWindow {
 public:
   MainWindow (juce::String name) : DocumentWindow (name, juce::Colours::black, allButtons) {
-    //setUsingNativeTitleBar (false);
+    setUsingNativeTitleBar (true);
     setContentOwned (new MainComponent(), true);
     setResizable (true, true);
     centreWithSize (getWidth(), getHeight());

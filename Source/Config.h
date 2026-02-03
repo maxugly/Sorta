@@ -23,4 +23,21 @@ namespace Config{
 
     // Playback and Loop text widths
     constexpr int playbackTextWidth = 220;
-    constexpr int loopTextWidth = 165;}
+    constexpr int loopTextWidth = 165;
+
+    // --- Button Settings ---
+    constexpr int buttonWidth = 80;
+    constexpr int buttonHeight = 30; // Will be used in resized()
+    constexpr float buttonCornerRadius = 5.0f;
+    constexpr float buttonOutlineThickness = 1.0f;
+    const juce::Colour buttonOutlineColour = juce::Colour(0xff808080); // Medium Grey Outline
+
+    const juce::Colour buttonBaseColour = juce::Colour(0xff3a3a3a); // Dark Grey
+    const juce::Colour buttonOnColour = juce::Colour(0xff00bfff);   // Deep Sky Blue (for toggled/highlighted state)
+    const juce::Colour buttonTextColour = juce::Colour(0xFFFFFFFF); // White
+    constexpr float buttonHighlightedBrightnessFactor = 0.1f; // How much brighter on hover
+    constexpr float buttonPressedDarknessFactor = 0.1f;   // How much darker on press
+
+    constexpr float buttonTextHeightScale = 0.45f;         // Default scale for button text
+    constexpr float buttonPlayPauseTextHeightScale = 0.7f; // Scale for Play/Pause symbols
+} // namespace Config
