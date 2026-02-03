@@ -385,29 +385,25 @@ void MainComponent::paint (juce::Graphics& g) {
     int textXRight;
     auto contentBounds = getLocalBounds(); // Use the full component bounds for text positioning
 
-    if (currentMode == ViewMode::Overlay)
-    {
-        textY = contentBounds.getBottom() - 25;
-        textXLeft = contentBounds.getX() + padding;
-        textXRight = contentBounds.getRight() - 200 - padding;
-    }
-    else
-    {
-        textY = waveformBounds.getBottom() - 25;
-        textXLeft = waveformBounds.getX() + padding;
-        textXRight = waveformBounds.getRight() - 200 - padding;
-    }
+  if (currentMode == ViewMode::Overlay) {
+    textY = bottomRowTopY - 25; // Use bottomRowTopY
+    textXLeft = contentBounds.getX() + padding;
+    textXRight = contentBounds.getRight() - 200 - padding; }
+  else {
+    textY = waveformBounds.getBottom() - 25;
+    textXLeft = waveformBounds.getX() + padding;
+    textXRight = waveformBounds.getRight() - 200 - padding; }
 
-    g.setColour(juce::Colours::white);
-    g.setFont(14.0f);
-    g.drawText(leftText,
-    textXLeft,
-    textY,    300, 20,    juce::Justification::left);
-    g.drawText(rightText,
-    textXRight,
-    textY,
-    200, 20,
-    juce::Justification::right); }}}
+  g.setColour(juce::Colours::white);
+  g.setFont(14.0f);
+  g.drawText(leftText,
+  textXLeft,
+  textY,    300, 20,    juce::Justification::left);
+  g.drawText(rightText,
+  textXRight,
+  textY,
+  200, 20,
+  juce::Justification::right); }}}
 
 void MainComponent::updateLoopLabels() {
   if (loopInPosition >= 0.0)
@@ -437,27 +433,21 @@ void MainComponent::resized() {
   loopOutLabel.setBounds(loopRow.removeFromLeft(150));
 
   auto bottomRow = bounds.removeFromBottom(50).reduced(Config::windowBorderMargins);
+  bottomRowTopY = bottomRow.getY(); // Store the top Y-coordinate
   qualityButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(Config::windowBorderMargins);
   channelViewButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(Config::windowBorderMargins);
   statsButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(Config::windowBorderMargins);
   modeButton.setBounds(bottomRow.removeFromRight(80));
 
-  if (currentMode == ViewMode::Overlay)
-  {
-    waveformBounds = getLocalBounds();
-  }
-  else
-  {
-    waveformBounds = bounds.reduced(Config::windowBorderMargins);
-  }
+  if (currentMode == ViewMode::Overlay) {waveformBounds = getLocalBounds(); }
+  else {waveformBounds = bounds.reduced(Config::windowBorderMargins);}
 
   if (showStats) {
     statsBounds = waveformBounds.withHeight(100).reduced(10);
     statsDisplay.setBounds(statsBounds);
     statsDisplay.setVisible(true);
     statsDisplay.toFront(true); }
-  else {
-    statsDisplay.setVisible(false); }
+  else {statsDisplay.setVisible(false); }
 
   openButton.setVisible(true);
   playStopButton.setVisible(true);

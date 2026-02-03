@@ -81,6 +81,7 @@ private:
   double loopInPosition = -1.0;
   double loopOutPosition = -1.0;
   int mouseCursorX = -1, mouseCursorY = -1;
+  int bottomRowTopY = 0; // Initialize to 0
 
   LoopButton loopInButton, loopOutButton;
 
