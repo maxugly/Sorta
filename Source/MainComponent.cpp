@@ -442,7 +442,10 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
             repaint();
         } else {
             editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
-            editor.setText(formatTime(loopInPosition), juce::dontSendNotification); // Revert to last valid
+            if (loopInPosition >= 0.0)
+                editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+            else
+                editor.setText("--:--:--:---", juce::dontSendNotification);
             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
         }
     } else if (&editor == &loopOutEditor) {
@@ -454,7 +457,10 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
             repaint();
         } else {
             editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
-            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Revert to last valid
+            if (loopOutPosition >= 0.0)
+                editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+            else
+                editor.setText("--:--:--:---", juce::dontSendNotification);
             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
         } // Closing brace for the 'else' part of loopOutEditor validation
     } // Closing brace for the 'else if (&editor == &loopOutEditor)' block
@@ -464,9 +470,15 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
 void MainComponent::textEditorEscapeKeyPressed (juce::TextEditor& editor) {
     // Revert text to current value on escape
     if (&editor == &loopInEditor) {
-        editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+        if (loopInPosition >= 0.0)
+            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+        else
+            editor.setText("--:--:--:---", juce::dontSendNotification);
     } else if (&editor == &loopOutEditor) {
-        editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+        if (loopOutPosition >= 0.0)
+            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+        else
+            editor.setText("--:--:--:---", juce::dontSendNotification);
     }
     editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
     editor.giveAwayKeyboardFocus(); // Lose focus
@@ -483,7 +495,10 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
             repaint();
         } else {
             // Revert to last valid position if input is invalid on focus lost
-            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+            if (loopInPosition >= 0.0)
+                editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+            else
+                editor.setText("--:--:--:---", juce::dontSendNotification);
             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
         }
     } else if (&editor == &loopOutEditor) {
@@ -495,7 +510,10 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
             repaint();
         } else {
             // Revert to last valid position if input is invalid on focus lost
-            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+            if (loopOutPosition >= 0.0)
+                editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+            else
+                editor.setText("--:--:--:---", juce::dontSendNotification);
             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
         }
     }
