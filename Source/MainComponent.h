@@ -90,5 +90,4 @@ private:
 
   juce::String formatTime(double seconds);
 
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
-};
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent) };

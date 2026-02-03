@@ -380,14 +380,31 @@ void MainComponent::paint (juce::Graphics& g) {
     juce::String leftText = currentTimeStr + " / " + totalTimeStr;
     juce::String rightText = remainingTimeStr;
     int padding = 10;
-    int textY = waveformBounds.getBottom() - 25;
+    int textY;
+    int textXLeft;
+    int textXRight;
+    auto contentBounds = getLocalBounds(); // Use the full component bounds for text positioning
+
+    if (currentMode == ViewMode::Overlay)
+    {
+        textY = contentBounds.getBottom() - 25;
+        textXLeft = contentBounds.getX() + padding;
+        textXRight = contentBounds.getRight() - 200 - padding;
+    }
+    else
+    {
+        textY = waveformBounds.getBottom() - 25;
+        textXLeft = waveformBounds.getX() + padding;
+        textXRight = waveformBounds.getRight() - 200 - padding;
+    }
+
     g.setColour(juce::Colours::white);
     g.setFont(14.0f);
     g.drawText(leftText,
-    waveformBounds.getX() + padding,
+    textXLeft,
     textY,    300, 20,    juce::Justification::left);
     g.drawText(rightText,
-    waveformBounds.getRight() - 200 - padding,
+    textXRight,
     textY,
     200, 20,
     juce::Justification::right); }}}
@@ -405,27 +422,34 @@ void MainComponent::updateLoopLabels() {
 void MainComponent::resized() {
   auto bounds = getLocalBounds();
 
-  auto topRow = bounds.removeFromTop(50).reduced(5);
-  openButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(5);
-  playStopButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(5);
-  modeButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(5);
-  statsButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(5);
-  exitButton.setBounds(topRow.removeFromRight(80)); topRow.removeFromRight(5);
+  auto topRow = bounds.removeFromTop(50).reduced(Config::windowBorderMargins);
+  openButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(Config::windowBorderMargins);
+  playStopButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(Config::windowBorderMargins);
+  modeButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(Config::windowBorderMargins);
+  statsButton.setBounds(topRow.removeFromLeft(80)); topRow.removeFromLeft(Config::windowBorderMargins);
+  exitButton.setBounds(topRow.removeFromRight(80)); topRow.removeFromRight(Config::windowBorderMargins);
 
-  auto loopRow = bounds.removeFromTop(50).reduced(5);
-  loopButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(5);
-  loopInButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(5);
-  loopInLabel.setBounds(loopRow.removeFromLeft(150)); loopRow.removeFromLeft(5);
-  loopOutButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(5);
+  auto loopRow = bounds.removeFromTop(50).reduced(Config::windowBorderMargins);
+  loopButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(Config::windowBorderMargins);
+  loopInButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(Config::windowBorderMargins);
+  loopInLabel.setBounds(loopRow.removeFromLeft(150)); loopRow.removeFromLeft(Config::windowBorderMargins);
+  loopOutButton.setBounds(loopRow.removeFromLeft(80)); loopRow.removeFromLeft(Config::windowBorderMargins);
   loopOutLabel.setBounds(loopRow.removeFromLeft(150));
 
-  auto bottomRow = bounds.removeFromBottom(50).reduced(5);
-  qualityButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(5);
-  channelViewButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(5);
-  statsButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(5);
+  auto bottomRow = bounds.removeFromBottom(50).reduced(Config::windowBorderMargins);
+  qualityButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(Config::windowBorderMargins);
+  channelViewButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(Config::windowBorderMargins);
+  statsButton.setBounds(bottomRow.removeFromRight(80)); bottomRow.removeFromRight(Config::windowBorderMargins);
   modeButton.setBounds(bottomRow.removeFromRight(80));
 
-  waveformBounds = bounds.reduced(10);
+  if (currentMode == ViewMode::Overlay)
+  {
+    waveformBounds = getLocalBounds();
+  }
+  else
+  {
+    waveformBounds = bounds.reduced(Config::windowBorderMargins);
+  }
 
   if (showStats) {
     statsBounds = waveformBounds.withHeight(100).reduced(10);
