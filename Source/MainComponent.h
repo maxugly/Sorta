@@ -53,6 +53,7 @@ public:
   void timerCallback();
   void paint (juce::Graphics& g);
   void resized();
+  void focusGained (juce::Component::FocusChangeType cause) override;
 
 private:
   juce::AudioFormatManager formatManager;
@@ -64,9 +65,12 @@ private:
 
   ModernLookAndFeel modernLF;
 
-  juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton;
+  juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton, detectSilenceButton;
   juce::TextButton clearLoopInButton, clearLoopOutButton;
-  juce::TextEditor statsDisplay, loopInEditor, loopOutEditor; // Changed from Label to TextEditor
+  juce::TextEditor statsDisplay, loopInEditor, loopOutEditor, silenceThresholdEditor;
+  juce::Label silenceThresholdLabel;
+  float currentSilenceThreshold = Config::silenceThreshold;
+  bool isDetectModeActive = false;
   juce::Rectangle<int> waveformBounds, statsBounds, contentAreaBounds;
   juce::FlexBox getTopRowFlexBox();
   juce::FlexBox getLoopRowFlexBox();
@@ -99,6 +103,7 @@ private:
   void updateQualityButtonText();
   void drawReducedQualityWaveform(juce::Graphics& g, int channel, int pixelsPerSample);
   void updateLoopButtonColors();
+  void detectSilence();
 
   juce::String formatTime(double seconds);
 

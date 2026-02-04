@@ -111,6 +111,7 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   loopInEditor.setMultiLine (false);
   loopInEditor.setReturnKeyStartsNewLine (false);
   loopInEditor.addListener (this);
+  loopInEditor.setWantsKeyboardFocus (false); // Explicitly prevent from taking focus initially
 
   addAndMakeVisible (loopOutEditor);
   loopOutEditor.setReadOnly (false);
@@ -121,6 +122,7 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   loopOutEditor.setMultiLine (false);
   loopOutEditor.setReturnKeyStartsNewLine (false);
   loopOutEditor.addListener (this);
+  loopOutEditor.setWantsKeyboardFocus (false); // Explicitly prevent from taking focus initially
 
   addAndMakeVisible (clearLoopInButton);
   clearLoopInButton.setButtonText ("X");
@@ -142,13 +144,41 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
       repaint();
   };
 
+  addAndMakeVisible (detectSilenceButton);
+  detectSilenceButton.setButtonText ("Detect");
+  detectSilenceButton.setClickingTogglesState (true); // Make it a toggle button
+  detectSilenceButton.setToggleState (isDetectModeActive, juce::dontSendNotification); // Set initial state
+  detectSilenceButton.onClick = [this] {
+    isDetectModeActive = detectSilenceButton.getToggleState();
+    if (isDetectModeActive) {
+      detectSilence(); // Perform detection immediately if toggled on
+    }
+  };
+
+  addAndMakeVisible (silenceThresholdLabel);
+  silenceThresholdLabel.setText ("Threshold:", juce::dontSendNotification);
+  silenceThresholdLabel.setJustificationType (juce::Justification::right);
+
+  addAndMakeVisible (silenceThresholdEditor);
+  silenceThresholdEditor.setText (juce::String (static_cast<int>(Config::silenceThreshold * 100.0f)));
+  silenceThresholdEditor.setInputRestrictions (0, "0123456789");
+  silenceThresholdEditor.setJustification(juce::Justification::centred);
+  silenceThresholdEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
+  silenceThresholdEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
+  silenceThresholdEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
+  silenceThresholdEditor.setMultiLine (false);
+  silenceThresholdEditor.setReturnKeyStartsNewLine (false);
+  silenceThresholdEditor.addListener (this);
+  silenceThresholdEditor.setWantsKeyboardFocus (true);
+
 
   updateLoopLabels();
   setSize(Config::initialWindowWidth, Config::initialWindowHeight);
 
   setAudioChannels (0, 2);
   startTimerHz (60);
-  setWantsKeyboardFocus (true); 
+  setWantsKeyboardFocus (true);
+  grabKeyboardFocus(); // Request keyboard focus for MainComponent
 
   updateComponentStates(); // Call to set initial button states
 }
@@ -236,6 +266,10 @@ void MainComponent::openButtonClicked() {
                 readerSource.reset (newSource.release());
                 updateButtonText();
                 updateComponentStates(); // Update component states after loading file
+                grabKeyboardFocus(); // Re-grab focus after file chooser closes
+                if (isDetectModeActive) { // Call detectSilence only if active
+                    detectSilence();
+                }
               }}});}
 
 void MainComponent::playStopButtonClicked() {
@@ -478,15 +512,24 @@ void MainComponent::paint (juce::Graphics& g) {
 
 // juce::TextEditor::Listener callbacks
 void MainComponent::textEditorTextChanged (juce::TextEditor& editor) {
-    double totalLength = thumbnail.getTotalLength();
-    double newPosition = parseTime(editor.getText());
-
-    if (newPosition >= 0.0 && newPosition <= totalLength) {
-        editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Valid and in range
-    } else if (newPosition == -1.0) {
-        editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Completely invalid format
+    if (&editor == &silenceThresholdEditor) {
+        int newPercentage = editor.getText().getIntValue();
+        if (newPercentage >= 1 && newPercentage <= 99) {
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Valid
+        } else {
+            editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Out of range
+        }
     } else {
-        editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Valid format but out of range
+        double totalLength = thumbnail.getTotalLength();
+        double newPosition = parseTime(editor.getText());
+
+        if (newPosition >= 0.0 && newPosition <= totalLength) {
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Valid and in range
+        } else if (newPosition == -1.0) {
+            editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Completely invalid format
+        } else {
+            editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Valid format but out of range
+        }
     }
 }
 
@@ -513,7 +556,23 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
             repaint();
         } // Closing brace for the 'else' part of loopOutEditor validation
-    } // Closing brace for the 'else if (&editor == &loopOutEditor)' block
+    } else if (&editor == &silenceThresholdEditor)
+    {
+        int newPercentage = editor.getText().getIntValue();
+        if (newPercentage >= 1 && newPercentage <= 99)
+        {
+            currentSilenceThreshold = static_cast<float>(newPercentage) / 100.0f;
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+            if (isDetectModeActive) { // Trigger detection if mode is active
+                detectSilence();
+            }
+        }
+        else
+        {
+            editor.setText(juce::String(static_cast<int>(currentSilenceThreshold * 100.0f)), juce::dontSendNotification);
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+        }
+    }
     editor.giveAwayKeyboardFocus(); // Lose focus after pressing enter
 }
 
@@ -529,6 +588,8 @@ void MainComponent::textEditorEscapeKeyPressed (juce::TextEditor& editor) {
             editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
         else
             editor.setText("--:--:--:---", juce::dontSendNotification);
+    } else if (&editor == &silenceThresholdEditor) {
+        editor.setText(juce::String(static_cast<int>(currentSilenceThreshold * 100.0f)), juce::dontSendNotification);
     }
     editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
     editor.giveAwayKeyboardFocus(); // Lose focus
@@ -568,6 +629,21 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
             repaint();
         }
+    } else if (&editor == &silenceThresholdEditor) {
+        int newPercentage = editor.getText().getIntValue();
+        if (newPercentage >= 1 && newPercentage <= 99)
+        {
+            currentSilenceThreshold = static_cast<float>(newPercentage) / 100.0f;
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+            if (isDetectModeActive) { // Trigger detection if mode is active
+                detectSilence();
+            }
+        }
+        else
+        {
+            editor.setText(juce::String(static_cast<int>(currentSilenceThreshold * 100.0f)), juce::dontSendNotification);
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+        }
     }
 }
 
@@ -581,6 +657,80 @@ void MainComponent::updateLoopLabels() {
     loopOutEditor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
   else
     loopOutEditor.setText("--:--:--:---", juce::dontSendNotification);
+}
+
+void MainComponent::detectSilence()
+{
+    if (!readerSource)
+        return;
+
+    auto* reader = readerSource->getAudioFormatReader();
+    if (!reader)
+        return;
+
+    juce::AudioBuffer<float> buffer(reader->numChannels, (int)reader->lengthInSamples);
+    reader->read(&buffer, 0, (int)reader->lengthInSamples, 0, true, true);
+
+    float threshold = currentSilenceThreshold; // Use the member variable
+
+    int firstSample = -1;
+    int lastSample = -1;
+
+    for (int i = 0; i < buffer.getNumSamples(); ++i)
+    {
+        bool isSilent = true;
+        for (int j = 0; j < buffer.getNumChannels(); ++j)
+        {
+            if (std::abs(buffer.getSample(j, i)) > threshold)
+            {
+                isSilent = false;
+                break;
+            }
+        }
+
+        if (!isSilent)
+        {
+            if (firstSample == -1)
+                firstSample = i;
+            lastSample = i;
+        }
+    }
+
+    if (firstSample != -1)
+    {
+        // Find previous zero crossing for loop in
+        int loopInSample = 0;
+        for (int i = firstSample; i > 0; --i)
+        {
+            bool sign1 = buffer.getSample(0, i) >= 0;
+            bool sign2 = buffer.getSample(0, i - 1) >= 0;
+            if (sign1 != sign2)
+            {
+                loopInSample = i;
+                break;
+            }
+        }
+
+        // Find next zero crossing for loop out
+        int loopOutSample = buffer.getNumSamples() - 1;
+        for (int i = lastSample; i < buffer.getNumSamples() - 1; ++i)
+        {
+            bool sign1 = buffer.getSample(0, i) >= 0;
+            bool sign2 = buffer.getSample(0, i + 1) >= 0;
+            if (sign1 != sign2)
+            {
+                loopOutSample = i;
+                break;
+            }
+        }
+
+        loopInPosition = (double)loopInSample / reader->sampleRate;
+        loopOutPosition = (double)loopOutSample / reader->sampleRate;
+
+        updateLoopButtonColors();
+        updateLoopLabels();
+        repaint();
+    }
 }
 
 void MainComponent::resized() {
@@ -622,6 +772,17 @@ void MainComponent::resized() {
   clearLoopOutButton.setBounds(loopRow.getX(), loopTextY, 25, 20);
   loopRow.removeFromLeft(25);
 
+  loopRow.removeFromLeft(Config::windowBorderMargins * 2); 
+
+  detectSilenceButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); 
+  loopRow.removeFromLeft(Config::windowBorderMargins);
+
+  silenceThresholdLabel.setBounds(loopRow.removeFromLeft(80));
+  loopRow.removeFromLeft(Config::windowBorderMargins / 2);
+
+  silenceThresholdEditor.setBounds(loopRow.getX(), loopTextY, 80, 20);
+  loopRow.removeFromLeft(80);
+
   auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(Config::windowBorderMargins);
   bottomRowTopY = bottomRow.getY();
   contentAreaBounds = bounds.reduced(Config::windowBorderMargins); // Store the actual content area bounds here
@@ -655,7 +816,10 @@ void MainComponent::resized() {
   clearLoopOutButton.setVisible(true);
   channelViewButton.setVisible(true);
   qualityButton.setVisible(true);
-  exitButton.setVisible(true);}
+  exitButton.setVisible(true);
+  detectSilenceButton.setVisible(true);
+  silenceThresholdLabel.setVisible(true);
+  silenceThresholdEditor.setVisible(true);}
 
 juce::FlexBox MainComponent::getTopRowFlexBox(){
   juce::FlexBox row;
@@ -728,6 +892,9 @@ void MainComponent::updateComponentStates() {
   loopInEditor.setEnabled(enabled);
   loopOutEditor.setEnabled(enabled);
   statsDisplay.setEnabled(enabled);
+  detectSilenceButton.setEnabled(enabled);
+  silenceThresholdEditor.setEnabled(enabled);
+  silenceThresholdLabel.setEnabled(enabled);
 }
 
 juce::FlexBox MainComponent::getBottomRowFlexBox() {
@@ -749,3 +916,8 @@ juce::FlexBox MainComponent::getBottomRowFlexBox() {
   addBtn(statsButton);
   addBtn(modeButton);
   return row; }
+
+void MainComponent::focusGained (juce::Component::FocusChangeType cause) {
+  ignoreUnused (cause);
+  grabKeyboardFocus();
+}

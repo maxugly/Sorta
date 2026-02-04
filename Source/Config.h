@@ -66,6 +66,9 @@ namespace Config{
     const juce::Colour loopRegionColor = juce::Colour(0xff0066cc).withAlpha(0.3f);
     const juce::Colour loopLineColor = juce::Colours::blue;
 
+    // --- Silence Detection ---
+    constexpr float silenceThreshold = 0.01f;
+
     // --- Playback Cursor Colors ---
     const juce::Colour playbackCursorColor = juce::Colours::lime;
     // Playback cursor glow colors (start and end alpha for gradient)
