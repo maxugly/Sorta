@@ -470,6 +470,32 @@ void MainComponent::paint (juce::Graphics& g) {
       thumbnail.drawChannels (g, waveformBounds, 0.0, thumbnail.getTotalLength(), 1.0f); }}
   auto audioLength = (float)thumbnail.getTotalLength();
   if (audioLength > 0.0) {
+      // --- NEW CODE: Silence Threshold Visualization ---
+      if (isDetectModeActive) {
+          float normalisedThreshold = currentSilenceThreshold; // currentSilenceThreshold is 0.0-1.0
+          float centerY = (float)waveformBounds.getCentreY();
+          float halfHeight = (float)waveformBounds.getHeight() / 2.0f;
+
+          // Calculate Y positions for the threshold lines
+          // +ve threshold is above center, -ve threshold is below center
+          float topThresholdY = centerY - (normalisedThreshold * halfHeight);
+          float bottomThresholdY = centerY + (normalisedThreshold * halfHeight);
+
+          // Ensure lines are within bounds
+          topThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), topThresholdY);
+          bottomThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), bottomThresholdY);
+
+          // Draw the filled region
+          g.setColour(Config::thresholdRegionColor);
+          g.fillRect((float)waveformBounds.getX(), topThresholdY, (float)waveformBounds.getWidth(), bottomThresholdY - topThresholdY);
+
+          // Draw the threshold lines
+          g.setColour(Config::thresholdLineColor);
+          g.drawHorizontalLine((int)topThresholdY, waveformBounds.getX(), waveformBounds.getRight());
+          g.drawHorizontalLine((int)bottomThresholdY, waveformBounds.getX(), waveformBounds.getRight());
+      }
+      // --- END NEW CODE ---
+
       bool inIsSet = loopInPosition > -1.0;
       bool outIsSet = loopOutPosition > -1.0;
       if (inIsSet && outIsSet) {
