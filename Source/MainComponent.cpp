@@ -148,7 +148,10 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
 
   setAudioChannels (0, 2);
   startTimerHz (60);
-  setWantsKeyboardFocus (true); }
+  setWantsKeyboardFocus (true); 
+
+  updateComponentStates(); // Call to set initial button states
+}
 
 void MainComponent::updateQualityButtonText() {
   if (currentQuality == MainComponent::ThumbnailQuality::High) qualityButton.setButtonText("[Q]ual H");
@@ -210,6 +213,9 @@ void MainComponent::drawReducedQualityWaveform(juce::Graphics& g, int channel, i
     g.drawVerticalLine(waveformBounds.getX() + x, topY, bottomY); }}
 
 void MainComponent::openButtonClicked() {
+  isFileLoaded = false; // Assume no file loaded initially
+  updateComponentStates(); // Disable buttons until a file is successfully loaded
+
   auto filter = formatManager.getWildcardForAllFormats();
   chooser = std::make_unique<juce::FileChooser> ("Select Audio...",
     juce::File::getSpecialLocation (juce::File::userHomeDirectory), filter);
@@ -225,10 +231,12 @@ void MainComponent::openButtonClicked() {
         transportSource.setSource (newSource.get(), 0, nullptr, reader->sampleRate);
         thumbnail.setSource (new juce::FileInputSource (file));
         DBG("AudioThumbnail: Num Channels = " << thumbnail.getNumChannels() << ", Total Length = " << thumbnail.getTotalLength());
-        totalTimeStaticStr = formatTime(thumbnail.getTotalLength()); // Set total time static string
-        playStopButton.setEnabled (true);
-        readerSource.reset (newSource.release());
-        updateButtonText(); }}});}
+                totalTimeStaticStr = formatTime(thumbnail.getTotalLength()); // Set total time static string
+                isFileLoaded = true; // Set flag to true after successful load
+                readerSource.reset (newSource.release());
+                updateButtonText();
+                updateComponentStates(); // Update component states after loading file
+              }}});}
 
 void MainComponent::playStopButtonClicked() {
   if (transportSource.isPlaying()) {
@@ -703,6 +711,30 @@ void MainComponent::prepareToPlay (int samplesPerBlockExpected, double sampleRat
 void MainComponent::changeListenerCallback (juce::ChangeBroadcaster*) { repaint(); }
 
 void MainComponent::releaseResources() { transportSource.releaseResources(); }
+
+void MainComponent::updateComponentStates() {
+  const bool enabled = isFileLoaded;
+
+  // Buttons that should always be enabled
+  openButton.setEnabled(true);
+  exitButton.setEnabled(true);
+
+  // Buttons that depend on a file being loaded
+  playStopButton.setEnabled(enabled);
+  modeButton.setEnabled(enabled);
+  statsButton.setEnabled(enabled);
+  loopButton.setEnabled(enabled);
+  channelViewButton.setEnabled(enabled);
+  qualityButton.setEnabled(enabled);
+  clearLoopInButton.setEnabled(enabled);
+  clearLoopOutButton.setEnabled(enabled);
+  loopInButton.setEnabled(enabled);
+  loopOutButton.setEnabled(enabled);
+
+  loopInEditor.setEnabled(enabled);
+  loopOutEditor.setEnabled(enabled);
+  statsDisplay.setEnabled(enabled);
+}
 
 juce::FlexBox MainComponent::getBottomRowFlexBox() {
   juce::FlexBox row;
