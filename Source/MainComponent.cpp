@@ -613,246 +613,281 @@ void MainComponent::timerCallback() {
   if (transportSource.isPlaying() || showStats || thumbnail.getTotalLength() > 0.0 || shouldAutoCutIn || shouldAutoCutOut)
     repaint(); }
 
-void MainComponent::paint (juce::Graphics& g) {
-  g.fillAll (Config::mainBackgroundColor);
-  if (thumbnail.getNumChannels() > 0) {
-      int pixelsPerSample = 1;
-      if (currentQuality == ThumbnailQuality::Low)
-        pixelsPerSample = 4;
-      else if (currentQuality == ThumbnailQuality::Medium)
-        pixelsPerSample = 2;
-      if (currentChannelViewMode == ChannelViewMode::Mono || thumbnail.getNumChannels() == 1) {
-        g.setColour (Config::waveformColor);
+    void MainComponent::paint (juce::Graphics& g)
+    {
+      g.fillAll (Config::mainBackgroundColor);
 
-        if (pixelsPerSample > 1) {
-          drawReducedQualityWaveform(g, 0, pixelsPerSample); }
-        else {
-          thumbnail.drawChannel (g, waveformBounds, 0.0, thumbnail.getTotalLength(), 0, 1.0f); }}
-  else {
-    g.setColour (Config::waveformColor);
-    if (pixelsPerSample > 1) {
-    for (int ch = 0; ch < thumbnail.getNumChannels(); ++ch)
-      drawReducedQualityWaveform(g, ch, pixelsPerSample); }
-    else {
-      thumbnail.drawChannels (g, waveformBounds, 0.0, thumbnail.getTotalLength(), 1.0f); }}
-  auto audioLength = (float)thumbnail.getTotalLength();
-  if (audioLength > 0.0) {
-    if (isCutModeActive) { // Only draw threshold visualization if Cut mode is active
-      // --- NEW CODE: Silence Threshold Visualization ---
-      // Helper lambda to draw threshold lines at a given position
-      auto drawThresholdVisualisation = [&](juce::Graphics& g_ref, double loopPos, float threshold, bool isActive) {
-          if (audioLength <= 0.0) return; // Only draw if audio is loaded
+      // Waveform drawing
+      if (thumbnail.getNumChannels() > 0)
+      {
+        int pixelsPerSample = 1;
+        if (currentQuality == ThumbnailQuality::Low)
+          pixelsPerSample = 4;
+        else if (currentQuality == ThumbnailQuality::Medium)
+          pixelsPerSample = 2;
 
-          float normalisedThreshold = threshold; // threshold is 0.0-1.0
+        if (currentChannelViewMode == ChannelViewMode::Mono || thumbnail.getNumChannels() == 1)
+        {
+          g.setColour (Config::waveformColor);
+          if (pixelsPerSample > 1)
+            drawReducedQualityWaveform(g, 0, pixelsPerSample);
+          else
+            thumbnail.drawChannel (g, waveformBounds, 0.0, thumbnail.getTotalLength(), 0, 1.0f);
+        }
+        else // Stereo
+        {
+          g.setColour (Config::waveformColor);
+          if (pixelsPerSample > 1)
+          {
+            for (int ch = 0; ch < thumbnail.getNumChannels(); ++ch)
+              drawReducedQualityWaveform(g, ch, pixelsPerSample);
+          }
+          else
+          {
+            thumbnail.drawChannels (g, waveformBounds, 0.0, thumbnail.getTotalLength(), 1.0f);
+          }
+        }
+      } // End of waveform drawing
+
+      auto audioLength = (float)thumbnail.getTotalLength();
+
+      if (audioLength > 0.0) // Main block for drawing elements that depend on audio length
+      {
+        // Threshold visualization
+        if (isCutModeActive) // Only draw threshold visualization if Cut mode is active
+        {
+          // Helper lambda to draw threshold lines at a given position
+          auto drawThresholdVisualisation = [&](juce::Graphics& g_ref, double loopPos, float threshold, bool isActive)
+          {
+            if (audioLength <= 0.0) return; // Only draw if audio is loaded
+
+            float normalisedThreshold = threshold; // threshold is 0.0-1.0
+            float centerY = (float)waveformBounds.getCentreY();
+            float halfHeight = (float)waveformBounds.getHeight() / 2.0f;
+
+            // Calculate Y positions for the threshold lines
+            float topThresholdY = centerY - (normalisedThreshold * halfHeight);
+            float bottomThresholdY = centerY + (normalisedThreshold * halfHeight);
+
+            // Ensure lines are within bounds
+            topThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), topThresholdY);
+            bottomThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), bottomThresholdY);
+
+            // Calculate X position for the loop point
+            float xPos = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (loopPos / audioLength);
+
+            // Calculate start and end X for the Config::thresholdLineWidth wide line
+            float halfThresholdLineWidth = Config::thresholdLineWidth / 2.0f;
+            float lineStartX = xPos - halfThresholdLineWidth;
+            float lineEndX = xPos + halfThresholdLineWidth;
+
+            // Ensure lines are within waveformBounds horizontally
+            lineStartX = juce::jmax(lineStartX, (float)waveformBounds.getX());
+            lineEndX = juce::jmin(lineEndX, (float)waveformBounds.getRight());
+            float currentLineWidth = lineEndX - lineStartX;
+
+            // No dimming factors - always full color if active
+            juce::Colour lineColor = Config::thresholdLineColor;
+            juce::Colour regionColor = Config::thresholdRegionColor;
+
+            // Draw the filled region (Config::thresholdLineWidth wide)
+            g_ref.setColour(regionColor);
+            g_ref.fillRect(lineStartX, topThresholdY, currentLineWidth, bottomThresholdY - topThresholdY);
+
+            // --- GLOW EFFECT FOR THRESHOLD ---
+            if (isActive) {
+              juce::Colour glowColor = lineColor.withAlpha(lineColor.getFloatAlpha() * glowAlpha);
+              g_ref.setColour(glowColor);
+              // Draw a thicker line underneath the main line to create a glow
+              g_ref.fillRect(lineStartX, topThresholdY - (Config::thresholdGlowThickness / 2.0f - 0.5f), currentLineWidth, Config::thresholdGlowThickness);
+              g_ref.fillRect(lineStartX, bottomThresholdY - (Config::thresholdGlowThickness / 2.0f - 0.5f), currentLineWidth, Config::thresholdGlowThickness);
+            }
+            // --- END GLOW EFFECT FOR THRESHOLD ---
+
+            // Draw the main threshold lines (Config::thresholdLineWidth wide) on top of the glow
+            g_ref.setColour(lineColor);
+            g_ref.drawHorizontalLine((int)topThresholdY, lineStartX, lineEndX);
+            g_ref.drawHorizontalLine((int)bottomThresholdY, lineStartX, lineEndX);
+          };
+
+          // Draw In-Threshold Visualization
+          drawThresholdVisualisation(g, loopInPosition, currentInSilenceThreshold, shouldAutoCutIn);
+
+          // Draw Out-Threshold Visualization
+          drawThresholdVisualisation(g, loopOutPosition, currentOutSilenceThreshold, shouldAutoCutOut);
+        } // End of if (isCutModeActive) for threshold visualization
+
+        // Loop Region drawing
+        if (isCutModeActive) // Only draw loop region if Cut mode is active
+        {
+          auto actualIn = juce::jmin(loopInPosition, loopOutPosition);
+          auto actualOut = juce::jmax(loopInPosition, loopOutPosition);
+          auto inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualIn / audioLength);
+          auto outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualOut / audioLength);
+          g.setColour(Config::loopRegionColor); // No dimming factor
+          g.fillRect(juce::Rectangle<float>(inX, (float)waveformBounds.getY(), outX - inX, (float)waveformBounds.getHeight()));
+        }
+
+        // Vertical loop lines
+        if (isCutModeActive) // Only draw if Cut mode is active
+        {
+          auto inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (loopInPosition / audioLength);
+          auto outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (loopOutPosition / audioLength);
+
+          // Draw pulsing glow for vertical lines (always active if cut mode is active)
+          juce::Colour glowColor = Config::loopLineColor.withAlpha(Config::loopLineColor.getFloatAlpha() * (1.0f - glowAlpha));
+          g.setColour(glowColor);
+          // Draw a thicker rectangle for the glow, centered on the line
+          g.fillRect(inX - (Config::loopLineGlowThickness / 2.0f - 0.5f), (float)waveformBounds.getY(), Config::loopLineGlowThickness, (float)waveformBounds.getHeight());
+          g.fillRect(outX - (Config::loopLineGlowThickness / 2.0f - 0.5f), (float)waveformBounds.getY(), Config::loopLineGlowThickness, (float)waveformBounds.getHeight());
+        }
+
+        // Playback Cursor
+        auto drawPosition = (float)transportSource.getCurrentPosition();
+        auto x = (drawPosition / audioLength) * (float)waveformBounds.getWidth() + (float)waveformBounds.getX();
+        if (transportSource.isPlaying())
+        {
+          juce::ColourGradient gradient (
+            Config::playbackCursorGlowColorStart,
+            (float)x - 10.0f, (float)waveformBounds.getCentreY(),
+                                         Config::playbackCursorGlowColorEnd,
+                                         (float)x, (float)waveformBounds.getCentreY(),
+                                         false );
+          g.setGradientFill (gradient);
+          g.fillRect (juce::Rectangle<float>((int)x - 10, (float)waveformBounds.getY(), 10, (float)waveformBounds.getHeight()));
+        }
+        else
+        {
+          juce::ColourGradient glowGradient;
+          glowGradient.addColour (0.0, Config::playbackCursorGlowColorStart);
+          glowGradient.addColour (0.5, Config::playbackCursorGlowColorEnd);
+          glowGradient.addColour (1.0, juce::Colours::lime.withAlpha(0.0f));
+          glowGradient.point1 = { (float)x - 5.0f, (float)waveformBounds.getCentreY() };
+          glowGradient.point2 = { (float)x + 5.0f, (float)waveformBounds.getCentreY() };
+          g.setGradientFill (glowGradient);
+          g.fillRect (juce::Rectangle<float>((int)x - 5, (float)waveformBounds.getY(), 10, (float)waveformBounds.getHeight()));
+        }
+        g.setColour (Config::playbackCursorColor);
+        g.drawVerticalLine ((int)x, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
+      } // End of main if (audioLength > 0.0) block for controls drawing
+
+      // Mouse Cursor
+      if (mouseCursorX != -1)
+      {
+        g.setColour (Config::mouseCursorHighlightColor);
+        g.fillRect (mouseCursorX - 2, waveformBounds.getY(), 5, waveformBounds.getHeight());
+        g.fillRect (waveformBounds.getX(), mouseCursorY - 2, waveformBounds.getWidth(), 5);
+
+        // --- Amplitude lines at mouse cursor ---
+        if (audioLength > 0.0) // Check audioLength for amplitude lines if drawing depends on it (it does for timeAtMouse calculation)
+        {
+          float minVal, maxVal;
+          double timeAtMouse = (double)(mouseCursorX - waveformBounds.getX()) / (double)waveformBounds.getWidth() * audioLength;
+          thumbnail.getApproximateMinMax(timeAtMouse, timeAtMouse + (audioLength / waveformBounds.getWidth()), 0, minVal, maxVal);
+
           float centerY = (float)waveformBounds.getCentreY();
           float halfHeight = (float)waveformBounds.getHeight() / 2.0f;
 
-          // Calculate Y positions for the threshold lines
-          float topThresholdY = centerY - (normalisedThreshold * halfHeight);
-          float bottomThresholdY = centerY + (normalisedThreshold * halfHeight);
+          float topAmplitudeY = centerY - (maxVal * halfHeight);
+          float bottomAmplitudeY = centerY - (minVal * halfHeight); // Corrected calculation
 
-          // Ensure lines are within bounds
-          topThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), topThresholdY);
-          bottomThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), bottomThresholdY);
+          // Clamp to waveform bounds
+          topAmplitudeY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), topAmplitudeY);
+          bottomAmplitudeY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), bottomAmplitudeY);
 
-          // Calculate X position for the loop point
-          float xPos = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (loopPos / audioLength);
+          float lineLength = Config::mouseAmplitudeLineLength;
+          float halfLineLength = lineLength / 2.0f;
+          float lineStartX = mouseCursorX - halfLineLength;
+          float lineEndX = mouseCursorX + halfLineLength;
 
-          // Calculate start and end X for the Config::thresholdLineWidth wide line
-          float halfThresholdLineWidth = Config::thresholdLineWidth / 2.0f;
-          float lineStartX = xPos - halfThresholdLineWidth;
-          float lineEndX = xPos + halfThresholdLineWidth;
-
-          // Ensure lines are within waveformBounds horizontally
+          // Clamp to waveformBounds horizontally
           lineStartX = juce::jmax(lineStartX, (float)waveformBounds.getX());
           lineEndX = juce::jmin(lineEndX, (float)waveformBounds.getRight());
           float currentLineWidth = lineEndX - lineStartX;
 
+          // Draw glow
+          g.setColour(Config::mouseAmplitudeGlowColor);
+          g.fillRect(lineStartX, topAmplitudeY - (Config::mouseAmplitudeGlowThickness / 2.0f - 0.5f),
+                     currentLineWidth, Config::mouseAmplitudeGlowThickness);
+          g.fillRect(lineStartX, bottomAmplitudeY - (Config::mouseAmplitudeGlowThickness / 2.0f - 0.5f),
+                     currentLineWidth, Config::mouseAmplitudeGlowThickness);
 
-          juce::Colour lineColor = Config::thresholdLineColor;
-          juce::Colour regionColor = Config::thresholdRegionColor;
+          // Draw main lines
+          g.setColour(Config::mouseAmplitudeLineColor);
+          g.fillRect(lineStartX, topAmplitudeY - (Config::mouseAmplitudeLineThickness / 2.0f - 0.5f),
+                     currentLineWidth, Config::mouseAmplitudeLineThickness);
+          g.fillRect(lineStartX, bottomAmplitudeY - (Config::mouseAmplitudeLineThickness / 2.0f - 0.5f),
+                     currentLineWidth, Config::mouseAmplitudeLineThickness);
 
-          // Draw the filled region (Config::thresholdLineWidth wide)
-          g_ref.setColour(regionColor);
-          g_ref.fillRect(lineStartX, topThresholdY, currentLineWidth, bottomThresholdY - topThresholdY);
+          // --- Display Time at Mouse Cursor ---
+          juce::String timeString = formatTime(timeAtMouse);
+          g.setColour(Config::playbackTextColor);
+          g.setFont(Config::mouseCursorTextSize);
+          // Position slightly above the mouse's horizontal line
+          g.drawText(timeString,
+                     mouseCursorX + 5, // A little to the right of the vertical line
+                     mouseCursorY - Config::mouseCursorTextSize - 5, // Above the horizontal line
+                     200, // Sufficient width
+                     Config::mouseCursorTextSize,
+                     juce::Justification::left,
+                     false);
 
-          // --- GLOW EFFECT FOR THRESHOLD ---
-          if (isActive) {
-              juce::Colour glowColor = lineColor.withAlpha(lineColor.getFloatAlpha() * glowAlpha);
-              g_ref.setColour(glowColor);
-              // Draw a thicker line underneath the main line to create a glow
-              g_ref.fillRect(lineStartX, topThresholdY - (Config::thresholdGlowThickness / 2.0f - 0.5f), currentLineWidth, Config::thresholdGlowThickness); 
-              g_ref.fillRect(lineStartX, bottomThresholdY - (Config::thresholdGlowThickness / 2.0f - 0.5f), currentLineWidth, Config::thresholdGlowThickness);
-          }
-          // --- END GLOW EFFECT FOR THRESHOLD ---
+          // --- Display Amplitude at Mouse Cursor (Percentage) ---
+          juce::String maxAmpString = juce::String::formatted("+%.2f%%", maxVal * 100.0f);
+          juce::String minAmpString = juce::String::formatted("%.2f%%", minVal * 100.0f); // minVal is already negative
 
-          // Draw the main threshold lines (Config::thresholdLineWidth wide) on top of the glow
-          g_ref.setColour(lineColor);
-          g_ref.drawHorizontalLine((int)topThresholdY, lineStartX, lineEndX);
-          g_ref.drawHorizontalLine((int)bottomThresholdY, lineStartX, lineEndX);
-      };
+          g.setColour(Config::mouseAmplitudeLineColor); // Use the amplitude line color for text
+          g.setFont(Config::mouseCursorTextSize);
 
-      // Draw In-Threshold Visualization
-      drawThresholdVisualisation(g, loopInPosition, currentInSilenceThreshold, shouldAutoCutIn);
+          // Draw max amplitude percentage near topAmplitudeY
+          g.drawText(maxAmpString,
+                     lineEndX + 5, // A little to the right of the amplitude line
+                     topAmplitudeY - (Config::mouseCursorTextSize / 2.0f), // Vertically centered on the line
+                     100, // Sufficient width
+                     Config::mouseCursorTextSize,
+                     juce::Justification::left,
+                     false);
 
-      // Draw Out-Threshold Visualization
-      drawThresholdVisualisation(g, loopOutPosition, currentOutSilenceThreshold, shouldAutoCutOut);
-      // --- END NEW CODE ---
-    }
+          // Draw min amplitude percentage near bottomAmplitudeY
+          g.drawText(minAmpString,
+                     lineEndX + 5, // A little to the right of the amplitude line
+                     bottomAmplitudeY - (Config::mouseCursorTextSize / 2.0f), // Vertically centered on the line
+                     100, // Sufficient width
+                     Config::mouseCursorTextSize,
+                     juce::Justification::left,
+                     false);
+        } // End of if (audioLength > 0.0) for mouse cursor amplitude drawing
 
-      // Loop points are initialized on file load or updated by user interaction, not reset on every paint.
-      if (audioLength > 0.0) {
-        auto actualIn = juce::jmin(loopInPosition, loopOutPosition);
-        auto actualOut = juce::jmax(loopInPosition, loopOutPosition);
-        auto inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualIn / audioLength);
-        auto outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualOut / audioLength);
-        if (isCutModeActive) { // Only draw loop region if Cut mode is active
-            g.setColour(Config::loopRegionColor);
-            g.fillRect(juce::Rectangle<float>(inX, (float)waveformBounds.getY(), outX - inX, (float)waveformBounds.getHeight()));
-        }
-      // Vertical loop lines
-      if (isCutModeActive) { // Only draw if Cut mode is active
-        auto inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (loopInPosition / audioLength);
-        auto outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (loopOutPosition / audioLength);
+        g.setColour (Config::mouseCursorLineColor);
+        g.drawVerticalLine (mouseCursorX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
+        g.drawHorizontalLine (mouseCursorY, (float)waveformBounds.getX(), (float)waveformBounds.getRight());
+      } // End of if (mouseCursorX != -1)
 
-        // Draw pulsing glow for vertical lines
-        juce::Colour glowColor = Config::loopLineColor.withAlpha(Config::loopLineColor.getFloatAlpha() * (1.0f - glowAlpha));
-        g.setColour(glowColor);
-        // Draw a thicker rectangle for the glow, centered on the line
-        g.fillRect(inX - (Config::loopLineGlowThickness / 2.0f - 0.5f), (float)waveformBounds.getY(), Config::loopLineGlowThickness, (float)waveformBounds.getHeight());
-        g.fillRect(outX - (Config::loopLineGlowThickness / 2.0f - 0.5f), (float)waveformBounds.getY(), Config::loopLineGlowThickness, (float)waveformBounds.getHeight());
-      }
-      auto drawPosition = (float)transportSource.getCurrentPosition();
-      auto x = (drawPosition / audioLength) * (float)waveformBounds.getWidth() + (float)waveformBounds.getX();
-      if (transportSource.isPlaying()) {
-        juce::ColourGradient gradient (
-        Config::playbackCursorGlowColorStart,
-        (float)x - 10.0f, (float)waveformBounds.getCentreY(),
-        Config::playbackCursorGlowColorEnd,
-        (float)x, (float)waveformBounds.getCentreY(),
-        false );
-          g.setGradientFill (gradient);
-          g.fillRect (juce::Rectangle<float>((int)x - 10, (float)waveformBounds.getY(), 10, (float)waveformBounds.getHeight())); }
-      else {
-        juce::ColourGradient glowGradient;
-        glowGradient.addColour (0.0, Config::playbackCursorGlowColorStart);
-        glowGradient.addColour (0.5, Config::playbackCursorGlowColorEnd);
-        glowGradient.addColour (1.0, juce::Colours::lime.withAlpha(0.0f));
-        glowGradient.point1 = { (float)x - 5.0f, (float)waveformBounds.getCentreY() };
-        glowGradient.point2 = { (float)x + 5.0f, (float)waveformBounds.getCentreY() };
-        g.setGradientFill (glowGradient);
-        g.fillRect (juce::Rectangle<float>((int)x - 5, (float)waveformBounds.getY(), 10, (float)waveformBounds.getHeight())); }
-      g.setColour (Config::playbackCursorColor);
-      g.drawVerticalLine ((int)x, (float)waveformBounds.getY(), (float)waveformBounds.getBottom()); }
-  if (mouseCursorX != -1) {
-    g.setColour (Config::mouseCursorHighlightColor);
-    g.fillRect (mouseCursorX - 2, waveformBounds.getY(), 5, waveformBounds.getHeight());
-    g.fillRect (waveformBounds.getX(), mouseCursorY - 2, waveformBounds.getWidth(), 5);
-    // --- Amplitude lines at mouse cursor ---
-    if (audioLength > 0.0) {
-        float minVal, maxVal;
-        double timeAtMouse = (double)(mouseCursorX - waveformBounds.getX()) / (double)waveformBounds.getWidth() * audioLength;
-        thumbnail.getApproximateMinMax(timeAtMouse, timeAtMouse + (audioLength / waveformBounds.getWidth()), 0, minVal, maxVal);
+      // Playback time display (bottom row)
+      if (audioLength > 0.0)
+      {
+        double currentTime = transportSource.getCurrentPosition();
+        double totalTime = thumbnail.getTotalLength(); // totalTime is calculated but totalTimeStaticStr is used for display
+        double remainingTime = totalTime - currentTime;
 
-        float centerY = (float)waveformBounds.getCentreY();
-        float halfHeight = (float)waveformBounds.getHeight() / 2.0f;
+        juce::String currentTimeStr = formatTime(currentTime);
+        juce::String remainingTimeStr = formatTime(remainingTime);
 
-        float topAmplitudeY = centerY - (maxVal * halfHeight);
-        float bottomAmplitudeY = centerY - (minVal * halfHeight); // Corrected calculation
+        int textY = bottomRowTopY - 25;
 
-        // Clamp to waveform bounds
-        topAmplitudeY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), topAmplitudeY);
-        bottomAmplitudeY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), bottomAmplitudeY);
-
-        float lineLength = Config::mouseAmplitudeLineLength;
-        float halfLineLength = lineLength / 2.0f;
-        float lineStartX = mouseCursorX - halfLineLength;
-        float lineEndX = mouseCursorX + halfLineLength;
-
-        // Clamp to waveformBounds horizontally
-        lineStartX = juce::jmax(lineStartX, (float)waveformBounds.getX());
-        lineEndX = juce::jmin(lineEndX, (float)waveformBounds.getRight());
-        float currentLineWidth = lineEndX - lineStartX;
-
-        // Draw glow
-        g.setColour(Config::mouseAmplitudeGlowColor);
-        g.fillRect(lineStartX, topAmplitudeY - (Config::mouseAmplitudeGlowThickness / 2.0f - 0.5f),
-                   currentLineWidth, Config::mouseAmplitudeGlowThickness);
-        g.fillRect(lineStartX, bottomAmplitudeY - (Config::mouseAmplitudeGlowThickness / 2.0f - 0.5f),
-                   currentLineWidth, Config::mouseAmplitudeGlowThickness);
-
-        // Draw main lines
-        g.setColour(Config::mouseAmplitudeLineColor);
-        g.fillRect(lineStartX, topAmplitudeY - (Config::mouseAmplitudeLineThickness / 2.0f - 0.5f),
-                   currentLineWidth, Config::mouseAmplitudeLineThickness);
-        g.fillRect(lineStartX, bottomAmplitudeY - (Config::mouseAmplitudeLineThickness / 2.0f - 0.5f),
-                   currentLineWidth, Config::mouseAmplitudeLineThickness);
-
-        // --- Display Time at Mouse Cursor ---
-        juce::String timeString = formatTime(timeAtMouse);
         g.setColour(Config::playbackTextColor);
-        g.setFont(Config::mouseCursorTextSize);
-        // Position slightly above the mouse's horizontal line
-        g.drawText(timeString,
-                   mouseCursorX + 5, // A little to the right of the vertical line
-                   mouseCursorY - Config::mouseCursorTextSize - 5, // Above the horizontal line
-                   200, // Sufficient width
-                   Config::mouseCursorTextSize,
-                   juce::Justification::left,
-                   false);
+        g.setFont(Config::playbackTextSize);
 
-        // --- Display Amplitude at Mouse Cursor (Percentage) ---
-        juce::String maxAmpString = juce::String::formatted("+%.2f%%", maxVal * 100.0f);
-        juce::String minAmpString = juce::String::formatted("%.2f%%", minVal * 100.0f); // minVal is already negative
+        // Draw Current Time (Left)
+        g.drawText(currentTimeStr, playbackLeftTextX, textY, Config::playbackTextWidth, Config::playbackTextHeight, juce::Justification::left, false);
 
-        g.setColour(Config::mouseAmplitudeLineColor); // Use the amplitude line color for text
-        g.setFont(Config::mouseCursorTextSize);
+        // Draw Total Time (Center)
+        g.drawText(totalTimeStaticStr, playbackCenterTextX, textY, Config::playbackTextWidth, 20, juce::Justification::centred, false);
 
-        // Draw max amplitude percentage near topAmplitudeY
-        g.drawText(maxAmpString,
-                   lineEndX + 5, // A little to the right of the amplitude line
-                   topAmplitudeY - (Config::mouseCursorTextSize / 2.0f), // Vertically centered on the line
-                   100, // Sufficient width
-                   Config::mouseCursorTextSize,
-                   juce::Justification::left,
-                   false);
-
-        // Draw min amplitude percentage near bottomAmplitudeY
-        g.drawText(minAmpString,
-                   lineEndX + 5, // A little to the right of the amplitude line
-                   bottomAmplitudeY - (Config::mouseCursorTextSize / 2.0f), // Vertically centered on the line
-                   100, // Sufficient width
-                   Config::mouseCursorTextSize,
-                   juce::Justification::left,
-                   false);
-    }
-    
-    g.setColour (Config::mouseCursorLineColor);
-    g.drawVerticalLine (mouseCursorX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
-    g.drawHorizontalLine (mouseCursorY, (float)waveformBounds.getX(), (float)waveformBounds.getRight()); }
-  if (audioLength > 0.0) {
-    // Loop times are now handled by TextEditors, no direct drawing here.
-
-    double currentTime = transportSource.getCurrentPosition();
-    double totalTime = thumbnail.getTotalLength(); // totalTime is calculated but totalTimeStaticStr is used for display
-    double remainingTime = totalTime - currentTime;
-
-    juce::String currentTimeStr = formatTime(currentTime);
-    juce::String remainingTimeStr = formatTime(remainingTime);
-
-    int textY = bottomRowTopY - 25;
-
-    g.setColour(Config::playbackTextColor);
-    g.setFont(Config::playbackTextSize);
-
-    // Draw Current Time (Left)
-    g.drawText(currentTimeStr, playbackLeftTextX, textY, Config::playbackTextWidth, Config::playbackTextHeight, juce::Justification::left, false);
-
-    // Draw Total Time (Center)
-    g.drawText(totalTimeStaticStr, playbackCenterTextX, textY, Config::playbackTextWidth, 20, juce::Justification::centred, false);
-
-    // Draw Remaining Time (Right)
-    g.drawText(remainingTimeStr, playbackRightTextX, textY, Config::playbackTextWidth, 20, juce::Justification::right, false); }}}
+        // Draw Remaining Time (Right)
+        g.drawText(remainingTimeStr, playbackRightTextX, textY, Config::playbackTextWidth, 20, juce::Justification::right, false);
+      }
+    } // Final closing brace for paint.
 
 // juce::TextEditor::Listener callbacks
 void MainComponent::textEditorTextChanged (juce::TextEditor& editor) {
