@@ -100,6 +100,10 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   autoCutInButton.onClick = [this] {
     DBG("Button Clicked: Auto Cut In, new state: " << (autoCutInButton.getToggleState() ? "On" : "Off"));
     shouldAutoCutIn = autoCutInButton.getToggleState();
+    if (shouldAutoCutIn && isFileLoaded) { // Only detect if a file is loaded and auto-cut is turned ON
+        detectInSilence();
+    }
+    updateComponentStates(); // Update component states to reflect changes in shouldAutoCutIn/Out
   };
 
   addAndMakeVisible (autoCutOutButton);
@@ -109,6 +113,10 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   autoCutOutButton.onClick = [this] {
     DBG("Button Clicked: Auto Cut Out, new state: " << (autoCutOutButton.getToggleState() ? "On" : "Off"));
     shouldAutoCutOut = autoCutOutButton.getToggleState();
+    if (shouldAutoCutOut && isFileLoaded) { // Only detect if a file is loaded and auto-cut is turned ON
+        detectOutSilence();
+    }
+    updateComponentStates(); // Update component states to reflect changes in shouldAutoCutIn/Out
   };
 
   addAndMakeVisible (cutButton);
@@ -1472,9 +1480,9 @@ void MainComponent::updateComponentStates() {
   clearLoopInButton.setEnabled(isCutModeActive && !shouldAutoCutIn);
   clearLoopOutButton.setEnabled(isCutModeActive && !shouldAutoCutOut);
 
-  // Threshold editors are enabled only if Cut mode is active AND their corresponding auto-cut is active
-  inSilenceThresholdEditor.setEnabled(isCutModeActive && shouldAutoCutIn);
-  outSilenceThresholdEditor.setEnabled(isCutModeActive && shouldAutoCutOut);
+  // Threshold editors are always enabled. Their visibility is still tied to Cut mode.
+  inSilenceThresholdEditor.setEnabled(true);
+  outSilenceThresholdEditor.setEnabled(true);
 
   // Auto-cut buttons are enabled only if Cut mode is active
   autoCutInButton.setEnabled(isCutModeActive);
