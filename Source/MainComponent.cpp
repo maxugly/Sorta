@@ -557,6 +557,8 @@ void MainComponent::getNextAudioBlock (const juce::AudioSourceChannelInfo& buffe
   else transportSource.getNextAudioBlock (bufferToFill); }
 
 void MainComponent::timerCallback() {
+  glowAlpha = 0.5f + 0.5f * std::sin(juce::Time::getMillisecondCounter() * 0.002);
+
   if (!transportSource.isPlaying() && transportSource.hasStreamFinished() && shouldLoop) {
     transportSource.setPosition (0.0);
     transportSource.start(); }
@@ -572,7 +574,7 @@ void MainComponent::timerCallback() {
     thumbnail.getApproximateMinMax(0.0, thumbnail.getTotalLength(), 0, minV, maxV);
     debugInfo << "Min/Max: " << minV << " / " << maxV;
     statsDisplay.setText (debugInfo, false); }
-  if (transportSource.isPlaying() || showStats || thumbnail.getTotalLength() > 0.0)
+  if (transportSource.isPlaying() || showStats || thumbnail.getTotalLength() > 0.0 || shouldAutoCutIn || shouldAutoCutOut)
     repaint(); }
 
 void MainComponent::paint (juce::Graphics& g) {
@@ -636,7 +638,17 @@ void MainComponent::paint (juce::Graphics& g) {
           g_ref.setColour(regionColor);
           g_ref.fillRect(lineStartX, topThresholdY, lineWidth, bottomThresholdY - topThresholdY);
 
-          // Draw the threshold lines (100 pixels wide)
+          // --- NEW GLOW EFFECT ---
+          if (isActive) {
+              juce::Colour glowColor = lineColor.withAlpha(lineColor.getFloatAlpha() * glowAlpha);
+              g_ref.setColour(glowColor);
+              // Draw a thicker line underneath the main line to create a glow
+              g_ref.fillRect(lineStartX, topThresholdY - 1.0f, lineWidth, 3.0f); 
+              g_ref.fillRect(lineStartX, bottomThresholdY - 1.0f, lineWidth, 3.0f);
+          }
+          // --- END NEW GLOW EFFECT ---
+
+          // Draw the main threshold lines (100 pixels wide) on top of the glow
           g_ref.setColour(lineColor);
           g_ref.drawHorizontalLine((int)topThresholdY, lineStartX, lineEndX);
           g_ref.drawHorizontalLine((int)bottomThresholdY, lineStartX, lineEndX);

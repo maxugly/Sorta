@@ -109,6 +109,7 @@ private:
   juce::TextButton autoCutOutButton;    // New auto cut out button
   bool shouldAutoCutIn = false;         // Auto cut in state
   bool shouldAutoCutOut = false;        // Auto cut out state
+  float glowAlpha = 0.0f;                 // Glow animation alpha
 
 
   void updateQualityButtonText();
