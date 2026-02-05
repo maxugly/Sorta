@@ -557,29 +557,27 @@ void MainComponent::paint (juce::Graphics& g) {
   auto audioLength = (float)thumbnail.getTotalLength();
   if (audioLength > 0.0) {
       // --- NEW CODE: Silence Threshold Visualization ---
-      if (isDetectModeActive) {
-          float normalisedThreshold = currentSilenceThreshold; // currentSilenceThreshold is 0.0-1.0
-          float centerY = (float)waveformBounds.getCentreY();
-          float halfHeight = (float)waveformBounds.getHeight() / 2.0f;
+      float normalisedThreshold = currentSilenceThreshold; // currentSilenceThreshold is 0.0-1.0
+      float centerY = (float)waveformBounds.getCentreY();
+      float halfHeight = (float)waveformBounds.getHeight() / 2.0f;
 
-          // Calculate Y positions for the threshold lines
-          // +ve threshold is above center, -ve threshold is below center
-          float topThresholdY = centerY - (normalisedThreshold * halfHeight);
-          float bottomThresholdY = centerY + (normalisedThreshold * halfHeight);
+      // Calculate Y positions for the threshold lines
+      // +ve threshold is above center, -ve threshold is below center
+      float topThresholdY = centerY - (normalisedThreshold * halfHeight);
+      float bottomThresholdY = centerY + (normalisedThreshold * halfHeight);
 
-          // Ensure lines are within bounds
-          topThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), topThresholdY);
-          bottomThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), bottomThresholdY);
+      // Ensure lines are within bounds
+      topThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), topThresholdY);
+      bottomThresholdY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), bottomThresholdY);
 
-          // Draw the filled region
-          g.setColour(Config::thresholdRegionColor);
-          g.fillRect((float)waveformBounds.getX(), topThresholdY, (float)waveformBounds.getWidth(), bottomThresholdY - topThresholdY);
+      // Draw the filled region
+      g.setColour(isDetectModeActive ? Config::thresholdRegionColor : Config::thresholdRegionColor.withMultipliedAlpha(Config::thresholdRegionInactiveDimFactor));
+      g.fillRect((float)waveformBounds.getX(), topThresholdY, (float)waveformBounds.getWidth(), bottomThresholdY - topThresholdY);
 
-          // Draw the threshold lines
-          g.setColour(Config::thresholdLineColor);
-          g.drawHorizontalLine((int)topThresholdY, waveformBounds.getX(), waveformBounds.getRight());
-          g.drawHorizontalLine((int)bottomThresholdY, waveformBounds.getX(), waveformBounds.getRight());
-      }
+      // Draw the threshold lines
+      g.setColour(isDetectModeActive ? Config::thresholdLineColor : Config::thresholdLineColor.withMultipliedAlpha(Config::thresholdLineInactiveDimFactor));
+      g.drawHorizontalLine((int)topThresholdY, waveformBounds.getX(), waveformBounds.getRight());
+      g.drawHorizontalLine((int)bottomThresholdY, waveformBounds.getX(), waveformBounds.getRight());
       // --- END NEW CODE ---
 
       // Loop points are initialized on file load or updated by user interaction, not reset on every paint.
@@ -588,9 +586,9 @@ void MainComponent::paint (juce::Graphics& g) {
         auto actualOut = juce::jmax(loopInPosition, loopOutPosition);
         auto inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualIn / audioLength);
         auto outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualOut / audioLength);
-        g.setColour(Config::loopRegionColor);
+        g.setColour(shouldLoop ? Config::loopRegionColor : Config::loopRegionColor.withMultipliedAlpha(Config::loopRegionInactiveDimFactor));
         g.fillRect(juce::Rectangle<float>(inX, (float)waveformBounds.getY(), outX - inX, (float)waveformBounds.getHeight())); }
-      g.setColour(Config::loopLineColor);
+      g.setColour(shouldLoop ? Config::loopLineColor : Config::loopLineColor.withMultipliedAlpha(Config::loopLineInactiveDimFactor));
       if (audioLength > 0.0) {
         auto inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (loopInPosition / audioLength);
         g.drawVerticalLine((int)inX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom()); }

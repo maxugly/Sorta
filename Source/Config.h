@@ -90,4 +90,10 @@ namespace Config{
     // --- Silence Threshold Visualization Colors ---
     const juce::Colour thresholdLineColor = juce::Colour(0xffe600e6); // Reddish purple
     const juce::Colour thresholdRegionColor = juce::Colours::red.withAlpha(0.15f); // A shade of red, translucent
+
+    // --- Inactive Visual Element Dimming Factors ---
+    constexpr float loopLineInactiveDimFactor = 0.5f;     // Factor to dim loop lines when looping is off
+    constexpr float loopRegionInactiveDimFactor = 0.5f;   // Factor to dim loop region when looping is off
+    constexpr float thresholdLineInactiveDimFactor = 0.5f; // Factor to dim threshold lines when detection is off
+    constexpr float thresholdRegionInactiveDimFactor = 0.5f; // Factor to dim threshold region when detection is off
 } // namespace Config
