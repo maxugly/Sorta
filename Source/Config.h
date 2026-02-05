@@ -93,6 +93,11 @@ namespace Config{
     // --- Mouse Cursor Colors ---
     const juce::Colour mouseCursorHighlightColor = juce::Colours::darkorange.withAlpha(0.4f);
     const juce::Colour mouseCursorLineColor = juce::Colours::yellow;
+    const juce::Colour mouseAmplitudeLineColor = juce::Colours::orange.brighter(0.5f);
+    const juce::Colour mouseAmplitudeGlowColor = juce::Colours::yellow;
+    const float mouseAmplitudeLineThickness = 1.0f;
+    const float mouseAmplitudeGlowThickness = 3.0f;
+    const float mouseAmplitudeLineLength = 50.0f;
 
     // --- Silence Threshold Visualization Colors ---
     const juce::Colour thresholdLineColor = juce::Colour(0xffe600e6); // Reddish purple

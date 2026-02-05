@@ -728,6 +728,48 @@ void MainComponent::paint (juce::Graphics& g) {
     g.setColour (Config::mouseCursorHighlightColor);
     g.fillRect (mouseCursorX - 2, waveformBounds.getY(), 5, waveformBounds.getHeight());
     g.fillRect (waveformBounds.getX(), mouseCursorY - 2, waveformBounds.getWidth(), 5);
+    // --- Amplitude lines at mouse cursor ---
+    if (audioLength > 0.0) {
+        float minVal, maxVal;
+        double timeAtMouse = (double)(mouseCursorX - waveformBounds.getX()) / (double)waveformBounds.getWidth() * audioLength;
+        thumbnail.getApproximateMinMax(timeAtMouse, timeAtMouse + (audioLength / waveformBounds.getWidth()), 0, minVal, maxVal);
+
+        float centerY = (float)waveformBounds.getCentreY();
+        float halfHeight = (float)waveformBounds.getHeight() / 2.0f;
+
+        float topAmplitudeY = centerY - (maxVal * halfHeight);
+        float bottomAmplitudeY = centerY - (minVal * halfHeight); // Corrected calculation
+
+        // Clamp to waveform bounds
+        topAmplitudeY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), topAmplitudeY);
+        bottomAmplitudeY = juce::jlimit((float)waveformBounds.getY(), (float)waveformBounds.getBottom(), bottomAmplitudeY);
+
+        float lineLength = Config::mouseAmplitudeLineLength;
+        float halfLineLength = lineLength / 2.0f;
+        float lineStartX = mouseCursorX - halfLineLength;
+        float lineEndX = mouseCursorX + halfLineLength;
+
+        // Clamp to waveformBounds horizontally
+        lineStartX = juce::jmax(lineStartX, (float)waveformBounds.getX());
+        lineEndX = juce::jmin(lineEndX, (float)waveformBounds.getRight());
+        float currentLineWidth = lineEndX - lineStartX;
+
+        // Draw glow
+        g.setColour(Config::mouseAmplitudeGlowColor);
+        g.fillRect(lineStartX, topAmplitudeY - (Config::mouseAmplitudeGlowThickness / 2.0f - 0.5f),
+                   currentLineWidth, Config::mouseAmplitudeGlowThickness);
+        g.fillRect(lineStartX, bottomAmplitudeY - (Config::mouseAmplitudeGlowThickness / 2.0f - 0.5f),
+                   currentLineWidth, Config::mouseAmplitudeGlowThickness);
+
+        // Draw main lines
+        g.setColour(Config::mouseAmplitudeLineColor);
+        g.fillRect(lineStartX, topAmplitudeY - (Config::mouseAmplitudeLineThickness / 2.0f - 0.5f),
+                   currentLineWidth, Config::mouseAmplitudeLineThickness);
+        g.fillRect(lineStartX, bottomAmplitudeY - (Config::mouseAmplitudeLineThickness / 2.0f - 0.5f),
+                   currentLineWidth, Config::mouseAmplitudeLineThickness);
+    }
+    // --- End Amplitude lines ---
+
     g.setColour (Config::mouseCursorLineColor);
     g.drawVerticalLine (mouseCursorX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
     g.drawHorizontalLine (mouseCursorY, (float)waveformBounds.getX(), (float)waveformBounds.getRight()); }
