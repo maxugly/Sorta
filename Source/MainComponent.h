@@ -65,14 +65,12 @@ private:
 
   ModernLookAndFeel modernLF;
 
-  juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton, detectInSilenceButton;
+  juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton;
   juce::TextButton clearLoopInButton, clearLoopOutButton;
   juce::TextEditor statsDisplay, loopInEditor, loopOutEditor, inSilenceThresholdEditor;
-  juce::Label inSilenceThresholdLabel;
   float currentInSilenceThreshold = Config::silenceThreshold;
 
-  juce::TextButton detectOutSilenceButton;
-  juce::Label outSilenceThresholdLabel;
+
   juce::TextEditor outSilenceThresholdEditor;
   float currentOutSilenceThreshold = Config::outSilenceThreshold;
   juce::Rectangle<int> waveformBounds, statsBounds, contentAreaBounds;

@@ -205,16 +205,9 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   };
 
 
-  addAndMakeVisible (detectInSilenceButton);
-  detectInSilenceButton.setButtonText (Config::detectInButtonText);
-  detectInSilenceButton.onClick = [this] {
-    DBG("Button Clicked: Detect In Silence");
-    detectInSilence(); // Call detectInSilence
-  };
 
-  addAndMakeVisible (inSilenceThresholdLabel);
-  inSilenceThresholdLabel.setText ("In Threshold:", juce::dontSendNotification);
-  inSilenceThresholdLabel.setJustificationType (juce::Justification::right);
+
+
 
   addAndMakeVisible (inSilenceThresholdEditor);
   inSilenceThresholdEditor.setText (juce::String (static_cast<int>(Config::silenceThreshold * 100.0f)));
@@ -230,16 +223,9 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   inSilenceThresholdEditor.setWantsKeyboardFocus (true);
 
 
-  addAndMakeVisible (detectOutSilenceButton);
-  detectOutSilenceButton.setButtonText (Config::detectOutButtonText);
-  detectOutSilenceButton.onClick = [this] {
-    DBG("Button Clicked: Detect Out Silence");
-    detectOutSilence(); // Call detectOutSilence
-  };
 
-  addAndMakeVisible (outSilenceThresholdLabel);
-  outSilenceThresholdLabel.setText ("Out Threshold:", juce::dontSendNotification);
-  outSilenceThresholdLabel.setJustificationType (juce::Justification::right);
+
+
 
   addAndMakeVisible (outSilenceThresholdEditor);
   outSilenceThresholdEditor.setText (juce::String (static_cast<int>(Config::outSilenceThreshold * 100.0f)));
@@ -451,6 +437,10 @@ bool MainComponent::keyPressed (const juce::KeyPress& key) {
             return true;
         }
         if (keyCode == 'i' || keyCode == 'I') {
+            if (shouldAutoCutIn) {
+                DBG("  'i' key pressed ignored: Auto Cut In is active.");
+                return true;
+            }
             loopInPosition = transportSource.getCurrentPosition();
             DBG("  'i' key pressed. Setting loop in position to " << loopInPosition);
             ensureLoopOrder(); // Call helper
@@ -460,6 +450,10 @@ bool MainComponent::keyPressed (const juce::KeyPress& key) {
             return true;
         }
         if (keyCode == 'o' || keyCode == 'O') {
+            if (shouldAutoCutOut) {
+                DBG("  'o' key pressed ignored: Auto Cut Out is active.");
+                return true;
+            }
             loopOutPosition = transportSource.getCurrentPosition();
             DBG("  'o' key pressed. Setting loop out position to " << loopOutPosition);
             ensureLoopOrder(); // Call helper
@@ -469,11 +463,19 @@ bool MainComponent::keyPressed (const juce::KeyPress& key) {
             return true;
         }
         if (keyCode == 'u' || keyCode == 'U') {
+            if (shouldAutoCutIn) {
+                DBG("  'u' key pressed ignored: Auto Cut In is active.");
+                return true;
+            }
             DBG("  'u' key pressed. Clearing loop in.");
             clearLoopInButton.triggerClick();
             return true;
         }
         if (keyCode == 'p' || keyCode == 'P') {
+            if (shouldAutoCutOut) {
+                DBG("  'p' key pressed ignored: Auto Cut Out is active.");
+                return true;
+            }
             DBG("  'p' key pressed. Clearing loop out.");
             clearLoopOutButton.triggerClick();
             return true;
@@ -503,13 +505,21 @@ void MainComponent::mouseUp (const juce::MouseEvent& e) {
     auto proportion = relativeX / (double)waveformBounds.getWidth();
     auto newPosition = juce::jlimit (0.0, 1.0, proportion) * thumbnail.getTotalLength();
     if (currentPlacementMode == PlacementMode::LoopIn) {
-      loopInPosition = newPosition;
-      DBG("  Setting Loop In position via mouse: " << loopInPosition);
-      ensureLoopOrder(); // Call helper
+      if (shouldAutoCutIn) {
+        DBG("  Loop In position mouse set ignored: Auto Cut In is active.");
+      } else {
+        loopInPosition = newPosition;
+        DBG("  Setting Loop In position via mouse: " << loopInPosition);
+        ensureLoopOrder(); // Call helper
+      }
     } else if (currentPlacementMode == PlacementMode::LoopOut) {
-      loopOutPosition = newPosition;
-      DBG("  Setting Loop Out position via mouse: " << loopOutPosition);
-      ensureLoopOrder(); // Call helper
+      if (shouldAutoCutOut) {
+        DBG("  Loop Out position mouse set ignored: Auto Cut Out is active.");
+      } else {
+        loopOutPosition = newPosition;
+        DBG("  Setting Loop Out position via mouse: " << loopOutPosition);
+        ensureLoopOrder(); // Call helper
+      }
     }
     currentPlacementMode = PlacementMode::None;
     updateLoopButtonColors();
@@ -767,9 +777,46 @@ void MainComponent::paint (juce::Graphics& g) {
                    currentLineWidth, Config::mouseAmplitudeLineThickness);
         g.fillRect(lineStartX, bottomAmplitudeY - (Config::mouseAmplitudeLineThickness / 2.0f - 0.5f),
                    currentLineWidth, Config::mouseAmplitudeLineThickness);
-    }
-    // --- End Amplitude lines ---
 
+        // --- Display Time at Mouse Cursor ---
+        juce::String timeString = formatTime(timeAtMouse);
+        g.setColour(Config::playbackTextColor);
+        g.setFont(Config::mouseCursorTextSize);
+        // Position slightly above the mouse's horizontal line
+        g.drawText(timeString,
+                   mouseCursorX + 5, // A little to the right of the vertical line
+                   mouseCursorY - Config::mouseCursorTextSize - 5, // Above the horizontal line
+                   200, // Sufficient width
+                   Config::mouseCursorTextSize,
+                   juce::Justification::left,
+                   false);
+
+        // --- Display Amplitude at Mouse Cursor (Percentage) ---
+        juce::String maxAmpString = juce::String::formatted("+%.2f%%", maxVal * 100.0f);
+        juce::String minAmpString = juce::String::formatted("%.2f%%", minVal * 100.0f); // minVal is already negative
+
+        g.setColour(Config::mouseAmplitudeLineColor); // Use the amplitude line color for text
+        g.setFont(Config::mouseCursorTextSize);
+
+        // Draw max amplitude percentage near topAmplitudeY
+        g.drawText(maxAmpString,
+                   lineEndX + 5, // A little to the right of the amplitude line
+                   topAmplitudeY - (Config::mouseCursorTextSize / 2.0f), // Vertically centered on the line
+                   100, // Sufficient width
+                   Config::mouseCursorTextSize,
+                   juce::Justification::left,
+                   false);
+
+        // Draw min amplitude percentage near bottomAmplitudeY
+        g.drawText(minAmpString,
+                   lineEndX + 5, // A little to the right of the amplitude line
+                   bottomAmplitudeY - (Config::mouseCursorTextSize / 2.0f), // Vertically centered on the line
+                   100, // Sufficient width
+                   Config::mouseCursorTextSize,
+                   juce::Justification::left,
+                   false);
+    }
+    
     g.setColour (Config::mouseCursorLineColor);
     g.drawVerticalLine (mouseCursorX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
     g.drawHorizontalLine (mouseCursorY, (float)waveformBounds.getX(), (float)waveformBounds.getRight()); }
@@ -835,6 +882,13 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
     DBG("Text Editor Return Key Pressed.");
     if (&editor == &loopInEditor) {
         DBG("  Loop In Editor: Return Key Pressed");
+        if (shouldAutoCutIn) {
+            DBG("  Loop In Editor: Return Key Pressed ignored: Auto Cut In is active.");
+            editor.setText(formatTime(loopInPosition), juce::dontSendNotification); // Revert text
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+            editor.giveAwayKeyboardFocus();
+            return;
+        }
         double newPosition = parseTime(editor.getText());
         if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength()) {
             // Validate against loopOutPosition if it's set
@@ -856,6 +910,13 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
         }
     } else if (&editor == &loopOutEditor) {
         DBG("  Loop Out Editor: Return Key Pressed");
+        if (shouldAutoCutOut) {
+            DBG("  Loop Out Editor: Return Key Pressed ignored: Auto Cut Out is active.");
+            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Revert text
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+            editor.giveAwayKeyboardFocus();
+            return;
+        }
         double newPosition = parseTime(editor.getText());
         if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength()) {
             if (shouldLoop && transportSource.getCurrentPosition() >= loopOutPosition)
@@ -941,6 +1002,12 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
     // Similar logic to return key pressed, but always revert if invalid on focus lost
     if (&editor == &loopInEditor) {
         DBG("  Loop In Editor: Focus Lost");
+        if (shouldAutoCutIn) {
+            DBG("  Loop In Editor: Focus Lost ignored: Auto Cut In is active.");
+            editor.setText(formatTime(loopInPosition), juce::dontSendNotification); // Revert text
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+            return;
+        }
         double newPosition = parseTime(editor.getText());
         if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength()) {
             // Validate against loopOutPosition if it's set
@@ -963,6 +1030,12 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
         }
     } else if (&editor == &loopOutEditor) {
         DBG("  Loop Out Editor: Focus Lost");
+        if (shouldAutoCutOut) {
+            DBG("  Loop Out Editor: Focus Lost ignored: Auto Cut Out is active.");
+            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Revert text
+            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+            return;
+        }
         double newPosition = parseTime(editor.getText());
         if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength()) {
             // Validate against loopInPosition if it's set
@@ -1288,25 +1361,15 @@ void MainComponent::resized() {
 
   loopRow.removeFromLeft(Config::windowBorderMargins * 2); 
 
-  detectInSilenceButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); 
-  loopRow.removeFromLeft(Config::windowBorderMargins);
-
-  inSilenceThresholdLabel.setBounds(loopRow.removeFromLeft(80));
-  loopRow.removeFromLeft(Config::windowBorderMargins / 2);
-
   inSilenceThresholdEditor.setBounds(loopRow.getX(), loopTextY, 80, Config::playbackTextHeight);
   loopRow.removeFromLeft(80);
-
-  loopRow.removeFromLeft(Config::windowBorderMargins * 2); 
-
-  detectOutSilenceButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); 
-  loopRow.removeFromLeft(Config::windowBorderMargins);
-
-  outSilenceThresholdLabel.setBounds(loopRow.removeFromLeft(80));
-  loopRow.removeFromLeft(Config::windowBorderMargins / 2);
+  autoCutInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth));
+  loopRow.removeFromLeft(Config::windowBorderMargins * 2);
 
   outSilenceThresholdEditor.setBounds(loopRow.getX(), loopTextY, 80, Config::playbackTextHeight);
   loopRow.removeFromLeft(80);
+  autoCutOutButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth));
+  loopRow.removeFromLeft(Config::windowBorderMargins * 2);
 
   auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(Config::windowBorderMargins);
   bottomRowTopY = bottomRow.getY();
@@ -1401,20 +1464,15 @@ void MainComponent::updateComponentStates() {
   statsDisplay.setEnabled(enabled);
 
   // Controls related to "Cut" mode: their enabled and visible state depends on isCutModeActive
-  loopInButton.setEnabled(cutControlsActive);
-  loopOutButton.setEnabled(cutControlsActive);
-  loopInEditor.setEnabled(cutControlsActive);
-  loopOutEditor.setEnabled(cutControlsActive);
-  clearLoopInButton.setEnabled(cutControlsActive);
-  clearLoopOutButton.setEnabled(cutControlsActive);
+  loopInButton.setEnabled(cutControlsActive && !shouldAutoCutIn);
+  loopOutButton.setEnabled(cutControlsActive && !shouldAutoCutOut);
+  loopInEditor.setEnabled(cutControlsActive && !shouldAutoCutIn);
+  loopOutEditor.setEnabled(cutControlsActive && !shouldAutoCutOut);
+  clearLoopInButton.setEnabled(cutControlsActive && !shouldAutoCutIn);
+  clearLoopOutButton.setEnabled(cutControlsActive && !shouldAutoCutOut);
 
-  detectInSilenceButton.setEnabled(cutControlsActive);
+
   inSilenceThresholdEditor.setEnabled(cutControlsActive);
-  inSilenceThresholdLabel.setEnabled(cutControlsActive);
-
-  detectOutSilenceButton.setEnabled(cutControlsActive);
-  outSilenceThresholdEditor.setEnabled(cutControlsActive);
-  outSilenceThresholdLabel.setEnabled(cutControlsActive);
 
   autoCutInButton.setEnabled(cutControlsActive);
   autoCutOutButton.setEnabled(cutControlsActive);
@@ -1427,13 +1485,13 @@ void MainComponent::updateComponentStates() {
   clearLoopInButton.setVisible(isCutModeActive);
   clearLoopOutButton.setVisible(isCutModeActive);
 
-  detectInSilenceButton.setVisible(isCutModeActive);
-  inSilenceThresholdEditor.setVisible(isCutModeActive);
-  inSilenceThresholdLabel.setVisible(isCutModeActive);
 
-  detectOutSilenceButton.setVisible(isCutModeActive);
+  inSilenceThresholdEditor.setVisible(isCutModeActive);
+
+
+
   outSilenceThresholdEditor.setVisible(isCutModeActive);
-  outSilenceThresholdLabel.setVisible(isCutModeActive);
+
 
   autoCutInButton.setVisible(isCutModeActive);
   autoCutOutButton.setVisible(isCutModeActive);
