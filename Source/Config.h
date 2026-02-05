@@ -25,6 +25,14 @@ namespace Config{
     constexpr int playbackTextWidth = 220;
     constexpr int loopTextWidth = 165;
 
+    // --- Playback and Loop Text Editor Settings ---
+    constexpr int playbackTextHeight = 20; // Height for all single-line text editors showing playback/loop times
+
+    // --- Clear Button Settings ---
+    const juce::String clearButtonText = "X";
+    const juce::Colour clearButtonColor = juce::Colours::red;
+    constexpr int clearButtonWidth = 25;
+
     // --- Button Settings ---
     constexpr int buttonWidth = 80;
     constexpr int buttonHeight = 30; // Will be used in resized()

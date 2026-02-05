@@ -138,8 +138,8 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   loopOutEditor.setWantsKeyboardFocus (true); // Allow to take focus for editing
 
   addAndMakeVisible (clearLoopInButton);
-  clearLoopInButton.setButtonText ("X");
-  clearLoopInButton.setColour(juce::TextButton::buttonColourId, juce::Colours::red);
+  clearLoopInButton.setButtonText (Config::clearButtonText);
+  clearLoopInButton.setColour(juce::TextButton::buttonColourId, Config::clearButtonColor);
   clearLoopInButton.onClick = [this] {
       DBG("Button Clicked: Clear Loop In");
       loopInPosition = -1.0;
@@ -149,8 +149,8 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   };
 
   addAndMakeVisible (clearLoopOutButton);
-  clearLoopOutButton.setButtonText ("X");
-  clearLoopOutButton.setColour(juce::TextButton::buttonColourId, juce::Colours::red);
+  clearLoopOutButton.setButtonText (Config::clearButtonText);
+  clearLoopOutButton.setColour(juce::TextButton::buttonColourId, Config::clearButtonColor);
   clearLoopOutButton.onClick = [this] {
       DBG("Button Clicked: Clear Loop Out");
       loopOutPosition = -1.0;
@@ -588,29 +588,29 @@ void MainComponent::paint (juce::Graphics& g) {
       auto x = (drawPosition / audioLength) * (float)waveformBounds.getWidth() + (float)waveformBounds.getX();
       if (transportSource.isPlaying()) {
         juce::ColourGradient gradient (
-        juce::Colours::lime.withAlpha(0.0f),
+        Config::playbackCursorGlowColorStart,
         (float)x - 10.0f, (float)waveformBounds.getCentreY(),
-        juce::Colours::lime.withAlpha(0.5f),
+        Config::playbackCursorGlowColorEnd,
         (float)x, (float)waveformBounds.getCentreY(),
         false );
           g.setGradientFill (gradient);
           g.fillRect (juce::Rectangle<float>((int)x - 10, (float)waveformBounds.getY(), 10, (float)waveformBounds.getHeight())); }
       else {
         juce::ColourGradient glowGradient;
-        glowGradient.addColour (0.0, juce::Colours::lime.withAlpha(0.0f));
-        glowGradient.addColour (0.5, juce::Colours::lime.withAlpha(0.5f));
+        glowGradient.addColour (0.0, Config::playbackCursorGlowColorStart);
+        glowGradient.addColour (0.5, Config::playbackCursorGlowColorEnd);
         glowGradient.addColour (1.0, juce::Colours::lime.withAlpha(0.0f));
         glowGradient.point1 = { (float)x - 5.0f, (float)waveformBounds.getCentreY() };
         glowGradient.point2 = { (float)x + 5.0f, (float)waveformBounds.getCentreY() };
         g.setGradientFill (glowGradient);
         g.fillRect (juce::Rectangle<float>((int)x - 5, (float)waveformBounds.getY(), 10, (float)waveformBounds.getHeight())); }
-      g.setColour (juce::Colours::lime);
+      g.setColour (Config::playbackCursorColor);
       g.drawVerticalLine ((int)x, (float)waveformBounds.getY(), (float)waveformBounds.getBottom()); }
   if (mouseCursorX != -1) {
-    g.setColour (juce::Colours::darkorange.withAlpha(0.4f));
+    g.setColour (Config::mouseCursorHighlightColor);
     g.fillRect (mouseCursorX - 2, waveformBounds.getY(), 5, waveformBounds.getHeight());
     g.fillRect (waveformBounds.getX(), mouseCursorY - 2, waveformBounds.getWidth(), 5);
-    g.setColour (juce::Colours::yellow);
+    g.setColour (Config::mouseCursorLineColor);
     g.drawVerticalLine (mouseCursorX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
     g.drawHorizontalLine (mouseCursorY, (float)waveformBounds.getX(), (float)waveformBounds.getRight()); }
   if (audioLength > 0.0) {
@@ -629,7 +629,7 @@ void MainComponent::paint (juce::Graphics& g) {
     g.setFont(Config::playbackTextSize);
 
     // Draw Current Time (Left)
-    g.drawText(currentTimeStr, playbackLeftTextX, textY, Config::playbackTextWidth, 20, juce::Justification::left, false);
+    g.drawText(currentTimeStr, playbackLeftTextX, textY, Config::playbackTextWidth, Config::playbackTextHeight, juce::Justification::left, false);
 
     // Draw Total Time (Center)
     g.drawText(totalTimeStaticStr, playbackCenterTextX, textY, Config::playbackTextWidth, 20, juce::Justification::centred, false);
@@ -1011,11 +1011,11 @@ void MainComponent::resized() {
   // Position loopInEditor
   loopInTextX = loopRow.getX(); // Left edge of the space for loopIn
   loopTextY = loopRow.getY() + (loopRow.getHeight() / 2) - 10; // Vertically center 20px high text
-  loopInEditor.setBounds(loopInTextX, loopTextY, Config::loopTextWidth, 20); // Set bounds for loopInEditor
+  loopInEditor.setBounds(loopInTextX, loopTextY, Config::loopTextWidth, Config::playbackTextHeight); // Set bounds for loopInEditor
   loopRow.removeFromLeft(Config::loopTextWidth); // Space for loopInEditor
   loopRow.removeFromLeft(Config::windowBorderMargins / 2);
 
-  clearLoopInButton.setBounds(loopRow.getX(), loopTextY, 25, 20);
+  clearLoopInButton.setBounds(loopRow.getX(), loopTextY, Config::clearButtonWidth, Config::playbackTextHeight);
   loopRow.removeFromLeft(25);
 
   loopRow.removeFromLeft(Config::windowBorderMargins * 2); // Doubled distance
@@ -1025,11 +1025,11 @@ void MainComponent::resized() {
   // Position loopOutEditor
   loopOutTextX = loopRow.getX(); // Left edge of the space for loopOut
   // loopTextY is already set once, assuming numbers are on the same line
-  loopOutEditor.setBounds(loopOutTextX, loopTextY, Config::loopTextWidth, 20); // Set bounds for loopOutEditor
+  loopOutEditor.setBounds(loopOutTextX, loopTextY, Config::loopTextWidth, Config::playbackTextHeight); // Set bounds for loopOutEditor
   loopRow.removeFromLeft(Config::loopTextWidth); // Space for loopOutEditor
   loopRow.removeFromLeft(Config::windowBorderMargins / 2);
 
-  clearLoopOutButton.setBounds(loopRow.getX(), loopTextY, 25, 20);
+  clearLoopOutButton.setBounds(loopRow.getX(), loopTextY, Config::clearButtonWidth, Config::playbackTextHeight);
   loopRow.removeFromLeft(25);
 
   loopRow.removeFromLeft(Config::windowBorderMargins * 2); 
@@ -1040,7 +1040,7 @@ void MainComponent::resized() {
   silenceThresholdLabel.setBounds(loopRow.removeFromLeft(80));
   loopRow.removeFromLeft(Config::windowBorderMargins / 2);
 
-  silenceThresholdEditor.setBounds(loopRow.getX(), loopTextY, 80, 20);
+  silenceThresholdEditor.setBounds(loopRow.getX(), loopTextY, 80, Config::playbackTextHeight);
   loopRow.removeFromLeft(80);
 
   auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(Config::windowBorderMargins);
