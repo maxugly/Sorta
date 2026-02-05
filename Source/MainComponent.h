@@ -103,6 +103,9 @@ private:
   int loopTextY = 0;
 
   LoopButton loopInButton, loopOutButton;
+  juce::TextButton autoplayButton; // New autoplay button
+  bool shouldAutoplay = false;      // Autoplay state
+
 
   void updateQualityButtonText();
   void drawReducedQualityWaveform(juce::Graphics& g, int channel, int pixelsPerSample);

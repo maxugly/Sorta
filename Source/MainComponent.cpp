@@ -80,6 +80,18 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
     DBG("Button Clicked: Loop, new state: " << (loopButton.getToggleState() ? "On" : "Off"));
     shouldLoop = loopButton.getToggleState(); };
 
+  addAndMakeVisible (autoplayButton);
+  autoplayButton.setButtonText (Config::autoplayButtonText);
+  autoplayButton.setClickingTogglesState (true);
+  autoplayButton.setToggleState (shouldAutoplay, juce::dontSendNotification);
+  autoplayButton.onClick = [this] {
+    DBG("Button Clicked: Autoplay, new state: " << (autoplayButton.getToggleState() ? "On" : "Off"));
+    shouldAutoplay = autoplayButton.getToggleState();
+    if (shouldAutoplay && isFileLoaded && !transportSource.isPlaying()) {
+        playStopButtonClicked();
+    }
+  };
+
   addAndMakeVisible (loopInButton);
   loopInButton.setButtonText ("[I]n");
     loopInButton.onLeftClick = [this] {
@@ -319,6 +331,9 @@ void MainComponent::openButtonClicked() {
                 updateButtonText();
                 updateComponentStates(); // Update component states after loading file
                 grabKeyboardFocus(); // Re-grab focus after file chooser closes
+                if (shouldAutoplay && isFileLoaded) {
+                    playStopButtonClicked(); // Simulate click to start playback
+                }
 
               }}});}
 
@@ -1107,7 +1122,8 @@ void MainComponent::resized() {
   playStopButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
   modeButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
   statsButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
-  loopButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins); // Moved here
+  loopButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins); 
+  autoplayButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
   exitButton.setBounds(topRow.removeFromRight(Config::buttonWidth)); topRow.removeFromRight(Config::windowBorderMargins);
 
   auto loopRow = bounds.removeFromTop(rowHeight).reduced(Config::windowBorderMargins);
@@ -1257,12 +1273,19 @@ void MainComponent::updateComponentStates() {
   // Buttons that should always be enabled
   openButton.setEnabled(true);
   exitButton.setEnabled(true);
+  loopButton.setEnabled(true); // Always enabled
+  autoplayButton.setEnabled(true); // Always enabled
+  detectInSilenceButton.setEnabled(true); // Always enabled
+  inSilenceThresholdEditor.setEnabled(true); // Always enabled
+  inSilenceThresholdLabel.setEnabled(true); // Always enabled
+  detectOutSilenceButton.setEnabled(true); // Always enabled
+  outSilenceThresholdEditor.setEnabled(true); // Always enabled
+  outSilenceThresholdLabel.setEnabled(true); // Always enabled
 
   // Buttons that depend on a file being loaded
   playStopButton.setEnabled(enabled);
   modeButton.setEnabled(enabled);
   statsButton.setEnabled(enabled);
-  loopButton.setEnabled(enabled);
   channelViewButton.setEnabled(enabled);
   qualityButton.setEnabled(enabled);
   const bool manualEditEnabled = enabled; // isDetectModeActive removed
@@ -1275,14 +1298,6 @@ void MainComponent::updateComponentStates() {
   loopInEditor.setEnabled(manualEditEnabled);
   loopOutEditor.setEnabled(manualEditEnabled);
   statsDisplay.setEnabled(enabled); // Stats display is always enabled if file loaded
-
-  detectInSilenceButton.setEnabled(enabled);
-  inSilenceThresholdEditor.setEnabled(enabled);
-  inSilenceThresholdLabel.setEnabled(enabled);
-
-  detectOutSilenceButton.setEnabled(enabled);
-  outSilenceThresholdEditor.setEnabled(enabled);
-  outSilenceThresholdLabel.setEnabled(enabled);
 }
 
 juce::FlexBox MainComponent::getBottomRowFlexBox() {
