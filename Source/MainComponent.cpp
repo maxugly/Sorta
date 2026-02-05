@@ -140,24 +140,29 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   addAndMakeVisible (clearLoopInButton);
   clearLoopInButton.setButtonText (Config::clearButtonText);
   clearLoopInButton.setColour(juce::TextButton::buttonColourId, Config::clearButtonColor);
-  clearLoopInButton.onClick = [this] {
-      DBG("Button Clicked: Clear Loop In");
-      loopInPosition = -1.0;
-      updateLoopButtonColors();
-      updateLoopLabels();
-      repaint();
+  clearLoopInButton.onClick = [this]
+  {
+    DBG("Button Clicked: Clear Loop In (reset to start)");
+    loopInPosition = 0.0;
+    ensureLoopOrder();
+    updateLoopButtonColors();
+    updateLoopLabels();
+    repaint();
   };
 
   addAndMakeVisible (clearLoopOutButton);
   clearLoopOutButton.setButtonText (Config::clearButtonText);
   clearLoopOutButton.setColour(juce::TextButton::buttonColourId, Config::clearButtonColor);
-  clearLoopOutButton.onClick = [this] {
-      DBG("Button Clicked: Clear Loop Out");
-      loopOutPosition = -1.0;
-      updateLoopButtonColors();
-      updateLoopLabels();
-      repaint();
+  clearLoopOutButton.onClick = [this]
+  {
+    DBG("Button Clicked: Clear Loop Out (reset to end)");
+    loopOutPosition = thumbnail.getTotalLength();
+    ensureLoopOrder();
+    updateLoopButtonColors();
+    updateLoopLabels();
+    repaint();
   };
+
 
   addAndMakeVisible (detectSilenceButton);
   detectSilenceButton.setButtonText ("Detect");
@@ -207,13 +212,18 @@ void MainComponent::updateQualityButtonText() {
   else qualityButton.setButtonText("[Q]ual L"); }
 
 void MainComponent::updateLoopButtonColors() {
-  if (currentPlacementMode == PlacementMode::LoopIn) {loopInButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonPlacementModeColor); }
-  else if (loopInPosition > -1.0) {loopInButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonActiveColor); }
-  else {loopInButton.setColour(juce::TextButton::buttonColourId, Config::buttonBaseColour); }
-  if (currentPlacementMode == PlacementMode::LoopOut) {loopOutButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonPlacementModeColor);}
-  else if (loopOutPosition > -1.0) {loopOutButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonActiveColor); }
-  else {loopOutButton.setColour(juce::TextButton::buttonColourId, Config::buttonBaseColour); }
-  updateLoopLabels();}
+  if (currentPlacementMode == PlacementMode::LoopIn) {
+    loopInButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonPlacementModeColor);
+  } else {
+    loopInButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonActiveColor);
+  }
+  if (currentPlacementMode == PlacementMode::LoopOut) {
+    loopOutButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonPlacementModeColor);
+  } else {
+    loopOutButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonActiveColor);
+  }
+  updateLoopLabels();
+}
 
 MainComponent::~MainComponent() {
   shutdownAudio();
@@ -222,6 +232,8 @@ MainComponent::~MainComponent() {
   setLookAndFeel(nullptr); }
 
 juce::String MainComponent::formatTime(double seconds) {
+  if (seconds < 0)
+    seconds = 0;
   int hours = (int)(seconds / 3600.0);
   int minutes = ((int)(seconds / 60.0)) % 60;
   int secs = ((int)seconds) % 60;
@@ -282,6 +294,8 @@ void MainComponent::openButtonClicked() {
         DBG("AudioThumbnail: Num Channels = " << thumbnail.getNumChannels() << ", Total Length = " << thumbnail.getTotalLength());
                 totalTimeStaticStr = formatTime(thumbnail.getTotalLength()); // Set total time static string
                 isFileLoaded = true; // Set flag to true after successful load
+                loopInPosition  = 0.0;
+                loopOutPosition = thumbnail.getTotalLength();
                 readerSource.reset (newSource.release());
                 updateButtonText();
                 updateComponentStates(); // Update component states after loading file
@@ -568,9 +582,8 @@ void MainComponent::paint (juce::Graphics& g) {
       }
       // --- END NEW CODE ---
 
-      bool inIsSet = loopInPosition > -1.0;
-      bool outIsSet = loopOutPosition > -1.0;
-      if (inIsSet && outIsSet) {
+      // Loop points are initialized on file load or updated by user interaction, not reset on every paint.
+      if (audioLength > 0.0) {
         auto actualIn = juce::jmin(loopInPosition, loopOutPosition);
         auto actualOut = juce::jmax(loopInPosition, loopOutPosition);
         auto inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualIn / audioLength);
@@ -578,10 +591,10 @@ void MainComponent::paint (juce::Graphics& g) {
         g.setColour(Config::loopRegionColor);
         g.fillRect(juce::Rectangle<float>(inX, (float)waveformBounds.getY(), outX - inX, (float)waveformBounds.getHeight())); }
       g.setColour(Config::loopLineColor);
-      if (inIsSet) {
+      if (audioLength > 0.0) {
         auto inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (loopInPosition / audioLength);
         g.drawVerticalLine((int)inX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom()); }
-      if (outIsSet) {
+      if (audioLength > 0.0) {
         auto outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (loopOutPosition / audioLength);
         g.drawVerticalLine((int)outX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom()); }
       auto drawPosition = (float)transportSource.getCurrentPosition();
@@ -690,19 +703,23 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
         DBG("  Loop Out Editor: Return Key Pressed");
         double newPosition = parseTime(editor.getText());
         if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength()) {
+            if (shouldLoop && transportSource.getCurrentPosition() >= loopOutPosition)
+            {
+                transportSource.setPosition(loopInPosition);
+            }
             // Validate against loopInPosition if it's set
-            if (loopInPosition > -1.0 && newPosition < loopInPosition) {
+            if (loopInPosition > -1.0 && newPosition < loopInPosition) { // Uncommented and properly nested
                 // Invalid: new loopOut is before loopIn, revert to current loopOut
                 editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
                 editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Indicate warning
-            } else {
+            } else { // This else belongs to the inner 'if'
                 loopOutPosition = newPosition;
                 DBG("    Loop Out position set to: " << loopOutPosition);
                 updateLoopButtonColors();
                 editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
                 repaint();
             }
-        } else {
+        } else { // This 'else' correctly handles out-of-bounds input for loopOutEditor
             // Revert to last valid position if input is invalid (out of bounds)
             editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
             editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
@@ -727,23 +744,18 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
         }
     }
     editor.giveAwayKeyboardFocus(); // Lose focus after pressing enter
-}
+} // Add this closing brace
+
 
 void MainComponent::textEditorEscapeKeyPressed (juce::TextEditor& editor) {
     DBG("Text Editor Escape Key Pressed.");
     // Revert text to current value on escape
     if (&editor == &loopInEditor) {
         DBG("  Loop In Editor: Escape Key Pressed");
-        if (loopInPosition >= 0.0)
-            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
-        else
-            editor.setText("--:--:--:---", juce::dontSendNotification);
+        editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
     } else if (&editor == &loopOutEditor) {
         DBG("  Loop Out Editor: Escape Key Pressed");
-        if (loopOutPosition >= 0.0)
-            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
-        else
-            editor.setText("--:--:--:---", juce::dontSendNotification);
+        editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
     } else if (&editor == &silenceThresholdEditor) {
         DBG("  Silence Threshold Editor: Escape Key Pressed");
         editor.setText(juce::String(static_cast<int>(currentSilenceThreshold * 100.0f)), juce::dontSendNotification);
@@ -762,10 +774,7 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
             // Validate against loopOutPosition if it's set
             if (loopOutPosition > -1.0 && newPosition > loopOutPosition) {
                 // Invalid: new loopIn is after loopOut, revert to current loopIn
-                if (loopInPosition >= 0.0)
-                    editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
-                else
-                    editor.setText("--:--:--:---", juce::dontSendNotification);
+                editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
                 editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Indicate warning
             } else {
                 loopInPosition = newPosition;
@@ -776,10 +785,7 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
             }
         } else {
             // Revert to last valid position if input is invalid (out of bounds)
-            if (loopInPosition >= 0.0)
-                editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
-            else
-                editor.setText("--:--:--:---", juce::dontSendNotification);
+            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
             editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
             repaint();
         }
@@ -790,10 +796,7 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
             // Validate against loopInPosition if it's set
             if (loopInPosition > -1.0 && newPosition < loopInPosition) {
                 // Invalid: new loopOut is before loopIn, revert to current loopOut
-                if (loopOutPosition >= 0.0)
-                    editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
-                else
-                    editor.setText("--:--:--:---", juce::dontSendNotification);
+                editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
                 editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Indicate warning
             } else {
                 loopOutPosition = newPosition;
@@ -802,14 +805,10 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
                 editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
                 repaint();
             }
-        } else {
+        } else { // This else belongs to `if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength())`
             // Revert to last valid position if input is invalid (out of bounds)
-            if (loopOutPosition >= 0.0)
-                editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
-            else
-                editor.setText("--:--:--:---", juce::dontSendNotification);
+            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
             editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
-            repaint();
         }
     } else if (&editor == &silenceThresholdEditor) {
         DBG("  Silence Threshold Editor: Focus Lost");
@@ -832,15 +831,9 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
 }
 
 void MainComponent::updateLoopLabels() {
-  if (loopInPosition >= 0.0)
-    loopInEditor.setText(formatTime(loopInPosition), juce::dontSendNotification);
-  else
-    loopInEditor.setText("--:--:--:---", juce::dontSendNotification);
+  loopInEditor.setText(formatTime(loopInPosition), juce::dontSendNotification);
   
-  if (loopOutPosition >= 0.0)
-    loopOutEditor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
-  else
-    loopOutEditor.setText("--:--:--:---", juce::dontSendNotification);
+  loopOutEditor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
 }
 
 void MainComponent::detectSilence()
@@ -983,13 +976,9 @@ void MainComponent::detectSilence()
 
 void MainComponent::ensureLoopOrder()
 {
-    // Only swap if both are valid (not -1.0) and out of order
-    if (loopInPosition > -1.0 && loopOutPosition > -1.0)
+    if (loopInPosition > loopOutPosition)
     {
-        if (loopInPosition > loopOutPosition)
-        {
-            std::swap(loopInPosition, loopOutPosition);
-        }
+        std::swap(loopInPosition, loopOutPosition);
     }
 }
 
