@@ -71,7 +71,8 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   statsButton.onClick = [this] {
     DBG("Button Clicked: Stats, new state: " << (statsButton.getToggleState() ? "Visible" : "Hidden"));
     showStats = statsButton.getToggleState();
-    resized(); };
+    resized();
+    updateComponentStates(); };
 
   addAndMakeVisible (loopButton);
   loopButton.setButtonText ("[L]oop");
@@ -1287,26 +1288,7 @@ void MainComponent::resized() {
     statsDisplay.toFront(true); }
   else {statsDisplay.setVisible(false); }
 
-  openButton.setVisible(true);
-  playStopButton.setVisible(true);
-  modeButton.setVisible(true);
-  statsButton.setVisible(true);
-  loopButton.setVisible(true);
-  loopInButton.setVisible(true);
-  loopOutButton.setVisible(true);
-  clearLoopInButton.setVisible(true);
-  clearLoopOutButton.setVisible(true);
-  channelViewButton.setVisible(true);
-  qualityButton.setVisible(true);
-  exitButton.setVisible(true);
-
-  detectInSilenceButton.setVisible(true);
-  inSilenceThresholdLabel.setVisible(true);
-  inSilenceThresholdEditor.setVisible(true);
-
-  detectOutSilenceButton.setVisible(true);
-  outSilenceThresholdLabel.setVisible(true);
-  outSilenceThresholdEditor.setVisible(true);}
+}
 
 juce::FlexBox MainComponent::getTopRowFlexBox(){
   juce::FlexBox row;
