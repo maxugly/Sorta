@@ -52,7 +52,13 @@ public:
   void changeListenerCallback (juce::ChangeBroadcaster*) override;
   void timerCallback();
   void paint (juce::Graphics& g);
-  void resized();
+  /**
+   * @brief Called when the component's size has been changed.
+   *
+   * This function is responsible for laying out all child components within the MainComponent.
+   * It calculates row heights and delegates to specific layout helper functions for different UI sections.
+   */
+  void resized() override;
   void focusGained (juce::Component::FocusChangeType cause) override;
 
 private:
@@ -153,8 +159,29 @@ private:
   void initialiseAutoCutInButton();
   void initialiseAutoCutOutButton();
   void initialiseCutButton();
-  void layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHeight); // New method declaration
-  void layoutLoopAndCutControls(juce::Rectangle<int>& bounds, int rowHeight); // New method declaration
+  /**
+   * @brief Lays out the buttons in the top row of the component.
+   *
+   * This function positions various control buttons (open, play/stop, autoplay, loop, cut, mode, stats, auto-cut in/out, exit)
+   * within the top row of the MainComponent, managing their bounds and spacing.
+   *
+   * @param bounds A reference to the current bounds of the component. This rectangle will be modified
+   *               as space is removed for the top row.
+   * @param rowHeight The calculated height for the top row of buttons.
+   */
+  void layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHeight);
+
+  /**
+   * @brief Lays out the loop and cut-related controls.
+   *
+   * This function positions the loop in/out buttons, their respective text editors for manual time input,
+   * clear buttons, silence threshold editors, and auto-cut in/out buttons within a designated row.
+   *
+   * @param bounds A reference to the current bounds of the component. This rectangle will be modified
+   *               as space is removed for this row.
+   * @param rowHeight The calculated height for the row containing loop and cut controls.
+   */
+  void layoutLoopAndCutControls(juce::Rectangle<int>& bounds, int rowHeight);
   /**
    * @brief Lays out the bottom row buttons and configures the playback text displays.
    *
