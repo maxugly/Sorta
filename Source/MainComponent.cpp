@@ -1,7 +1,7 @@
 #include "MainComponent.h"
 #include "Config.h"
 
-MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManager, thumbnailCache) {
+MainComponent::MainComponent() : thumbnailCache (Config::thumbnailCacheSize), thumbnail (Config::thumbnailSizePixels, formatManager, thumbnailCache) {
   initialiseAudioFormatsAndThumbnail();
   initialiseLookAndFeel();
   initialiseLoopButtons(); // Call the new function
@@ -227,7 +227,7 @@ void MainComponent::initialiseLoopEditors()
   addAndMakeVisible (loopInEditor);
   loopInEditor.setReadOnly (false);
   loopInEditor.setJustification(juce::Justification::centred);
-  loopInEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
+  loopInEditor.setColour (juce::TextEditor::backgroundColourId, Config::textEditorBackgroundColour);
   loopInEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
   loopInEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
   loopInEditor.setMultiLine (false);
@@ -238,7 +238,7 @@ void MainComponent::initialiseLoopEditors()
   addAndMakeVisible (loopOutEditor);
   loopOutEditor.setReadOnly (false);
   loopOutEditor.setJustification(juce::Justification::centred);
-  loopOutEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
+  loopOutEditor.setColour (juce::TextEditor::backgroundColourId, Config::textEditorBackgroundColour);
   loopOutEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
   loopOutEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
   loopOutEditor.setMultiLine (false);
@@ -250,7 +250,7 @@ void MainComponent::initialiseLoopEditors()
   inSilenceThresholdEditor.setText (juce::String (static_cast<int>(Config::silenceThreshold * 100.0f)));
   inSilenceThresholdEditor.setInputRestrictions (0, "0123456789");
   inSilenceThresholdEditor.setJustification(juce::Justification::centred);
-  inSilenceThresholdEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
+  inSilenceThresholdEditor.setColour (juce::TextEditor::backgroundColourId, Config::textEditorBackgroundColour);
   inSilenceThresholdEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
   inSilenceThresholdEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
   inSilenceThresholdEditor.applyFontToAllText(inSilenceThresholdEditor.getFont());
@@ -263,7 +263,7 @@ void MainComponent::initialiseLoopEditors()
   outSilenceThresholdEditor.setText (juce::String (static_cast<int>(Config::outSilenceThreshold * 100.0f)));
   outSilenceThresholdEditor.setInputRestrictions (0, "0123456789");
   outSilenceThresholdEditor.setJustification(juce::Justification::centred);
-  outSilenceThresholdEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
+  outSilenceThresholdEditor.setColour (juce::TextEditor::backgroundColourId, Config::textEditorBackgroundColour);
   outSilenceThresholdEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
   outSilenceThresholdEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
   outSilenceThresholdEditor.applyFontToAllText(outSilenceThresholdEditor.getFont());
@@ -893,7 +893,7 @@ void MainComponent::timerCallback() {
           juce::ColourGradient glowGradient;
           glowGradient.addColour (0.0, Config::playbackCursorGlowColorStart);
           glowGradient.addColour (0.5, Config::playbackCursorGlowColorEnd);
-          glowGradient.addColour (1.0, juce::Colours::lime.withAlpha(0.0f));
+          glowGradient.addColour (1.0, Config::playbackCursorColor.withAlpha(0.0f));
           glowGradient.point1 = { (float)x - 5.0f, (float)waveformBounds.getCentreY() };
           glowGradient.point2 = { (float)x + 5.0f, (float)waveformBounds.getCentreY() };
           g.setGradientFill (glowGradient);
@@ -1038,7 +1038,7 @@ void MainComponent::textEditorTextChanged (juce::TextEditor& editor) {
         if (newPercentage >= 1 && newPercentage <= 99) {
             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Valid
         } else {
-            editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Out of range
+            editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor); // Out of range
         }
     } else {
         DBG("  Loop Editor Text Changed: " << editor.getText());
@@ -1048,9 +1048,9 @@ void MainComponent::textEditorTextChanged (juce::TextEditor& editor) {
         if (newPosition >= 0.0 && newPosition <= totalLength) {
             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Valid and in range
         } else if (newPosition == -1.0) {
-            editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Completely invalid format
+            editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor); // Completely invalid format
         } else {
-            editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Valid format but out of range
+            editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor); // Valid format but out of range
         }
     }
 }
@@ -1071,53 +1071,52 @@ void MainComponent::textEditorReturnKeyPressed (juce::TextEditor& editor) {
             // Validate against loopOutPosition if it's set
             if (loopOutPosition > -1.0 && newPosition > loopOutPosition) {
                 // Invalid: new loopIn is after loopOut, revert to current loopIn
-                editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
-                editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Indicate warning
-            } else {
-                loopInPosition = newPosition;
-                DBG("    Loop In position set to: " << loopInPosition);
-                updateLoopButtonColors();
-                editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
-                repaint();
-            }
-        } else {
-            // Revert to last valid position if input is invalid (out of bounds)
-            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
-            editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
-        }
-    } else if (&editor == &loopOutEditor) {
-        DBG("  Loop Out Editor: Return Key Pressed");
-        if (shouldAutoCutOut) {
-            DBG("  Loop Out Editor: Return Key Pressed ignored: Auto Cut Out is active.");
-            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Revert text
-            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
-            editor.giveAwayKeyboardFocus();
-            return;
-        }
-        double newPosition = parseTime(editor.getText());
-        if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength()) {
-            if (shouldLoop && transportSource.getCurrentPosition() >= loopOutPosition)
-            {
-                transportSource.setPosition(loopInPosition);
-            }
-            // Validate against loopInPosition if it's set
-            if (loopInPosition > -1.0 && newPosition < loopInPosition) { // Uncommented and properly nested
-                // Invalid: new loopOut is before loopIn, revert to current loopOut
-                editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
-                editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Indicate warning
-            } else { // This else belongs to the inner 'if'
-                loopOutPosition = newPosition;
-                DBG("    Loop Out position set to: " << loopOutPosition);
-                updateLoopButtonColors();
-                editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
-                repaint();
-            }
-        } else { // This 'else' correctly handles out-of-bounds input for loopOutEditor
-            // Revert to last valid position if input is invalid (out of bounds)
-            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
-            editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
-        }
-    } else if (&editor == &inSilenceThresholdEditor)
+                            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+                            editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor); // Indicate warning
+                        } else {
+                            loopInPosition = newPosition;
+                            DBG("    Loop In position set to: " << loopInPosition);
+                            updateLoopButtonColors();
+                            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+                            repaint();
+                        }
+                    } else {
+                        // Revert to last valid position if input is invalid (out of bounds)
+                        editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+                        editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor); // Indicate error
+                    }
+                } else if (&editor == &loopOutEditor) {
+                    DBG("  Loop Out Editor: Return Key Pressed");
+                    if (shouldAutoCutOut) {
+                        DBG("  Loop Out Editor: Return Key Pressed ignored: Auto Cut Out is active.");
+                        editor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Revert text
+                        editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+                        editor.giveAwayKeyboardFocus();
+                        return;
+                    }
+                    double newPosition = parseTime(editor.getText());
+                    if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength()) {
+                        if (shouldLoop && transportSource.getCurrentPosition() >= loopOutPosition)
+                        {
+                            transportSource.setPosition(loopInPosition);
+                        }
+                        // Validate against loopInPosition if it's set
+                        if (loopInPosition > -1.0 && newPosition < loopInPosition) { // Uncommented and properly nested
+                            // Invalid: new loopOut is before loopIn, revert to current loopOut
+                            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+                            editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor); // Indicate warning
+                        } else { // This else belongs to the inner 'if'
+                            loopOutPosition = newPosition;
+                            DBG("    Loop Out position set to: " << loopOutPosition);
+                            updateLoopButtonColors();
+                            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+                            repaint();
+                        }
+                    } else { // This 'else' correctly handles out-of-bounds input for loopOutEditor
+                        // Revert to last valid position if input is invalid (out of bounds)
+                        editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+                        editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor); // Indicate error
+                    }    } else if (&editor == &inSilenceThresholdEditor)
     {
         DBG("  In Silence Threshold Editor: Return Key Pressed");
         int newPercentage = editor.getText().getIntValue();
@@ -1190,49 +1189,48 @@ void MainComponent::textEditorFocusLost (juce::TextEditor& editor) {
             // Validate against loopOutPosition if it's set
             if (loopOutPosition > -1.0 && newPosition > loopOutPosition) {
                 // Invalid: new loopIn is after loopOut, revert to current loopIn
-                editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
-                editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Indicate warning
-            } else {
-                loopInPosition = newPosition;
-                DBG("    Loop In position set to: " << loopInPosition);
-                updateLoopButtonColors();
-                editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
-                repaint();
-            }
-        } else {
-            // Revert to last valid position if input is invalid (out of bounds)
-            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
-            editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
-            repaint();
-        }
-    } else if (&editor == &loopOutEditor) {
-        DBG("  Loop Out Editor: Focus Lost");
-        if (shouldAutoCutOut) {
-            DBG("  Loop Out Editor: Focus Lost ignored: Auto Cut Out is active.");
-            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Revert text
-            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
-            return;
-        }
-        double newPosition = parseTime(editor.getText());
-        if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength()) {
-            // Validate against loopInPosition if it's set
-            if (loopInPosition > -1.0 && newPosition < loopInPosition) {
-                // Invalid: new loopOut is before loopIn, revert to current loopOut
-                editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
-                editor.setColour(juce::TextEditor::textColourId, juce::Colours::orange); // Indicate warning
-            } else {
-                loopOutPosition = newPosition;
-                DBG("    Loop Out position set to: " << loopOutPosition);
-                updateLoopButtonColors();
-                editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
-                repaint();
-            }
-        } else { // This else belongs to `if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength())`
-            // Revert to last valid position if input is invalid (out of bounds)
-            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
-            editor.setColour(juce::TextEditor::textColourId, juce::Colours::red); // Indicate error
-        }
-    } else if (&editor == &inSilenceThresholdEditor) {
+                            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+                            editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor); // Indicate warning
+                        } else {
+                            loopInPosition = newPosition;
+                            DBG("    Loop In position set to: " << loopInPosition);
+                            updateLoopButtonColors();
+                            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+                            repaint();
+                        }
+                    } else {
+                        // Revert to last valid position if input is invalid (out of bounds)
+                        editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+                        editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor); // Indicate error
+                        repaint();
+                    }
+                } else if (&editor == &loopOutEditor) {
+                    DBG("  Loop Out Editor: Focus Lost");
+                    if (shouldAutoCutOut) {
+                        DBG("  Loop Out Editor: Focus Lost ignored: Auto Cut Out is active.");
+                        editor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Revert text
+                        editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+                        return;
+                    }
+                    double newPosition = parseTime(editor.getText());
+                    if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength()) {
+                        // Validate against loopInPosition if it's set
+                        if (loopInPosition > -1.0 && newPosition < loopInPosition) {
+                            // Invalid: new loopOut is before loopIn, revert to current loopOut
+                            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+                            editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor); // Indicate warning
+                        } else {
+                            loopOutPosition = newPosition;
+                            DBG("    Loop Out position set to: " << loopOutPosition);
+                            updateLoopButtonColors();
+                            editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor); // Reset color
+                            repaint();
+                        }
+                    } else { // This else belongs to `if (newPosition >= 0.0 && newPosition <= thumbnail.getTotalLength())`
+                        // Revert to last valid position if input is invalid (out of bounds)
+                        editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+                        editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor); // Indicate error
+                    }    } else if (&editor == &inSilenceThresholdEditor) {
         DBG("  In Silence Threshold Editor: Focus Lost");
         int newPercentage = editor.getText().getIntValue();
         if (newPercentage >= 1 && newPercentage <= 99)

@@ -29,6 +29,12 @@ namespace Config{
     // --- Playback and Loop Text Editor Settings ---
     constexpr int playbackTextHeight = 20; // Height for all single-line text editors showing playback/loop times
 
+    // --- Text Editor Colors ---
+    const juce::Colour textEditorErrorColor = juce::Colours::red;
+    const juce::Colour textEditorWarningColor = juce::Colours::orange;
+    /// The background colour for various text editors, derived from a grey with playback text alpha.
+    const juce::Colour textEditorBackgroundColour = juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha);
+
     // --- Clear Button Settings ---
     const juce::String clearButtonText = "X";
     const juce::Colour clearButtonColor = juce::Colours::red;
@@ -114,4 +120,10 @@ namespace Config{
     constexpr float loopLineGlowThickness = 3.0f;        // Thickness of the glowing vertical loop lines
     constexpr float loopPulseAlphaMinFactor = 0.1f;      // Minimum alpha multiplier for pulsing vertical loop lines
     constexpr float loopPulseAlphaModulationFactor = 0.8f; // Factor controlling the range of alpha modulation for vertical loop lines
+
+    // --- Audio Settings ---
+    /// The number of files the thumbnail cache can hold.
+    constexpr int thumbnailCacheSize = 5;
+    /// The size of the thumbnail in pixels.
+    constexpr int thumbnailSizePixels = 512;
 } // namespace Config
