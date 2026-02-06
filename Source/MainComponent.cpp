@@ -1571,6 +1571,23 @@ void MainComponent::updateComponentStates() {
 
   updateGeneralButtonStates(enabled); // Call the new function
 
+  updateCutModeControlStates(isCutModeActive, enabled, shouldAutoCutIn, shouldAutoCutOut);
+}
+
+/**
+ * @brief Updates the enabled and visible states of controls related to "Cut" mode.
+ *
+ * This function manages the interactive states and visibility of loop buttons,
+ * loop editors, clear loop buttons, silence threshold editors, and auto-cut buttons,
+ * all based on whether the "Cut" mode is active and if an audio file is loaded.
+ *
+ * @param isCutModeActive A boolean indicating whether the "Cut" mode is currently active.
+ * @param enabled A boolean indicating whether a file is loaded (true) or not (false).
+ * @param shouldAutoCutIn A boolean indicating if auto-cut-in is active.
+ * @param shouldAutoCutOut A boolean indicating if auto-cut-out is active.
+ */
+void MainComponent::updateCutModeControlStates(bool isCutModeActive, bool enabled, bool shouldAutoCutIn, bool shouldAutoCutOut)
+{
   // Controls related to "Cut" mode: their enabled and visible state depends on isCutModeActive
   // Manual loop point controls are enabled only if Cut mode is active AND their auto-cut is NOT active
   loopInButton.setEnabled(isCutModeActive && !shouldAutoCutIn);

@@ -174,5 +174,28 @@ private:
    * @param enabled A boolean indicating whether a file is loaded (true) or not (false).
    */
   void updateGeneralButtonStates(bool enabled); // New method declaration
+  /**
+   * @brief Updates the enabled and visible states of controls related to "Cut" mode.
+   *
+   * This function manages the interactive states and visibility of loop buttons,
+   * loop editors, clear loop buttons, silence threshold editors, and auto-cut buttons,
+   * all based on whether the "Cut" mode is active and if an audio file is loaded.
+   *
+   * @param isCutModeActive A boolean indicating whether the "Cut" mode is currently active.
+   * @param enabled A boolean indicating whether a file is loaded (true) or not (false).
+   * @param shouldAutoCutIn A boolean indicating if auto-cut-in is active.
+   * @param shouldAutoCutOut A boolean indicating if auto-cut-out is active.
+   */
+  void updateCutModeControlStates(bool isCutModeActive, bool enabled, bool shouldAutoCutIn, bool shouldAutoCutOut); // New method declaration
+  /**
+   * @brief Handles global keybinds for application-wide actions.
+   *
+   * This function processes key presses for actions that should be available
+   * regardless of the current application state, such as quitting or opening a file.
+   *
+   * @param key The `juce::KeyPress` object representing the key that was pressed.
+   * @return `true` if the key press was handled, `false` otherwise.
+   */
+  bool handleGlobalKeybinds(const juce::KeyPress& key); // New method declaration
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent) };
