@@ -132,5 +132,47 @@ private:
 
   bool isFileLoaded = false; // New member variable
   void updateComponentStates(); // New method declaration
+  void initialiseLoopEditors(); // New method declaration
+  void initialiseClearButtons(); // New method declaration
+  void initialiseButtons();    // New method declaration
+  void finaliseSetup();        // New method declaration
+  void initialiseAudioFormatsAndThumbnail(); // New method declaration
+  void initialiseLookAndFeel();  // New method declaration
+  void initialiseLoopButtons();  // New method declaration
+  void layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHeight); // New method declaration
+  void layoutLoopAndCutControls(juce::Rectangle<int>& bounds, int rowHeight); // New method declaration
+  /**
+   * @brief Lays out the bottom row buttons and configures the playback text displays.
+   *
+   * This function positions the quality, channel view, stats, and mode buttons
+   * in the bottom row of the component. It also calculates the positions for
+   * the playback time text displays (current, total, remaining).
+   *
+   * @param bounds The current bounds of the component, which will be modified
+   *               as sections are laid out.
+   * @param rowHeight The calculated height for each row of buttons.
+   */
+  void layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, int rowHeight); // New method declaration
+  /**
+   * @brief Lays out the waveform area and conditionally displays the stats.
+   *
+   * This function determines the bounds for the audio waveform display based on the
+   * current view mode (Classic or Overlay) and sets the visibility and position
+   * of the stats display based on the `showStats` flag.
+   *
+   * @param bounds The current bounds of the component, which will be used to
+   *               determine the waveform area.
+   */
+  void layoutWaveformAndStats(juce::Rectangle<int>& bounds); // New method declaration
+  /**
+   * @brief Updates the enabled and visible states of general UI buttons.
+   *
+   * This function sets the enabled and visible states for buttons that are
+   * always active or depend only on whether a file is currently loaded,
+   * regardless of the cut mode.
+   *
+   * @param enabled A boolean indicating whether a file is loaded (true) or not (false).
+   */
+  void updateGeneralButtonStates(bool enabled); // New method declaration
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent) };

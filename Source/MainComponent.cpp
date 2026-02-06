@@ -1,8 +1,65 @@
 #include "MainComponent.h"
 #include "Config.h"
 
-MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManager, thumbnailCache),
-								 loopInButton("Loop In Button"), loopOutButton("Loop Out Button") {
+MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManager, thumbnailCache) {
+  initialiseAudioFormatsAndThumbnail();
+  initialiseLookAndFeel();
+  initialiseLoopButtons(); // Call the new function
+  initialiseButtons();
+
+
+  initialiseClearButtons();
+
+  initialiseLoopEditors();
+
+  finaliseSetup();
+}
+
+void MainComponent::initialiseLoopButtons()
+{
+  addAndMakeVisible (loopInButton);
+  loopInButton.setButtonText ("[I]n");
+  loopInButton.onLeftClick = [this] {
+    loopInPosition = transportSource.getCurrentPosition();
+    DBG("Loop In Button Left Clicked. Position: " << loopInPosition);
+    ensureLoopOrder(); // Call helper
+    updateLoopButtonColors();
+    repaint();
+  };
+  loopInButton.onRightClick = [this] {
+    DBG("Loop In Button Right Clicked. Setting placement mode to LoopIn.");
+    currentPlacementMode = PlacementMode::LoopIn;
+    updateLoopButtonColors();
+    repaint();
+  };
+
+  addAndMakeVisible (loopOutButton);
+  loopOutButton.setButtonText ("[O]ut");
+  loopOutButton.onLeftClick = [this] {
+    loopOutPosition = transportSource.getCurrentPosition();
+    DBG("Loop Out Button Left Clicked. Position: " << loopOutPosition);
+    ensureLoopOrder(); // Call helper
+    updateLoopButtonColors();
+    repaint();
+  };
+  loopOutButton.onRightClick = [this] {
+    DBG("Loop Out Button Right Clicked. Setting placement mode to LoopOut.");
+    currentPlacementMode = PlacementMode::LoopOut;
+    updateLoopButtonColors();
+    repaint();
+  };
+}
+
+void MainComponent::initialiseLookAndFeel()
+{
+  setLookAndFeel (&modernLF);
+  modernLF.setBaseOffColor(Config::buttonBaseColour);
+  modernLF.setBaseOnColor(Config::buttonOnColour);
+  modernLF.setTextColor(Config::buttonTextColour);
+}
+
+void MainComponent::initialiseAudioFormatsAndThumbnail()
+{
   formatManager.registerFormat (new juce::WavAudioFormat(), false);
   formatManager.registerFormat (new juce::AiffAudioFormat(), false);
   formatManager.registerFormat (new juce::FlacAudioFormat(), false);
@@ -10,12 +67,10 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   formatManager.registerFormat (new juce::MP3AudioFormat(), false);
 
   thumbnail.addChangeListener (this);
+}
 
-  setLookAndFeel (&modernLF);
-  modernLF.setBaseOffColor(Config::buttonBaseColour);
-  modernLF.setBaseOnColor(Config::buttonOnColour);
-  modernLF.setTextColor(Config::buttonTextColour);
-
+void MainComponent::initialiseButtons()
+{
   addAndMakeVisible (openButton);
   openButton.setButtonText ("[D]ir");
   openButton.onClick = [this] { openButtonClicked(); };
@@ -129,33 +184,6 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
     updateComponentStates(); // Update visibility/enabled state of cut-related controls
   };
 
-  addAndMakeVisible (loopInButton);
-  loopInButton.setButtonText ("[I]n");
-    loopInButton.onLeftClick = [this] {
-      loopInPosition = transportSource.getCurrentPosition();
-      DBG("Loop In Button Left Clicked. Position: " << loopInPosition);    ensureLoopOrder(); // Call helper
-    updateLoopButtonColors();
-    repaint(); };
-  loopInButton.onRightClick = [this] {
-    DBG("Loop In Button Right Clicked. Setting placement mode to LoopIn.");
-    currentPlacementMode = PlacementMode::LoopIn;
-    updateLoopButtonColors();
-    repaint(); };
-
-  addAndMakeVisible (loopOutButton);
-  loopOutButton.setButtonText ("[O]ut");
-  loopOutButton.onLeftClick = [this] {
-    loopOutPosition = transportSource.getCurrentPosition();
-    DBG("Loop Out Button Left Clicked. Position: " << loopOutPosition);
-    ensureLoopOrder(); // Call helper
-    updateLoopButtonColors();
-    repaint(); };
-  loopOutButton.onRightClick = [this] {
-    DBG("Loop Out Button Right Clicked. Setting placement mode to LoopOut.");
-    currentPlacementMode = PlacementMode::LoopOut;
-    updateLoopButtonColors();
-    repaint(); };
-
   addAndMakeVisible (statsDisplay);
   statsDisplay.setReadOnly (true);
   statsDisplay.setMultiLine (true);
@@ -163,29 +191,10 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   statsDisplay.setColour (juce::TextEditor::backgroundColourId, Config::statsDisplayBackgroundColour);
   statsDisplay.setColour (juce::TextEditor::textColourId, Config::statsDisplayTextColour);
   statsDisplay.setVisible (false);
+}
 
-  addAndMakeVisible (loopInEditor);
-  loopInEditor.setReadOnly (false);
-  loopInEditor.setJustification(juce::Justification::centred);
-  loopInEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
-  loopInEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
-  loopInEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
-  loopInEditor.setMultiLine (false);
-  loopInEditor.setReturnKeyStartsNewLine (false);
-  loopInEditor.addListener (this);
-  loopInEditor.setWantsKeyboardFocus (true); // Allow to take focus for editing
-
-  addAndMakeVisible (loopOutEditor);
-  loopOutEditor.setReadOnly (false);
-  loopOutEditor.setJustification(juce::Justification::centred);
-  loopOutEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
-  loopOutEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
-  loopOutEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
-  loopOutEditor.setMultiLine (false);
-  loopOutEditor.setReturnKeyStartsNewLine (false);
-  loopOutEditor.addListener (this);
-  loopOutEditor.setWantsKeyboardFocus (true); // Allow to take focus for editing
-
+void MainComponent::initialiseClearButtons()
+{
   addAndMakeVisible (clearLoopInButton);
   clearLoopInButton.setButtonText (Config::clearButtonText);
   clearLoopInButton.setColour(juce::TextButton::buttonColourId, Config::clearButtonColor);
@@ -211,11 +220,31 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
     updateLoopLabels();
     repaint();
   };
+}
 
+void MainComponent::initialiseLoopEditors()
+{
+  addAndMakeVisible (loopInEditor);
+  loopInEditor.setReadOnly (false);
+  loopInEditor.setJustification(juce::Justification::centred);
+  loopInEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
+  loopInEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
+  loopInEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
+  loopInEditor.setMultiLine (false);
+  loopInEditor.setReturnKeyStartsNewLine (false);
+  loopInEditor.addListener (this);
+  loopInEditor.setWantsKeyboardFocus (true); // Allow to take focus for editing
 
-
-
-
+  addAndMakeVisible (loopOutEditor);
+  loopOutEditor.setReadOnly (false);
+  loopOutEditor.setJustification(juce::Justification::centred);
+  loopOutEditor.setColour (juce::TextEditor::backgroundColourId, juce::Colours::grey.withAlpha(Config::playbackTextBackgroundAlpha));
+  loopOutEditor.setColour (juce::TextEditor::textColourId, Config::playbackTextColor);
+  loopOutEditor.setFont (juce::Font (juce::FontOptions (Config::playbackTextSize)));
+  loopOutEditor.setMultiLine (false);
+  loopOutEditor.setReturnKeyStartsNewLine (false);
+  loopOutEditor.addListener (this);
+  loopOutEditor.setWantsKeyboardFocus (true); // Allow to take focus for editing
 
   addAndMakeVisible (inSilenceThresholdEditor);
   inSilenceThresholdEditor.setText (juce::String (static_cast<int>(Config::silenceThreshold * 100.0f)));
@@ -230,11 +259,6 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   inSilenceThresholdEditor.addListener (this);
   inSilenceThresholdEditor.setWantsKeyboardFocus (true);
 
-
-
-
-
-
   addAndMakeVisible (outSilenceThresholdEditor);
   outSilenceThresholdEditor.setText (juce::String (static_cast<int>(Config::outSilenceThreshold * 100.0f)));
   outSilenceThresholdEditor.setInputRestrictions (0, "0123456789");
@@ -247,8 +271,10 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   outSilenceThresholdEditor.setReturnKeyStartsNewLine (false);
   outSilenceThresholdEditor.addListener (this);
   outSilenceThresholdEditor.setWantsKeyboardFocus (true);
+}
 
-
+void MainComponent::finaliseSetup()
+{
   updateLoopLabels();
   setSize(Config::initialWindowWidth, Config::initialWindowHeight);
 
@@ -258,6 +284,112 @@ MainComponent::MainComponent() : thumbnailCache (5), thumbnail (512, formatManag
   grabKeyboardFocus(); // Request keyboard focus for MainComponent
 
   updateComponentStates(); // Call to set initial button states
+}
+
+void MainComponent::layoutLoopAndCutControls(juce::Rectangle<int>& bounds, int rowHeight)
+{
+  auto loopRow = bounds.removeFromTop(rowHeight).reduced(Config::windowBorderMargins);
+  loopInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
+
+  // Position loopInEditor
+  loopInTextX = loopRow.getX(); // Left edge of the space for loopIn
+  loopTextY = loopRow.getY() + (loopRow.getHeight() / 2) - 10; // Vertically center 20px high text
+  loopInEditor.setBounds(loopInTextX, loopTextY, Config::loopTextWidth, Config::playbackTextHeight); // Set bounds for loopInEditor
+  loopRow.removeFromLeft(Config::loopTextWidth); // Space for loopInEditor
+  loopRow.removeFromLeft(Config::windowBorderMargins / 2);
+
+  clearLoopInButton.setBounds(loopRow.getX(), loopTextY, Config::clearButtonWidth, Config::playbackTextHeight);
+  loopRow.removeFromLeft(25);
+
+  loopRow.removeFromLeft(Config::windowBorderMargins * 2); // Doubled distance
+
+  loopOutButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
+
+  // Position loopOutEditor
+  loopOutTextX = loopRow.getX(); // Left edge of the space for loopOut
+  // loopTextY is already set once, assuming numbers are on the same line
+  loopOutEditor.setBounds(loopOutTextX, loopTextY, Config::loopTextWidth, Config::playbackTextHeight); // Set bounds for loopOutEditor
+  loopRow.removeFromLeft(Config::loopTextWidth); // Space for loopOutEditor
+  loopRow.removeFromLeft(Config::windowBorderMargins / 2);
+
+  clearLoopOutButton.setBounds(loopRow.getX(), loopTextY, Config::clearButtonWidth, Config::playbackTextHeight);
+  loopRow.removeFromLeft(25);
+
+  loopRow.removeFromLeft(Config::windowBorderMargins * 2);
+
+  inSilenceThresholdEditor.setBounds(loopRow.getX(), loopTextY, 80, Config::playbackTextHeight);
+  loopRow.removeFromLeft(80);
+  autoCutInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth));
+  loopRow.removeFromLeft(Config::windowBorderMargins * 2);
+
+  outSilenceThresholdEditor.setBounds(loopRow.getX(), loopTextY, 80, Config::playbackTextHeight);
+  loopRow.removeFromLeft(80);
+  autoCutOutButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth));
+  loopRow.removeFromLeft(Config::windowBorderMargins * 2);
+}
+
+void MainComponent::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHeight)
+{
+  auto topRow = bounds.removeFromTop(rowHeight).reduced(Config::windowBorderMargins);
+  openButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  playStopButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  autoplayButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  loopButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  cutButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  modeButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  statsButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  autoCutInButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  autoCutOutButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
+  exitButton.setBounds(topRow.removeFromRight(Config::buttonWidth)); topRow.removeFromRight(Config::windowBorderMargins);
+}
+
+/**
+ * @brief Lays out the bottom row buttons and configures the playback text displays.
+ *
+ * This function positions the quality, channel view, stats, and mode buttons
+ * in the bottom row of the component. It also calculates the positions for
+ * the playback time text displays (current, total, remaining).
+ *
+ * @param bounds The current bounds of the component, which will be modified
+ *               as sections are laid out.
+ * @param rowHeight The calculated height for each row of buttons.
+ */
+void MainComponent::layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, int rowHeight)
+{
+  auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(Config::windowBorderMargins);
+  bottomRowTopY = bottomRow.getY();
+  contentAreaBounds = bounds.reduced(Config::windowBorderMargins); // Store the actual content area bounds here
+  qualityButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
+  channelViewButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
+  statsButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
+  modeButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth));
+
+  playbackLeftTextX = getLocalBounds().getX() + Config::windowBorderMargins;
+  playbackCenterTextX = (getLocalBounds().getWidth() / 2) - (Config::playbackTextWidth / 2); // Use Config::playbackTextWidth
+  playbackRightTextX = getLocalBounds().getRight() - Config::windowBorderMargins - Config::playbackTextWidth; // Use Config::playbackTextWidth
+}
+
+/**
+ * @brief Lays out the waveform area and conditionally displays the stats.
+ *
+ * This function determines the bounds for the audio waveform display based on the
+ * current view mode (Classic or Overlay) and sets the visibility and position
+ * of the stats display based on the `showStats` flag.
+ *
+ * @param bounds The current bounds of the component, which will be used to
+ *               determine the waveform area.
+ */
+void MainComponent::layoutWaveformAndStats(juce::Rectangle<int>& bounds)
+{
+  if (currentMode == ViewMode::Overlay) {waveformBounds = getLocalBounds(); }
+  else {waveformBounds = bounds.reduced(Config::windowBorderMargins);} // Use the remaining bounds
+
+  if (showStats) {
+    statsBounds = contentAreaBounds.withHeight(100).reduced(10); // Use contentAreaBounds
+    statsDisplay.setBounds(statsBounds);
+    statsDisplay.setVisible(true);
+    statsDisplay.toFront(true); }
+  else {statsDisplay.setVisible(false); }
 }
 
 void MainComponent::updateQualityButtonText() {
@@ -1362,82 +1494,26 @@ void MainComponent::ensureLoopOrder()
 }
 
 void MainComponent::resized() {
+
   auto bounds = getLocalBounds();
 
-  int rowHeight = Config::buttonHeight + Config::windowBorderMargins * 2; // Make row height configurable based on button height
-  auto topRow = bounds.removeFromTop(rowHeight).reduced(Config::windowBorderMargins);
-  openButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
-  playStopButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
-  autoplayButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
-  loopButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins); 
-  cutButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
-  modeButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
-  statsButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
-  autoCutInButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
-  autoCutOutButton.setBounds(topRow.removeFromLeft(Config::buttonWidth)); topRow.removeFromLeft(Config::windowBorderMargins);
-  exitButton.setBounds(topRow.removeFromRight(Config::buttonWidth)); topRow.removeFromRight(Config::windowBorderMargins);
+  int rowHeight = Config::buttonHeight + Config::windowBorderMargins * 2; // Calculate rowHeight here
 
-  auto loopRow = bounds.removeFromTop(rowHeight).reduced(Config::windowBorderMargins);
-  loopInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
 
-  // Position loopInEditor
-  loopInTextX = loopRow.getX(); // Left edge of the space for loopIn
-  loopTextY = loopRow.getY() + (loopRow.getHeight() / 2) - 10; // Vertically center 20px high text
-  loopInEditor.setBounds(loopInTextX, loopTextY, Config::loopTextWidth, Config::playbackTextHeight); // Set bounds for loopInEditor
-  loopRow.removeFromLeft(Config::loopTextWidth); // Space for loopInEditor
-  loopRow.removeFromLeft(Config::windowBorderMargins / 2);
 
-  clearLoopInButton.setBounds(loopRow.getX(), loopTextY, Config::clearButtonWidth, Config::playbackTextHeight);
-  loopRow.removeFromLeft(25);
+    layoutTopRowButtons(bounds, rowHeight); // Pass rowHeight to the function
 
-  loopRow.removeFromLeft(Config::windowBorderMargins * 2); // Doubled distance
 
-  loopOutButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
 
-  // Position loopOutEditor
-  loopOutTextX = loopRow.getX(); // Left edge of the space for loopOut
-  // loopTextY is already set once, assuming numbers are on the same line
-  loopOutEditor.setBounds(loopOutTextX, loopTextY, Config::loopTextWidth, Config::playbackTextHeight); // Set bounds for loopOutEditor
-  loopRow.removeFromLeft(Config::loopTextWidth); // Space for loopOutEditor
-  loopRow.removeFromLeft(Config::windowBorderMargins / 2);
+  
 
-  clearLoopOutButton.setBounds(loopRow.getX(), loopTextY, Config::clearButtonWidth, Config::playbackTextHeight);
-  loopRow.removeFromLeft(25);
 
-  loopRow.removeFromLeft(Config::windowBorderMargins * 2); 
 
-  inSilenceThresholdEditor.setBounds(loopRow.getX(), loopTextY, 80, Config::playbackTextHeight);
-  loopRow.removeFromLeft(80);
-  autoCutInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth));
-  loopRow.removeFromLeft(Config::windowBorderMargins * 2);
+    layoutLoopAndCutControls(bounds, rowHeight);
 
-  outSilenceThresholdEditor.setBounds(loopRow.getX(), loopTextY, 80, Config::playbackTextHeight);
-  loopRow.removeFromLeft(80);
-  autoCutOutButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth));
-  loopRow.removeFromLeft(Config::windowBorderMargins * 2);
+  layoutBottomRowAndTextDisplay(bounds, rowHeight);
 
-  auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(Config::windowBorderMargins);
-  bottomRowTopY = bottomRow.getY();
-  contentAreaBounds = bounds.reduced(Config::windowBorderMargins); // Store the actual content area bounds here
-  qualityButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
-  channelViewButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
-  statsButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
-  modeButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth));
-
-  playbackLeftTextX = getLocalBounds().getX() + Config::windowBorderMargins;
-  playbackCenterTextX = (getLocalBounds().getWidth() / 2) - (Config::playbackTextWidth / 2); // Use Config::playbackTextWidth
-  playbackRightTextX = getLocalBounds().getRight() - Config::windowBorderMargins - Config::playbackTextWidth; // Use Config::playbackTextWidth
-
-  if (currentMode == ViewMode::Overlay) {waveformBounds = getLocalBounds(); }
-  else {waveformBounds = bounds.reduced(Config::windowBorderMargins);}
-
-  if (showStats) {
-    statsBounds = contentAreaBounds.withHeight(100).reduced(10); // Use contentAreaBounds
-    statsDisplay.setBounds(statsBounds);
-    statsDisplay.setVisible(true);
-    statsDisplay.toFront(true); }
-  else {statsDisplay.setVisible(false); }
-
+  layoutWaveformAndStats(bounds);
 }
 
 juce::FlexBox MainComponent::getTopRowFlexBox(){
@@ -1493,20 +1569,7 @@ void MainComponent::updateComponentStates() {
   const bool enabled = isFileLoaded; // Base enable state depends on file loaded
   const bool cutControlsActive = isCutModeActive && enabled; // Cut controls enabled only if Cut mode is active AND file is loaded
 
-  // Buttons that should always be enabled (and visible)
-  openButton.setEnabled(true);
-  exitButton.setEnabled(true);
-  loopButton.setEnabled(true);
-  autoplayButton.setEnabled(true);
-  cutButton.setEnabled(true);
-
-  // Buttons that depend on a file being loaded (but not necessarily isCutModeActive)
-  playStopButton.setEnabled(enabled);
-  modeButton.setEnabled(enabled);
-  statsButton.setEnabled(enabled);
-  channelViewButton.setEnabled(enabled);
-  qualityButton.setEnabled(enabled);
-  statsDisplay.setEnabled(enabled);
+  updateGeneralButtonStates(enabled); // Call the new function
 
   // Controls related to "Cut" mode: their enabled and visible state depends on isCutModeActive
   // Manual loop point controls are enabled only if Cut mode is active AND their auto-cut is NOT active
@@ -1543,6 +1606,33 @@ void MainComponent::updateComponentStates() {
 
   autoCutInButton.setVisible(isCutModeActive);
   autoCutOutButton.setVisible(isCutModeActive);
+}
+
+/**
+ * @brief Updates the enabled and visible states of general UI buttons.
+ *
+ * This function sets the enabled and visible states for buttons that are
+ * always active or depend only on whether a file is currently loaded,
+ * regardless of the cut mode.
+ *
+ * @param enabled A boolean indicating whether a file is loaded (true) or not (false).
+ */
+void MainComponent::updateGeneralButtonStates(bool enabled)
+{
+  // Buttons that should always be enabled (and visible)
+  openButton.setEnabled(true);
+  exitButton.setEnabled(true);
+  loopButton.setEnabled(true);
+  autoplayButton.setEnabled(true);
+  cutButton.setEnabled(true);
+
+  // Buttons that depend on a file being loaded (but not necessarily isCutModeActive)
+  playStopButton.setEnabled(enabled);
+  modeButton.setEnabled(enabled);
+  statsButton.setEnabled(enabled);
+  channelViewButton.setEnabled(enabled);
+  qualityButton.setEnabled(enabled);
+  statsDisplay.setEnabled(enabled);
 }
 
 juce::FlexBox MainComponent::getBottomRowFlexBox() {
