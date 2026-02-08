@@ -2,13 +2,14 @@
 
 #include <JuceHeader.h>
 #include "Config.h"
-#include "ModernLookAndFeel.h"
+#include "ModernLookAndFeel.h" // Added include for ModernLookAndFeel
 #include "AppEnums.h"
 #include "AudioPlayer.h" // Added for AudioPlayer type recognition
 
 class MainComponent; // Forward declaration
 #include <memory>    // Required for std::unique_ptr
 #include "SilenceDetector.h" // Include the new SilenceDetector class
+#include "MouseHandler.h" // Include the new MouseHandler class
 
 /**
  * @file ControlPanel.h
@@ -167,6 +168,12 @@ public:
      */
     bool getShouldLoop() const { return shouldLoop; }
 
+    /**
+     * @brief Sets whether audio playback should loop.
+     * @param shouldLoopParam True to enable looping, false to disable.
+     */
+    void setShouldLoop(bool shouldLoopParam);
+
     /** @brief Gets the current loop-in position.
      *  @return The loop-in position in seconds.
      */
@@ -271,13 +278,7 @@ public:
     /** @brief Gets the current `PlacementMode` of the application.
      *  @return The current `AppEnums::PlacementMode`.
      */
-    AppEnums::PlacementMode getPlacementMode() const { return currentPlacementMode; }
-
-    /**
-     * @brief Sets the current `PlacementMode` of the application.
-     * @param mode The new `AppEnums::PlacementMode` to set.
-     */
-    void setPlacementMode(AppEnums::PlacementMode mode) { currentPlacementMode = mode; }
+    AppEnums::PlacementMode getPlacementMode() const;
     
     /** @brief Returns whether autoplay is currently enabled.
      *  @return True if autoplay is enabled, false otherwise.
@@ -355,8 +356,7 @@ public:
     /**
      * @brief Handles mouse movement events.
      *
-     * Updates the internal mouse cursor position and triggers a repaint to
-     * provide visual feedback (e.g., drawing the mouse line and time display).
+     * Forwards the event to the owned `MouseHandler` instance.
      * @param event The mouse event details.
      */
     void mouseMove(const juce::MouseEvent& event) override;
@@ -364,8 +364,8 @@ public:
     /**
      * @brief Handles mouse down events.
      *
-     * Initiates dragging for seeking playback, or handles right-click events
-     * for entering loop point placement mode.
+     * Forwards the event to the owned `MouseHandler` instance after
+     * handling text editor focus.
      * @param event The mouse event details.
      */
     void mouseDown(const juce::MouseEvent& event) override;
@@ -373,7 +373,7 @@ public:
     /**
      * @brief Handles mouse drag events.
      *
-     * Updates the playback position if a seeking drag operation is active.
+     * Forwards the event to the owned `MouseHandler` instance.
      * @param event The mouse event details.
      */
     void mouseDrag(const juce::MouseEvent& event) override;
@@ -381,9 +381,7 @@ public:
     /**
      * @brief Handles mouse up events.
      *
-     * Stops any active dragging operation and finalizes a seek operation.
-     * Also handles left-click events for directly seeking to a position or
-     * placing a loop point if in placement mode.
+     * Forwards the event to the owned `MouseHandler` instance.
      * @param event The mouse event details.
      */
     void mouseUp(const juce::MouseEvent& event) override;
@@ -391,8 +389,7 @@ public:
     /**
      * @brief Handles mouse exit events from the component.
      *
-     * Resets the internal mouse cursor position to hide any visual feedback
-     * when the mouse leaves the control panel area.
+     * Forwards the event to the owned `MouseHandler` instance.
      * @param event The mouse event details.
      */
     void mouseExit(const juce::MouseEvent& event) override;
@@ -451,6 +448,7 @@ private:
     MainComponent& owner;                       ///< A reference to the owning `MainComponent` for inter-component communication.
     ModernLookAndFeel modernLF;                 ///< Custom look and feel instance for UI styling.
     std::unique_ptr<SilenceDetector> silenceDetector; ///< Manages silence detection logic and its UI.
+    std::unique_ptr<MouseHandler> mouseHandler;     ///< Manages all mouse interaction logic.
 
     // --- UI Components ---
     juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton; ///< Standard TextButtons for various actions.
@@ -468,18 +466,11 @@ private:
     AppEnums::ViewMode currentMode = AppEnums::ViewMode::Classic;           ///< The currently active view mode (e.g., Classic, Overlay).
     AppEnums::ChannelViewMode currentChannelViewMode = AppEnums::ChannelViewMode::Mono; ///< The currently selected channel view mode.
     AppEnums::ThumbnailQuality currentQuality = AppEnums::ThumbnailQuality::Low; ///< The currently selected waveform thumbnail quality.
-    AppEnums::PlacementMode currentPlacementMode = AppEnums::PlacementMode::None; ///< Tracks if the user is in a mode to place a loop point.
     
     bool showStats = false;                     ///< Flag indicating if the statistics display is currently visible.
     bool shouldLoop = false;                    ///< Flag indicating if audio playback should loop.
     double loopInPosition = -1.0;               ///< The start time of the loop region in seconds (-1.0 means unset).
     double loopOutPosition = -1.0;              ///< The end time of the loop region in seconds (-1.0 means unset).
-
-    int mouseCursorX = -1, mouseCursorY = -1;   ///< Current mouse cursor coordinates relative to this component.
-    double mouseCursorTime = 0.0;               ///< Time in seconds corresponding to `mouseCursorX` over the waveform.
-    bool isDragging = false;                    ///< True if the mouse is currently dragging to seek.
-    double currentPlaybackPosOnDragStart = 0.0; ///< Playback position when a drag operation began.
-    int mouseDragStartX = 0;                    ///< X-coordinate where a mouse drag operation began.
 
     int bottomRowTopY = 0;                      ///< Y-coordinate for the top edge of the bottom row of controls.
     int playbackLeftTextX = 0, playbackRightTextX = 0, playbackCenterTextX = 0; ///< X-coordinates for various playback time display positions.
@@ -496,26 +487,7 @@ private:
     //==============================================================================
 
     //==============================================================================
-    /** @name Private Helper Methods - Mouse Interaction
-     *  @{
-     */
 
-    /**
-     * @brief Handles right-click events specifically for entering loop point placement modes.
-     * @param x The x-coordinate of the mouse click relative to the component.
-     */
-    void handleRightClickForLoopPlacement(int x);
-
-    /**
-     * @brief Seeks the audio player to the position corresponding to the given x-coordinate.
-     *
-     * This method translates a UI pixel coordinate within the waveform display area
-     * into a time in seconds and instructs the `AudioPlayer` to seek to that position.
-     * @param x The x-coordinate of the mouse position relative to the component.
-     */
-    void seekToMousePosition(int x);
-
-    /** @} */
     //==============================================================================
 
     //==============================================================================

@@ -25,7 +25,8 @@
  */
 ControlPanel::ControlPanel(MainComponent& ownerComponent) : owner(ownerComponent),
                                                          modernLF(),
-                                                         silenceDetector(std::make_unique<SilenceDetector>(*this))
+                                                         silenceDetector(std::make_unique<SilenceDetector>(*this)),
+                                                         mouseHandler(std::make_unique<MouseHandler>(*this))
 {
     initialiseLookAndFeel();
     initialiseButtons();
@@ -224,8 +225,8 @@ void ControlPanel::initialiseStatsButton()
     statsButton.setButtonText(Config::statsButtonText);
     statsButton.setClickingTogglesState(true); // Makes it a toggle button
     statsButton.onClick = [this] {
-        showStats = statsButton.getToggleState(); // Update internal state
-        resized(); // Re-layout components
+        setShouldShowStats(statsButton.getToggleState()); // Update internal state
+        // resized() is called inside setShouldShowStats()
         updateComponentStates(); // Update visibility based on new state
     };
 }
@@ -243,8 +244,8 @@ void ControlPanel::initialiseLoopButton()
     loopButton.setButtonText(Config::loopButtonText);
     loopButton.setClickingTogglesState(true); // Makes it a toggle button
     loopButton.onClick = [this] {
-        shouldLoop = loopButton.getToggleState(); // Update internal state
-        owner.getAudioPlayer()->setLooping(shouldLoop); // Inform AudioPlayer
+        setShouldLoop(loopButton.getToggleState()); // Update internal state
+        owner.getAudioPlayer()->setLooping(getShouldLoop()); // Inform AudioPlayer
     };
 }
 
@@ -344,8 +345,8 @@ void ControlPanel::initialiseCutButton()
         if (m_isCutModeActive && owner.getAudioPlayer()->isPlaying())
         {
             double currentPosition = owner.getAudioPlayer()->getTransportSource().getCurrentPosition();
-            double loopIn = loopInPosition;
-            double loopOut = loopOutPosition;
+            double loopIn = getLoopInPosition();
+            double loopOut = getLoopOutPosition();
 
             // Ensure valid loop range before checking current position against it
             if (loopOut > loopIn)
@@ -375,14 +376,14 @@ void ControlPanel::initialiseLoopButtons()
     addAndMakeVisible(loopInButton);
     loopInButton.setButtonText(Config::loopInButtonText);
     loopInButton.onLeftClick = [this] {
-        loopInPosition = owner.getAudioPlayer()->getTransportSource().getCurrentPosition();
+        setLoopInPosition(owner.getAudioPlayer()->getTransportSource().getCurrentPosition());
         ensureLoopOrder();
         updateLoopButtonColors();
         silenceDetector->setIsAutoCutInActive(false); // User manually set loop in, so auto-cut is no longer active
         repaint();
     };
     loopInButton.onRightClick = [this] {
-        currentPlacementMode = AppEnums::PlacementMode::LoopIn;
+        mouseHandler->setCurrentPlacementMode(AppEnums::PlacementMode::LoopIn);
         updateLoopButtonColors();
         silenceDetector->setIsAutoCutInActive(false); // User manually set loop in, so auto-cut is no longer active
         repaint();
@@ -391,13 +392,13 @@ void ControlPanel::initialiseLoopButtons()
     addAndMakeVisible(loopOutButton);
     loopOutButton.setButtonText(Config::loopOutButtonText);
     loopOutButton.onLeftClick = [this] {
-        loopOutPosition = owner.getAudioPlayer()->getTransportSource().getCurrentPosition();
+        setLoopOutPosition(owner.getAudioPlayer()->getTransportSource().getCurrentPosition());
         ensureLoopOrder();
         updateLoopButtonColors();
         repaint();
     };
     loopOutButton.onRightClick = [this] {
-        currentPlacementMode = AppEnums::PlacementMode::LoopOut;
+        mouseHandler->setCurrentPlacementMode(AppEnums::PlacementMode::LoopOut);
         updateLoopButtonColors();
         repaint();
     };
@@ -418,7 +419,7 @@ void ControlPanel::initialiseClearButtons()
     clearLoopInButton.setButtonText(Config::clearButtonText);
     clearLoopInButton.setColour(juce::TextButton::buttonColourId, Config::clearButtonColor);
     clearLoopInButton.onClick = [this] {
-        loopInPosition = 0.0;
+        setLoopInPosition(0.0);
         ensureLoopOrder();
         updateLoopButtonColors();
         updateLoopLabels();
@@ -430,7 +431,7 @@ void ControlPanel::initialiseClearButtons()
     clearLoopOutButton.setButtonText(Config::clearButtonText);
     clearLoopOutButton.setColour(juce::TextButton::buttonColourId, Config::clearButtonColor);
     clearLoopOutButton.onClick = [this] {
-        loopOutPosition = owner.getAudioPlayer()->getThumbnail().getTotalLength();
+        setLoopOutPosition(owner.getAudioPlayer()->getThumbnail().getTotalLength());
         ensureLoopOrder();
         updateLoopButtonColors();
         updateLoopLabels();
@@ -594,8 +595,8 @@ void ControlPanel::paint(juce::Graphics& g)
                 g_ref.drawHorizontalLine((int)bottomThresholdY, lineStartX, lineEndX);
             };
 
-            drawThresholdVisualisation(g, loopInPosition, silenceDetector->getCurrentInSilenceThreshold());
-            drawThresholdVisualisation(g, loopOutPosition, silenceDetector->getCurrentOutSilenceThreshold());
+            drawThresholdVisualisation(g, getLoopInPosition(), silenceDetector->getCurrentInSilenceThreshold());
+            drawThresholdVisualisation(g, getLoopOutPosition(), silenceDetector->getCurrentOutSilenceThreshold());
 
             auto actualIn = juce::jmin(loopInPosition, loopOutPosition);
             auto actualOut = juce::jmax(loopInPosition, loopOutPosition);
@@ -658,7 +659,7 @@ void ControlPanel::paint(juce::Graphics& g)
         g.drawVerticalLine ((int)x, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
     } 
 
-        if (mouseCursorX != -1)
+        if (mouseHandler->getMouseCursorX() != -1)
         {
             juce::Colour currentLineColor;
             juce::Colour currentHighlightColor;
@@ -667,7 +668,7 @@ void ControlPanel::paint(juce::Graphics& g)
     
             // Why: Change mouse cursor color and add glow/shadow when in loop placement mode
             // to provide visual feedback that the mouse is "armed" to set a loop point.
-            if (currentPlacementMode == AppEnums::PlacementMode::LoopIn || currentPlacementMode == AppEnums::PlacementMode::LoopOut)
+            if (mouseHandler->getCurrentPlacementMode() == AppEnums::PlacementMode::LoopIn || mouseHandler->getCurrentPlacementMode() == AppEnums::PlacementMode::LoopOut)
             {
                 currentLineColor = Config::placementModeCursorColor;
                 currentHighlightColor = Config::placementModeCursorColor.withAlpha(0.4f);
@@ -676,9 +677,9 @@ void ControlPanel::paint(juce::Graphics& g)
     
                 // Draw glow/shadow for the vertical line
                 g.setColour(currentGlowColor.withAlpha(0.3f)); // Semi-transparent for shadow effect
-                g.fillRect(mouseCursorX - (int)(currentGlowThickness / 2) - 1, waveformBounds.getY(), (int)currentGlowThickness + 2, waveformBounds.getHeight());
+                g.fillRect(mouseHandler->getMouseCursorX() - (int)(currentGlowThickness / 2) - 1, waveformBounds.getY(), (int)currentGlowThickness + 2, waveformBounds.getHeight());
                 // Draw glow/shadow for the horizontal line
-                g.fillRect(waveformBounds.getX(), mouseCursorY - (int)(currentGlowThickness / 2) - 1, waveformBounds.getWidth(), (int)currentGlowThickness + 2);
+                g.fillRect(waveformBounds.getX(), mouseHandler->getMouseCursorY() - (int)(currentGlowThickness / 2) - 1, waveformBounds.getWidth(), (int)currentGlowThickness + 2);
     
             }
             else
@@ -690,8 +691,8 @@ void ControlPanel::paint(juce::Graphics& g)
             }
     
             g.setColour (currentHighlightColor);
-            g.fillRect (mouseCursorX - 2, waveformBounds.getY(), 5, waveformBounds.getHeight());
-            g.fillRect (waveformBounds.getX(), mouseCursorY - 2, waveformBounds.getWidth(), 5);
+            g.fillRect (mouseHandler->getMouseCursorX() - 2, waveformBounds.getY(), 5, waveformBounds.getHeight());
+            g.fillRect (waveformBounds.getX(), mouseHandler->getMouseCursorY() - 2, waveformBounds.getWidth(), 5);
     
             if (audioLength > 0.0)
             {
@@ -703,7 +704,7 @@ void ControlPanel::paint(juce::Graphics& g)
                     if (sampleRate > 0)
                     {
                         float minVal, maxVal;
-                        audioPlayer->getThumbnail().getApproximateMinMax(mouseCursorTime, mouseCursorTime + (1.0 / sampleRate), 0, minVal, maxVal);
+                        audioPlayer->getThumbnail().getApproximateMinMax(mouseHandler->getMouseCursorTime(), mouseHandler->getMouseCursorTime() + (1.0 / sampleRate), 0, minVal, maxVal);
                         amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
                     }
                 }
@@ -713,40 +714,40 @@ void ControlPanel::paint(juce::Graphics& g)
                             float amplitudeY = centerY - (amplitude * waveformBounds.getHeight() * 0.5f);
                             float bottomAmplitudeY = centerY + (amplitude * waveformBounds.getHeight() * 0.5f); // The bottom amplitude line Y position
                             
-                            juce::ColourGradient amplitudeGlowGradient(Config::mouseAmplitudeGlowColor.withAlpha(0.0f), (float)mouseCursorX, amplitudeY,
-                                                                      Config::mouseAmplitudeGlowColor.withAlpha(0.7f), (float)mouseCursorX, centerY, true);
+                            juce::ColourGradient amplitudeGlowGradient(Config::mouseAmplitudeGlowColor.withAlpha(0.0f), (float)mouseHandler->getMouseCursorX(), amplitudeY,
+                                                                      Config::mouseAmplitudeGlowColor.withAlpha(0.7f), (float)mouseHandler->getMouseCursorX(), centerY, true);
                             g.setGradientFill(amplitudeGlowGradient);
-                            g.fillRect(juce::Rectangle<float>((float)mouseCursorX - Config::mouseAmplitudeGlowThickness / 2, amplitudeY, Config::mouseAmplitudeGlowThickness, centerY - amplitudeY));
-                            g.fillRect(juce::Rectangle<float>((float)mouseCursorX - Config::mouseAmplitudeGlowThickness / 2, centerY, Config::mouseAmplitudeGlowThickness, centerY - amplitudeY));
+                            g.fillRect(juce::Rectangle<float>((float)mouseHandler->getMouseCursorX() - Config::mouseAmplitudeGlowThickness / 2, amplitudeY, Config::mouseAmplitudeGlowThickness, centerY - amplitudeY));
+                            g.fillRect(juce::Rectangle<float>((float)mouseHandler->getMouseCursorX() - Config::mouseAmplitudeGlowThickness / 2, centerY, Config::mouseAmplitudeGlowThickness, centerY - amplitudeY));
                 
                             g.setColour(Config::mouseAmplitudeLineColor);
-                            g.drawVerticalLine((float)mouseCursorX, amplitudeY, bottomAmplitudeY);
+                            g.drawVerticalLine((float)mouseHandler->getMouseCursorX(), amplitudeY, bottomAmplitudeY);
                             
                             // Why: Draw two short horizontal lines at the top and bottom of the amplitude visualization
                             // to clearly indicate the min/max amplitude range at the mouse cursor's X position.
                             float halfLineLength = Config::mouseAmplitudeLineLength / 2.0f;
-                            g.drawHorizontalLine(amplitudeY, (float)mouseCursorX - halfLineLength, (float)mouseCursorX + halfLineLength);
-                            g.drawHorizontalLine(bottomAmplitudeY, (float)mouseCursorX - halfLineLength, (float)mouseCursorX + halfLineLength);
+                            g.drawHorizontalLine(amplitudeY, (float)mouseHandler->getMouseCursorX() - halfLineLength, (float)mouseHandler->getMouseCursorX() + halfLineLength);
+                            g.drawHorizontalLine(bottomAmplitudeY, (float)mouseHandler->getMouseCursorX() - halfLineLength, (float)mouseHandler->getMouseCursorX() + halfLineLength);
                 
                             // Draw amplitude text
                             juce::String amplitudeText = juce::String(amplitude, 2); // Positive amplitude
                             juce::String negativeAmplitudeText = juce::String(-amplitude, 2); // Negative amplitude
                             g.setColour(Config::playbackTextColor);
                             g.setFont(Config::mouseCursorTextSize);
-                            g.drawText(amplitudeText, mouseCursorX + 5, (int)amplitudeY - Config::mouseCursorTextSize, 100, Config::mouseCursorTextSize, juce::Justification::left, true);
+                            g.drawText(amplitudeText, mouseHandler->getMouseCursorX() + 5, (int)amplitudeY - Config::mouseCursorTextSize, 100, Config::mouseCursorTextSize, juce::Justification::left, true);
                             // Why: Display the negative amplitude value to provide complete information about the peak-to-peak amplitude.
-                            g.drawText(negativeAmplitudeText, mouseCursorX + 5, (int)bottomAmplitudeY, 100, Config::mouseCursorTextSize, juce::Justification::left, true);
+                            g.drawText(negativeAmplitudeText, mouseHandler->getMouseCursorX() + 5, (int)bottomAmplitudeY, 100, Config::mouseCursorTextSize, juce::Justification::left, true);
                 
                 
                             // Draw time text
-                            juce::String timeText = formatTime(mouseCursorTime); // Use ControlPanel's formatTime
-                            g.drawText(timeText, mouseCursorX + 5, mouseCursorY + 5, 100, Config::mouseCursorTextSize, juce::Justification::left, true);
+                            juce::String timeText = formatTime(mouseHandler->getMouseCursorTime()); // Use ControlPanel's formatTime
+                            g.drawText(timeText, mouseHandler->getMouseCursorX() + 5, mouseHandler->getMouseCursorY() + 5, 100, Config::mouseCursorTextSize, juce::Justification::left, true);
             }
             
                     // Draw the main cursor lines on top
                     g.setColour (currentLineColor);
-                    g.drawVerticalLine (mouseCursorX, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
-                    g.drawHorizontalLine (mouseCursorY, (float)waveformBounds.getX(), (float)waveformBounds.getRight());        }
+                    g.drawVerticalLine (mouseHandler->getMouseCursorX(), (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
+                    g.drawHorizontalLine (mouseHandler->getMouseCursorY(), (float)waveformBounds.getX(), (float)waveformBounds.getRight());        }
     if (audioLength > 0.0)
     {
         double currentTime = audioPlayer->getTransportSource().getCurrentPosition();
@@ -774,8 +775,8 @@ void ControlPanel::updatePlayButtonText(bool isPlaying)
 
 void ControlPanel::updateLoopLabels()
 {
-    loopInEditor.setText(formatTime(loopInPosition), juce::dontSendNotification); // Use ControlPanel's formatTime
-    loopOutEditor.setText(formatTime(loopOutPosition), juce::dontSendNotification); // Use ControlPanel's formatTime
+    loopInEditor.setText(formatTime(getLoopInPosition()), juce::dontSendNotification); // Use ControlPanel's formatTime
+    loopOutEditor.setText(formatTime(getLoopOutPosition()), juce::dontSendNotification); // Use ControlPanel's formatTime
 }
 
 void ControlPanel::updateComponentStates()
@@ -973,19 +974,19 @@ void ControlPanel::textEditorReturnKeyPressed (juce::TextEditor& editor) {
 
         double newPosition = parseTime(editor.getText());
         if (newPosition >= 0.0 && newPosition <= owner.getAudioPlayer()->getThumbnail().getTotalLength()) {
-            if (loopOutPosition > -1.0 && newPosition > loopOutPosition) {
-                            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+            if (getLoopOutPosition() > -1.0 && newPosition > getLoopOutPosition()) {
+                            editor.setText(formatTime(getLoopInPosition()), juce::dontSendNotification);
                             editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor);
                         } else {
-                            loopInPosition = newPosition;
-                            DBG("    Loop In position set to: " << loopInPosition);
+                            setLoopInPosition(newPosition);
+                            DBG("    Loop In position set to: " << getLoopInPosition());
                             updateLoopButtonColors();
                             silenceDetector->setIsAutoCutInActive(false); // User manually set loop in, so auto-cut is no longer active
                             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
                             repaint();
                         }
                     } else {
-                        editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+                        editor.setText(formatTime(getLoopInPosition()), juce::dontSendNotification);
                         editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor);
                     }
                 } else if (&editor == &loopOutEditor) {
@@ -993,22 +994,22 @@ void ControlPanel::textEditorReturnKeyPressed (juce::TextEditor& editor) {
 
                     double newPosition = parseTime(editor.getText());
                     if (newPosition >= 0.0 && newPosition <= owner.getAudioPlayer()->getThumbnail().getTotalLength()) {
-                        if (shouldLoop && owner.getAudioPlayer()->getTransportSource().getCurrentPosition() >= loopOutPosition)
+                        if (getShouldLoop() && owner.getAudioPlayer()->getTransportSource().getCurrentPosition() >= getLoopOutPosition())
                         {
-                            owner.getAudioPlayer()->getTransportSource().setPosition(loopInPosition);
+                            owner.getAudioPlayer()->getTransportSource().setPosition(getLoopInPosition());
                         }
-                        if (loopInPosition > -1.0 && newPosition < loopInPosition) {
-                            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+                        if (getLoopInPosition() > -1.0 && newPosition < getLoopInPosition()) {
+                            editor.setText(formatTime(getLoopOutPosition()), juce::dontSendNotification);
                             editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor);
                         } else {
-                            loopOutPosition = newPosition;
-                            DBG("    Loop Out position set to: " << loopOutPosition);
+                            setLoopOutPosition(newPosition);
+                            DBG("    Loop Out position set to: " << getLoopOutPosition());
                             updateLoopButtonColors();
                             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
                             repaint();
                         }
                     } else {
-                        editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+                        editor.setText(formatTime(getLoopOutPosition()), juce::dontSendNotification);
                         editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor);
                     }
                 }
@@ -1019,10 +1020,10 @@ void ControlPanel::textEditorEscapeKeyPressed (juce::TextEditor& editor) {
     DBG("Text Editor Escape Key Pressed.");
     if (&editor == &loopInEditor) {
         DBG("  Loop In Editor: Escape Key Pressed");
-        editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+        editor.setText(formatTime(getLoopInPosition()), juce::dontSendNotification);
     } else if (&editor == &loopOutEditor) {
         DBG("  Loop Out Editor: Escape Key Pressed");
-        editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+        editor.setText(formatTime(getLoopOutPosition()), juce::dontSendNotification);
     }
     editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
     editor.giveAwayKeyboardFocus();
@@ -1035,19 +1036,19 @@ void ControlPanel::textEditorFocusLost (juce::TextEditor& editor) {
 
         double newPosition = parseTime(editor.getText());
         if (newPosition >= 0.0 && newPosition <= owner.getAudioPlayer()->getThumbnail().getTotalLength()) {
-            if (loopOutPosition > -1.0 && newPosition > loopOutPosition) {
-                            editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+            if (getLoopOutPosition() > -1.0 && newPosition > getLoopOutPosition()) {
+                            editor.setText(formatTime(getLoopInPosition()), juce::dontSendNotification);
                             editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor);
                         } else {
-                            loopInPosition = newPosition;
-                            DBG("    Loop In position set to: " << loopInPosition);
+                            setLoopInPosition(newPosition);
+                            DBG("    Loop In position set to: " << getLoopInPosition());
                             updateLoopButtonColors();
                             silenceDetector->setIsAutoCutInActive(false); // User manually set loop in, so auto-cut is no longer active
                             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
                             repaint();
                         }
                     } else {
-                        editor.setText(formatTime(loopInPosition), juce::dontSendNotification);
+                        editor.setText(formatTime(getLoopInPosition()), juce::dontSendNotification);
                         editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor);
                         repaint();
                     }
@@ -1056,18 +1057,18 @@ void ControlPanel::textEditorFocusLost (juce::TextEditor& editor) {
 
                     double newPosition = parseTime(editor.getText());
                     if (newPosition >= 0.0 && newPosition <= owner.getAudioPlayer()->getThumbnail().getTotalLength()) {
-                        if (loopInPosition > -1.0 && newPosition < loopInPosition) {
-                            editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+                        if (getLoopInPosition() > -1.0 && newPosition < getLoopInPosition()) {
+                            editor.setText(formatTime(getLoopOutPosition()), juce::dontSendNotification);
                             editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor);
                         } else {
-                            loopOutPosition = newPosition;
-                            DBG("    Loop Out position set to: " << loopOutPosition);
+                            setLoopOutPosition(newPosition);
+                            DBG("    Loop Out position set to: " << getLoopOutPosition());
                             updateLoopButtonColors();
                             editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
                             repaint();
                         }
                     } else {
-                        editor.setText(formatTime(loopOutPosition), juce::dontSendNotification);
+                        editor.setText(formatTime(getLoopOutPosition()), juce::dontSendNotification);
                         editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor);
                     }
                 }
@@ -1117,9 +1118,7 @@ double ControlPanel::parseTime(const juce::String& timeString) {
     if (parts.size() != 4) return -1.0;
     return parts[0].getIntValue() * 3600.0 + parts[1].getIntValue() * 60.0 + parts[2].getIntValue() + parts[3].getIntValue() / 1000.0;
 }
-void ControlPanel::ensureLoopOrder() { if (loopInPosition > loopOutPosition) std::swap(loopInPosition, loopOutPosition); }
-void ControlPanel::setShouldShowStats(bool shouldShowStats) { showStats = shouldShowStats; resized(); }
-void ControlPanel::setTotalTimeStaticString(const juce::String& timeString) { totalTimeStaticStr = timeString; }
+
 /**
  * @brief Sets the text in the stats display box.
  * @param text The text to display.
@@ -1138,13 +1137,31 @@ void ControlPanel::updateStatsDisplay(const juce::String& statsText) {
     statsDisplay.setText(statsText, juce::dontSendNotification);
     statsDisplay.setColour(juce::TextEditor::textColourId, Config::statsDisplayTextColour);
 }
+void ControlPanel::ensureLoopOrder() {
+    if (loopInPosition > loopOutPosition) {
+        std::swap(loopInPosition, loopOutPosition);
+    }
+}
+
+void ControlPanel::setShouldShowStats(bool shouldShowStatsParam) {
+    showStats = shouldShowStatsParam;
+    resized();
+}
+
+void ControlPanel::setTotalTimeStaticString(const juce::String& timeString) {
+    totalTimeStaticStr = timeString;
+}
+
+void ControlPanel::setShouldLoop(bool shouldLoopParam) {
+    shouldLoop = shouldLoopParam;
+}
 void ControlPanel::updateLoopButtonColors() {
-    if (currentPlacementMode == AppEnums::PlacementMode::LoopIn) {
+    if (mouseHandler->getCurrentPlacementMode() == AppEnums::PlacementMode::LoopIn) {
         loopInButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonPlacementModeColor);
     } else {
         loopInButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonActiveColor);
     }
-    if (currentPlacementMode == AppEnums::PlacementMode::LoopOut) {
+    if (mouseHandler->getCurrentPlacementMode() == AppEnums::PlacementMode::LoopOut) {
         loopOutButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonPlacementModeColor);
     } else {
         loopOutButton.setColour(juce::TextButton::buttonColourId, Config::loopButtonActiveColor);
@@ -1166,7 +1183,7 @@ void ControlPanel::setLoopStart(int sampleIndex)
     if (audioPlayer.getAudioFormatReader() != nullptr)
     {
         double sampleRate = audioPlayer.getAudioFormatReader()->sampleRate;
-        loopInPosition = (double)sampleIndex / sampleRate;
+        setLoopInPosition((double)sampleIndex / sampleRate);
         ensureLoopOrder();
         updateLoopLabels();
         repaint();
@@ -1179,7 +1196,7 @@ void ControlPanel::setLoopEnd(int sampleIndex)
     if (audioPlayer.getAudioFormatReader() != nullptr)
     {
         double sampleRate = audioPlayer.getAudioFormatReader()->sampleRate;
-        loopOutPosition = (double)sampleIndex / sampleRate;
+        setLoopOutPosition((double)sampleIndex / sampleRate);
         ensureLoopOrder();
         updateLoopLabels();
         repaint();
@@ -1196,183 +1213,34 @@ const juce::LookAndFeel& ControlPanel::getLookAndFeel() const
     return modernLF;
 }
 
+AppEnums::PlacementMode ControlPanel::getPlacementMode() const
+{
+    return mouseHandler->getCurrentPlacementMode();
+}
 
-/**
- * @brief Handles mouse movement events.
- *        Updates the mouse cursor position and triggers repaint for visual feedback.
- * @param event The mouse event details.
- */
 void ControlPanel::mouseMove(const juce::MouseEvent& event)
 {
-    if (waveformBounds.contains(event.getPosition()))
-    {
-        mouseCursorX = event.x;
-        mouseCursorY = event.y;
-        AudioPlayer* audioPlayer = owner.getAudioPlayer(); // Use pointer here
-        auto audioLength = audioPlayer->getThumbnail().getTotalLength();
-        if (audioLength > 0.0)
-        {
-            float proportion = (float)(mouseCursorX - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-            mouseCursorTime = proportion * audioLength;
-        }
-        else
-        {
-            mouseCursorTime = 0.0;
-        }
-    }
-    else
-    {
-        mouseCursorX = -1;
-        mouseCursorY = -1;
-        mouseCursorTime = 0.0;
-    }
-    repaint();
+    mouseHandler->mouseMove(event);
 }
 
-/**
- * @brief Handles mouse down events.
- *        Initiates dragging for seeking or handles right-click for loop placement.
- * @param event The mouse event details.
- */
-void ControlPanel::mouseDown(juce::MouseEvent const& event)
+void ControlPanel::mouseDown(const juce::MouseEvent& event)
 {
-    // Explicitly handle focus loss for any TextEditor children
-    // If a TextEditor has focus and the click is not on it, it should lose focus.
-    for (auto* child : getChildren())
-    {
-        juce::TextEditor* editorChild = dynamic_cast<juce::TextEditor*>(child);
-        if (editorChild != nullptr && editorChild->hasKeyboardFocus(false))
-        {
-            if (! editorChild->getBoundsInParent().contains(event.getPosition()))
-            {
-                editorChild->giveAwayKeyboardFocus();
-            }
-        }
-    }
-
-    if (waveformBounds.contains(event.getPosition()))
-    {
-        if (event.mods.isLeftButtonDown())
-        {
-            isDragging = true;
-            mouseDragStartX = event.x;
-            currentPlaybackPosOnDragStart = owner.getAudioPlayer()->getTransportSource().getCurrentPosition();
-            seekToMousePosition(event.x);
-        }
-        else if (event.mods.isRightButtonDown())
-        {
-            handleRightClickForLoopPlacement(event.x);
-        }
-    }
+    mouseHandler->mouseDown(event);
 }
 
-/**
- * @brief Handles mouse drag events.
- *        Updates playback position if dragging is active.
- * @param event The mouse event details.
- */
 void ControlPanel::mouseDrag(const juce::MouseEvent& event)
 {
-    if (isDragging && event.mods.isLeftButtonDown() && waveformBounds.contains(event.getPosition()))
-    {
-        seekToMousePosition(event.x);
-    }
+    mouseHandler->mouseDrag(event);
 }
 
-/**
- * @brief Handles mouse up events.
- *        Stops dragging and finalizes seek operation, or handles left-click for seeking.
- * @param event The mouse event details.
- */
 void ControlPanel::mouseUp(const juce::MouseEvent& event)
 {
-    isDragging = false;
-    if (waveformBounds.contains(event.getPosition()) && event.mods.isLeftButtonDown())
-    {
-        if (currentPlacementMode != AppEnums::PlacementMode::None)
-        {
-            AudioPlayer* audioPlayer = owner.getAudioPlayer(); // Use pointer here
-            auto audioLength = audioPlayer->getThumbnail().getTotalLength();
-            if (audioLength > 0.0)
-            {
-                float proportion = (float)(event.x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-                double time = proportion * audioLength;
-
-                if (currentPlacementMode == AppEnums::PlacementMode::LoopIn)
-                {
-                    loopInPosition = time;
-                }
-                else if (currentPlacementMode == AppEnums::PlacementMode::LoopOut)
-                {
-                    loopOutPosition = time;
-                }
-                ensureLoopOrder();
-                updateLoopLabels();
-            }
-            currentPlacementMode = AppEnums::PlacementMode::None; // Reset placement mode
-            updateLoopButtonColors(); // Update button colours
-            repaint();
-        }
-        // If it was a click (not a drag) then seek to position.
-        // If it was a drag, seekToMousePosition would have already been called.
-        else if (mouseDragStartX == event.x)
-        {
-            seekToMousePosition(event.x);
-        }
-    }
+    mouseHandler->mouseUp(event);
 }
 
-/**
- * @brief Handles mouse exit events from the component.
- *        Resets mouse cursor position to hide visual feedback.
- * @param event The mouse event details.
- */
 void ControlPanel::mouseExit(const juce::MouseEvent& event)
 {
-    mouseCursorX = -1;
-    mouseCursorY = -1;
-    mouseCursorTime = 0.0;
-    repaint();
+    mouseHandler->mouseExit(event);
 }
 
-/**
- * @brief Handles right-click events for placing loop in/out points.
- * @param x The x-coordinate of the mouse click relative to the component.
- */
-void ControlPanel::handleRightClickForLoopPlacement(int x)
-{
-    AudioPlayer* audioPlayer = owner.getAudioPlayer(); // Use pointer here
-    auto audioLength = audioPlayer->getThumbnail().getTotalLength();
-    if (audioLength <= 0.0) return;
 
-    float proportion = (float)(x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-    double time = proportion * audioLength;
-
-    if (currentPlacementMode == AppEnums::PlacementMode::LoopIn)
-    {
-        loopInPosition = time;
-    }
-    else if (currentPlacementMode == AppEnums::PlacementMode::LoopOut)
-    {
-        loopOutPosition = time;
-    }
-    ensureLoopOrder();
-    updateLoopButtonColors();
-    updateLoopLabels();
-    repaint();
-}
-
-/**
- * @brief Seeks the audio player to the position corresponding to the given x-coordinate.
- * @param x The x-coordinate of the mouse position relative to the component.
- */
-void ControlPanel::seekToMousePosition(int x)
-{
-    AudioPlayer* audioPlayer = owner.getAudioPlayer(); // Use pointer here
-    auto audioLength = audioPlayer->getThumbnail().getTotalLength();
-    if (audioLength <= 0.0) return;
-
-    float proportion = (float)(x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-    double time = proportion * audioLength;
-    audioPlayer->getTransportSource().setPosition(time);
-}

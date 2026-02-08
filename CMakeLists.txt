@@ -62,6 +62,8 @@ target_sources(Sorta PRIVATE
         Source/AppEnums.h
         Source/SilenceDetector.h
         Source/SilenceDetector.cpp
+        Source/MouseHandler.h
+        Source/MouseHandler.cpp
 )
 
 target_link_libraries(Sorta PRIVATE
