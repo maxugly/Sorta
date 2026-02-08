@@ -56,7 +56,7 @@ namespace Config{
     constexpr float buttonOutlineThickness = 1.0f;
     const juce::Colour buttonOutlineColour = juce::Colour(0xff808080); // Medium Grey Outline
 
-    const juce::Colour buttonBaseColour = juce::Colour(0xff3a3a3a); // Dark Grey
+    const juce::Colour buttonBaseColour = juce::Colour(0xff5a5a5a); // Lighter Dark Grey for better contrast with disabled
     const juce::Colour buttonOnColour = juce::Colour(0xff00bfff);   // Deep Sky Blue (for toggled/highlighted state)
     const juce::Colour buttonTextColour = juce::Colour(0xFFFFFFFF); // White
     // New colors for disabled state

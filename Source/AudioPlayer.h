@@ -102,6 +102,12 @@ public:
      */
     juce::AudioFormatReader* getAudioFormatReader() const;
 
+    /**
+     * @brief Gets the currently loaded audio file.
+     * @return The juce::File object representing the loaded audio file.
+     */
+    juce::File getLoadedFile() const;
+
 private:
     //==============================================================================
     // Private Methods
@@ -118,6 +124,7 @@ private:
     juce::AudioThumbnailCache thumbnailCache;
     juce::AudioThumbnail thumbnail;
 
+    juce::File loadedFile; // Stores the currently loaded file
 
     bool looping = false;
 

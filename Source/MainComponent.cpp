@@ -1,6 +1,7 @@
 #include "MainComponent.h"
 #include "ControlPanel.h"
 #include "Config.h"
+#include <cmath> // For std::abs
 
 MainComponent::MainComponent()
 {
@@ -23,11 +24,14 @@ MainComponent::MainComponent()
         auto result = audioPlayer->loadFile(audioFile);
         if (result.wasOk())
         {
-            controlPanel->setStatsDisplayText("File loaded: " + audioFile.getFileName());
             controlPanel->setTotalTimeStaticString(formatTime(audioPlayer->getThumbnail().getTotalLength()));
             controlPanel->setLoopInPosition(0.0);
             controlPanel->setLoopOutPosition(audioPlayer->getThumbnail().getTotalLength());
             controlPanel->updateComponentStates();
+            
+            // Calculate and display dynamic statistics
+            juce::String stats = buildStatsString();
+            controlPanel->updateStatsDisplay(stats);
             // Further setup for testing can be done via controlPanel
         }
         else
@@ -92,6 +96,10 @@ void MainComponent::timerCallback()
     controlPanel->repaint();
 }
 
+/**
+ * @brief Handles the click event for the open file button.
+ *        Opens a file chooser dialog and loads the selected audio file.
+ */
 void MainComponent::openButtonClicked()
 {
     chooser = std::make_unique<juce::FileChooser>("Select Audio...",
@@ -106,15 +114,18 @@ void MainComponent::openButtonClicked()
             auto result = audioPlayer->loadFile(file);
             if (result.wasOk())
             {
-                controlPanel->setStatsDisplayText("File loaded: " + file.getFileName());
                 controlPanel->setTotalTimeStaticString(formatTime(audioPlayer->getThumbnail().getTotalLength()));
                 controlPanel->setLoopInPosition(0.0);
                 controlPanel->setLoopOutPosition(audioPlayer->getThumbnail().getTotalLength());
                 controlPanel->updateLoopLabels();
                 controlPanel->updateComponentStates();
 
-                // if (controlPanel->shouldAutoplay())
-                //    audioPlayer->togglePlayStop();
+                // Calculate and display dynamic statistics
+                juce::String stats = buildStatsString();
+                controlPanel->updateStatsDisplay(stats);
+
+                if (controlPanel->shouldAutoplay())
+                   audioPlayer->togglePlayStop();
             }
             else
             {
@@ -125,68 +136,10 @@ void MainComponent::openButtonClicked()
     });
 }
 
-void MainComponent::mouseDown(const juce::MouseEvent& e)
-{
-    if (e.mods.isRightButtonDown()) return;
-
-    if (controlPanel->getWaveformBounds().contains(e.getMouseDownPosition()))
-    {
-        auto newPosition = (double)(e.x - controlPanel->getWaveformBounds().getX()) / (double)controlPanel->getWaveformBounds().getWidth() * audioPlayer->getThumbnail().getTotalLength();
-        if (newPosition < 0.0) newPosition = 0.0;
-        if (newPosition > audioPlayer->getThumbnail().getTotalLength()) newPosition = audioPlayer->getThumbnail().getTotalLength();
-
-        if (controlPanel->getPlacementMode() == AppEnums::PlacementMode::LoopIn) {
-            controlPanel->setLoopInPosition(newPosition);
-            controlPanel->setPlacementMode(AppEnums::PlacementMode::None);
-            controlPanel->ensureLoopOrder();
-            controlPanel->updateLoopButtonColors();
-            controlPanel->updateLoopLabels();
-            controlPanel->repaint();
-        } else if (controlPanel->getPlacementMode() == AppEnums::PlacementMode::LoopOut) {
-            controlPanel->setLoopOutPosition(newPosition);
-            controlPanel->setPlacementMode(AppEnums::PlacementMode::None);
-            controlPanel->ensureLoopOrder();
-            controlPanel->updateLoopButtonColors();
-            controlPanel->updateLoopLabels();
-            controlPanel->repaint();
-        } else {
-            seekToPosition(e.x);
-        }
-    }
-}
-
-void MainComponent::mouseDrag(const juce::MouseEvent& e)
-{
-    if (e.mods.isRightButtonDown()) return;
-    if (controlPanel->getPlacementMode() == PlacementMode::None && controlPanel->getWaveformBounds().contains(e.getPosition()))
-    {
-        seekToPosition(e.x);
-    }
-}
-
-void MainComponent::mouseMove(const juce::MouseEvent& e)
-{
-    if (controlPanel->getWaveformBounds().contains(e.getPosition()))
-    {
-        mouseCursorX = e.x;
-        mouseCursorY = e.y;
-        // The actual drawing of the cursor is now in ControlPanel, but we might need to pass the coordinates
-        // For simplicity, we trigger a repaint and let ControlPanel handle it.
-        controlPanel->repaint();
-    }
-    else if (mouseCursorX != -1)
-    {
-        mouseCursorX = -1;
-        mouseCursorY = -1;
-        controlPanel->repaint();
-    }
-}
-
-void MainComponent::mouseUp(const juce::MouseEvent& e)
-{
-    // Potentially handle something here if needed
-}
-
+/**
+ * @brief Seeks the audio playback position based on an X-coordinate in the waveform.
+ * @param x The X-coordinate in pixels relative to the MainComponent.
+ */
 void MainComponent::seekToPosition(int x)
 {
     if (audioPlayer->getThumbnail().getTotalLength() > 0.0)
@@ -248,21 +201,31 @@ bool MainComponent::handleLoopKeybinds(const juce::KeyPress& key)
 {
     auto k = key.getTextCharacter();
     // Simplified, assuming controlPanel handles the logic of whether to ignore
-    if (k == 'i' || k == 'I') {
-        controlPanel->setLoopInPosition(audioPlayer->getTransportSource().getCurrentPosition());
-        controlPanel->repaint();
-        return true;
-    }
-    if (k == 'o' || k == 'O') {
-        controlPanel->setLoopOutPosition(audioPlayer->getTransportSource().getCurrentPosition());
-        controlPanel->repaint();
-        return true;
+    if (controlPanel->getPlacementMode() == AppEnums::PlacementMode::None) // Only allow keybinds if not in waveform placement mode
+    {
+        if (k == 'i' || k == 'I') {
+            if (controlPanel->shouldAutoCutIn()) return false; // Ignore if auto-cut in is active
+            controlPanel->setLoopInPosition(audioPlayer->getTransportSource().getCurrentPosition());
+            controlPanel->repaint();
+            return true;
+        }
+        if (k == 'o' || k == 'O') {
+            if (controlPanel->shouldAutoCutOut()) return false; // Ignore if auto-cut out is active
+            controlPanel->setLoopOutPosition(audioPlayer->getTransportSource().getCurrentPosition());
+            controlPanel->repaint();
+            return true;
+        }
     }
     if (k == 'u' || k == 'U') { controlPanel->clearLoopIn(); return true; }
     if (k == 'p' || k == 'P') { controlPanel->clearLoopOut(); return true; }
     return false;
 }
 
+/**
+ * @brief Formats a time in seconds into a human-readable string (HH:MM:SS:mmm).
+ * @param seconds The time in seconds.
+ * @return A formatted juce::String.
+ */
 juce::String MainComponent::formatTime(double seconds) {
   if (seconds < 0) seconds = 0;
   int hours = (int)(seconds / 3600.0);
@@ -270,4 +233,42 @@ juce::String MainComponent::formatTime(double seconds) {
   int secs = ((int)seconds) % 60;
   int milliseconds = (int)((seconds - (int)seconds) * 1000.0);
   return juce::String::formatted("%02d:%02d:%02d:%03d", hours, minutes, secs, milliseconds);
+}
+
+/**
+ * @brief Builds a string containing various audio statistics.
+ * @return A juce::String with formatted audio statistics.
+ */
+juce::String MainComponent::buildStatsString()
+{
+    juce::String stats;
+    auto* thumbnail = &audioPlayer->getThumbnail();
+    auto* reader = audioPlayer->getAudioFormatReader();
+
+    if (thumbnail && thumbnail->getTotalLength() > 0.0 && reader)
+    {
+        stats << "File: " << audioPlayer->getLoadedFile().getFileName() << "\n";
+        stats << "Samples Loaded: " << reader->lengthInSamples << "\n";
+        stats << "Sample Rate: " << reader->sampleRate << " Hz\n";
+        stats << "Channels: " << thumbnail->getNumChannels() << "\n";
+        stats << "Length: " << formatTime(thumbnail->getTotalLength()) << "\n";
+
+        float minVal = 0.0f, maxVal = 0.0f;
+        thumbnail->getApproximateMinMax(0.0, thumbnail->getTotalLength(), 0, minVal, maxVal); // For channel 0
+        stats << "Approx Peak (Ch 0): " << juce::jmax(std::abs(minVal), std::abs(maxVal)) << "\n";
+        stats << "Min: " << minVal << ", Max: " << maxVal << "\n";
+
+        // If stereo, get stats for channel 1 as well
+        if (thumbnail->getNumChannels() > 1)
+        {
+            thumbnail->getApproximateMinMax(0.0, thumbnail->getTotalLength(), 1, minVal, maxVal); // For channel 1
+            stats << "Approx Peak (Ch 1): " << juce::jmax(std::abs(minVal), std::abs(maxVal)) << "\n";
+            stats << "Min: " << minVal << ", Max: " << maxVal << "\n";
+        }
+    }
+    else
+    {
+        stats << "No file loaded or error reading audio.";
+    }
+    return stats;
 }

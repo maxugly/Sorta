@@ -37,6 +37,8 @@ juce_add_gui_app(Sorta
         PRODUCT_NAME "Sorta"
 )
 
+target_compile_definitions(Sorta PUBLIC JUCE_DEBUG=1)
+
 target_compile_definitions(Sorta PRIVATE
         JUCE_USE_MP3AUDIOFORMAT=1
         JUCE_USE_FLAC_AUDIO_FORMAT=1

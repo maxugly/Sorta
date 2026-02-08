@@ -19,6 +19,7 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
 
     if (reader != nullptr)
     {
+        loadedFile = file; // Store the loaded file
         auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
         transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
         thumbnail.setSource(new juce::FileInputSource(file));
@@ -27,6 +28,15 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
     }
 
     return juce::Result::fail("Failed to read audio file: " + file.getFileName());
+}
+
+/**
+ * @brief Gets the currently loaded audio file.
+ * @return The juce::File object representing the loaded audio file.
+ */
+juce::File AudioPlayer::getLoadedFile() const
+{
+    return loadedFile;
 }
 
 void AudioPlayer::togglePlayStop()

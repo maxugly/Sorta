@@ -94,13 +94,13 @@ public:
      * @brief Sets the loop-in position.
      * @param pos The new loop-in position in seconds.
      */
-    void setLoopInPosition(double pos) { loopInPosition = pos; }
+    void setLoopInPosition(double pos) { loopInPosition = pos; updateComponentStates(); }
 
     /**
      * @brief Sets the loop-out position.
      * @param pos The new loop-out position in seconds.
      */
-    void setLoopOutPosition(double pos) { loopOutPosition = pos; }
+    void setLoopOutPosition(double pos) { loopOutPosition = pos; updateComponentStates(); }
 
     /**
      * @brief Ensures loopInPosition is not after loopOutPosition, swapping if necessary.
@@ -162,6 +162,12 @@ public:
     void setStatsDisplayText(const juce::String& text, juce::Colour color = Config::statsDisplayTextColour);
 
     /**
+     * @brief Updates the stats display with dynamic audio statistics.
+     * @param statsText The formatted string containing the dynamic statistics.
+     */
+    void updateStatsDisplay(const juce::String& statsText);
+
+    /**
      * @brief Gets the current placement mode.
      */
     AppEnums::PlacementMode getPlacementMode() const { return currentPlacementMode; }
@@ -170,6 +176,24 @@ public:
      * @brief Sets the current placement mode.
      */
     void setPlacementMode(AppEnums::PlacementMode mode) { currentPlacementMode = mode; }
+    
+    /**
+     * @brief Returns whether autoplay is enabled.
+     * @return True if autoplay is enabled, false otherwise.
+     */
+    bool shouldAutoplay() const { return m_shouldAutoplay; }
+
+    /**
+     * @brief Returns whether auto-cut in is enabled.
+     * @return True if auto-cut in is enabled, false otherwise.
+     */
+    bool shouldAutoCutIn() const { return m_shouldAutoCutIn; }
+
+    /**
+     * @brief Returns whether auto-cut out is enabled.
+     * @return True if auto-cut out is enabled, false otherwise.
+     */
+    bool shouldAutoCutOut() const { return m_shouldAutoCutOut; }
     
     /**
      * @brief Updates the colors of the loop buttons based on the current placement mode.
@@ -181,14 +205,68 @@ public:
      */
     juce::Rectangle<int> getWaveformBounds() const { return waveformBounds; }
 
+    /**
+     * @brief Handles mouse movement events.
+     *        Updates the mouse cursor position and triggers repaint for visual feedback.
+     * @param event The mouse event details.
+     */
+    void mouseMove(const juce::MouseEvent& event) override;
+
+    /**
+     * @brief Handles mouse down events.
+     *        Initiates dragging for seeking or handles right-click for loop placement.
+     * @param event The mouse event details.
+     */
+    void mouseDown(const juce::MouseEvent& event) override;
+
+    /**
+     * @brief Handles mouse drag events.
+     *        Updates playback position if dragging is active.
+     * @param event The mouse event details.
+     */
+    void mouseDrag(const juce::MouseEvent& event) override;
+
+    /**
+     * @brief Handles mouse up events.
+     *        Stops dragging and finalizes seek operation, or handles left-click for seeking.
+     * @param event The mouse event details.
+     */
+    void mouseUp(const juce::MouseEvent& event) override;
+
+    /**
+     * @brief Handles mouse exit events from the component.
+     *        Resets mouse cursor position to hide visual feedback.
+     * @param event The mouse event details.
+     */
+    void mouseExit(const juce::MouseEvent& event) override;
+
     // Silence detection
     void detectInSilence();
     void detectOutSilence();
 
 private:
+    /**
+     * @brief Overrides from juce::TextEditor::Listener to handle text changes in editors.
+     * @param editor The TextEditor that triggered the event.
+     */
     void textEditorTextChanged(juce::TextEditor& editor) override;
+
+    /**
+     * @brief Overrides from juce::TextEditor::Listener to handle return key presses in editors.
+     * @param editor The TextEditor that triggered the event.
+     */
     void textEditorReturnKeyPressed(juce::TextEditor& editor) override;
+
+    /**
+     * @brief Overrides from juce::TextEditor::Listener to handle escape key presses in editors.
+     * @param editor The TextEditor that triggered the event.
+     */
     void textEditorEscapeKeyPressed(juce::TextEditor& editor) override;
+
+    /**
+     * @brief Overrides from juce::TextEditor::Listener to handle focus loss from editors.
+     * @param editor The TextEditor that triggered the event.
+     */
     void textEditorFocusLost(juce::TextEditor& editor) override;
 
     MainComponent& owner;
@@ -216,6 +294,11 @@ private:
     double loopOutPosition = -1.0;
 
     int mouseCursorX = -1, mouseCursorY = -1;
+    double mouseCursorTime = 0.0; // Time in seconds corresponding to mouseCursorX
+    bool isDragging = false;
+    double currentPlaybackPosOnDragStart = 0.0;
+    int mouseDragStartX = 0;
+
     int bottomRowTopY = 0;
     int playbackLeftTextX = 0, playbackRightTextX = 0, playbackCenterTextX = 0;
     
@@ -223,14 +306,27 @@ private:
     juce::String loopInDisplayString, loopOutDisplayString;
     int loopInTextX = 0, loopOutTextX = 0, loopTextY = 0;
 
-    bool shouldAutoplay = false;
-    bool shouldAutoCutIn = false;
-    bool shouldAutoCutOut = false;
+    bool m_shouldAutoplay = false;
+    bool m_shouldAutoCutIn = false;
+    bool m_shouldAutoCutOut = false;
     float glowAlpha = 0.0f;
     bool isCutModeActive = false;
 
     float currentInSilenceThreshold = Config::silenceThreshold;
     float currentOutSilenceThreshold = Config::outSilenceThreshold;
+
+    // Private helper methods for mouse interaction
+    /**
+     * @brief Handles right-click events for placing loop in/out points.
+     * @param x The x-coordinate of the mouse click relative to the component.
+     */
+    void handleRightClickForLoopPlacement(int x);
+
+    /**
+     * @brief Seeks the audio player to the position corresponding to the given x-coordinate.
+     * @param x The x-coordinate of the mouse position relative to the component.
+     */
+    void seekToMousePosition(int x);
 
     // Initialization
     void initialiseLookAndFeel();
