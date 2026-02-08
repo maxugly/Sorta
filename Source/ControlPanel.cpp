@@ -426,16 +426,37 @@ void ControlPanel::paint(juce::Graphics& g)
             auto actualOut = juce::jmax(loopInPosition, loopOutPosition);
             auto inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualIn / audioLength);
             auto outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (actualOut / audioLength);
-            g.setColour(Config::loopRegionColor);
-            // Draw region to the left of loopIn
-            g.fillRect(juce::Rectangle<float>((float)waveformBounds.getX(), (float)waveformBounds.getY(), inX - (float)waveformBounds.getX(), (float)waveformBounds.getHeight()));
-            // Draw region to the right of loopOut
-            g.fillRect(juce::Rectangle<float>(outX, (float)waveformBounds.getY(), (float)waveformBounds.getRight() - outX, (float)waveformBounds.getHeight()));
+            const float fadeLength = waveformBounds.getWidth() * Config::waveBoxHaze;
+
+            // Draw region to the left of loopIn with fade
+            juce::Rectangle<float> leftRegion((float)waveformBounds.getX(), (float)waveformBounds.getY(), inX - (float)waveformBounds.getX(), (float)waveformBounds.getHeight());
+            if (leftRegion.getWidth() > 0)
+            {
+                juce::ColourGradient leftFadeGradient(Config::loopRegionColor, inX, leftRegion.getCentreY(),
+                                                      Config::hazyWaveBoxFadeColor, inX - fadeLength, leftRegion.getCentreY(), false);
+                g.setGradientFill(leftFadeGradient);
+                g.fillRect(leftRegion);
+            }
+            
+            // Draw region to the right of loopOut with fade
+            juce::Rectangle<float> rightRegion(outX, (float)waveformBounds.getY(), (float)waveformBounds.getRight() - outX, (float)waveformBounds.getHeight());
+            if (rightRegion.getWidth() > 0)
+            {
+                juce::ColourGradient rightFadeGradient(Config::hazyWaveBoxFadeColor, outX + fadeLength, rightRegion.getCentreY(),
+                                                       Config::loopRegionColor, outX, rightRegion.getCentreY(), false);
+                g.setGradientFill(rightFadeGradient);
+                g.fillRect(rightRegion);
+            }
 
             juce::Colour glowColor = Config::loopLineColor.withAlpha(Config::loopLineColor.getFloatAlpha() * (1.0f - glowAlpha));
             g.setColour(glowColor);
             g.fillRect(inX - (Config::loopLineGlowThickness / 2.0f - 0.5f), (float)waveformBounds.getY(), Config::loopLineGlowThickness, (float)waveformBounds.getHeight());
             g.fillRect(outX - (Config::loopLineGlowThickness / 2.0f - 0.5f), (float)waveformBounds.getY(), Config::loopLineGlowThickness, (float)waveformBounds.getHeight());
+
+            // Draw horizontal lines connecting loop in/out markers at top and bottom
+            g.setColour(Config::loopLineColor); // Use the same color as vertical lines
+            g.drawHorizontalLine(waveformBounds.getY(), (int)inX, (int)outX); // Top line
+            g.drawHorizontalLine(waveformBounds.getBottom() - 1, (int)inX, (int)outX); // Bottom line (offset by 1 to be inside bounds)
         }
 
         // Playback Cursor

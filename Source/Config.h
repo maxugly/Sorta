@@ -108,6 +108,13 @@ namespace Config{
     const juce::Colour loopRegionColor = juce::Colour(0xff0066cc).withAlpha(0.3f);
     const juce::Colour loopLineColor = juce::Colours::blue;
 
+    // New colors for the hazy wave box effect
+    const juce::Colour hazyWaveBoxFadeColor = juce::Colours::black.withAlpha(0.0f); // Fully transparent black for fade effect
+    const juce::Colour hazyWavyBoxLineColor = juce::Colours::cyan; // A distinct color for the lines
+
+    // New variable for fade effect
+    constexpr float waveBoxHaze = 0.2f; // Represents the proportion of the shaded box's width to fade
+
     // --- Silence Detection ---
     constexpr float silenceThreshold = 0.01f;
     constexpr float outSilenceThreshold = 0.01f; // Default for outbound silence detection
