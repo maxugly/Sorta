@@ -2,6 +2,7 @@
 #include "ControlPanel.h" // Full header required for implementation details.
 #include "AudioPlayer.h"
 #include "SilenceThresholdPresenter.h"
+#include "SilenceAnalysisWorker.h"
 
 /**
  * @file SilenceDetector.cpp
@@ -52,54 +53,9 @@ SilenceDetector::~SilenceDetector() = default;
  */
 void SilenceDetector::detectInSilence()
 {
-    AudioPlayer& audioPlayer = owner.getAudioPlayer();
-    bool wasPlaying = audioPlayer.isPlaying();
-    if (wasPlaying) {
-        audioPlayer.getTransportSource().stop();
-    }
-
-    juce::AudioFormatReader* reader = audioPlayer.getAudioFormatReader();
-    if (!reader)
-    {
-        owner.getStatsDisplay().insertTextAtCaret("No audio loaded to detect silence.\\n");
-        if (wasPlaying) { audioPlayer.getTransportSource().start(); } // Resume if was playing
-        return;
-    }
-
-    juce::int64 lengthInSamples = reader->lengthInSamples;
-    owner.getStatsDisplay().insertTextAtCaret("SilenceDetector: Reading " + juce::String(lengthInSamples) + " samples for In detection.\\n");
-
-    if (lengthInSamples == 0) // Added check for 0-length audio
-    {
-        owner.getStatsDisplay().insertTextAtCaret("SilenceDetector: Audio length is 0, cannot detect silence.\\n");
-        if (wasPlaying) { audioPlayer.getTransportSource().start(); } // Resume if was playing
-        return;
-    }
-
-    // Create a temporary buffer and read the entire audio into it for fast analysis.
-    auto buffer = std::make_unique<juce::AudioBuffer<float>>(reader->numChannels, (int)lengthInSamples);
-    reader->read(buffer.get(), 0, (int)lengthInSamples, 0, true, true);
-    
-    const int numSamples = buffer->getNumSamples();
-
-    // Scan from the start to find the first sample above the threshold.
-    for (int sample = 0; sample < numSamples; ++sample)
-    {
-        // Check across all channels for a non-silent sample.
-        for (int channel = 0; channel < buffer->getNumChannels(); ++channel)
-        {
-            if (std::abs(buffer->getSample(channel, sample)) > currentInSilenceThreshold)
-            {
-                owner.setLoopStart(sample);
-                owner.getStatsDisplay().insertTextAtCaret("Auto-set loop start to sample " + juce::String(sample) + " (" + owner.formatTime((double)sample / reader->sampleRate) + ")\\n");
-                if (wasPlaying) { audioPlayer.getTransportSource().start(); } // Resume playback
-                return; // Exit after finding the first non-silent sample.
-            }
-        }
-    }
-    owner.getStatsDisplay().insertTextAtCaret("Could not detect any sound at start.\\n");
-    if (wasPlaying) { audioPlayer.getTransportSource().start(); } // Resume playback
+    SilenceAnalysisWorker::detectInSilence(owner, currentInSilenceThreshold);
 }
+
 
 /**
  * @brief Detects the end of sound in the audio file and sets the loop end point.
@@ -113,59 +69,9 @@ void SilenceDetector::detectInSilence()
  */
 void SilenceDetector::detectOutSilence()
 {
-    AudioPlayer& audioPlayer = owner.getAudioPlayer();
-    bool wasPlaying = audioPlayer.isPlaying();
-    if (wasPlaying) {
-        audioPlayer.getTransportSource().stop();
-    }
-
-    juce::AudioFormatReader* reader = audioPlayer.getAudioFormatReader();
-    if (!reader)
-    {
-        owner.getStatsDisplay().insertTextAtCaret("No audio loaded to detect silence.\\n");
-        if (wasPlaying) { audioPlayer.getTransportSource().start(); } // Resume if was playing
-        return;
-    }
-
-    juce::int64 lengthInSamples = reader->lengthInSamples;
-    owner.getStatsDisplay().insertTextAtCaret("SilenceDetector: Reading " + juce::String(lengthInSamples) + " samples for Out detection.\\n");
-
-    if (lengthInSamples == 0) // Added check for 0-length audio
-    {
-        owner.getStatsDisplay().insertTextAtCaret("SilenceDetector: Audio length is 0, cannot detect silence.\\n");
-        if (wasPlaying) { audioPlayer.getTransportSource().start(); } // Resume if was playing
-        return;
-    }
-
-    // Read audio into memory for fast reverse scanning.
-    auto buffer = std::make_unique<juce::AudioBuffer<float>>(reader->numChannels, (int)lengthInSamples);
-    reader->read(buffer.get(), 0, (int)lengthInSamples, 0, true, true);
-    
-    const int numSamples = buffer->getNumSamples();
-
-    // Find the last sample that is not silence to avoid clipping the audio tail.
-    for (int sample = numSamples - 1; sample >= 0; --sample)
-    {
-        // Check across all channels for a non-silent sample.
-        for (int channel = 0; channel < buffer->getNumChannels(); ++channel)
-        {
-            if (std::abs(buffer->getSample(channel, sample)) > currentOutSilenceThreshold)
-            {
-                // Set loop end slightly after the last sound to include reverb tails.
-                // This 50ms buffer provides a more natural-sounding loop end.
-                int endPoint = sample + (int)(reader->sampleRate * 0.05); // 50ms buffer
-                endPoint = juce::jmin(endPoint, numSamples);
-                
-                owner.setLoopEnd(endPoint);
-                owner.getStatsDisplay().insertTextAtCaret("Auto-set loop end to sample " + juce::String(endPoint) + " (" + owner.formatTime((double)endPoint / reader->sampleRate) + ")\\n");
-                if (wasPlaying) { audioPlayer.getTransportSource().start(); } // Resume playback
-                return; // Exit after finding the last non-silent sample.
-            }
-        }
-    }
-    owner.getStatsDisplay().insertTextAtCaret("Could not detect any sound at end.\\n");
-    if (wasPlaying) { audioPlayer.getTransportSource().start(); } // Resume playback
+    SilenceAnalysisWorker::detectOutSilence(owner, currentOutSilenceThreshold);
 }
+
 
 /**
  * @brief Provides real-time visual feedback as the user types in a threshold editor.
