@@ -74,6 +74,8 @@ target_sources(Sorta PRIVATE
         Source/ControlStatePresenter.cpp
         Source/TransportPresenter.h
         Source/TransportPresenter.cpp
+        Source/SilenceDetectionPresenter.h
+        Source/SilenceDetectionPresenter.cpp
         Source/StatsPresenter.h
         Source/StatsPresenter.cpp
         Source/MouseHandler.h

@@ -7,6 +7,7 @@
 #include "LoopPresenter.h"
 #include "ControlStatePresenter.h"
 #include "TransportPresenter.h"
+#include "SilenceDetectionPresenter.h"
 #include "WaveformRenderer.h"
 #include <cmath> // For std::abs
 
@@ -38,6 +39,7 @@ ControlPanel::ControlPanel(MainComponent& ownerComponent) : owner(ownerComponent
 {
     initialiseLookAndFeel();
     statsPresenter = std::make_unique<StatsPresenter>(*this);
+    silenceDetectionPresenter = std::make_unique<SilenceDetectionPresenter>(*this);
     initialiseButtons();
     initialiseLoopButtons();
     initialiseClearButtons();
@@ -284,15 +286,8 @@ void ControlPanel::initialiseAutoCutInButton()
     autoCutInButton.setButtonText(Config::autoCutInButtonText);
     autoCutInButton.setClickingTogglesState(true); // Make it a toggle button
     autoCutInButton.onClick = [this] {
-        const bool isAutoCutActive = autoCutInButton.getToggleState();
-        silenceDetector->setIsAutoCutInActive(isAutoCutActive); // Inform SilenceDetector
-        updateComponentStates(); // Update related component states
-        // Why: If auto-cut in is activated and an audio file is loaded,
-        // immediately run the detection to set the loop-in point.
-        // This provides instant feedback and functionality to the user.
-        if (isAutoCutActive && owner.getAudioPlayer()->getThumbnail().getTotalLength() > 0.0) {
-            silenceDetector->detectInSilence();
-        }
+        if (silenceDetectionPresenter != nullptr)
+            silenceDetectionPresenter->handleAutoCutInToggle(autoCutInButton.getToggleState());
     };
 }
 
@@ -310,15 +305,8 @@ void ControlPanel::initialiseAutoCutOutButton()
     autoCutOutButton.setButtonText(Config::autoCutOutButtonText);
     autoCutOutButton.setClickingTogglesState(true); // Make it a toggle button
     autoCutOutButton.onClick = [this] {
-        const bool isAutoCutActive = autoCutOutButton.getToggleState();
-        silenceDetector->setIsAutoCutOutActive(isAutoCutActive); // Inform SilenceDetector
-        updateComponentStates(); // Update related component states
-        // Why: If auto-cut out is activated and an audio file is loaded,
-        // immediately run the detection to set the loop-out point.
-        // This provides instant feedback and functionality to the user.
-        if (isAutoCutActive && owner.getAudioPlayer()->getThumbnail().getTotalLength() > 0.0) {
-            silenceDetector->detectOutSilence();
-        }
+        if (silenceDetectionPresenter != nullptr)
+            silenceDetectionPresenter->handleAutoCutOutToggle(autoCutOutButton.getToggleState());
     };
 }
 
