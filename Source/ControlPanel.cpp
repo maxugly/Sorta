@@ -10,6 +10,7 @@
 #include "TransportPresenter.h"
 #include "SilenceDetectionPresenter.h"
 #include "ControlButtonsPresenter.h"
+#include "LoopEditorPresenter.h"
 #include "WaveformRenderer.h"
 #include <cmath> // For std::abs
 
@@ -86,27 +87,9 @@ void ControlPanel::initialiseLookAndFeel()
  */
 void ControlPanel::initialiseLoopEditors()
 {
-    addAndMakeVisible(loopInEditor);
-    loopInEditor.setReadOnly(false); // Allows user to type
-    loopInEditor.setJustification(juce::Justification::centred);
-    loopInEditor.setColour(juce::TextEditor::backgroundColourId, Config::textEditorBackgroundColour);
-    loopInEditor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
-    loopInEditor.setFont(juce::Font(juce::FontOptions(Config::playbackTextSize)));
-    loopInEditor.setMultiLine(false); // Single line input
-    loopInEditor.setReturnKeyStartsNewLine(false); // Enter key applies value
-    loopInEditor.setWantsKeyboardFocus(true); // Can receive keyboard focus
+    loopEditorPresenter = std::make_unique<LoopEditorPresenter>(*this);
+    loopEditorPresenter->initialiseEditors();
 
-    addAndMakeVisible(loopOutEditor);
-    loopOutEditor.setReadOnly(false); // Allows user to type
-    loopOutEditor.setJustification(juce::Justification::centred);
-    loopOutEditor.setColour(juce::TextEditor::backgroundColourId, Config::textEditorBackgroundColour);
-    loopOutEditor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
-    loopOutEditor.setFont(juce::Font(juce::FontOptions(Config::playbackTextSize)));
-    loopOutEditor.setMultiLine(false); // Single line input
-    loopOutEditor.setReturnKeyStartsNewLine(false); // Enter key applies value
-    loopOutEditor.setWantsKeyboardFocus(true); // Can receive keyboard focus
-
-    // Add TextEditors managed by SilenceDetector
     addAndMakeVisible(silenceDetector->getInSilenceThresholdEditor());
     addAndMakeVisible(silenceDetector->getOutSilenceThresholdEditor());
 }

@@ -19,6 +19,7 @@ class ControlStatePresenter;
 class TransportPresenter;
 class SilenceDetectionPresenter;
 class ControlButtonsPresenter;
+class LoopEditorPresenter;
 
 /**
  * @file ControlPanel.h
@@ -458,6 +459,7 @@ private:
     friend class TransportPresenter;
     friend class SilenceDetectionPresenter;
     friend class ControlButtonsPresenter;
+    friend class LoopEditorPresenter;
 
     //==============================================================================
     /** @name juce::TextEditor::Listener Overrides (Private)
@@ -486,6 +488,7 @@ private:
     std::unique_ptr<TransportPresenter> transportPresenter; ///< Handles loop/autoplay/cut button behaviour.
     std::unique_ptr<SilenceDetectionPresenter> silenceDetectionPresenter; ///< Owns auto-cut toggle behaviour.
     std::unique_ptr<ControlButtonsPresenter> buttonPresenter; ///< Handles button initialization.
+    std::unique_ptr<LoopEditorPresenter> loopEditorPresenter; ///< Manages loop editor setup and validation.
 
     // --- UI Components ---
     juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton; ///< Standard TextButtons for various actions.

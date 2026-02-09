@@ -1,0 +1,134 @@
+#include "LoopEditorPresenter.h"
+
+#include "ControlPanel.h"
+#include "Config.h"
+
+LoopEditorPresenter::LoopEditorPresenter(ControlPanel& ownerPanel)
+    : owner(ownerPanel),
+      loopInEditor(owner.loopInEditor),
+      loopOutEditor(owner.loopOutEditor)
+{
+}
+
+LoopEditorPresenter::~LoopEditorPresenter()
+{
+    loopInEditor.removeListener(this);
+    loopOutEditor.removeListener(this);
+}
+
+void LoopEditorPresenter::initialiseEditors()
+{
+    auto configure = [](juce::TextEditor& editor)
+    {
+        editor.setReadOnly(false);
+        editor.setJustification(juce::Justification::centred);
+        editor.setColour(juce::TextEditor::backgroundColourId, Config::textEditorBackgroundColour);
+        editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
+        editor.setFont(juce::Font(juce::FontOptions(Config::playbackTextSize)));
+        editor.setMultiLine(false);
+        editor.setReturnKeyStartsNewLine(false);
+        editor.setWantsKeyboardFocus(true);
+    };
+
+    owner.addAndMakeVisible(loopInEditor);
+    configure(loopInEditor);
+    loopInEditor.addListener(this);
+
+    owner.addAndMakeVisible(loopOutEditor);
+    configure(loopOutEditor);
+    loopOutEditor.addListener(this);
+}
+
+void LoopEditorPresenter::textEditorTextChanged(juce::TextEditor& editor)
+{
+    const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
+    const double newPosition = parseTime(editor.getText());
+
+    if (newPosition >= 0.0 && newPosition <= totalLength)
+        editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
+    else if (newPosition == -1.0)
+        editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor);
+    else
+        editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor);
+}
+
+void LoopEditorPresenter::textEditorReturnKeyPressed(juce::TextEditor& editor)
+{
+    applyLoopEdit(editor, &editor == &loopInEditor);
+    editor.giveAwayKeyboardFocus();
+}
+
+void LoopEditorPresenter::textEditorEscapeKeyPressed(juce::TextEditor& editor)
+{
+    restoreEditorValue(editor, &editor == &loopInEditor);
+    editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
+    editor.giveAwayKeyboardFocus();
+}
+
+void LoopEditorPresenter::textEditorFocusLost(juce::TextEditor& editor)
+{
+    applyLoopEdit(editor, &editor == &loopInEditor);
+}
+
+void LoopEditorPresenter::applyLoopEdit(juce::TextEditor& editor, bool isLoopIn)
+{
+    const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
+    const double newPosition = parseTime(editor.getText());
+
+    if (newPosition >= 0.0 && newPosition <= totalLength)
+    {
+        if (isLoopIn)
+        {
+            if (owner.getLoopOutPosition() > -1.0 && newPosition > owner.getLoopOutPosition())
+            {
+                restoreEditorValue(editor, true);
+                editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor);
+                return;
+            }
+            owner.setLoopInPosition(newPosition);
+            owner.updateLoopButtonColors();
+            owner.silenceDetector->setIsAutoCutInActive(false);
+        }
+        else
+        {
+            if (owner.getShouldLoop() && owner.getAudioPlayer().getTransportSource().getCurrentPosition() >= owner.getLoopOutPosition())
+                owner.getAudioPlayer().getTransportSource().setPosition(owner.getLoopInPosition());
+
+            if (owner.getLoopInPosition() > -1.0 && newPosition < owner.getLoopInPosition())
+            {
+                restoreEditorValue(editor, false);
+                editor.setColour(juce::TextEditor::textColourId, Config::textEditorWarningColor);
+                return;
+            }
+            owner.setLoopOutPosition(newPosition);
+        }
+
+        editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
+        owner.ensureLoopOrder();
+        owner.updateLoopLabels();
+        owner.repaint();
+    }
+    else
+    {
+        restoreEditorValue(editor, isLoopIn);
+        editor.setColour(juce::TextEditor::textColourId, Config::textEditorErrorColor);
+        owner.repaint();
+    }
+}
+
+void LoopEditorPresenter::restoreEditorValue(juce::TextEditor& editor, bool isLoopIn)
+{
+    const double value = isLoopIn ? owner.getLoopInPosition() : owner.getLoopOutPosition();
+    editor.setText(owner.formatTime(value), juce::dontSendNotification);
+}
+
+double LoopEditorPresenter::parseTime(const juce::String& timeString) const
+{
+    auto parts = juce::StringArray::fromTokens(timeString, ":", "");
+    if (parts.size() != 4) return -1.0;
+    return parts[0].getIntValue() * 3600.0
+         + parts[1].getIntValue() * 60.0
+         + parts[2].getIntValue()
+         + parts[3].getIntValue() / 1000.0;
+}
+
