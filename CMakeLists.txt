@@ -78,6 +78,9 @@ target_sources(Sorta PRIVATE
         Source/SilenceDetectionPresenter.cpp
         Source/SilenceAnalysisWorker.h
         Source/SilenceAnalysisWorker.cpp
+        Source/SilenceDetectionLogger.h
+        Source/SilenceDetectionLogger.cpp
+        Source/ControlPanelCopy.h
         Source/SilenceThresholdPresenter.h
         Source/SilenceThresholdPresenter.cpp
         Source/StatsPresenter.h

@@ -2,6 +2,7 @@
 #include "MainComponent.h" // Full header required for MainComponent access (e.g., getAudioPlayer)
 #include "AudioPlayer.h"    // Required for AudioPlayer types in public methods
 #include "Config.h"
+#include "ControlPanelCopy.h"
 #include "LayoutManager.h"
 #include "StatsPresenter.h"
 #include "LoopPresenter.h"
@@ -113,7 +114,7 @@ void ControlPanel::initialiseButtons()
 void ControlPanel::initialiseOpenButton()
 {
     addAndMakeVisible(openButton);
-    openButton.setButtonText(Config::openButtonText);
+    openButton.setButtonText(ControlPanelCopy::openButtonText());
     openButton.onClick = [this] { owner.openButtonClicked(); };
 }
 
@@ -127,7 +128,7 @@ void ControlPanel::initialiseOpenButton()
 void ControlPanel::initialisePlayStopButton()
 {
     addAndMakeVisible(playStopButton);
-    playStopButton.setButtonText(Config::playButtonText); // Initialize text
+    playStopButton.setButtonText(ControlPanelCopy::playButtonText()); // Initialize text
     playStopButton.onClick = [this] { owner.getAudioPlayer()->togglePlayStop(); };
     playStopButton.setEnabled(false); // Disabled until an audio file is loaded
 }
@@ -143,11 +144,11 @@ void ControlPanel::initialisePlayStopButton()
 void ControlPanel::initialiseModeButton()
 {
     addAndMakeVisible (modeButton);
-    modeButton.setButtonText (Config::viewModeClassicText);
+    modeButton.setButtonText (ControlPanelCopy::viewModeClassicText());
     modeButton.setClickingTogglesState (true); // Makes it a toggle button
     modeButton.onClick = [this] {
         currentMode = modeButton.getToggleState() ? AppEnums::ViewMode::Overlay : AppEnums::ViewMode::Classic;
-        modeButton.setButtonText (currentMode == AppEnums::ViewMode::Classic ? Config::viewModeClassicText : Config::viewModeOverlayText);
+        modeButton.setButtonText (currentMode == AppEnums::ViewMode::Classic ? ControlPanelCopy::viewModeClassicText() : ControlPanelCopy::viewModeOverlayText());
         resized(); // Re-layout components based on new view mode
         repaint(); // Redraw to reflect changes
     };
@@ -164,11 +165,11 @@ void ControlPanel::initialiseModeButton()
 void ControlPanel::initialiseChannelViewButton()
 {
     addAndMakeVisible(channelViewButton);
-    channelViewButton.setButtonText(Config::channelViewMonoText);
+    channelViewButton.setButtonText(ControlPanelCopy::channelViewMonoText());
     channelViewButton.setClickingTogglesState(true); // Makes it a toggle button
     channelViewButton.onClick = [this] {
         currentChannelViewMode = channelViewButton.getToggleState() ? AppEnums::ChannelViewMode::Stereo : AppEnums::ChannelViewMode::Mono;
-        channelViewButton.setButtonText(currentChannelViewMode == AppEnums::ChannelViewMode::Mono ? Config::channelViewMonoText : Config::channelViewStereoText);
+        channelViewButton.setButtonText(currentChannelViewMode == AppEnums::ChannelViewMode::Mono ? ControlPanelCopy::channelViewMonoText() : ControlPanelCopy::channelViewStereoText());
         repaint(); // Redraw waveform to reflect channel view change
     };
 }
@@ -185,7 +186,7 @@ void ControlPanel::initialiseChannelViewButton()
 void ControlPanel::initialiseQualityButton()
 {
     addAndMakeVisible(qualityButton);
-    qualityButton.setButtonText(Config::qualityButtonText);
+    qualityButton.setButtonText(ControlPanelCopy::qualityButtonText());
     qualityButton.onClick = [this] {
         if (currentQuality == AppEnums::ThumbnailQuality::High)
             currentQuality = AppEnums::ThumbnailQuality::Medium;
@@ -208,7 +209,7 @@ void ControlPanel::initialiseQualityButton()
 void ControlPanel::initialiseExitButton()
 {
     addAndMakeVisible(exitButton);
-    exitButton.setButtonText(Config::exitButtonText);
+    exitButton.setButtonText(ControlPanelCopy::exitButtonText());
     exitButton.setColour(juce::TextButton::buttonColourId, Config::exitButtonColor); // Distinct color for exit
     exitButton.onClick = [] {
         juce::JUCEApplication::getInstance()->systemRequestedQuit();
@@ -225,7 +226,7 @@ void ControlPanel::initialiseExitButton()
 void ControlPanel::initialiseStatsButton()
 {
     addAndMakeVisible(statsButton);
-    statsButton.setButtonText(Config::statsButtonText);
+    statsButton.setButtonText(ControlPanelCopy::statsButtonText());
     statsButton.setClickingTogglesState(true); // Makes it a toggle button
     statsButton.onClick = [this] {
         setShouldShowStats(statsButton.getToggleState()); // Update internal state
@@ -244,7 +245,7 @@ void ControlPanel::initialiseStatsButton()
 void ControlPanel::initialiseLoopButton()
 {
     addAndMakeVisible(loopButton);
-    loopButton.setButtonText(Config::loopButtonText);
+    loopButton.setButtonText(ControlPanelCopy::loopButtonText());
     loopButton.setClickingTogglesState(true); // Makes it a toggle button
     loopButton.onClick = [this] {
         if (transportPresenter != nullptr)
@@ -262,7 +263,7 @@ void ControlPanel::initialiseLoopButton()
 void ControlPanel::initialiseAutoplayButton()
 {
     addAndMakeVisible(autoplayButton);
-    autoplayButton.setButtonText(Config::autoplayButtonText);
+    autoplayButton.setButtonText(ControlPanelCopy::autoplayButtonText());
     autoplayButton.setClickingTogglesState(true); // Makes it a toggle button
     autoplayButton.setToggleState(m_shouldAutoplay, juce::dontSendNotification); // Set initial state
     autoplayButton.onClick = [this] {
@@ -283,7 +284,7 @@ void ControlPanel::initialiseAutoplayButton()
 void ControlPanel::initialiseAutoCutInButton()
 {
     addAndMakeVisible(autoCutInButton);
-    autoCutInButton.setButtonText(Config::autoCutInButtonText);
+    autoCutInButton.setButtonText(ControlPanelCopy::autoCutInButtonText());
     autoCutInButton.setClickingTogglesState(true); // Make it a toggle button
     autoCutInButton.onClick = [this] {
         if (silenceDetectionPresenter != nullptr)
@@ -302,7 +303,7 @@ void ControlPanel::initialiseAutoCutInButton()
 void ControlPanel::initialiseAutoCutOutButton()
 {
     addAndMakeVisible(autoCutOutButton);
-    autoCutOutButton.setButtonText(Config::autoCutOutButtonText);
+    autoCutOutButton.setButtonText(ControlPanelCopy::autoCutOutButtonText());
     autoCutOutButton.setClickingTogglesState(true); // Make it a toggle button
     autoCutOutButton.onClick = [this] {
         if (silenceDetectionPresenter != nullptr)
@@ -323,7 +324,7 @@ void ControlPanel::initialiseAutoCutOutButton()
 void ControlPanel::initialiseCutButton()
 {
     addAndMakeVisible(cutButton);
-    cutButton.setButtonText(Config::cutButtonText);
+    cutButton.setButtonText(ControlPanelCopy::cutButtonText());
     cutButton.setClickingTogglesState(true);
     cutButton.setToggleState(m_isCutModeActive, juce::dontSendNotification); // Set initial state
     cutButton.onClick = [this] {
@@ -346,7 +347,7 @@ void ControlPanel::initialiseCutButton()
 void ControlPanel::initialiseLoopButtons()
 {
     addAndMakeVisible(loopInButton);
-    loopInButton.setButtonText(Config::loopInButtonText);
+    loopInButton.setButtonText(ControlPanelCopy::loopInButtonText());
     loopInButton.onLeftClick = [this] {
         setLoopInPosition(owner.getAudioPlayer()->getTransportSource().getCurrentPosition());
         ensureLoopOrder();
@@ -362,7 +363,7 @@ void ControlPanel::initialiseLoopButtons()
     };
 
     addAndMakeVisible(loopOutButton);
-    loopOutButton.setButtonText(Config::loopOutButtonText);
+    loopOutButton.setButtonText(ControlPanelCopy::loopOutButtonText());
     loopOutButton.onLeftClick = [this] {
         setLoopOutPosition(owner.getAudioPlayer()->getTransportSource().getCurrentPosition());
         ensureLoopOrder();
@@ -388,7 +389,7 @@ void ControlPanel::initialiseLoopButtons()
 void ControlPanel::initialiseClearButtons()
 {
     addAndMakeVisible(clearLoopInButton);
-    clearLoopInButton.setButtonText(Config::clearButtonText);
+    clearLoopInButton.setButtonText(ControlPanelCopy::clearButtonText());
     clearLoopInButton.setColour(juce::TextButton::buttonColourId, Config::clearButtonColor);
     clearLoopInButton.onClick = [this] {
         setLoopInPosition(0.0);
@@ -400,7 +401,7 @@ void ControlPanel::initialiseClearButtons()
     };
 
     addAndMakeVisible(clearLoopOutButton);
-    clearLoopOutButton.setButtonText(Config::clearButtonText);
+    clearLoopOutButton.setButtonText(ControlPanelCopy::clearButtonText());
     clearLoopOutButton.setColour(juce::TextButton::buttonColourId, Config::clearButtonColor);
     clearLoopOutButton.onClick = [this] {
         setLoopOutPosition(owner.getAudioPlayer()->getThumbnail().getTotalLength());
@@ -484,7 +485,7 @@ void ControlPanel::paint(juce::Graphics& g)
 
 void ControlPanel::updatePlayButtonText(bool isPlaying)
 {
-    playStopButton.setButtonText(isPlaying ? Config::stopButtonText : Config::playButtonText);
+    playStopButton.setButtonText(isPlaying ? ControlPanelCopy::stopButtonText() : ControlPanelCopy::playButtonText());
 }
 
 double ControlPanel::getLoopInPosition() const
@@ -530,11 +531,11 @@ void ControlPanel::updateComponentStates()
 void ControlPanel::updateQualityButtonText()
 {
     if (currentQuality == AppEnums::ThumbnailQuality::High)
-        qualityButton.setButtonText(Config::qualityHighText);
+        qualityButton.setButtonText(ControlPanelCopy::qualityHighText());
     else if (currentQuality == AppEnums::ThumbnailQuality::Medium)
-        qualityButton.setButtonText(Config::qualityMediumText);
+        qualityButton.setButtonText(ControlPanelCopy::qualityMediumText());
     else
-        qualityButton.setButtonText(Config::qualityLowText);
+        qualityButton.setButtonText(ControlPanelCopy::qualityLowText());
 }
 
 /**

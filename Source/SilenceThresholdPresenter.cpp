@@ -3,6 +3,7 @@
 #include "SilenceDetector.h"
 #include "ControlPanel.h"
 #include "Config.h"
+#include "ControlPanelCopy.h"
 
 SilenceThresholdPresenter::SilenceThresholdPresenter(SilenceDetector& detectorIn,
                                                      ControlPanel& ownerPanel)
@@ -11,10 +12,10 @@ SilenceThresholdPresenter::SilenceThresholdPresenter(SilenceDetector& detectorIn
 {
     configureEditor(detector.inSilenceThresholdEditor,
                     detector.currentInSilenceThreshold,
-                    "Threshold to detect start of sound (0.0 - 1.0)");
+                    ControlPanelCopy::silenceThresholdInTooltip());
     configureEditor(detector.outSilenceThresholdEditor,
                     detector.currentOutSilenceThreshold,
-                    "Threshold to detect end of sound (0.0 - 1.0)");
+                    ControlPanelCopy::silenceThresholdOutTooltip());
 }
 
 SilenceThresholdPresenter::~SilenceThresholdPresenter()
