@@ -5,6 +5,7 @@
 
 // Forward declaration to avoid circular header dependencies.
 class ControlPanel;
+class SilenceThresholdPresenter;
 
 /**
  * @file SilenceDetector.h
@@ -15,7 +16,7 @@ class ControlPanel;
  * (TextEditors) for setting the silence thresholds, decoupling this specific
  * functionality from the main `ControlPanel`.
  */
-class SilenceDetector : public juce::TextEditor::Listener
+class SilenceDetector
 {
 public:
     /**
@@ -118,44 +119,6 @@ public:
 
 private:
     //==============================================================================
-    /** @name juce::TextEditor::Listener Overrides
-     *  Private callbacks to handle UI events from the threshold editors.
-     *  @{
-     */
-
-    /**
-     * @brief Called when the text in an editor changes. Provides real-time validation feedback.
-     * @param editor A reference to the editor that was modified.
-     */
-    void textEditorTextChanged(juce::TextEditor& editor) override;
-
-    /**
-     * @brief Called when the user presses Return in an editor. Finalizes the value.
-     * @param editor A reference to the editor where Return was pressed.
-     */
-    void textEditorReturnKeyPressed(juce::TextEditor& editor) override;
-
-    /**
-     * @brief Called when an editor loses focus. Finalizes the value.
-     * @param editor A reference to the editor that lost focus.
-     */
-    void textEditorFocusLost(juce::TextEditor& editor) override;
-
-    /** @} */
-    //==============================================================================
-
-    /**
-     * @brief Validates and applies the threshold value from a TextEditor.
-     *
-     * This is the internal logic triggered by `textEditorReturnKeyPressed` or
-     * `textEditorFocusLost`. It parses the text, validates it's within a sensible
-     * range (1-99%), and updates the internal threshold state. If an auto-cut
-     * feature is active, it will also trigger the corresponding detection method.
-     * @param editor The TextEditor containing the new threshold value to apply.
-     */
-    void applyThresholdFromEditor(juce::TextEditor& editor);
-    
-    //==============================================================================
     // Member Variables
     //==============================================================================
     
@@ -171,6 +134,9 @@ private:
     float currentOutSilenceThreshold; ///< Normalized (0.0-1.0) threshold for detecting the end of sound.
     bool m_isAutoCutInActive = false;  ///< If true, `detectInSilence` is run automatically when the threshold changes.
     bool m_isAutoCutOutActive = false; ///< If true, `detectOutSilence` is run automatically when the threshold changes.
+    std::unique_ptr<SilenceThresholdPresenter> thresholdPresenter;
+
+    friend class SilenceThresholdPresenter;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SilenceDetector)
 };
