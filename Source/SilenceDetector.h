@@ -33,7 +33,7 @@ public:
      * Ensures this object is correctly removed as a listener from its
      * TextEditors to prevent dangling pointers and crashes.
      */
-    ~SilenceDetector() override;
+    ~SilenceDetector();
 
     //==============================================================================
     /** @name Core Detection Logic
