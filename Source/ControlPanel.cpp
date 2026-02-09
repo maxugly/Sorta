@@ -6,6 +6,7 @@
 #include "StatsPresenter.h"
 #include "LoopPresenter.h"
 #include "ControlStatePresenter.h"
+#include "TransportPresenter.h"
 #include "WaveformRenderer.h"
 #include <cmath> // For std::abs
 
@@ -43,6 +44,7 @@ ControlPanel::ControlPanel(MainComponent& ownerComponent) : owner(ownerComponent
     initialiseLoopEditors();
     loopPresenter = std::make_unique<LoopPresenter>(*this, *silenceDetector, loopInEditor, loopOutEditor);
     controlStatePresenter = std::make_unique<ControlStatePresenter>(*this);
+    transportPresenter = std::make_unique<TransportPresenter>(*this);
     finaliseSetup();
 
     setMouseCursor(juce::MouseCursor::CrosshairCursor);
@@ -243,8 +245,8 @@ void ControlPanel::initialiseLoopButton()
     loopButton.setButtonText(Config::loopButtonText);
     loopButton.setClickingTogglesState(true); // Makes it a toggle button
     loopButton.onClick = [this] {
-        setShouldLoop(loopButton.getToggleState()); // Update internal state
-        owner.getAudioPlayer()->setLooping(getShouldLoop()); // Inform AudioPlayer
+        if (transportPresenter != nullptr)
+            transportPresenter->handleLoopToggle(loopButton.getToggleState());
     };
 }
 
@@ -262,7 +264,8 @@ void ControlPanel::initialiseAutoplayButton()
     autoplayButton.setClickingTogglesState(true); // Makes it a toggle button
     autoplayButton.setToggleState(m_shouldAutoplay, juce::dontSendNotification); // Set initial state
     autoplayButton.onClick = [this] {
-        m_shouldAutoplay = autoplayButton.getToggleState(); // Update internal flag
+        if (transportPresenter != nullptr)
+            transportPresenter->handleAutoplayToggle(autoplayButton.getToggleState());
     };
 }
 
@@ -336,26 +339,8 @@ void ControlPanel::initialiseCutButton()
     cutButton.setClickingTogglesState(true);
     cutButton.setToggleState(m_isCutModeActive, juce::dontSendNotification); // Set initial state
     cutButton.onClick = [this] {
-        m_isCutModeActive = cutButton.getToggleState(); // Update internal flag
-        updateComponentStates(); // Adjust visibility/enabled states of related controls
-        // Why: If Cut Mode is activated while the audio is playing outside the defined loop range,
-        // the playback position should immediately jump to the loop-in point.
-        // This ensures playback adheres to the cut boundaries from the moment the mode is engaged.
-        if (m_isCutModeActive && owner.getAudioPlayer()->isPlaying())
-        {
-            double currentPosition = owner.getAudioPlayer()->getTransportSource().getCurrentPosition();
-            double loopIn = getLoopInPosition();
-            double loopOut = getLoopOutPosition();
-
-            // Ensure valid loop range before checking current position against it
-            if (loopOut > loopIn)
-            {
-                if (currentPosition < loopIn || currentPosition >= loopOut)
-                {
-                    owner.getAudioPlayer()->getTransportSource().setPosition(loopIn);
-                }
-            }
-        }
+        if (transportPresenter != nullptr)
+            transportPresenter->handleCutModeToggle(cutButton.getToggleState());
     };
 }
 
