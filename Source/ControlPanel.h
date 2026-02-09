@@ -9,6 +9,7 @@
 #include <memory>    // Required for std::unique_ptr
 #include "SilenceDetector.h" // Include the new SilenceDetector class
 #include "MouseHandler.h" // Include the new MouseHandler class
+#include "ControlPanelLayoutCache.h"
 
 class MainComponent; // Forward declaration
 class LayoutManager;
@@ -310,7 +311,7 @@ public:
     /** @brief Gets the calculated bounds of the waveform display area within the control panel.
      *  @return A `juce::Rectangle<int>` representing the waveform display area.
      */
-    juce::Rectangle<int> getWaveformBounds() const { return waveformBounds; }
+    juce::Rectangle<int> getWaveformBounds() const { return layoutCache.waveformBounds; }
 
     /** @brief Provides access to the `AudioPlayer` instance owned by `MainComponent`.
      *  @return A reference to the `AudioPlayer` object.
@@ -351,13 +352,13 @@ public:
      * @brief Gets the cached Y coordinate for the bottom row's top.
      * @return Y coordinate in pixels.
      */
-    int getBottomRowTopY() const { return bottomRowTopY; }
+    int getBottomRowTopY() const { return layoutCache.bottomRowTopY; }
 
     /**
      * @brief Retrieves the cached playback label X positions (left, centre, right).
      * @return Tuple of left/centre/right X coordinates.
      */
-    std::tuple<int, int, int> getPlaybackLabelXs() const { return { playbackLeftTextX, playbackCenterTextX, playbackRightTextX }; }
+    std::tuple<int, int, int> getPlaybackLabelXs() const { return { layoutCache.playbackLeftTextX, layoutCache.playbackCenterTextX, layoutCache.playbackRightTextX }; }
 
     /**
      * @brief Retrieves the formatted total time text displayed in the centre label.
@@ -498,8 +499,7 @@ private:
     juce::TextButton autoplayButton, autoCutInButton, autoCutOutButton, cutButton;                                                ///< Buttons for automation features.
 
     // --- Layout ---
-    juce::Rectangle<int> waveformBounds;        ///< The calculated area within the control panel reserved for the waveform display.
-    juce::Rectangle<int> contentAreaBounds;     ///< The main content area excluding borders.
+    ControlPanelLayoutCache layoutCache;
 
     // --- State ---
     AppEnums::ViewMode currentMode = AppEnums::ViewMode::Classic;           ///< The currently active view mode (e.g., Classic, Overlay).
@@ -508,9 +508,6 @@ private:
     
     bool shouldLoop = false;                    ///< Flag indicating if audio playback should loop.
 
-    int bottomRowTopY = 0;                      ///< Y-coordinate for the top edge of the bottom row of controls.
-    int playbackLeftTextX = 0, playbackRightTextX = 0, playbackCenterTextX = 0; ///< X-coordinates for various playback time display positions.
-    
     juce::String totalTimeStaticStr;            ///< Stores the formatted total duration of the loaded audio.
     juce::String loopInDisplayString, loopOutDisplayString; ///< Formatted strings for loop in/out display.
     int loopInTextX = 0, loopOutTextX = 0, loopTextY = 0;   ///< Coordinates for loop point text displays.

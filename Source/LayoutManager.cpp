@@ -54,26 +54,26 @@ void LayoutManager::layoutLoopAndCutControls(juce::Rectangle<int>& bounds, int r
 void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, int rowHeight)
 {
     auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(Config::windowBorderMargins);
-    controlPanel.bottomRowTopY = bottomRow.getY();
-    controlPanel.contentAreaBounds = bounds.reduced(Config::windowBorderMargins);
+    controlPanel.layoutCache.bottomRowTopY = bottomRow.getY();
+    controlPanel.layoutCache.contentAreaBounds = bounds.reduced(Config::windowBorderMargins);
     controlPanel.qualityButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
     controlPanel.channelViewButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
     controlPanel.statsButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth)); bottomRow.removeFromRight(Config::windowBorderMargins);
     controlPanel.modeButton.setBounds(bottomRow.removeFromRight(Config::buttonWidth));
 
-    controlPanel.playbackLeftTextX = controlPanel.getLocalBounds().getX() + Config::windowBorderMargins;
-    controlPanel.playbackCenterTextX = (controlPanel.getLocalBounds().getWidth() / 2) - (Config::playbackTextWidth / 2);
-    controlPanel.playbackRightTextX = controlPanel.getLocalBounds().getRight() - Config::windowBorderMargins - Config::playbackTextWidth;
+    controlPanel.layoutCache.playbackLeftTextX = controlPanel.getLocalBounds().getX() + Config::windowBorderMargins;
+    controlPanel.layoutCache.playbackCenterTextX = (controlPanel.getLocalBounds().getWidth() / 2) - (Config::playbackTextWidth / 2);
+    controlPanel.layoutCache.playbackRightTextX = controlPanel.getLocalBounds().getRight() - Config::windowBorderMargins - Config::playbackTextWidth;
 }
 
 void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int>& bounds)
 {
     if (controlPanel.currentMode == AppEnums::ViewMode::Overlay) {
-        controlPanel.waveformBounds = controlPanel.getLocalBounds();
+        controlPanel.layoutCache.waveformBounds = controlPanel.getLocalBounds();
     } else {
-        controlPanel.waveformBounds = bounds.reduced(Config::windowBorderMargins);
+        controlPanel.layoutCache.waveformBounds = bounds.reduced(Config::windowBorderMargins);
     }
 
     if (controlPanel.statsPresenter != nullptr)
-        controlPanel.statsPresenter->layoutWithin(controlPanel.contentAreaBounds);
+        controlPanel.statsPresenter->layoutWithin(controlPanel.layoutCache.contentAreaBounds);
 }

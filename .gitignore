@@ -89,3 +89,10 @@ project_handover_prompt.md
 prompty
 q
 userFrustration
+/html
+*.md5
+*.txt
+*.tex
+*.pdf
+*.sty
+Doxyfile
