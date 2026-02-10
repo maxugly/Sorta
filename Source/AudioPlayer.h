@@ -50,6 +50,14 @@ public:
      */
     ~AudioPlayer() override;
 
+    /**
+     * @brief Sets the playback position, constrained by provided loop points.
+     * @param newPosition The desired new position in seconds.
+     * @param loopIn The loop-in position in seconds.
+     * @param loopOut The loop-out position in seconds.
+     */
+    void setPositionConstrained(double newPosition, double loopIn, double loopOut);
+
     /** @} */
     //==============================================================================
 

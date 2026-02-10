@@ -238,3 +238,23 @@ juce::AudioFormatReader* AudioPlayer::getAudioFormatReader() const
         return readerSource->getAudioFormatReader();
     return nullptr;
 }
+
+/**
+ * @brief Sets the playback position, constrained by provided loop points.
+ * @param newPosition The desired new position in seconds.
+ * @param loopIn The loop-in position in seconds.
+ * @param loopOut The loop-out position in seconds.
+ *
+ * This method ensures that the playback position is always within the
+ * specified loop-in and loop-out bounds.
+ */
+void AudioPlayer::setPositionConstrained(double newPosition, double loopIn, double loopOut)
+{
+    // Ensure loopIn is not greater than loopOut to prevent jlimit issues
+    const double effectiveLoopIn = juce::jmin(loopIn, loopOut);
+    const double effectiveLoopOut = juce::jmax(loopIn, loopOut);
+
+    // Constrain the new position within the effective loop bounds
+    const double constrainedPosition = juce::jlimit(effectiveLoopIn, effectiveLoopOut, newPosition);
+    transportSource.setPosition(constrainedPosition);
+}

@@ -146,7 +146,9 @@ void MainComponent::seekToPosition(int x)
         auto relativeX = (double)(x - controlPanel->getWaveformBounds().getX());
         auto proportion = relativeX / (double)controlPanel->getWaveformBounds().getWidth();
         auto newPosition = juce::jlimit(0.0, 1.0, proportion) * audioPlayer->getThumbnail().getTotalLength();
-        audioPlayer->getTransportSource().setPosition(newPosition);
+        audioPlayer->setPositionConstrained(newPosition,
+                                           controlPanel->getLoopInPosition(),
+                                           controlPanel->getLoopOutPosition());
     }
 }
 
