@@ -59,6 +59,9 @@ void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, boo
     owner.autoCutInButton.setEnabled(enabled && isCutModeActive); DBG("  - autoCutInButton enabled: " << (owner.autoCutInButton.isEnabled() ? "true" : "false"));
     owner.autoCutOutButton.setEnabled(enabled && isCutModeActive); DBG("  - autoCutOutOutton enabled: " << (owner.autoCutOutButton.isEnabled() ? "true" : "false"));
 
+    owner.autoCutInButton.setToggleState(owner.silenceDetector->getIsAutoCutInActive(), juce::dontSendNotification);
+    owner.autoCutOutButton.setToggleState(owner.silenceDetector->getIsAutoCutOutActive(), juce::dontSendNotification);
+
     owner.silenceDetector->getInSilenceThresholdEditor().setEnabled(true); DBG("  - inSilenceThresholdEditor enabled: true");
     owner.silenceDetector->getOutSilenceThresholdEditor().setEnabled(true); DBG("  - outSilenceThresholdEditor enabled: true");
 

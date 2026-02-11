@@ -149,9 +149,23 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
             double mouseTime = proportion * audioLength;
 
             if (draggedHandle == LoopMarkerHandle::In)
+            {
                 owner.setLoopInPosition(mouseTime);
+                if (owner.getSilenceDetector().getIsAutoCutInActive())
+                {
+                    owner.getSilenceDetector().setIsAutoCutInActive(false);
+                    owner.updateComponentStates();
+                }
+            }
             else if (draggedHandle == LoopMarkerHandle::Out)
+            {
                 owner.setLoopOutPosition(mouseTime);
+                if (owner.getSilenceDetector().getIsAutoCutOutActive())
+                {
+                    owner.getSilenceDetector().setIsAutoCutOutActive(false);
+                    owner.updateComponentStates();
+                }
+            }
             else if (draggedHandle == LoopMarkerHandle::Full)
             {
                 double newIn = mouseTime - dragStartMouseOffset;
@@ -171,6 +185,15 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
                 
                 owner.setLoopInPosition(newIn);
                 owner.setLoopOutPosition(newOut);
+
+                // Disable autocuts when moving the whole loop manually
+                auto& sd = owner.getSilenceDetector();
+                bool changed = false;
+                if (sd.getIsAutoCutInActive()) { sd.setIsAutoCutInActive(false); changed = true; }
+                if (sd.getIsAutoCutOutActive()) { sd.setIsAutoCutOutActive(false); changed = true; }
+                
+                if (changed)
+                    owner.updateComponentStates();
             }
 
             owner.updateLoopLabels();
