@@ -37,17 +37,30 @@ void LayoutManager::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHei
 void LayoutManager::layoutLoopAndCutControls(juce::Rectangle<int>& bounds, int rowHeight)
 {
     auto loopRow = bounds.removeFromTop(rowHeight).reduced(Config::windowBorderMargins);
-    controlPanel.loopInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
-    controlPanel.loopInEditor.setBounds(loopRow.removeFromLeft(Config::loopTextWidth)); loopRow.removeFromLeft(Config::windowBorderMargins / 2);
-    controlPanel.clearLoopInButton.setBounds(loopRow.removeFromLeft(Config::clearButtonWidth)); loopRow.removeFromLeft(Config::clearButtonMargin);
-    loopRow.removeFromLeft(Config::windowBorderMargins * 2);
-    controlPanel.loopOutButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
-    controlPanel.loopOutEditor.setBounds(loopRow.removeFromLeft(Config::loopTextWidth)); loopRow.removeFromLeft(Config::windowBorderMargins / 2);
-    controlPanel.clearLoopOutButton.setBounds(loopRow.removeFromLeft(Config::clearButtonWidth)); loopRow.removeFromLeft(Config::clearButtonMargin);
-    loopRow.removeFromLeft(Config::windowBorderMargins * 2);
-    controlPanel.silenceDetector->getInSilenceThresholdEditor().setBounds(loopRow.removeFromLeft(Config::thresholdEditorWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
-    controlPanel.autoCutInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); loopRow.removeFromLeft(Config::windowBorderMargins * 2);
-    controlPanel.silenceDetector->getOutSilenceThresholdEditor().setBounds(loopRow.removeFromLeft(Config::thresholdEditorWidth)); loopRow.removeFromLeft(Config::windowBorderMargins);
+    
+    // Group "In" controls
+    controlPanel.loopInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); 
+    loopRow.removeFromLeft(Config::windowBorderMargins);
+    controlPanel.loopInEditor.setBounds(loopRow.removeFromLeft(Config::loopTextWidth)); 
+    loopRow.removeFromLeft(Config::windowBorderMargins / 2);
+    controlPanel.clearLoopInButton.setBounds(loopRow.removeFromLeft(Config::clearButtonWidth)); 
+    loopRow.removeFromLeft(Config::windowBorderMargins);
+    controlPanel.silenceDetector->getInSilenceThresholdEditor().setBounds(loopRow.removeFromLeft(Config::thresholdEditorWidth)); 
+    loopRow.removeFromLeft(Config::windowBorderMargins / 2);
+    controlPanel.autoCutInButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); 
+    
+    // Space between groups
+    loopRow.removeFromLeft(Config::windowBorderMargins * 3);
+    
+    // Group "Out" controls
+    controlPanel.loopOutButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth)); 
+    loopRow.removeFromLeft(Config::windowBorderMargins);
+    controlPanel.loopOutEditor.setBounds(loopRow.removeFromLeft(Config::loopTextWidth)); 
+    loopRow.removeFromLeft(Config::windowBorderMargins / 2);
+    controlPanel.clearLoopOutButton.setBounds(loopRow.removeFromLeft(Config::clearButtonWidth)); 
+    loopRow.removeFromLeft(Config::windowBorderMargins);
+    controlPanel.silenceDetector->getOutSilenceThresholdEditor().setBounds(loopRow.removeFromLeft(Config::thresholdEditorWidth)); 
+    loopRow.removeFromLeft(Config::windowBorderMargins / 2);
     controlPanel.autoCutOutButton.setBounds(loopRow.removeFromLeft(Config::buttonWidth));
 }
 
