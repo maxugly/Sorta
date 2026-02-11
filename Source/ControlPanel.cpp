@@ -167,8 +167,6 @@ void ControlPanel::setZKeyDown(bool isDown)
             m_activeZoomPoint = ActiveZoomPoint::In;
         else if (dragged == MouseHandler::LoopMarkerHandle::Out)
             m_activeZoomPoint = ActiveZoomPoint::Out;
-        else if (m_activeZoomPoint == ActiveZoomPoint::None)
-            m_activeZoomPoint = ActiveZoomPoint::In; // Default
     }
     else
     {

@@ -369,8 +369,10 @@ void WaveformRenderer::drawMouseCursorOverlays(juce::Graphics& g, AudioPlayer& a
 
 void WaveformRenderer::drawZoomPopup(juce::Graphics& g) const
 {
+    const bool zDown = controlPanel.isZKeyDown();
     const auto activePoint = controlPanel.getActiveZoomPoint();
-    if (activePoint == ControlPanel::ActiveZoomPoint::None)
+    
+    if (!zDown && activePoint == ControlPanel::ActiveZoomPoint::None)
         return;
 
     AudioPlayer& audioPlayer = controlPanel.getAudioPlayer();
@@ -410,13 +412,19 @@ void WaveformRenderer::drawZoomPopup(juce::Graphics& g) const
         zoomCenterTime = audioPlayer.getTransportSource().getCurrentPosition();
 
     // Determine current time point for the indicator (the setting being adjusted)
-    const double indicatorTime = (activePoint == ControlPanel::ActiveZoomPoint::In) 
-                                ? controlPanel.getLoopInPosition() 
-                                : controlPanel.getLoopOutPosition();
+    double indicatorTime = 0.0;
+    if (activePoint == ControlPanel::ActiveZoomPoint::In)
+        indicatorTime = controlPanel.getLoopInPosition();
+    else if (activePoint == ControlPanel::ActiveZoomPoint::Out)
+        indicatorTime = controlPanel.getLoopOutPosition();
+    else
+        indicatorTime = audioPlayer.getTransportSource().getCurrentPosition();
 
     // Calculate time range for dynamic zoom
     double timeRange = audioLength / (double)controlPanel.getZoomFactor();
-    timeRange = juce::jmin(timeRange, audioLength);
+    
+    // Ensure we don't zoom in so much that we have 0 duration (min 2 samples at 44.1k approx)
+    timeRange = juce::jlimit(0.00005, audioLength, timeRange);
 
     const double startTime = zoomCenterTime - (timeRange / 2.0);
     const double endTime = startTime + timeRange;

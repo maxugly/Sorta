@@ -117,7 +117,7 @@ public:
     void setActiveZoomPoint(ActiveZoomPoint point) { m_activeZoomPoint = point; repaint(); }
 
     float getZoomFactor() const { return m_zoomFactor; }
-    void setZoomFactor(float factor) { m_zoomFactor = juce::jlimit(1.0f, 100.0f, factor); repaint(); }
+    void setZoomFactor(float factor) { m_zoomFactor = juce::jlimit(1.0f, 1000000.0f, factor); repaint(); }
 
     bool isZKeyDown() const { return m_isZKeyDown; }
     void setZKeyDown(bool isDown);
