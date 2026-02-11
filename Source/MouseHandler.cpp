@@ -457,6 +457,11 @@ void MouseHandler::mouseWheelMove(const juce::MouseEvent& event, const juce::Mou
         timeRange = audioLength / (double)owner.getZoomFactor();
 
     double step = timeRange * 0.05 * std::abs(wheel.deltaY); // 5% of current view
+    
+    // Alt is a x10 multiplier
+    if (event.mods.isAltDown())
+        step *= 10.0;
+
     double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
     double newPos = currentPos + (direction * step);
 

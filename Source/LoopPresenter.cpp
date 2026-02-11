@@ -374,6 +374,10 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
         }
     }
 
+    // Alt is a x10 multiplier
+    if (event.mods.isAltDown())
+        step *= 10.0;
+
     const double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
     const double delta = direction * step;
 
