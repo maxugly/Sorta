@@ -17,12 +17,16 @@ LoopPresenter::LoopPresenter(ControlPanel& ownerPanel,
 {
     loopInEditor.addListener(this);
     loopOutEditor.addListener(this);
+    loopInEditor.addMouseListener(this, false);
+    loopOutEditor.addMouseListener(this, false);
 }
 
 LoopPresenter::~LoopPresenter()
 {
     loopInEditor.removeListener(this);
     loopOutEditor.removeListener(this);
+    loopInEditor.removeMouseListener(this);
+    loopOutEditor.removeMouseListener(this);
 }
 
 void LoopPresenter::setLoopInPosition(double positionSeconds)
@@ -209,4 +213,48 @@ bool LoopPresenter::applyLoopOutFromEditor(double newPosition, juce::TextEditor&
 void LoopPresenter::syncEditorToPosition(juce::TextEditor& editor, double positionSeconds)
 {
     editor.setText(owner.formatTime(positionSeconds), juce::dontSendNotification);
+}
+
+void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
+{
+    if (wheel.deltaY == 0.0f)
+        return;
+
+    const double totalLength = getAudioTotalLength();
+    if (totalLength <= 0.0)
+        return;
+
+    // Determine step size. Base: 1ms. Shift: 10ms. Ctrl: 0.1ms.
+    double step = 0.001;
+    if (event.mods.isShiftDown())
+        step = 0.01;
+    else if (event.mods.isCtrlDown())
+        step = 0.0001;
+
+    const double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
+    const double delta = direction * step;
+
+    if (event.eventComponent == &loopInEditor)
+    {
+        double newPos = juce::jlimit(0.0, totalLength, loopInPosition + delta);
+        if (newPos != loopInPosition)
+        {
+            loopInPosition = newPos;
+            silenceDetector.setIsAutoCutInActive(false);
+            ensureLoopOrder();
+            updateLoopLabels();
+            owner.repaint();
+        }
+    }
+    else if (event.eventComponent == &loopOutEditor)
+    {
+        double newPos = juce::jlimit(0.0, totalLength, loopOutPosition + delta);
+        if (newPos != loopOutPosition)
+        {
+            loopOutPosition = newPos;
+            ensureLoopOrder();
+            updateLoopLabels();
+            owner.repaint();
+        }
+    }
 }

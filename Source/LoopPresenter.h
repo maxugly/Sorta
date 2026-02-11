@@ -13,7 +13,8 @@ class SilenceDetector;
  * It listens to the loop TextEditors, updates ControlPanel's buttons as needed, and ensures the
  * stored positions always reflect valid ranges relative to the loaded audio file.
  */
-class LoopPresenter : private juce::TextEditor::Listener
+class LoopPresenter : private juce::TextEditor::Listener,
+                      public juce::MouseListener
 {
 public:
     /**
@@ -85,6 +86,9 @@ private:
     void textEditorReturnKeyPressed(juce::TextEditor& editor) override;
     void textEditorEscapeKeyPressed(juce::TextEditor& editor) override;
     void textEditorFocusLost(juce::TextEditor& editor) override;
+
+    // juce::MouseListener overrides
+    void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
 
     double parseTime(const juce::String& timeString) const;
     double getAudioTotalLength() const;
