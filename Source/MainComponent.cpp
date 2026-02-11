@@ -123,6 +123,11 @@ void MainComponent::openButtonClicked()
                 // Calculate and display dynamic statistics
                 controlPanel->updateStatsFromAudio();
 
+                // Run autocut detection if enabled
+                auto& sd = controlPanel->getSilenceDetector();
+                if (sd.getIsAutoCutInActive()) sd.detectInSilence();
+                if (sd.getIsAutoCutOutActive()) sd.detectOutSilence();
+
                 if (controlPanel->shouldAutoplay())
                    audioPlayer->togglePlayStop();
             }
