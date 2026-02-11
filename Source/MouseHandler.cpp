@@ -433,8 +433,8 @@ void MouseHandler::mouseWheelMove(const juce::MouseEvent& event, const juce::Mou
     if (!waveformBounds.contains(event.getPosition()))
         return;
 
-    // CTRL + Mouse Wheel ALWAYS controls zoom
-    if (event.mods.isCtrlDown())
+    // CTRL + Mouse Wheel (without Shift) ALWAYS controls zoom
+    if (event.mods.isCtrlDown() && !event.mods.isShiftDown())
     {
         float currentZoom = owner.getZoomFactor();
         float zoomDelta = wheel.deltaY > 0 ? 1.1f : 0.9f;

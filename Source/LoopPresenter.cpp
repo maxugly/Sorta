@@ -325,8 +325,8 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
     if (wheel.deltaY == 0.0f)
         return;
 
-    // CTRL + Mouse Wheel ALWAYS controls zoom
-    if (event.mods.isCtrlDown())
+    // CTRL + Mouse Wheel (without Shift) controls zoom
+    if (event.mods.isCtrlDown() && !event.mods.isShiftDown())
     {
         float currentZoom = owner.getZoomFactor();
         float zoomDelta = wheel.deltaY > 0 ? 1.1f : 0.9f;
@@ -355,7 +355,23 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
         step = Config::loopStepSeconds;
     else if (charIndex >= 9)                   // mmm
     {
-        step = event.mods.isShiftDown() ? Config::loopStepMillisecondsFine : Config::loopStepMilliseconds;
+        if (event.mods.isCtrlDown() && event.mods.isShiftDown())
+        {
+            // Sample accurate (audio frame)
+            auto& audioPlayer = owner.getAudioPlayer();
+            if (auto* reader = audioPlayer.getAudioFormatReader())
+                step = 1.0 / reader->sampleRate;
+            else
+                step = 0.0001; // Fallback
+        }
+        else if (event.mods.isShiftDown())
+        {
+            step = Config::loopStepMillisecondsFine; // 1ms
+        }
+        else
+        {
+            step = Config::loopStepMilliseconds; // 10ms
+        }
     }
 
     const double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
