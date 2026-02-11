@@ -187,25 +187,46 @@ void WaveformRenderer::drawCutModeOverlays(juce::Graphics& g, AudioPlayer& audio
     g.setColour(Config::loopLineColor);
     auto drawLoopMarker = [&](float x, MouseHandler::LoopMarkerHandle handleType) {
         const auto& mouseHandler = controlPanel.getMouseHandler();
+        const auto& silenceDetector = controlPanel.getSilenceDetector();
         
-        juce::Colour capColor = Config::loopLineColor;
-        if (mouseHandler.getDraggedHandle() == handleType)
-            capColor = Config::loopMarkerDragColor;
-        else if (mouseHandler.getHoveredHandle() == handleType)
-            capColor = Config::loopMarkerHoverColor;
+        juce::Colour markerColor = Config::loopLineColor;
+        
+        // Base color based on Auto-Cut status
+        if (handleType == MouseHandler::LoopMarkerHandle::In && silenceDetector.getIsAutoCutInActive())
+            markerColor = Config::loopMarkerAutoColor;
+        else if (handleType == MouseHandler::LoopMarkerHandle::Out && silenceDetector.getIsAutoCutOutActive())
+            markerColor = Config::loopMarkerAutoColor;
 
-        // Draw the thin middle part
-        g.setColour(Config::loopLineColor);
-        g.fillRect(x - Config::loopMarkerWidthThin / Config::loopMarkerCenterDivisor, (float)waveformBounds.getY(), Config::loopMarkerWidthThin, (float)waveformBounds.getHeight());
+        float thickness = Config::loopBoxOutlineThickness;
+
+        if (mouseHandler.getDraggedHandle() == handleType)
+        {
+            markerColor = Config::loopMarkerDragColor;
+            thickness = Config::loopBoxOutlineThicknessInteracting;
+        }
+        else if (mouseHandler.getHoveredHandle() == handleType)
+        {
+            markerColor = Config::loopMarkerHoverColor;
+            thickness = Config::loopBoxOutlineThicknessInteracting;
+        }
+
+        const float boxWidth = Config::loopMarkerBoxWidth;
+        const float boxHeight = (float)Config::loopMarkerBoxHeight;
+        const float halfBoxWidth = boxWidth / 2.0f;
+
+        // Draw the top hollow box
+        g.setColour(markerColor);
+        g.drawRect(x - halfBoxWidth, (float)waveformBounds.getY(), boxWidth, boxHeight, thickness);
         
-        g.setColour(capColor);
-        // Draw the thick top cap
-        g.fillRect(x - Config::loopMarkerWidthThick / Config::loopMarkerCenterDivisor, (float)waveformBounds.getY(), 
-                   Config::loopMarkerWidthThick, (float)Config::loopMarkerCapHeight);
-        
-        // Draw the thick bottom cap
-        g.fillRect(x - Config::loopMarkerWidthThick / Config::loopMarkerCenterDivisor, (float)waveformBounds.getBottom() - Config::loopMarkerCapHeight, 
-                   Config::loopMarkerWidthThick, (float)Config::loopMarkerCapHeight);
+        // Draw the bottom hollow box
+        g.drawRect(x - halfBoxWidth, (float)waveformBounds.getBottom() - boxHeight, boxWidth, boxHeight, thickness);
+
+        // Draw the thin middle line between the boxes
+        g.setColour(markerColor); // Use the marker color for the middle line too if auto/interacting
+        g.fillRect(x - Config::loopMarkerWidthThin / Config::loopMarkerCenterDivisor, 
+                   (float)waveformBounds.getY() + boxHeight, 
+                   Config::loopMarkerWidthThin, 
+                   (float)waveformBounds.getHeight() - (2.0f * boxHeight));
     };
 
     drawLoopMarker(inX, MouseHandler::LoopMarkerHandle::In);
@@ -227,15 +248,15 @@ void WaveformRenderer::drawCutModeOverlays(juce::Graphics& g, AudioPlayer& audio
     }
 
     g.setColour(hollowColor);
-    int hollowHeight = Config::loopMarkerCapHeight / Config::loopHollowHeightDivisor;
+    const float boxHeight = (float)Config::loopMarkerBoxHeight;
     
     // Draw top box horizontal lines
     g.drawLine(inX, (float)waveformBounds.getY(), outX, (float)waveformBounds.getY(), thickness);
-    g.drawLine(inX, (float)waveformBounds.getY() + hollowHeight, outX, (float)waveformBounds.getY() + hollowHeight, thickness);
+    g.drawLine(inX, (float)waveformBounds.getY() + boxHeight, outX, (float)waveformBounds.getY() + boxHeight, thickness);
     
     // Draw bottom box horizontal lines
-    g.drawLine(inX, (float)waveformBounds.getBottom() - 1, outX, (float)waveformBounds.getBottom() - 1, thickness);
-    g.drawLine(inX, (float)waveformBounds.getBottom() - hollowHeight, outX, (float)waveformBounds.getBottom() - hollowHeight, thickness);
+    g.drawLine(inX, (float)waveformBounds.getBottom() - 1.0f, outX, (float)waveformBounds.getBottom() - 1.0f, thickness);
+    g.drawLine(inX, (float)waveformBounds.getBottom() - boxHeight, outX, (float)waveformBounds.getBottom() - boxHeight, thickness);
 }
 
 void WaveformRenderer::drawPlaybackCursor(juce::Graphics& g, AudioPlayer& audioPlayer, float audioLength) const

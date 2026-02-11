@@ -153,6 +153,8 @@ namespace Config {
     const juce::Colour loopRegionColor = juce::Colour(0xff0066cc).withAlpha(0.3f);
     /// The color of the vertical lines that mark the loop start and end points.
     const juce::Colour loopLineColor = juce::Colours::blue;
+    /// The color for loop marker boxes when auto-cut is active.
+    const juce::Colour loopMarkerAutoColor = juce::Colour(0xff00bfff); // Same as buttonOnColour (Deep Sky Blue)
     /// Hover color for loop marker handles.
     const juce::Colour loopMarkerHoverColor = juce::Colours::teal;
     /// Drag color for loop marker handles.
@@ -283,10 +285,10 @@ namespace Config {
     constexpr float loopBoxOutlineThickness = 1.5f;
     /// Thickness of the loop box hollow outline when hovered or dragged.
     constexpr float loopBoxOutlineThicknessInteracting = 3.0f;
-    /// Thickness of the top/bottom caps of the loop marker line.
-    constexpr float loopMarkerWidthThick = 10.0f;
-    /// Height of the thick top/bottom caps.
-    constexpr int loopMarkerCapHeight = 80;
+    /// Width of the hollow box markers.
+    constexpr float loopMarkerBoxWidth = 30.0f;
+    /// Height of the hollow box markers.
+    constexpr int loopMarkerBoxHeight = 30;
     /// Divisor used to center marker lines.
     constexpr float loopMarkerCenterDivisor = 2.0f;
 

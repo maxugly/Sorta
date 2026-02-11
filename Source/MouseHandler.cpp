@@ -409,18 +409,18 @@ MouseHandler::LoopMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int
     auto checkHandle = [&](double time) -> bool {
         float x = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(time / audioLength);
         
-        // Define handle hitboxes (top and bottom caps)
-        juce::Rectangle<int> topCap((int)(x - Config::loopMarkerWidthThick / Config::loopMarkerCenterDivisor), 
+        // Define handle hitboxes (top and bottom boxes)
+        juce::Rectangle<int> topBox((int)(x - Config::loopMarkerBoxWidth / 2.0f), 
                                     waveformBounds.getY(), 
-                                    (int)Config::loopMarkerWidthThick, 
-                                    Config::loopMarkerCapHeight);
+                                    (int)Config::loopMarkerBoxWidth, 
+                                    Config::loopMarkerBoxHeight);
         
-        juce::Rectangle<int> bottomCap((int)(x - Config::loopMarkerWidthThick / Config::loopMarkerCenterDivisor), 
-                                       waveformBounds.getBottom() - Config::loopMarkerCapHeight, 
-                                       (int)Config::loopMarkerWidthThick, 
-                                       Config::loopMarkerCapHeight);
+        juce::Rectangle<int> bottomBox((int)(x - Config::loopMarkerBoxWidth / 2.0f), 
+                                       waveformBounds.getBottom() - Config::loopMarkerBoxHeight, 
+                                       (int)Config::loopMarkerBoxWidth, 
+                                       Config::loopMarkerBoxHeight);
                                        
-        return topCap.expanded(2).contains(pos) || bottomCap.expanded(2).contains(pos);
+        return topBox.expanded(2).contains(pos) || bottomBox.expanded(2).contains(pos);
     };
 
     if (checkHandle(owner.getLoopInPosition())) return LoopMarkerHandle::In;
@@ -435,7 +435,7 @@ MouseHandler::LoopMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int
     float inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(actualIn / audioLength);
     float outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(actualOut / audioLength);
     
-    int hollowHeight = Config::loopMarkerCapHeight / 3;
+    int hollowHeight = Config::loopMarkerBoxHeight / Config::loopHollowHeightDivisor;
     
     juce::Rectangle<int> topHollow((int)inX, waveformBounds.getY(), (int)(outX - inX), hollowHeight);
     juce::Rectangle<int> bottomHollow((int)inX, waveformBounds.getBottom() - hollowHeight, (int)(outX - inX), hollowHeight);
