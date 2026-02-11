@@ -34,6 +34,14 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
         
         hoveredHandle = getHandleAtPosition(event.getPosition());
 
+        // Lock handles if autocut is active
+        const auto& silenceDetector = owner.getSilenceDetector();
+        if ((hoveredHandle == LoopMarkerHandle::In && silenceDetector.getIsAutoCutInActive()) ||
+            (hoveredHandle == LoopMarkerHandle::Out && silenceDetector.getIsAutoCutOutActive()))
+        {
+            hoveredHandle = LoopMarkerHandle::None;
+        }
+
         AudioPlayer& audioPlayer = owner.getAudioPlayer();
         auto audioLength = audioPlayer.getThumbnail().getTotalLength();
         if (audioLength > 0.0)
@@ -77,6 +85,14 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
     {
         draggedHandle = getHandleAtPosition(event.getPosition());
         
+        // Prevent dragging if autocut is active for this handle
+        const auto& silenceDetector = owner.getSilenceDetector();
+        if ((draggedHandle == LoopMarkerHandle::In && silenceDetector.getIsAutoCutInActive()) ||
+            (draggedHandle == LoopMarkerHandle::Out && silenceDetector.getIsAutoCutOutActive()))
+        {
+            draggedHandle = LoopMarkerHandle::None;
+        }
+
         if (draggedHandle == LoopMarkerHandle::None)
         {
             isDragging = true;
