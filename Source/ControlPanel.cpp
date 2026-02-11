@@ -386,3 +386,8 @@ void ControlPanel::mouseExit(const juce::MouseEvent& event)
 {
     mouseHandler->mouseExit(event);
 }
+
+void ControlPanel::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
+{
+    mouseHandler->mouseWheelMove(event, wheel);
+}

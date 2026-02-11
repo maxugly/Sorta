@@ -474,6 +474,15 @@ public:
      */
     void mouseExit(const juce::MouseEvent& event) override;
 
+    /**
+     * @brief Handles mouse wheel events.
+     *
+     * Forwards the event to the owned `MouseHandler` instance.
+     * @param event The mouse event details.
+     * @param wheel The mouse wheel details.
+     */
+    void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
+
     /** @} */
     //==============================================================================
 

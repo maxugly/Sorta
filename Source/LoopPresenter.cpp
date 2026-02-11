@@ -325,8 +325,8 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
     if (wheel.deltaY == 0.0f)
         return;
 
-    // If zoomed in, mouse wheel controls zoom level
-    if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
+    // CTRL + Mouse Wheel ALWAYS controls zoom
+    if (event.mods.isCtrlDown())
     {
         float currentZoom = owner.getZoomFactor();
         float zoomDelta = wheel.deltaY > 0 ? 1.1f : 0.9f;

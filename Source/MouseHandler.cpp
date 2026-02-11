@@ -427,6 +427,48 @@ void MouseHandler::mouseExit(const juce::MouseEvent& event)
     owner.repaint();
 }
 
+void MouseHandler::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
+{
+    const auto waveformBounds = owner.getWaveformBounds();
+    if (!waveformBounds.contains(event.getPosition()))
+        return;
+
+    // CTRL + Mouse Wheel ALWAYS controls zoom
+    if (event.mods.isCtrlDown())
+    {
+        float currentZoom = owner.getZoomFactor();
+        float zoomDelta = wheel.deltaY > 0 ? 1.1f : 0.9f;
+        owner.setZoomFactor(currentZoom * zoomDelta);
+        return;
+    }
+
+    AudioPlayer& audioPlayer = owner.getAudioPlayer();
+    auto& transport = audioPlayer.getTransportSource();
+    double currentPos = transport.getCurrentPosition();
+    double audioLength = audioPlayer.getThumbnail().getTotalLength();
+    
+    if (audioLength <= 0.0)
+        return;
+
+    // Determine scrub step (e.g., 1% of the viewable range or fixed time)
+    // If zoomed, we should scrub smaller increments
+    double timeRange = audioLength;
+    if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
+        timeRange = audioLength / (double)owner.getZoomFactor();
+
+    double step = timeRange * 0.05 * std::abs(wheel.deltaY); // 5% of current view
+    double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
+    double newPos = currentPos + (direction * step);
+
+    // Constrain to loop
+    double effectiveLoopIn = juce::jmax(0.0, owner.getLoopInPosition());
+    double effectiveLoopOut = owner.getLoopOutPosition();
+    if (effectiveLoopOut <= 0.0) effectiveLoopOut = audioLength;
+
+    transport.setPosition(juce::jlimit(effectiveLoopIn, effectiveLoopOut, newPos));
+    owner.repaint();
+}
+
 /**
  * @brief Handles right-click events specifically for entering loop point placement modes.
  *
