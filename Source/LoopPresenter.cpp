@@ -240,7 +240,9 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
     else if (charIndex >= 6 && charIndex <= 7) // SS
         step = Config::loopStepSeconds;
     else if (charIndex >= 9)                   // mmm
-        step = Config::loopStepMilliseconds;
+    {
+        step = event.mods.isShiftDown() ? Config::loopStepMillisecondsFine : Config::loopStepMilliseconds;
+    }
 
     const double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
     const double delta = direction * step;

@@ -220,7 +220,8 @@ namespace Config {
     constexpr double loopStepHours = 3600.0;
     constexpr double loopStepMinutes = 60.0;
     constexpr double loopStepSeconds = 1.0;
-    constexpr double loopStepMilliseconds = 0.001;
+    constexpr double loopStepMilliseconds = 0.01;
+    constexpr double loopStepMillisecondsFine = 0.001;
 
     //==============================================================================
     // Animation, Glow, and Style Settings
