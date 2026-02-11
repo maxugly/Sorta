@@ -494,24 +494,19 @@ MouseHandler::LoopMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int
     auto checkHandle = [&](double time) -> bool {
         float x = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(time / audioLength);
         
-        // Define handle hitboxes (top and bottom boxes)
-        juce::Rectangle<int> topBox((int)(x - Config::loopMarkerBoxWidth / 2.0f), 
-                                    waveformBounds.getY(), 
-                                    (int)Config::loopMarkerBoxWidth, 
-                                    Config::loopMarkerBoxHeight);
-        
-        juce::Rectangle<int> bottomBox((int)(x - Config::loopMarkerBoxWidth / 2.0f), 
-                                       waveformBounds.getBottom() - Config::loopMarkerBoxHeight, 
-                                       (int)Config::loopMarkerBoxWidth, 
-                                       Config::loopMarkerBoxHeight);
+        // Define handle hitboxes: Full height vertical strip (30px wide)
+        juce::Rectangle<int> hitStrip((int)(x - Config::loopMarkerBoxWidth / 2.0f), 
+                                      waveformBounds.getY(), 
+                                      (int)Config::loopMarkerBoxWidth, 
+                                      waveformBounds.getHeight());
                                        
-        return topBox.expanded(2).contains(pos) || bottomBox.expanded(2).contains(pos);
+        return hitStrip.contains(pos);
     };
 
     if (checkHandle(owner.getLoopInPosition())) return LoopMarkerHandle::In;
     if (checkHandle(owner.getLoopOutPosition())) return LoopMarkerHandle::Out;
 
-    // Check for Full loop handle (top/bottom 1/3 of the cap area between markers)
+    // Check for Full loop handle (top/bottom box areas between markers)
     const double loopIn = owner.getLoopInPosition();
     const double loopOut = owner.getLoopOutPosition();
     const double actualIn = juce::jmin(loopIn, loopOut);
@@ -520,7 +515,7 @@ MouseHandler::LoopMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int
     float inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(actualIn / audioLength);
     float outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(actualOut / audioLength);
     
-    int hollowHeight = Config::loopMarkerBoxHeight / Config::loopHollowHeightDivisor;
+    int hollowHeight = Config::loopMarkerBoxHeight;
     
     juce::Rectangle<int> topHollow((int)inX, waveformBounds.getY(), (int)(outX - inX), hollowHeight);
     juce::Rectangle<int> bottomHollow((int)inX, waveformBounds.getBottom() - hollowHeight, (int)(outX - inX), hollowHeight);
