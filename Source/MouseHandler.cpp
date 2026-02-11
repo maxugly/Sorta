@@ -34,12 +34,16 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
         
         hoveredHandle = getHandleAtPosition(event.getPosition());
 
-        // Lock handles if autocut is active
-        const auto& silenceDetector = owner.getSilenceDetector();
-        if ((hoveredHandle == LoopMarkerHandle::In && silenceDetector.getIsAutoCutInActive()) ||
-            (hoveredHandle == LoopMarkerHandle::Out && silenceDetector.getIsAutoCutOutActive()))
+        // Lock handles if autocut is active and locking is enabled in Config
+        if (Config::lockHandlesWhenAutoCutActive)
         {
-            hoveredHandle = LoopMarkerHandle::None;
+            const auto& silenceDetector = owner.getSilenceDetector();
+            if ((hoveredHandle == LoopMarkerHandle::In && silenceDetector.getIsAutoCutInActive()) ||
+                (hoveredHandle == LoopMarkerHandle::Out && silenceDetector.getIsAutoCutOutActive()) ||
+                (hoveredHandle == LoopMarkerHandle::Full && (silenceDetector.getIsAutoCutInActive() || silenceDetector.getIsAutoCutOutActive())))
+            {
+                hoveredHandle = LoopMarkerHandle::None;
+            }
         }
 
         AudioPlayer& audioPlayer = owner.getAudioPlayer();
@@ -84,16 +88,37 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
     if (event.mods.isLeftButtonDown())
     {
         draggedHandle = getHandleAtPosition(event.getPosition());
+        auto& silenceDetector = owner.getSilenceDetector();
         
-        // Prevent dragging if autocut is active for this handle
-        const auto& silenceDetector = owner.getSilenceDetector();
-        if ((draggedHandle == LoopMarkerHandle::In && silenceDetector.getIsAutoCutInActive()) ||
-            (draggedHandle == LoopMarkerHandle::Out && silenceDetector.getIsAutoCutOutActive()))
+        // Handle Locking logic
+        if (Config::lockHandlesWhenAutoCutActive)
         {
-            draggedHandle = LoopMarkerHandle::None;
+            if ((draggedHandle == LoopMarkerHandle::In && silenceDetector.getIsAutoCutInActive()) ||
+                (draggedHandle == LoopMarkerHandle::Out && silenceDetector.getIsAutoCutOutActive()) ||
+                (draggedHandle == LoopMarkerHandle::Full && (silenceDetector.getIsAutoCutInActive() || silenceDetector.getIsAutoCutOutActive())))
+            {
+                draggedHandle = LoopMarkerHandle::None;
+            }
         }
         
-        // Special case: Full loop drag initialization
+        // Auto-disable logic (if not locked)
+        if (draggedHandle != LoopMarkerHandle::None)
+        {
+            bool stateChanged = false;
+            if (draggedHandle == LoopMarkerHandle::In || draggedHandle == LoopMarkerHandle::Full)
+            {
+                if (silenceDetector.getIsAutoCutInActive()) { silenceDetector.setIsAutoCutInActive(false); stateChanged = true; }
+            }
+            if (draggedHandle == LoopMarkerHandle::Out || draggedHandle == LoopMarkerHandle::Full)
+            {
+                if (silenceDetector.getIsAutoCutOutActive()) { silenceDetector.setIsAutoCutOutActive(false); stateChanged = true; }
+            }
+            
+            if (stateChanged)
+                owner.updateComponentStates();
+        }
+
+        // Initialize drag operations
         if (draggedHandle == LoopMarkerHandle::Full)
         {
             dragStartLoopLength = std::abs(owner.getLoopOutPosition() - owner.getLoopInPosition());
@@ -151,20 +176,10 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
             if (draggedHandle == LoopMarkerHandle::In)
             {
                 owner.setLoopInPosition(mouseTime);
-                if (owner.getSilenceDetector().getIsAutoCutInActive())
-                {
-                    owner.getSilenceDetector().setIsAutoCutInActive(false);
-                    owner.updateComponentStates();
-                }
             }
             else if (draggedHandle == LoopMarkerHandle::Out)
             {
                 owner.setLoopOutPosition(mouseTime);
-                if (owner.getSilenceDetector().getIsAutoCutOutActive())
-                {
-                    owner.getSilenceDetector().setIsAutoCutOutActive(false);
-                    owner.updateComponentStates();
-                }
             }
             else if (draggedHandle == LoopMarkerHandle::Full)
             {
@@ -185,15 +200,6 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
                 
                 owner.setLoopInPosition(newIn);
                 owner.setLoopOutPosition(newOut);
-
-                // Disable autocuts when moving the whole loop manually
-                auto& sd = owner.getSilenceDetector();
-                bool changed = false;
-                if (sd.getIsAutoCutInActive()) { sd.setIsAutoCutInActive(false); changed = true; }
-                if (sd.getIsAutoCutOutActive()) { sd.setIsAutoCutOutActive(false); changed = true; }
-                
-                if (changed)
-                    owner.updateComponentStates();
             }
 
             owner.updateLoopLabels();

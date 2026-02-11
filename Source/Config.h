@@ -345,4 +345,8 @@ namespace Config {
     /// The default amplitude threshold for detecting the end of audio. Can be different from the 'in' threshold.
     constexpr float outSilenceThreshold = 0.01f;
 
+    /// If true, handles are unresponsive when their respective autocut is active.
+    /// If false, dragging a handle will automatically disable the autocut.
+    constexpr bool lockHandlesWhenAutoCutActive = false;
+
 } // namespace Config
