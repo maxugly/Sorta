@@ -163,6 +163,20 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
     if (!event.mods.isLeftButtonDown())
         return;
 
+    // Update cursor position even during drag
+    if (waveformBounds.contains(event.getPosition()))
+    {
+        mouseCursorX = event.x;
+        mouseCursorY = event.y;
+        AudioPlayer& audioPlayer = owner.getAudioPlayer();
+        auto audioLength = audioPlayer.getThumbnail().getTotalLength();
+        if (audioLength > 0.0)
+        {
+            float proportion = (float)(mouseCursorX - waveformBounds.getX()) / (float)waveformBounds.getWidth();
+            mouseCursorTime = proportion * audioLength;
+        }
+    }
+
     if (draggedHandle != LoopMarkerHandle::None)
     {
         AudioPlayer& audioPlayer = owner.getAudioPlayer();
