@@ -101,6 +101,7 @@ bool KeybindHandler::handleLoopKeybinds(const juce::KeyPress& key)
             controlPanel.setLoopInPosition(audioPlayer.getTransportSource().getCurrentPosition());
             controlPanel.getSilenceDetector().setIsAutoCutInActive(false);
             controlPanel.updateComponentStates();
+            controlPanel.jumpToLoopIn();
             controlPanel.repaint();
             return true;
         }
@@ -110,6 +111,7 @@ bool KeybindHandler::handleLoopKeybinds(const juce::KeyPress& key)
             controlPanel.setLoopOutPosition(audioPlayer.getTransportSource().getCurrentPosition());
             controlPanel.getSilenceDetector().setIsAutoCutOutActive(false);
             controlPanel.updateComponentStates();
+            controlPanel.jumpToLoopIn();
             controlPanel.repaint();
             return true;
         }

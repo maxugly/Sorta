@@ -127,6 +127,10 @@ public:
 
     std::pair<double, double> getZoomTimeRange() const { return m_zoomTimeRange; }
     void setZoomTimeRange(double start, double end) { m_zoomTimeRange = {start, end}; }
+
+    void jumpToLoopIn();
+    void setNeedsJumpToLoopIn(bool needs) { m_needsJumpToLoopIn = needs; }
+    void performDelayedJumpIfNeeded();
     /** @} */
 
     //==============================================================================
@@ -541,6 +545,7 @@ private:
     ActiveZoomPoint m_activeZoomPoint = ActiveZoomPoint::None; ///< Currently zoomed loop point.
     float m_zoomFactor = 10.0f;                 ///< Dynamic zoom factor.
     bool m_isZKeyDown = false;                  ///< State of the 'z' key.
+    bool m_needsJumpToLoopIn = false;           ///< Flag for delayed playback jump.
     juce::Rectangle<int> m_zoomPopupBounds;     ///< Cached bounds of the zoom popup.
     std::pair<double, double> m_zoomTimeRange;  ///< Cached time range of the zoom popup.
 

@@ -166,8 +166,21 @@ void ControlPanel::setZKeyDown(bool isDown)
         // But for now, let's keep it simple: release 'z' -> no zoom unless we want to keep it on hover.
         // The user said 'z' is a momentary switch, so let's prioritise that.
         m_activeZoomPoint = ActiveZoomPoint::None;
+        performDelayedJumpIfNeeded();
     }
     repaint();
+}
+
+void ControlPanel::jumpToLoopIn()
+{
+    getAudioPlayer().getTransportSource().setPosition(getLoopInPosition());
+    m_needsJumpToLoopIn = false;
+}
+
+void ControlPanel::performDelayedJumpIfNeeded()
+{
+    if (m_needsJumpToLoopIn)
+        jumpToLoopIn();
 }
 
 double ControlPanel::getLoopInPosition() const

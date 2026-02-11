@@ -197,6 +197,7 @@ void LoopPresenter::textEditorFocusLost(juce::TextEditor& editor)
     
     // Clear zoom on focus lost
     owner.setActiveZoomPoint(ControlPanel::ActiveZoomPoint::None);
+    owner.performDelayedJumpIfNeeded();
 }
 
 void LoopPresenter::textEditorFocusGained(juce::TextEditor& editor)
@@ -240,6 +241,10 @@ bool LoopPresenter::applyLoopInFromEditor(double newPosition, juce::TextEditor& 
         owner.updateLoopButtonColors();
         silenceDetector.setIsAutoCutInActive(false);
         owner.updateComponentStates();
+        
+        if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
+            owner.setNeedsJumpToLoopIn(true);
+
         editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
         owner.repaint();
         return true;
@@ -272,6 +277,10 @@ bool LoopPresenter::applyLoopOutFromEditor(double newPosition, juce::TextEditor&
         owner.updateLoopButtonColors();
         silenceDetector.setIsAutoCutOutActive(false);
         owner.updateComponentStates();
+
+        if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
+            owner.setNeedsJumpToLoopIn(true);
+
         editor.setColour(juce::TextEditor::textColourId, Config::playbackTextColor);
         owner.repaint();
         return true;
@@ -307,6 +316,7 @@ void LoopPresenter::mouseExit(const juce::MouseEvent& event)
     if (editor != nullptr && !editor->hasKeyboardFocus(false))
     {
         owner.setActiveZoomPoint(ControlPanel::ActiveZoomPoint::None);
+        owner.performDelayedJumpIfNeeded();
     }
 }
 
@@ -359,6 +369,7 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
             setLoopInPosition(newPos);
             silenceDetector.setIsAutoCutInActive(false);
             owner.updateComponentStates();
+            owner.setNeedsJumpToLoopIn(true);
             ensureLoopOrder();
             updateLoopLabels();
             owner.repaint();
@@ -372,6 +383,7 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
             setLoopOutPosition(newPos);
             silenceDetector.setIsAutoCutOutActive(false);
             owner.updateComponentStates();
+            owner.setNeedsJumpToLoopIn(true);
             ensureLoopOrder();
             updateLoopLabels();
             owner.repaint();

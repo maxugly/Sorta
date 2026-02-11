@@ -93,6 +93,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
             
             if (event.mods.isLeftButtonDown())
             {
+                owner.setNeedsJumpToLoopIn(true);
                 if (currentPlacementMode == AppEnums::PlacementMode::LoopIn)
                 {
                     owner.setLoopInPosition(zoomedTime);
@@ -107,19 +108,36 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                 }
                 else
                 {
-                    // Dragging in zoom popup
-                    draggedHandle = (owner.getActiveZoomPoint() == ControlPanel::ActiveZoomPoint::In) 
-                                     ? LoopMarkerHandle::In : LoopMarkerHandle::Out;
+                    // NOT ARMED: Drag or Seek like the main waveform
+                    double loopPointTime = (owner.getActiveZoomPoint() == ControlPanel::ActiveZoomPoint::In)
+                                           ? owner.getLoopInPosition() : owner.getLoopOutPosition();
                     
-                    if (draggedHandle == LoopMarkerHandle::In)
-                        owner.setLoopInPosition(zoomedTime);
-                    else
-                        owner.setLoopOutPosition(zoomedTime);
+                    // Check if click is near the indicator (within 20 pixels)
+                    float indicatorX = (float)zoomBounds.getX();
+                    if (timeRange.second > timeRange.first)
+                    {
+                        float proportionIndicator = (float)((loopPointTime - timeRange.first) / (timeRange.second - timeRange.first));
+                        indicatorX += proportionIndicator * (float)zoomBounds.getWidth();
+                    }
+
+                    if (std::abs(event.x - (int)indicatorX) < 20)
+                    {
+                        draggedHandle = (owner.getActiveZoomPoint() == ControlPanel::ActiveZoomPoint::In) 
+                                         ? LoopMarkerHandle::In : LoopMarkerHandle::Out;
+                        dragStartMouseOffset = zoomedTime - loopPointTime; // Prevent jump
                         
-                    auto& silenceDetector = owner.getSilenceDetector();
-                    if (draggedHandle == LoopMarkerHandle::In) silenceDetector.setIsAutoCutInActive(false);
-                    else silenceDetector.setIsAutoCutOutActive(false);
-                    owner.updateComponentStates();
+                        auto& silenceDetector = owner.getSilenceDetector();
+                        if (draggedHandle == LoopMarkerHandle::In) silenceDetector.setIsAutoCutInActive(false);
+                        else silenceDetector.setIsAutoCutOutActive(false);
+                        owner.updateComponentStates();
+                    }
+                    else
+                    {
+                        // Seek playback in zoom popup
+                        owner.getAudioPlayer().getTransportSource().setPosition(zoomedTime);
+                        isDragging = true;
+                        mouseDragStartX = event.x;
+                    }
                 }
                 owner.repaint();
                 return;
@@ -224,20 +242,30 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
     }
 
     // --- ZOOM POPUP DRAG ---
-    if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None && draggedHandle != LoopMarkerHandle::None)
+    if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None && (draggedHandle != LoopMarkerHandle::None || isDragging))
     {
         auto zoomBounds = owner.getZoomPopupBounds();
-        if (zoomBounds.contains(event.getPosition()) || draggedHandle != LoopMarkerHandle::None)
+        if (zoomBounds.contains(event.getPosition()) || draggedHandle != LoopMarkerHandle::None || isDragging)
         {
             auto timeRange = owner.getZoomTimeRange();
             int clampedX = juce::jlimit(zoomBounds.getX(), zoomBounds.getRight(), event.x);
             float proportion = (float)(clampedX - zoomBounds.getX()) / (float)zoomBounds.getWidth();
             double zoomedTime = timeRange.first + (proportion * (timeRange.second - timeRange.first));
 
-            if (draggedHandle == LoopMarkerHandle::In)
-                owner.setLoopInPosition(zoomedTime);
-            else if (draggedHandle == LoopMarkerHandle::Out)
-                owner.setLoopOutPosition(zoomedTime);
+            if (draggedHandle != LoopMarkerHandle::None)
+            {
+                // Use offset if not in placement mode to prevent jumping
+                double offset = (currentPlacementMode == AppEnums::PlacementMode::None) ? dragStartMouseOffset : 0.0;
+                
+                if (draggedHandle == LoopMarkerHandle::In)
+                    owner.setLoopInPosition(zoomedTime - offset);
+                else if (draggedHandle == LoopMarkerHandle::Out)
+                    owner.setLoopOutPosition(zoomedTime - offset);
+            }
+            else if (isDragging)
+            {
+                owner.getAudioPlayer().getTransportSource().setPosition(zoomedTime);
+            }
 
             owner.updateLoopLabels();
             owner.repaint();
@@ -328,6 +356,7 @@ void MouseHandler::mouseUp(const juce::MouseEvent& event)
 
     isDragging = false;
     draggedHandle = LoopMarkerHandle::None;
+    owner.jumpToLoopIn(); // Jump after regular drag
     
     const auto waveformBounds = owner.getWaveformBounds();
     if (waveformBounds.contains(event.getPosition()) && event.mods.isLeftButtonDown())
@@ -355,6 +384,7 @@ void MouseHandler::mouseUp(const juce::MouseEvent& event)
                 }
                 owner.ensureLoopOrder();
                 owner.updateLoopLabels();
+                owner.jumpToLoopIn(); // Immediate jump on waveform placement
             }
             currentPlacementMode = AppEnums::PlacementMode::None; // Reset placement mode
             owner.updateLoopButtonColors(); // Update button colours
