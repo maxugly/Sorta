@@ -254,7 +254,7 @@ namespace Config {
     /// Thickness of the top/bottom caps of the loop marker line.
     constexpr float loopMarkerWidthThick = 10.0f;
     /// Height of the thick top/bottom caps.
-    constexpr int loopMarkerCapHeight = 20;
+    constexpr int loopMarkerCapHeight = 80;
     /// Divisor used to center marker lines.
     constexpr float loopMarkerCenterDivisor = 2.0f;
 
