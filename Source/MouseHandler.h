@@ -123,6 +123,20 @@ public:
      */
     void setCurrentPlacementMode(AppEnums::PlacementMode mode) { currentPlacementMode = mode; }
 
+    /** @enum LoopMarkerHandle
+     *  @brief Identifies which loop marker handle is being interacted with.
+     */
+    enum class LoopMarkerHandle {
+        None,
+        In,
+        Out
+    };
+
+    /** @brief Gets the handle currently under the mouse. */
+    LoopMarkerHandle getHoveredHandle() const { return hoveredHandle; }
+
+    /** @brief Gets the handle currently being dragged. */
+    LoopMarkerHandle getDraggedHandle() const { return draggedHandle; }
 
 private:
     //==============================================================================
@@ -138,6 +152,9 @@ private:
     int mouseDragStartX = 0;                    ///< X-coordinate where a mouse drag operation began.
     AppEnums::PlacementMode currentPlacementMode = AppEnums::PlacementMode::None; ///< Tracks if the user is in a mode to place a loop point.
 
+    LoopMarkerHandle hoveredHandle = LoopMarkerHandle::None;
+    LoopMarkerHandle draggedHandle = LoopMarkerHandle::None;
+
     /** @} */
     //==============================================================================
 
@@ -146,6 +163,13 @@ private:
      *  Internal utility methods for mouse event processing.
      *  @{
      */
+
+    /**
+     * @brief Identifies which loop marker handle is at a given pixel position.
+     * @param pos The position relative to the ControlPanel.
+     * @return The handle found, or LoopMarkerHandle::None.
+     */
+    LoopMarkerHandle getHandleAtPosition(juce::Point<int> pos) const;
 
     /**
      * @brief Handles right-click events specifically for entering loop point placement modes.

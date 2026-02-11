@@ -162,10 +162,20 @@ void WaveformRenderer::drawCutModeOverlays(juce::Graphics& g, AudioPlayer& audio
     g.fillRect(outX - (Config::loopLineGlowThickness / 2.0f - 0.5f), (float)waveformBounds.getY(), Config::loopLineGlowThickness, (float)waveformBounds.getHeight());
 
     g.setColour(Config::loopLineColor);
-    auto drawLoopMarker = [&](float x) {
+    auto drawLoopMarker = [&](float x, MouseHandler::LoopMarkerHandle handleType) {
+        const auto& mouseHandler = controlPanel.getMouseHandler();
+        
+        juce::Colour capColor = Config::loopLineColor;
+        if (mouseHandler.getDraggedHandle() == handleType)
+            capColor = Config::loopMarkerDragColor;
+        else if (mouseHandler.getHoveredHandle() == handleType)
+            capColor = Config::loopMarkerHoverColor;
+
         // Draw the thin middle part
+        g.setColour(Config::loopLineColor);
         g.fillRect(x - Config::loopMarkerWidthThin / Config::loopMarkerCenterDivisor, (float)waveformBounds.getY(), Config::loopMarkerWidthThin, (float)waveformBounds.getHeight());
         
+        g.setColour(capColor);
         // Draw the thick top cap
         g.fillRect(x - Config::loopMarkerWidthThick / Config::loopMarkerCenterDivisor, (float)waveformBounds.getY(), 
                    Config::loopMarkerWidthThick, (float)Config::loopMarkerCapHeight);
@@ -175,8 +185,8 @@ void WaveformRenderer::drawCutModeOverlays(juce::Graphics& g, AudioPlayer& audio
                    Config::loopMarkerWidthThick, (float)Config::loopMarkerCapHeight);
     };
 
-    drawLoopMarker(inX);
-    drawLoopMarker(outX);
+    drawLoopMarker(inX, MouseHandler::LoopMarkerHandle::In);
+    drawLoopMarker(outX, MouseHandler::LoopMarkerHandle::Out);
 
     g.drawHorizontalLine(waveformBounds.getY(), (int)inX, (int)outX);
     g.drawHorizontalLine(waveformBounds.getBottom() - 1, (int)inX, (int)outX);

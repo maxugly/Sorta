@@ -31,6 +31,9 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
     {
         mouseCursorX = event.x;
         mouseCursorY = event.y;
+        
+        hoveredHandle = getHandleAtPosition(event.getPosition());
+
         AudioPlayer& audioPlayer = owner.getAudioPlayer();
         auto audioLength = audioPlayer.getThumbnail().getTotalLength();
         if (audioLength > 0.0)
@@ -48,6 +51,7 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
         mouseCursorX = -1;
         mouseCursorY = -1;
         mouseCursorTime = 0.0;
+        hoveredHandle = LoopMarkerHandle::None;
     }
     owner.repaint(); // Trigger repaint on owner
 }
@@ -71,10 +75,19 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
 
     if (event.mods.isLeftButtonDown())
     {
-        isDragging = true;
-        mouseDragStartX = event.x;
-        currentPlaybackPosOnDragStart = owner.getAudioPlayer().getTransportSource().getCurrentPosition();
-        seekToMousePosition(event.x);
+        draggedHandle = getHandleAtPosition(event.getPosition());
+        
+        if (draggedHandle == LoopMarkerHandle::None)
+        {
+            isDragging = true;
+            mouseDragStartX = event.x;
+            currentPlaybackPosOnDragStart = owner.getAudioPlayer().getTransportSource().getCurrentPosition();
+            seekToMousePosition(event.x);
+        }
+        else
+        {
+            owner.repaint();
+        }
     }
     else if (event.mods.isRightButtonDown())
     {
@@ -92,9 +105,32 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
 void MouseHandler::mouseDrag(const juce::MouseEvent& event)
 {
     const auto waveformBounds = owner.getWaveformBounds();
-    if (isDragging && event.mods.isLeftButtonDown() && waveformBounds.contains(event.getPosition()))
+    if (!event.mods.isLeftButtonDown())
+        return;
+
+    if (draggedHandle != LoopMarkerHandle::None)
+    {
+        AudioPlayer& audioPlayer = owner.getAudioPlayer();
+        auto audioLength = audioPlayer.getThumbnail().getTotalLength();
+        if (audioLength > 0.0)
+        {
+            int clampedX = juce::jlimit(waveformBounds.getX(), waveformBounds.getRight(), event.x);
+            float proportion = (float)(clampedX - waveformBounds.getX()) / (float)waveformBounds.getWidth();
+            double time = proportion * audioLength;
+
+            if (draggedHandle == LoopMarkerHandle::In)
+                owner.setLoopInPosition(time);
+            else if (draggedHandle == LoopMarkerHandle::Out)
+                owner.setLoopOutPosition(time);
+
+            owner.updateLoopLabels();
+            owner.repaint();
+        }
+    }
+    else if (isDragging && waveformBounds.contains(event.getPosition()))
     {
         seekToMousePosition(event.x);
+        owner.repaint();
     }
 }
 
@@ -109,6 +145,8 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
 void MouseHandler::mouseUp(const juce::MouseEvent& event)
 {
     isDragging = false;
+    draggedHandle = LoopMarkerHandle::None;
+    
     const auto waveformBounds = owner.getWaveformBounds();
     if (waveformBounds.contains(event.getPosition()) && event.mods.isLeftButtonDown())
     {
@@ -161,6 +199,7 @@ void MouseHandler::mouseExit(const juce::MouseEvent& event)
     mouseCursorX = -1;
     mouseCursorY = -1;
     mouseCursorTime = 0.0;
+    hoveredHandle = LoopMarkerHandle::None;
     owner.repaint();
 }
 
@@ -256,4 +295,34 @@ void MouseHandler::clearTextEditorFocusIfNeeded(const juce::Point<int>& clickPos
             }
         }
     }
+}
+
+MouseHandler::LoopMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int> pos) const
+{
+    const auto waveformBounds = owner.getWaveformBounds();
+    AudioPlayer& audioPlayer = owner.getAudioPlayer();
+    auto audioLength = audioPlayer.getThumbnail().getTotalLength();
+    if (audioLength <= 0.0) return LoopMarkerHandle::None;
+
+    auto checkHandle = [&](double time) -> bool {
+        float x = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(time / audioLength);
+        
+        // Define handle hitboxes (top and bottom caps)
+        juce::Rectangle<int> topCap((int)(x - Config::loopMarkerWidthThick / Config::loopMarkerCenterDivisor), 
+                                    waveformBounds.getY(), 
+                                    (int)Config::loopMarkerWidthThick, 
+                                    Config::loopMarkerCapHeight);
+        
+        juce::Rectangle<int> bottomCap((int)(x - Config::loopMarkerWidthThick / Config::loopMarkerCenterDivisor), 
+                                       waveformBounds.getBottom() - Config::loopMarkerCapHeight, 
+                                       (int)Config::loopMarkerWidthThick, 
+                                       Config::loopMarkerCapHeight);
+                                       
+        return topCap.expanded(2).contains(pos) || bottomCap.expanded(2).contains(pos);
+    };
+
+    if (checkHandle(owner.getLoopInPosition())) return LoopMarkerHandle::In;
+    if (checkHandle(owner.getLoopOutPosition())) return LoopMarkerHandle::Out;
+
+    return LoopMarkerHandle::None;
 }

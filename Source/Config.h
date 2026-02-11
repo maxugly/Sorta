@@ -153,6 +153,10 @@ namespace Config {
     const juce::Colour loopRegionColor = juce::Colour(0xff0066cc).withAlpha(0.3f);
     /// The color of the vertical lines that mark the loop start and end points.
     const juce::Colour loopLineColor = juce::Colours::blue;
+    /// Hover color for loop marker handles.
+    const juce::Colour loopMarkerHoverColor = juce::Colours::teal;
+    /// Drag color for loop marker handles.
+    const juce::Colour loopMarkerDragColor = juce::Colours::green;
 
     //==============================================================================
     // Color Palette - Mouse Cursor Indicators
