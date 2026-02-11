@@ -220,21 +220,32 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
     if (wheel.deltaY == 0.0f)
         return;
 
+    auto* editor = dynamic_cast<juce::TextEditor*>(event.eventComponent);
+    if (editor == nullptr)
+        return;
+
     const double totalLength = getAudioTotalLength();
     if (totalLength <= 0.0)
         return;
 
-    // Determine step size. Base: 1ms. Shift: 10ms. Ctrl: 0.1ms.
-    double step = 0.001;
-    if (event.mods.isShiftDown())
-        step = 0.01;
-    else if (event.mods.isCtrlDown())
-        step = 0.0001;
+    // Determine character index under the mouse to set step size contextually
+    // Format is HH:MM:SS:mmm (012345678901)
+    int charIndex = editor->getTextIndexAt(event.getPosition());
+    double step = Config::loopStepMilliseconds;
+    
+    if (charIndex >= 0 && charIndex <= 1)      // HH
+        step = Config::loopStepHours;
+    else if (charIndex >= 3 && charIndex <= 4) // MM
+        step = Config::loopStepMinutes;
+    else if (charIndex >= 6 && charIndex <= 7) // SS
+        step = Config::loopStepSeconds;
+    else if (charIndex >= 9)                   // mmm
+        step = Config::loopStepMilliseconds;
 
     const double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
     const double delta = direction * step;
 
-    if (event.eventComponent == &loopInEditor)
+    if (editor == &loopInEditor)
     {
         double newPos = juce::jlimit(0.0, totalLength, loopInPosition + delta);
         if (newPos != loopInPosition)
@@ -246,7 +257,7 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
             owner.repaint();
         }
     }
-    else if (event.eventComponent == &loopOutEditor)
+    else if (editor == &loopOutEditor)
     {
         double newPos = juce::jlimit(0.0, totalLength, loopOutPosition + delta);
         if (newPos != loopOutPosition)
