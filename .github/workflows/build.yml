@@ -7,7 +7,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -40,19 +41,23 @@ jobs:
           fi
 
       - name: Configure CMake
+        # Using g++-12 and Ninja for speed on the runner
         run: cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=g++-12 .
 
       - name: Build with Ninja
         run: ninja -C build
 
-      - name: List build directory
-        run: ls -Rlh build | grep -i audiofiler || true
+      - name: Debug Build Output
+        # This lists all files produced so we can see the exact binary name/path
+        run: find build -maxdepth 4 -not -path '*/.*'
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: audiofiler-build
-          # Matches strictly lowercase 'audiofiler' 
+          # Looks for lowercase, uppercase, or mixed case binaries
           path: |
-            build/**/audiofiler*
+            build/**/[Aa]udiofiler*
+          # This ensures the build fails if no binary is found, 
+          # but we have the Debug step above to tell us why.
           if-no-files-found: error
