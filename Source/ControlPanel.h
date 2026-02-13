@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_CONTROLPANEL_H
+#define AUDIOFILER_CONTROLPANEL_H
 
 #include <JuceHeader.h>
 #include <tuple>
@@ -33,7 +34,7 @@ class PlaybackTextPresenter;
 
 /**
  * @class ControlPanel
- * @brief A component that manages all UI controls and interactions for the Sorta++ application.
+ * @brief A component that manages all UI controls and interactions for the Audiofiler application.
  *
  * This class acts as the central hub for the application's graphical user interface,
  * encapsulating all buttons, text editors, and visual displays (excluding the waveform
@@ -575,3 +576,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPanel)
 };
+
+#endif // AUDIOFILER_CONTROLPANEL_H

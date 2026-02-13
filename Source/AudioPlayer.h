@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_AUDIOPLAYER_H
+#define AUDIOFILER_AUDIOPLAYER_H
 
 #include <JuceHeader.h>
 
@@ -242,3 +243,5 @@ private:
     /** @} */
     //==============================================================================
 };
+
+#endif // AUDIOFILER_AUDIOPLAYER_H

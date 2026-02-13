@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_CONTROLBUTTONSPRESENTER_H
+#define AUDIOFILER_CONTROLBUTTONSPRESENTER_H
 
 class ControlPanel;
 
@@ -38,3 +39,5 @@ private:
     ControlPanel& owner;
 };
 
+
+#endif // AUDIOFILER_CONTROLBUTTONSPRESENTER_H

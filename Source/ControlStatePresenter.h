@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_CONTROLSTATEPRESENTER_H
+#define AUDIOFILER_CONTROLSTATEPRESENTER_H
 
 #include <JuceHeader.h>
 
@@ -31,3 +32,5 @@ private:
 
     ControlPanel& owner;
 };
+
+#endif // AUDIOFILER_CONTROLSTATEPRESENTER_H

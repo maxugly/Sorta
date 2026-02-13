@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_LOOPPRESENTER_H
+#define AUDIOFILER_LOOPPRESENTER_H
 
 #include <JuceHeader.h>
 
@@ -106,3 +107,5 @@ private:
     double loopInPosition { -1.0 };
     double loopOutPosition { -1.0 };
 };
+
+#endif // AUDIOFILER_LOOPPRESENTER_H

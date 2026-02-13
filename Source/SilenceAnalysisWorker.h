@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_SILENCEANALYSISWORKER_H
+#define AUDIOFILER_SILENCEANALYSISWORKER_H
 
 #include <JuceHeader.h>
 
@@ -28,3 +29,5 @@ public:
      */
     static void detectOutSilence(ControlPanel& ownerPanel, float threshold);
 };
+
+#endif // AUDIOFILER_SILENCEANALYSISWORKER_H

@@ -3,7 +3,7 @@
 
 /**
  * @file Main.cpp
- * @brief Implements the main entry point for the Sorta++ JUCE application.
+ * @brief Implements the main entry point for the Audiofiler JUCE application.
  *
  * This file defines the `GuiAppApplication` class, which is the main application
  * entry point according to the JUCE framework, and the `MainWindow` class,
@@ -31,7 +31,7 @@ public:
    * @brief Returns the application's name.
    * @return A `juce::String` containing the application name.
    */
-  const juce::String getApplicationName() override       { return "Sorta++"; }
+  const juce::String getApplicationName() override       { return "Audiofiler"; }
 
   /**
    * @brief Returns the application's version string.

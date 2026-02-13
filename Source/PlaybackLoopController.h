@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_PLAYBACKLOOPCONTROLLER_H
+#define AUDIOFILER_PLAYBACKLOOPCONTROLLER_H
 
 #include <JuceHeader.h>
 
@@ -33,3 +34,5 @@ private:
     AudioPlayer& audioPlayer;
     ControlPanel& controlPanel;
 };
+
+#endif // AUDIOFILER_PLAYBACKLOOPCONTROLLER_H

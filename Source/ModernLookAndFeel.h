@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_MODERNLOOKANDFEEL_H
+#define AUDIOFILER_MODERNLOOKANDFEEL_H
 
 #include <JuceHeader.h>
 #include "Config.h" // Include Config.h
@@ -165,3 +166,5 @@ public:
 
 private:
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ModernLookAndFeel) };
+
+#endif // AUDIOFILER_MODERNLOOKANDFEEL_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_PLAYBACKCURSORGLOW_H
+#define AUDIOFILER_PLAYBACKCURSORGLOW_H
 
 #include <JuceHeader.h>
 
@@ -14,3 +15,5 @@ public:
     static void renderGlow(juce::Graphics& g, const ControlPanel& controlPanel, const juce::Rectangle<int>& waveformBounds);
 };
 
+
+#endif // AUDIOFILER_PLAYBACKCURSORGLOW_H

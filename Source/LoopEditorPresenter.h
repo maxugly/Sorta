@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_LOOPEDITORPRESENTER_H
+#define AUDIOFILER_LOOPEDITORPRESENTER_H
 
 #include <JuceHeader.h>
 
@@ -31,3 +32,5 @@ private:
     juce::TextEditor& loopOutEditor;
 };
 
+
+#endif // AUDIOFILER_LOOPEDITORPRESENTER_H

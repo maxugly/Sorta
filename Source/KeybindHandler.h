@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_KEYBINDHANDLER_H
+#define AUDIOFILER_KEYBINDHANDLER_H
 
 #include <JuceHeader.h>
 
@@ -68,3 +69,5 @@ private:
     AudioPlayer& audioPlayer;
     ControlPanel& controlPanel;
 };
+
+#endif // AUDIOFILER_KEYBINDHANDLER_H

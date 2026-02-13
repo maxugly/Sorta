@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_MAINCOMPONENT_H
+#define AUDIOFILER_MAINCOMPONENT_H
 
 #include <JuceHeader.h>
 #include "AudioPlayer.h"
@@ -10,12 +11,12 @@ class PlaybackLoopController;
 
 /**
  * @file MainComponent.h
- * @brief Declares the MainComponent class, the central UI component of the Sorta++ application.
+ * @brief Declares the MainComponent class, the central UI component of the Audiofiler application.
  */
 
 /**
  * @class MainComponent
- * @brief The main graphical user interface component for the Sorta++ application.
+ * @brief The main graphical user interface component for the Audiofiler application.
  *
  * This class serves as the primary container for the application's UI,
  * managing the layout and interaction of various sub-components such as the
@@ -227,3 +228,5 @@ private:
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
+
+#endif // AUDIOFILER_MAINCOMPONENT_H
