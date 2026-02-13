@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_SILENCETHRESHOLDPRESENTER_H
+#define AUDIOFILER_SILENCETHRESHOLDPRESENTER_H
 
 #include <JuceHeader.h>
 
@@ -41,3 +42,5 @@ private:
     SilenceDetector& detector;
     ControlPanel& owner;
 };
+
+#endif // AUDIOFILER_SILENCETHRESHOLDPRESENTER_H

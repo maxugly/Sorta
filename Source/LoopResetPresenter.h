@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_LOOPRESETPRESENTER_H
+#define AUDIOFILER_LOOPRESETPRESENTER_H
 
 class ControlPanel;
 
@@ -18,3 +19,5 @@ private:
     ControlPanel& owner;
 };
 
+
+#endif // AUDIOFILER_LOOPRESETPRESENTER_H

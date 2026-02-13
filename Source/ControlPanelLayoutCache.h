@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_CONTROLPANELLAYOUTCACHE_H
+#define AUDIOFILER_CONTROLPANELLAYOUTCACHE_H
 
 #include <JuceHeader.h>
 
@@ -16,3 +17,5 @@ struct ControlPanelLayoutCache
     int playbackCenterTextX = 0;
 };
 
+
+#endif // AUDIOFILER_CONTROLPANELLAYOUTCACHE_H

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_TRANSPORTPRESENTER_H
+#define AUDIOFILER_TRANSPORTPRESENTER_H
 
 #include <JuceHeader.h>
 
@@ -44,3 +45,5 @@ private:
 
     ControlPanel& owner;
 };
+
+#endif // AUDIOFILER_TRANSPORTPRESENTER_H

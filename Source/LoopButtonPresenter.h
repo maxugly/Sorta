@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_LOOPBUTTONPRESENTER_H
+#define AUDIOFILER_LOOPBUTTONPRESENTER_H
 
 #include <JuceHeader.h>
 
@@ -19,3 +20,5 @@ private:
     ControlPanel& owner;
 };
 
+
+#endif // AUDIOFILER_LOOPBUTTONPRESENTER_H

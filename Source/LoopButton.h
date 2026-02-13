@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_LOOPBUTTON_H
+#define AUDIOFILER_LOOPBUTTON_H
 
 #include <JuceHeader.h>
 #include <functional>
@@ -32,3 +33,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LoopButton)
 };
+
+#endif // AUDIOFILER_LOOPBUTTON_H

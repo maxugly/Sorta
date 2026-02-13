@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_APPENUMS_H
+#define AUDIOFILER_APPENUMS_H
 
 /**
  * @file AppEnums.h
@@ -55,3 +56,5 @@ namespace AppEnums
         High      /**< A high-resolution thumbnail for maximum visual detail. */
     };
 }
+
+#endif // AUDIOFILER_APPENUMS_H

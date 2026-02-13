@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_STATSPRESENTER_H
+#define AUDIOFILER_STATSPRESENTER_H
 
 #include <JuceHeader.h>
 #include "Config.h"
@@ -139,3 +140,5 @@ private:
     bool showStats { false };
     int currentHeight { Config::initialStatsDisplayHeight };
 };
+
+#endif // AUDIOFILER_STATSPRESENTER_H

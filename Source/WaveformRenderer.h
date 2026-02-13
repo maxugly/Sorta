@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_WAVEFORMRENDERER_H
+#define AUDIOFILER_WAVEFORMRENDERER_H
 
 #include <JuceHeader.h>
 
@@ -37,3 +38,5 @@ private:
 
     ControlPanel& controlPanel;
 };
+
+#endif // AUDIOFILER_WAVEFORMRENDERER_H

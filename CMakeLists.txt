@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(Sorta VERSION 0.0.0001)
+project(Audiofiler VERSION 0.0.0001)
 
 message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
 if (UNIX AND NOT APPLE)
@@ -33,13 +33,13 @@ CPMAddPackage(
         GIT_TAG 8.0.12
 )
 
-juce_add_gui_app(Sorta
-        PRODUCT_NAME "Sorta"
+juce_add_gui_app(Audiofiler
+        PRODUCT_NAME "Audiofiler"
 )
 
-target_compile_definitions(Sorta PUBLIC JUCE_DEBUG=1)
+target_compile_definitions(Audiofiler PUBLIC JUCE_DEBUG=1)
 
-target_compile_definitions(Sorta PRIVATE
+target_compile_definitions(Audiofiler PRIVATE
         JUCE_USE_MP3AUDIOFORMAT=1
         JUCE_USE_FLAC_AUDIO_FORMAT=1
         JUCE_USE_OGGVORBIS_AUDIO_FORMAT=1
@@ -51,7 +51,7 @@ target_compile_definitions(Sorta PRIVATE
         JUCE_JACK=1
 )
 
-target_sources(Sorta PRIVATE
+target_sources(Audiofiler PRIVATE
         Source/Main.cpp
         Source/MainComponent.h
 		Source/MainComponent.cpp
@@ -105,7 +105,7 @@ target_sources(Sorta PRIVATE
         Source/MouseHandler.cpp
 )
 
-target_link_libraries(Sorta PRIVATE
+target_link_libraries(Audiofiler PRIVATE
         juce::juce_audio_utils
         juce::juce_audio_formats
         juce::juce_audio_devices
@@ -115,4 +115,4 @@ target_link_libraries(Sorta PRIVATE
         ${GTK3_LIBRARIES}
 )
 
-juce_generate_juce_header(Sorta)
+juce_generate_juce_header(Audiofiler)

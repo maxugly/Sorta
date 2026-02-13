@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_SILENCEDETECTIONPRESENTER_H
+#define AUDIOFILER_SILENCEDETECTIONPRESENTER_H
 
 #include <JuceHeader.h>
 
@@ -38,3 +39,5 @@ private:
 
     ControlPanel& owner;
 };
+
+#endif // AUDIOFILER_SILENCEDETECTIONPRESENTER_H

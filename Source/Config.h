@@ -1,8 +1,9 @@
-#pragma once
+#ifndef AUDIOFILER_CONFIG_H
+#define AUDIOFILER_CONFIG_H
 
 /**
  * @file Config.h
- * @brief Centralized configuration for the Sorta application.
+ * @brief Centralized configuration for the Audiofiler application.
  *
  * This file contains a collection of compile-time constants and settings
  * that control the application's appearance, behavior, and default values.
@@ -366,3 +367,5 @@ namespace Config {
     constexpr bool lockHandlesWhenAutoCutActive = false;
 
 } // namespace Config
+
+#endif // AUDIOFILER_CONFIG_H

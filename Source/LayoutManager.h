@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_LAYOUTMANAGER_H
+#define AUDIOFILER_LAYOUTMANAGER_H
 
 #include <JuceHeader.h>
 
@@ -34,3 +35,5 @@ private:
 
     ControlPanel& controlPanel;
 };
+
+#endif // AUDIOFILER_LAYOUTMANAGER_H

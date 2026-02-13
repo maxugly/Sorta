@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_PLAYBACKTEXTPRESENTER_H
+#define AUDIOFILER_PLAYBACKTEXTPRESENTER_H
 
 #include <JuceHeader.h>
 
@@ -43,3 +44,5 @@ private:
     ControlPanel& owner;
     juce::String totalTimeStaticStr;
 };
+
+#endif // AUDIOFILER_PLAYBACKTEXTPRESENTER_H

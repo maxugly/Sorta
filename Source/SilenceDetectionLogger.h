@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_SILENCEDETECTIONLOGGER_H
+#define AUDIOFILER_SILENCEDETECTIONLOGGER_H
 
 #include <JuceHeader.h>
 
@@ -19,3 +20,5 @@ public:
     static void logNoSoundFound(ControlPanel& panel, const juce::String& boundaryDescription);
     static void logAudioTooLarge(ControlPanel& panel);
 };
+
+#endif // AUDIOFILER_SILENCEDETECTIONLOGGER_H

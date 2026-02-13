@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_CONTROLPANELCOPY_H
+#define AUDIOFILER_CONTROLPANELCOPY_H
 
 #include <JuceHeader.h>
 #include "Config.h"
@@ -40,3 +41,5 @@ inline const juce::String& silenceThresholdOutTooltip()
 }
 } // namespace ControlPanelCopy
 
+
+#endif // AUDIOFILER_CONTROLPANELCOPY_H

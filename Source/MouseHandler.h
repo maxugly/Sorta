@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_MOUSEHANDLER_H
+#define AUDIOFILER_MOUSEHANDLER_H
 
 #include <JuceHeader.h>
 #include "Config.h" // For access to Config::
@@ -214,3 +215,5 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MouseHandler)
 };
+
+#endif // AUDIOFILER_MOUSEHANDLER_H

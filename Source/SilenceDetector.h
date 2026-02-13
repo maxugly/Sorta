@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AUDIOFILER_SILENCEDETECTOR_H
+#define AUDIOFILER_SILENCEDETECTOR_H
 
 #include <JuceHeader.h>
 #include "Config.h"
@@ -140,3 +141,5 @@ private:
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SilenceDetector)
 };
+
+#endif // AUDIOFILER_SILENCEDETECTOR_H
