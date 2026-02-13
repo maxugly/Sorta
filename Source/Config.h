@@ -3,7 +3,7 @@
 
 /**
  * @file Config.h
- * @brief Centralized configuration for the Audiofiler application.
+ * @brief Centralized configuration for the audiofiler application.
  *
  * This file contains a collection of compile-time constants and settings
  * that control the application's appearance, behavior, and default values.

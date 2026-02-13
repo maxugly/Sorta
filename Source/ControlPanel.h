@@ -34,7 +34,7 @@ class PlaybackTextPresenter;
 
 /**
  * @class ControlPanel
- * @brief A component that manages all UI controls and interactions for the Audiofiler application.
+ * @brief A component that manages all UI controls and interactions for the audiofiler application.
  *
  * This class acts as the central hub for the application's graphical user interface,
  * encapsulating all buttons, text editors, and visual displays (excluding the waveform

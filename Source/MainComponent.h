@@ -11,12 +11,12 @@ class PlaybackLoopController;
 
 /**
  * @file MainComponent.h
- * @brief Declares the MainComponent class, the central UI component of the Audiofiler application.
+ * @brief Declares the MainComponent class, the central UI component of the audiofiler application.
  */
 
 /**
  * @class MainComponent
- * @brief The main graphical user interface component for the Audiofiler application.
+ * @brief The main graphical user interface component for the audiofiler application.
  *
  * This class serves as the primary container for the application's UI,
  * managing the layout and interaction of various sub-components such as the
