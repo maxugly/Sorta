@@ -76,8 +76,8 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, 
     controlPanel.modeButton.setBounds(bottomRow.removeFromRight(Config::Layout::buttonWidth));
 
     controlPanel.layoutCache.playbackLeftTextX = controlPanel.getLocalBounds().getX() + Config::Layout::windowBorderMargins;
-    controlPanel.layoutCache.playbackCenterTextX = (controlPanel.getLocalBounds().getWidth() / 2) - (Config::Layout::Text::playbackTextWidth / 2);
-    controlPanel.layoutCache.playbackRightTextX = controlPanel.getLocalBounds().getRight() - Config::Layout::windowBorderMargins - Config::Layout::Text::playbackTextWidth;
+    controlPanel.layoutCache.playbackCenterTextX = (controlPanel.getLocalBounds().getWidth() / 2) - (Config::Layout::Text::playbackWidth / 2);
+    controlPanel.layoutCache.playbackRightTextX = controlPanel.getLocalBounds().getRight() - Config::Layout::windowBorderMargins - Config::Layout::Text::playbackWidth;
 
     if (controlPanel.playbackTextPresenter != nullptr)
         controlPanel.playbackTextPresenter->layoutEditors();
