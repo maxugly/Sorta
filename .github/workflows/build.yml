@@ -1,5 +1,5 @@
 # .github/workflows/build.yml
-name: Build Audiofiler
+name: Build audiofiler
 
 on: [push, pull_request]
 
