@@ -1,10 +1,10 @@
-Agent.md: Refactoring and Development Practices for Sorta++
+Agent.md: Refactoring and Development Practices for audiofiler
 Introduction
-This document outlines the core principles, practices, and workflows for refactoring and developing the Sorta++ JUCE-based audio application. Our approach is patient, iterative, and focused on real-world success — treating the codebase like "Lego bricks and wires" for easy understanding, maintenance, and expansion. The goal is a perfectly maintainable, coherent, best-practice C++/JUCE project that's team-friendly, extensible, and tuned for LLM assistance (e.g., short functions, descriptive names, explicit comments).
+This document outlines the core principles, practices, and workflows for refactoring and developing the audiofiler JUCE-based audio application. Our approach is patient, iterative, and focused on real-world success — treating the codebase like "Lego bricks and wires" for easy understanding, maintenance, and expansion. The goal is a perfectly maintainable, coherent, best-practice C++/JUCE project that's team-friendly, extensible, and tuned for LLM assistance (e.g., short functions, descriptive names, explicit comments).
 These practices draw from our conversations and refactoring journey, emphasizing modularity, testing, and gradual change to avoid bugs or "shooting ourselves in the foot."
 Core Theory: Separation of Concerns
 What is Separation of Concerns?
-Separation of Concerns (SoC) is a fundamental software design principle that advocates dividing a program into distinct sections, each addressing a separate "concern" or responsibility. In Sorta++, this means breaking down the monolithic MainComponent (originally a "god class" handling UI, audio, events, states, etc.) into small, single-responsibility classes.
+Separation of Concerns (SoC) is a fundamental software design principle that advocates dividing a program into distinct sections, each addressing a separate "concern" or responsibility. In audiofiler, this means breaking down the monolithic MainComponent (originally a "god class" handling UI, audio, events, states, etc.) into small, single-responsibility classes.
 
 Why SoC?
 Improves readability: Each file/class focuses on one thing (e.g., AudioPlayer for playback, MouseHandler for input).
@@ -13,7 +13,7 @@ Boosts testability: Small classes are easier to unit-test (e.g., mock AudioPlaye
 Enables extensibility: New features plug in like Lego (e.g., add a PluginManager without touching UI).
 LLM-friendly: Short files (<500 lines) with clear comments make AI tools (like Gemini or Jules) more effective for generation/refactoring.
 
-How we apply SoC in Sorta++:
+How we apply SoC in audiofiler:
 Single Responsibility Principle (SRP): Each class does one job (e.g., WaveformRenderer only renders visuals, KeybindHandler only handles keys).
 Ownership & Delegation: Parent classes (e.g., ControlPanel) own child classes via std::unique_ptr and delegate (e.g., controlPanel->mouseHandler->mouseDown(event)).
 Interfaces/Refs: Use references for access (e.g., MouseHandler takes ControlPanel& ref to get bounds, avoiding tight coupling).

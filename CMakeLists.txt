@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(Audiofiler VERSION 0.0.0001)
+project(audiofiler VERSION 0.0.0001)
 
 message(STATUS "C++ compiler: ${CMAKE_CXX_COMPILER}")
 if (UNIX AND NOT APPLE)
@@ -33,13 +33,13 @@ CPMAddPackage(
         GIT_TAG 8.0.12
 )
 
-juce_add_gui_app(Audiofiler
-        PRODUCT_NAME "Audiofiler"
+juce_add_gui_app(audiofiler
+        PRODUCT_NAME "audiofiler"
 )
 
-target_compile_definitions(Audiofiler PUBLIC JUCE_DEBUG=1)
+target_compile_definitions(audiofiler PUBLIC JUCE_DEBUG=1)
 
-target_compile_definitions(Audiofiler PRIVATE
+target_compile_definitions(audiofiler PRIVATE
         JUCE_USE_MP3AUDIOFORMAT=1
         JUCE_USE_FLAC_AUDIO_FORMAT=1
         JUCE_USE_OGGVORBIS_AUDIO_FORMAT=1
@@ -51,7 +51,7 @@ target_compile_definitions(Audiofiler PRIVATE
         JUCE_JACK=1
 )
 
-target_sources(Audiofiler PRIVATE
+target_sources(audiofiler PRIVATE
         Source/Main.cpp
         Source/MainComponent.h
 		Source/MainComponent.cpp
@@ -105,7 +105,7 @@ target_sources(Audiofiler PRIVATE
         Source/MouseHandler.cpp
 )
 
-target_link_libraries(Audiofiler PRIVATE
+target_link_libraries(audiofiler PRIVATE
         juce::juce_audio_utils
         juce::juce_audio_formats
         juce::juce_audio_devices
@@ -115,4 +115,4 @@ target_link_libraries(Audiofiler PRIVATE
         ${GTK3_LIBRARIES}
 )
 
-juce_generate_juce_header(Audiofiler)
+juce_generate_juce_header(audiofiler)
