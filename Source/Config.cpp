@@ -2,75 +2,80 @@
 
 namespace Config {
 
-    namespace Colors {
-        // General
-        const juce::Colour background = juce::Colours::black;
-        const juce::Colour playbackText = juce::Colour(0xFF34FA11); // Bright green
+    //==============================================================================
+    // Colors
+    //==============================================================================
 
-        // Buttons
-        const juce::Colour buttonBase = juce::Colour(0xff5a5a5a);
-        const juce::Colour buttonOn = juce::Colour(0xff00bfff); // Deep Sky Blue
-        const juce::Colour buttonText = juce::Colour(0xFFFFFFFF); // White
-        const juce::Colour buttonOutline = juce::Colour(0xff808080); // Medium Grey
-        const juce::Colour buttonDisabledBackground = juce::Colour(0xff2a2a2a);
-        const juce::Colour buttonDisabledText = juce::Colour(0xff4a4a4a);
-        const juce::Colour buttonExit = juce::Colours::darkred;
-        const juce::Colour buttonClear = juce::Colours::red;
-        const juce::Colour buttonLoopPlacement = juce::Colour(0xffff1493); // Deep Pink
-        const juce::Colour buttonLoopActive = juce::Colour(0xff0066cc); // Moderate Blue
+    // Window
+    const juce::Colour Colors::Window::background = juce::Colours::black;
 
-        // Text Editors
-        const juce::Colour textEditorBackground = juce::Colours::grey.withAlpha(Config::Layout::Text::backgroundAlpha);
-        const juce::Colour textEditorError = juce::Colours::red;
-        const juce::Colour textEditorWarning = juce::Colours::orange;
-        const juce::Colour textEditorOutOfRange = juce::Colours::orange;
+    // Playback
+    const juce::Colour Colors::Playback::text = juce::Colour(0xFF34FA11); // Bright green
+    const juce::Colour Colors::Playback::cursor = juce::Colours::lime;
+    const juce::Colour Colors::Playback::cursorGlowStart = juce::Colours::lime.withAlpha(0.0f);
+    const juce::Colour Colors::Playback::cursorGlowEnd = juce::Colours::lime.withAlpha(0.5f);
 
-        // Waveform & Visuals
-        const juce::Colour waveform = juce::Colours::deeppink;
-        const juce::Colour playbackCursor = juce::Colours::lime;
-        const juce::Colour loopRegion = juce::Colour(0xff0066cc).withAlpha(0.3f);
-        const juce::Colour loopLine = juce::Colours::blue;
-        const juce::Colour loopMarkerAuto = juce::Colour(0xff00bfff);
-        const juce::Colour loopMarkerHover = juce::Colours::teal;
-        const juce::Colour loopMarkerDrag = juce::Colours::green;
+    // Button
+    const juce::Colour Colors::Button::base = juce::Colour(0xff5a5a5a);
+    const juce::Colour Colors::Button::on = juce::Colour(0xff00bfff); // Deep Sky Blue
+    const juce::Colour Colors::Button::text = juce::Colour(0xFFFFFFFF); // White
+    const juce::Colour Colors::Button::outline = juce::Colour(0xff808080); // Medium Grey
+    const juce::Colour Colors::Button::disabledBackground = juce::Colour(0xff2a2a2a);
+    const juce::Colour Colors::Button::disabledText = juce::Colour(0xff4a4a4a);
+    const juce::Colour Colors::Button::exit = juce::Colours::darkred;
+    const juce::Colour Colors::Button::clear = juce::Colours::red;
+    const juce::Colour Colors::Button::loopPlacement = juce::Colour(0xffff1493); // Deep Pink
+    const juce::Colour Colors::Button::loopActive = juce::Colour(0xff0066cc); // Moderate Blue
 
-        // Mouse Cursor
-        const juce::Colour mouseCursorLine = juce::Colours::yellow;
-        const juce::Colour mouseCursorHighlight = juce::Colours::darkorange.withAlpha(0.4f);
-        const juce::Colour mouseAmplitudeLine = juce::Colours::orange.brighter(0.5f);
-        const juce::Colour mousePlacementMode = juce::Colours::deeppink;
+    // TextEditor
+    const juce::Colour Colors::TextEditor::background = juce::Colours::grey.withAlpha(Config::Layout::Text::backgroundAlpha);
+    const juce::Colour Colors::TextEditor::error = juce::Colours::red;
+    const juce::Colour Colors::TextEditor::warning = juce::Colours::orange;
+    const juce::Colour Colors::TextEditor::outOfRange = juce::Colours::orange;
 
-        // Silence Threshold
-        const juce::Colour thresholdLine = juce::Colour(0xffe600e6);
-        const juce::Colour thresholdRegion = juce::Colours::red.withAlpha(0.15f);
+    // Waveform
+    const juce::Colour Colors::Waveform::wave = juce::Colours::deeppink;
 
-        // Stats Display
-        const juce::Colour statsBackground = juce::Colours::black.withAlpha(0.5f);
-        const juce::Colour statsText = juce::Colours::white;
-        const juce::Colour statsErrorText = juce::Colours::red;
+    // Loop
+    const juce::Colour Colors::Loop::region = juce::Colour(0xff0066cc).withAlpha(0.3f);
+    const juce::Colour Colors::Loop::line = juce::Colours::blue;
+    const juce::Colour Colors::Loop::markerAuto = juce::Colour(0xff00bfff);
+    const juce::Colour Colors::Loop::markerHover = juce::Colours::teal;
+    const juce::Colour Colors::Loop::markerDrag = juce::Colours::green;
 
-        // Animation/Glow
-        const juce::Colour playbackCursorGlowStart = juce::Colours::lime.withAlpha(0.0f);
-        const juce::Colour playbackCursorGlowEnd = juce::Colours::lime.withAlpha(0.5f);
-        const juce::Colour mouseAmplitudeGlow = juce::Colours::yellow;
-        const juce::Colour placementModeGlow = juce::Colours::red.withAlpha(0.7f);
+    // Mouse
+    const juce::Colour Colors::Mouse::cursorLine = juce::Colours::yellow;
+    const juce::Colour Colors::Mouse::cursorHighlight = juce::Colours::darkorange.withAlpha(0.4f);
+    const juce::Colour Colors::Mouse::amplitudeLine = juce::Colours::orange.brighter(0.5f);
+    const juce::Colour Colors::Mouse::placementMode = juce::Colours::deeppink;
+    const juce::Colour Colors::Mouse::amplitudeGlow = juce::Colours::yellow;
+    const juce::Colour Colors::Mouse::placementModeGlow = juce::Colours::red.withAlpha(0.7f);
 
-        // Zoom Popup
-        const juce::Colour zoomPopupBorder = juce::Colours::blue;
-        const juce::Colour zoomPopupIndicator = juce::Colours::white;
+    // Silence
+    const juce::Colour Colors::Silence::line = juce::Colour(0xffe600e6);
+    const juce::Colour Colors::Silence::region = juce::Colours::red.withAlpha(0.15f);
 
-        // Hazy Box (Unused/Optional but present in original)
-        const juce::Colour hazyBoxFade = juce::Colours::black.withAlpha(0.0f);
-        const juce::Colour hazyBoxLine = juce::Colours::cyan;
+    // Stats
+    const juce::Colour Colors::Stats::background = juce::Colours::black.withAlpha(0.5f);
+    const juce::Colour Colors::Stats::text = juce::Colours::white;
+    const juce::Colour Colors::Stats::errorText = juce::Colours::red;
 
-        // Additional colors for UI elements found in code
-        const juce::Colour zoomPopupShadowOuter = juce::Colours::black.withAlpha(0.5f);
-        const juce::Colour zoomPopupShadowInner = juce::Colours::black;
-        const juce::Colour zoomPopupTrackingLine = juce::Colours::dodgerblue;
-        const juce::Colour zoomPopupPlaybackLine = juce::Colours::lime;
-        const juce::Colour zoomPopupZeroLine = juce::Colours::grey.withAlpha(0.3f);
-    }
+    // Zoom
+    const juce::Colour Colors::Zoom::border = juce::Colours::blue;
+    const juce::Colour Colors::Zoom::indicator = juce::Colours::white;
+    const juce::Colour Colors::Zoom::shadowOuter = juce::Colours::black.withAlpha(0.5f);
+    const juce::Colour Colors::Zoom::shadowInner = juce::Colours::black;
+    const juce::Colour Colors::Zoom::trackingLine = juce::Colours::dodgerblue;
+    const juce::Colour Colors::Zoom::playbackLine = juce::Colours::lime;
+    const juce::Colour Colors::Zoom::zeroLine = juce::Colours::grey.withAlpha(0.3f);
 
+    // HazyBox
+    const juce::Colour Colors::HazyBox::fade = juce::Colours::black.withAlpha(0.0f);
+    const juce::Colour Colors::HazyBox::line = juce::Colours::cyan;
+
+    //==============================================================================
+    // Labels
+    //==============================================================================
     namespace Labels {
         const juce::String openButton = "[D]ir";
         const juce::String playButton = juce::CharPointer_UTF8 ("\xe2\x96\xb6");

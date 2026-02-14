@@ -14,74 +14,85 @@ namespace Config {
     //==============================================================================
     // Colors
     //==============================================================================
-    namespace Colors {
-        // General
-        extern const juce::Colour background;
-        extern const juce::Colour playbackText;
+    struct Colors {
+        struct Window {
+            static const juce::Colour background;
+        };
 
-        // Buttons
-        extern const juce::Colour buttonBase;
-        extern const juce::Colour buttonOn;
-        extern const juce::Colour buttonText;
-        extern const juce::Colour buttonOutline;
-        extern const juce::Colour buttonDisabledBackground;
-        extern const juce::Colour buttonDisabledText;
-        extern const juce::Colour buttonExit;
-        extern const juce::Colour buttonClear;
-        extern const juce::Colour buttonLoopPlacement;
-        extern const juce::Colour buttonLoopActive;
+        struct Playback {
+            static const juce::Colour text;
+            static const juce::Colour cursor;
+            static const juce::Colour cursorGlowStart;
+            static const juce::Colour cursorGlowEnd;
+        };
 
-        // Text Editors
-        extern const juce::Colour textEditorBackground;
-        extern const juce::Colour textEditorError;
-        extern const juce::Colour textEditorWarning;
-        extern const juce::Colour textEditorOutOfRange;
+        struct Button {
+            static const juce::Colour base;
+            static const juce::Colour on;
+            static const juce::Colour text;
+            static const juce::Colour outline;
+            static const juce::Colour disabledBackground;
+            static const juce::Colour disabledText;
+            static const juce::Colour exit;
+            static const juce::Colour clear;
+            static const juce::Colour loopPlacement;
+            static const juce::Colour loopActive;
+        };
 
-        // Waveform & Visuals
-        extern const juce::Colour waveform;
-        extern const juce::Colour playbackCursor;
-        extern const juce::Colour loopRegion;
-        extern const juce::Colour loopLine;
-        extern const juce::Colour loopMarkerAuto;
-        extern const juce::Colour loopMarkerHover;
-        extern const juce::Colour loopMarkerDrag;
+        struct TextEditor {
+            static const juce::Colour background;
+            static const juce::Colour error;
+            static const juce::Colour warning;
+            static const juce::Colour outOfRange;
+        };
 
-        // Mouse Cursor
-        extern const juce::Colour mouseCursorLine;
-        extern const juce::Colour mouseCursorHighlight;
-        extern const juce::Colour mouseAmplitudeLine;
-        extern const juce::Colour mousePlacementMode;
+        struct Waveform {
+            static const juce::Colour wave;
+        };
 
-        // Silence Threshold
-        extern const juce::Colour thresholdLine;
-        extern const juce::Colour thresholdRegion;
+        struct Loop {
+            static const juce::Colour region;
+            static const juce::Colour line;
+            static const juce::Colour markerAuto;
+            static const juce::Colour markerHover;
+            static const juce::Colour markerDrag;
+        };
 
-        // Stats Display
-        extern const juce::Colour statsBackground;
-        extern const juce::Colour statsText;
-        extern const juce::Colour statsErrorText;
+        struct Mouse {
+            static const juce::Colour cursorLine;
+            static const juce::Colour cursorHighlight;
+            static const juce::Colour amplitudeLine;
+            static const juce::Colour placementMode;
+            static const juce::Colour amplitudeGlow;
+            static const juce::Colour placementModeGlow;
+        };
 
-        // Animation/Glow
-        extern const juce::Colour playbackCursorGlowStart;
-        extern const juce::Colour playbackCursorGlowEnd;
-        extern const juce::Colour mouseAmplitudeGlow;
-        extern const juce::Colour placementModeGlow;
+        struct Silence {
+            static const juce::Colour line;
+            static const juce::Colour region;
+        };
 
-        // Zoom Popup
-        extern const juce::Colour zoomPopupBorder;
-        extern const juce::Colour zoomPopupIndicator;
+        struct Stats {
+            static const juce::Colour background;
+            static const juce::Colour text;
+            static const juce::Colour errorText;
+        };
 
-        // Extra Zoom Colors
-        extern const juce::Colour zoomPopupShadowOuter;
-        extern const juce::Colour zoomPopupShadowInner;
-        extern const juce::Colour zoomPopupTrackingLine;
-        extern const juce::Colour zoomPopupPlaybackLine;
-        extern const juce::Colour zoomPopupZeroLine;
+        struct Zoom {
+            static const juce::Colour border;
+            static const juce::Colour indicator;
+            static const juce::Colour shadowOuter;
+            static const juce::Colour shadowInner;
+            static const juce::Colour trackingLine;
+            static const juce::Colour playbackLine;
+            static const juce::Colour zeroLine;
+        };
 
-        // Hazy Box
-        extern const juce::Colour hazyBoxFade;
-        extern const juce::Colour hazyBoxLine;
-    }
+        struct HazyBox {
+            static const juce::Colour fade;
+            static const juce::Colour line;
+        };
+    };
 
     //==============================================================================
     // Layout & Sizing
