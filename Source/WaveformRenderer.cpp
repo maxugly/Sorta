@@ -7,6 +7,12 @@
 #include "SilenceDetector.h"
 #include "Config.h"
 
+void WaveformRenderer::invalidateWaveformCache()
+{
+    waveformCache = juce::Image();
+    lastAudioLength = -1.0;
+}
+
 WaveformRenderer::WaveformRenderer(ControlPanel& controlPanelIn)
     : controlPanel(controlPanelIn)
 {
@@ -36,30 +42,66 @@ void WaveformRenderer::drawWaveform(juce::Graphics& g, AudioPlayer& audioPlayer)
     if (numChannels <= 0)
         return;
 
-    int pixelsPerSample = 1;
-    if (controlPanel.getCurrentQualitySetting() == AppEnums::ThumbnailQuality::Low)
-        pixelsPerSample = Config::Layout::Waveform::pixelsPerSampleLow;
-    else if (controlPanel.getCurrentQualitySetting() == AppEnums::ThumbnailQuality::Medium)
-        pixelsPerSample = Config::Layout::Waveform::pixelsPerSampleMedium;
+    const auto bounds = controlPanel.getWaveformBounds();
+    const double audioLength = audioPlayer.getThumbnail().getTotalLength();
+    const int quality = (int)controlPanel.getCurrentQualitySetting();
+    const int channelMode = (int)controlPanel.getChannelViewMode();
+    const float scale = g.getInternalContext().getPhysicalPixelScaleFactor();
 
-    g.setColour(Config::Colors::waveform);
-    if (controlPanel.getChannelViewMode() == AppEnums::ChannelViewMode::Mono || numChannels == 1)
+    if (!waveformCache.isValid()
+        || lastBounds != bounds
+        || std::abs(lastAudioLength - audioLength) > 0.001
+        || lastQuality != quality
+        || lastChannelMode != channelMode
+        || std::abs(lastScale - scale) > 0.001f)
     {
-        if (pixelsPerSample > 1)
-            drawReducedQualityWaveform(g, audioPlayer, 0, pixelsPerSample);
+        // Re-render cache
+        int w = juce::roundToInt((float)bounds.getWidth() * scale);
+        int h = juce::roundToInt((float)bounds.getHeight() * scale);
+
+        if (w <= 0 || h <= 0) return;
+
+        waveformCache = juce::Image(juce::Image::ARGB, w, h, true);
+        juce::Graphics ig(waveformCache);
+
+        ig.addTransform(juce::AffineTransform::scale(scale));
+        ig.setOrigin(-bounds.getX(), -bounds.getY());
+
+        int pixelsPerSample = 1;
+        if (controlPanel.getCurrentQualitySetting() == AppEnums::ThumbnailQuality::Low)
+            pixelsPerSample = Config::Layout::Waveform::pixelsPerSampleLow;
+        else if (controlPanel.getCurrentQualitySetting() == AppEnums::ThumbnailQuality::Medium)
+            pixelsPerSample = Config::Layout::Waveform::pixelsPerSampleMedium;
+
+        ig.setColour(Config::Colors::waveform);
+        if (controlPanel.getChannelViewMode() == AppEnums::ChannelViewMode::Mono || numChannels == 1)
+        {
+            if (pixelsPerSample > 1)
+                drawReducedQualityWaveform(ig, audioPlayer, 0, pixelsPerSample);
+            else
+                audioPlayer.getThumbnail().drawChannel(ig, bounds, 0.0, audioPlayer.getThumbnail().getTotalLength(), 0, 1.0f);
+        }
         else
-            audioPlayer.getThumbnail().drawChannel(g, controlPanel.getWaveformBounds(), 0.0, audioPlayer.getThumbnail().getTotalLength(), 0, 1.0f);
-        return;
+        {
+            if (pixelsPerSample > 1)
+            {
+                for (int ch = 0; ch < numChannels; ++ch)
+                    drawReducedQualityWaveform(ig, audioPlayer, ch, pixelsPerSample);
+            }
+            else
+            {
+                audioPlayer.getThumbnail().drawChannels(ig, bounds, 0.0, audioPlayer.getThumbnail().getTotalLength(), 1.0f);
+            }
+        }
+
+        lastBounds = bounds;
+        lastAudioLength = audioLength;
+        lastQuality = quality;
+        lastChannelMode = channelMode;
+        lastScale = scale;
     }
 
-    if (pixelsPerSample > 1)
-    {
-        for (int ch = 0; ch < numChannels; ++ch)
-            drawReducedQualityWaveform(g, audioPlayer, ch, pixelsPerSample);
-        return;
-    }
-
-    audioPlayer.getThumbnail().drawChannels(g, controlPanel.getWaveformBounds(), 0.0, audioPlayer.getThumbnail().getTotalLength(), 1.0f);
+    g.drawImage(waveformCache, bounds.toFloat());
 }
 
 void WaveformRenderer::drawReducedQualityWaveform(juce::Graphics& g, AudioPlayer& audioPlayer, int channel, int pixelsPerSample) const

@@ -44,7 +44,7 @@ class PlaybackTextPresenter;
  * `MainComponent` and `AudioPlayer`. It also integrates a `SilenceDetector` for
  * automatic loop point setting.
  */
-class ControlPanel : public juce::Component
+class ControlPanel : public juce::Component, public juce::ChangeListener
 {
 public:
     //==============================================================================
@@ -234,6 +234,7 @@ public:
 
     /** @brief Programmatically "clicks" the clear loop out button to reset the loop-out point. */
     void clearLoopOut();
+    void forceInvalidateWaveformCache();
 
     /** @} */
     //==============================================================================
@@ -449,6 +450,7 @@ public:
      * @param wheel The mouse wheel details.
      */
     void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 
     /** @} */
     //==============================================================================
