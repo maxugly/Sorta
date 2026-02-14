@@ -34,3 +34,5 @@ temp/
 tmp/
 *.mp3
 /Source/counter.py
+CMakeCache.txt
+CMakeFiles/
