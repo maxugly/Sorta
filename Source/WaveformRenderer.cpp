@@ -280,11 +280,9 @@ void WaveformRenderer::drawCutModeOverlays(juce::Graphics& g, AudioPlayer& audio
 void WaveformRenderer::drawPlaybackCursor(juce::Graphics& g, AudioPlayer& audioPlayer, float audioLength) const
 {
     const auto waveformBounds = controlPanel.getWaveformBounds();
-    PlaybackCursorGlow::renderGlow(g, controlPanel, waveformBounds);
-    g.setColour(Config::Colors::playbackCursor);
     const float drawPosition = (float)audioPlayer.getTransportSource().getCurrentPosition();
     const float x = (drawPosition / audioLength) * (float)waveformBounds.getWidth() + (float)waveformBounds.getX();
-    g.drawVerticalLine((int)x, (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
+    drawGlowingLine(g, (int)x, waveformBounds.getY(), waveformBounds.getBottom(), Config::Colors::playbackText);
 }
 
 void WaveformRenderer::drawMouseCursorOverlays(juce::Graphics& g, AudioPlayer& audioPlayer, float audioLength) const
@@ -315,8 +313,16 @@ void WaveformRenderer::drawMouseCursorOverlays(juce::Graphics& g, AudioPlayer& a
     }
     else
     {
-        currentLineColor = Config::Colors::mouseCursorLine;
-        currentHighlightColor = Config::Colors::mouseCursorHighlight;
+        if (controlPanel.isZKeyDown())
+        {
+            currentLineColor = Config::Colors::mousePlacementMode;
+            currentHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
+        }
+        else
+        {
+            currentLineColor = Config::Colors::mouseCursorLine;
+            currentHighlightColor = Config::Colors::mouseCursorHighlight;
+        }
         currentGlowColor = Config::Colors::mouseAmplitudeGlow;
     }
 
@@ -376,8 +382,8 @@ void WaveformRenderer::drawMouseCursorOverlays(juce::Graphics& g, AudioPlayer& a
                    Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
     }
 
+    drawGlowingLine(g, mouseHandler.getMouseCursorX(), waveformBounds.getY(), waveformBounds.getBottom(), currentLineColor);
     g.setColour(currentLineColor);
-    g.drawVerticalLine(mouseHandler.getMouseCursorX(), (float)waveformBounds.getY(), (float)waveformBounds.getBottom());
     g.drawHorizontalLine(mouseHandler.getMouseCursorY(), (float)waveformBounds.getX(), (float)waveformBounds.getRight());
 }
 
@@ -520,4 +526,21 @@ void WaveformRenderer::drawZoomPopup(juce::Graphics& g) const
     // Draw blue border
     g.setColour(Config::Colors::zoomPopupBorder);
     g.drawRect(popupBounds.toFloat(), Config::Layout::Zoom::borderThickness);
+}
+
+void WaveformRenderer::drawGlowingLine(juce::Graphics& g, int x, int topY, int bottomY, juce::Colour baseColor) const
+{
+    const float glowWidth = Config::Layout::Glow::thickness;
+
+    // Create a horizontal gradient for the glow: Transparent -> Color -> Transparent
+    juce::ColourGradient gradient(baseColor.withAlpha(0.0f), (float)x - glowWidth, 0.0f,
+                                  baseColor.withAlpha(0.0f), (float)x + glowWidth, 0.0f, false);
+    gradient.addColour(0.5, baseColor.withAlpha(0.5f));
+
+    g.setGradientFill(gradient);
+    g.fillRect((float)x - glowWidth, (float)topY, glowWidth * 2.0f, (float)(bottomY - topY));
+
+    // Draw the core 1-pixel vertical line
+    g.setColour(baseColor);
+    g.drawVerticalLine(x, (float)topY, (float)bottomY);
 }
