@@ -1,4 +1,5 @@
 #include "PlaybackTextPresenter.h"
+#include "TimeUtils.h"
 
 #include "ControlPanel.h"
 #include "Config.h"
