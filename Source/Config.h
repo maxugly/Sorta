@@ -153,6 +153,7 @@ namespace Config {
              static constexpr int mouseTextOffset = 5;
 
              // Thicknesses
+             static constexpr float thickness = 3.0f;
              static constexpr float mouseAmplitudeLineThickness = 1.0f;
              static constexpr float mouseAmplitudeGlowThickness = 3.0f;
              static constexpr float placementModeGlowThickness = 3.0f;
