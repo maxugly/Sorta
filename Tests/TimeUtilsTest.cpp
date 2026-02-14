@@ -56,6 +56,37 @@ public:
         // 2500 hours = 9,000,000 seconds -> 9,000,000,000 ms (fits in long long, exceeds int)
         // 9000000 / 3600 = 2500
         expectEquals(TimeUtils::formatTime(9000000.0), juce::String("2500:00:00:000"));
+
+        // ==========================================
+        // parseTime tests
+        // ==========================================
+        beginTest("parseTime handles valid inputs");
+        expectEquals(TimeUtils::parseTime("00:00:00:000"), 0.0);
+        expectEquals(TimeUtils::parseTime("01:00:00:000"), 3600.0);
+        expectEquals(TimeUtils::parseTime("00:01:00:000"), 60.0);
+        expectEquals(TimeUtils::parseTime("00:00:01:000"), 1.0);
+        expectEquals(TimeUtils::parseTime("00:00:00:500"), 0.5);
+
+        beginTest("parseTime handles complex inputs");
+        expectEquals(TimeUtils::parseTime("01:01:01:500"), 3661.5);
+
+        beginTest("parseTime handles negative string inputs (strips minus)");
+        expectEquals(TimeUtils::parseTime("-00:00:01:000"), 1.0);
+        expectEquals(TimeUtils::parseTime("-01:00:00:000"), 3600.0);
+
+        beginTest("parseTime handles invalid inputs");
+        expectEquals(TimeUtils::parseTime("invalid"), -1.0);
+        expectEquals(TimeUtils::parseTime("00:00"), -1.0); // Too few parts
+        expectEquals(TimeUtils::parseTime(""), -1.0);
+        expectEquals(TimeUtils::parseTime("00:00:00:000:000"), -1.0); // Too many parts
+
+        beginTest("Round trip consistency");
+        // Check a range of times
+        double testTimes[] = { 0.0, 0.5, 1.0, 60.0, 3600.0, 3661.5, 9999.999 };
+        for (double t : testTimes)
+        {
+            expectWithinAbsoluteError(TimeUtils::parseTime(TimeUtils::formatTime(t)), t, 0.001);
+        }
     }
 };
 
