@@ -119,9 +119,6 @@ void PlaybackTextPresenter::textEditorFocusLost(juce::TextEditor& editor)
     applyTimeEdit(editor);
 }
 
-void PlaybackTextPresenter::textEditorFocusGained(juce::TextEditor&)
-{
-}
 
 void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor& editor)
 {
