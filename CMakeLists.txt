@@ -4,6 +4,7 @@ project(audiofiler VERSION 0.0.0001)
 
 option(BUILD_TESTS_ONLY "Build tests only" OFF)
 
+
 include(cmake/CPM.cmake)
 CPMAddPackage(
         NAME juce
@@ -102,6 +103,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/MouseHandler.cpp
             Source/FocusManager.h
             Source/FocusManager.cpp
+            Source/PlaybackHelpers.h
+            Source/PlaybackHelpers.cpp
     )
 
     target_link_libraries(audiofiler PRIVATE
@@ -119,6 +122,6 @@ if (NOT BUILD_TESTS_ONLY)
 endif()
 
 # Tests
-add_executable(tests Tests/TestMain.cpp Tests/TimeUtilsTest.cpp Source/TimeUtils.cpp)
+add_executable(tests Tests/TestMain.cpp Tests/TimeUtilsTest.cpp Source/TimeUtils.cpp Source/PlaybackHelpers.cpp Tests/PlaybackHelpersTest.cpp)
 target_compile_definitions(tests PRIVATE JUCE_USE_CURL=0 JUCE_WEB_BROWSER=0)
 target_link_libraries(tests PRIVATE juce::juce_core)
