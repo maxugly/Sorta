@@ -22,7 +22,7 @@ MainComponent::MainComponent()
     setAudioChannels(0, 2);
 
     // 5. Set Window Size - This triggers resized() and lays out the ControlPanel
-    setSize(Config::Layout::initialWindowWidth, Config::Layout::initialWindowHeight);
+    setSize(Config::Layout::Window::width, Config::Layout::Window::height);
     
     // 6. Start the UI Refresh Timer
     startTimerHz(60);
