@@ -59,6 +59,7 @@ ControlPanel::ControlPanel(MainComponent& ownerComponent)
     transportPresenter = std::make_unique<TransportPresenter>(*this);
     finaliseSetup();
 
+    getAudioPlayer().getThumbnail().addChangeListener(this);
     setMouseCursor(juce::MouseCursor::CrosshairCursor);
 }
 
@@ -71,6 +72,7 @@ ControlPanel::ControlPanel(MainComponent& ownerComponent)
  */
 ControlPanel::~ControlPanel()
 {
+    getAudioPlayer().getThumbnail().removeChangeListener(this);
     setLookAndFeel(nullptr);
 }
 
@@ -398,4 +400,19 @@ void ControlPanel::mouseExit(const juce::MouseEvent& event)
 void ControlPanel::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
 {
     mouseHandler->mouseWheelMove(event, wheel);
+}
+
+void ControlPanel::forceInvalidateWaveformCache()
+{
+    if (waveformRenderer != nullptr)
+        waveformRenderer->invalidateWaveformCache();
+}
+
+void ControlPanel::changeListenerCallback(juce::ChangeBroadcaster* source)
+{
+    if (source == &getAudioPlayer().getThumbnail())
+    {
+        forceInvalidateWaveformCache();
+        repaint();
+    }
 }

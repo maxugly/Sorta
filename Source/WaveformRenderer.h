@@ -16,6 +16,7 @@ class AudioPlayer;
 class WaveformRenderer
 {
 public:
+    void invalidateWaveformCache();
     /**
      * @brief Constructs a renderer bound to a ControlPanel.
      * @param controlPanel Reference to the owning ControlPanel for accessing state and helpers.
@@ -29,6 +30,12 @@ public:
     void render(juce::Graphics& g);
 
 private:
+    mutable juce::Image waveformCache;
+    mutable juce::Rectangle<int> lastBounds;
+    mutable double lastAudioLength = -1.0;
+    mutable float lastScale = 1.0f;
+    mutable int lastQuality = -1;
+    mutable int lastChannelMode = -1;
     void drawWaveform(juce::Graphics& g, AudioPlayer& audioPlayer) const;
     void drawReducedQualityWaveform(juce::Graphics& g, AudioPlayer& audioPlayer, int channel, int pixelsPerSample) const;
     void drawCutModeOverlays(juce::Graphics& g, AudioPlayer& audioPlayer, float audioLength) const;
