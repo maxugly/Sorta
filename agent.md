@@ -53,22 +53,44 @@ Preserve states (e.g., new feature doesn't reset loop positions).
 
 
 Example: Adding "undo loop changes" — Create LoopHistory.h/cpp (stores position stacks), owned by LoopPresenter. Add methods like pushState(), undo(); wire to new button in ButtonManager.
+
 All Our Specific Practices
-Refactoring Workflow
+1. Configuration & Theming (The "Config.h" Standard)
 
-One Extraction/Addition Per Session: Small steps (e.g., extract mouse to MouseHandler) to avoid LLM loops/overwhelm.
-Prompt Structure: Specific, with guidelines (Doxygen, Config, modern C++), context snippets, removal emphasis, output format.
-Build/Test After Each: cmake -G Ninja -B build; ninja -C build; manual UI test (e.g., "test buttons/loops"); await results before next.
-Fallbacks: If LLM replace/insert fails, use Python (e.g., script for string ops in files).
-Git Safety: Commit WIP before changes; reset if broken.
+Nested Semantic Structs: Group constants by Component (e.g., Waveform, Button) inside a parent struct like Layout.
 
-Code Style & Best Practices
+The DRY (Don't Repeat Yourself) Principle: Avoid redundant naming. Use Config::Layout::Button::height instead of Config::buttonHeight.
 
-Doxygen Comments: @file/@class/@brief/@param/@return everywhere; "why" inlines (intent over what).
-Config.h Central: All tweakables here (texts, colors, thresholds) — no hardcodes.
-Modern C++: Smart pointers (unique_ptr for ownership), const-correctness, short functions (<50 lines), RAII.
-Modularity: Single-responsibility classes; delegation over inheritance; refs for access.
-Testing: Unit test ideas per extraction (e.g., mock for SilenceDetector); aim 80% coverage with gcov.
-Tools: Emerge/CodeCharta for visualization; Doxygen for docs; counter.py for line counts.
-No New Features During Refactor: Only modularize existing; add later.
-Granularity: "Super granular" like Lego — small classes for one job (e.g., PlaybackCursorGlow).
+Header/Implementation Split:
+
+Header (.h): Use static constexpr for primitives. Use extern const for complex types like juce::Colour.
+
+Implementation (.cpp): Define the actual values for extern objects here to avoid multiple-definition linker errors.
+
+Derived Colors: Use semantic variables (e.g., primary) and derive UI variations using JUCE methods like withAlpha() or withMultipliedBrightness().
+
+2. Git & Environment Health
+
+The "Zombie" Rule: .gitignore does not untrack files already in the index. Use git rm -r --cached <path> to fix "red entries" in Lazygit for ignored folders.
+
+Pre-commit Verification: Before committing, verify no ignored files are tracked using git ls-files -c -i --exclude-standard.
+
+Clean Slate Alias: Maintain a shell function/alias (git-clean-index) that untracks everything and re-adds based on the current .gitignore.
+
+3. Refactoring Workflow
+
+One Extraction Per Session: Small steps (e.g., extract mouse to MouseHandler) to avoid LLM context collapse.
+
+The "Jules" Pivot: If a task changes the fundamental architecture (like the flat-to-nested namespace shift), start a new job/task.
+
+Mapping Tables: Before a global search-and-replace, require the agent to provide a mapping table (OldVariable -> NewPath) for verification.
+
+Build-Tested Iteration: Run ninja after every header change. Use compiler errors as a checklist for the search-and-replace process.
+
+4. Code Style & Best Practices
+
+Doxygen Comments: @file, @class, @brief, @param, and @return are mandatory. Explain why (intent) rather than just what.
+
+Modern C++: Use std::unique_ptr for ownership, const references for access, and RAII.
+
+Granularity: Aim for "Lego-brick" classes. If a file exceeds 400-500 lines, it’s time to extract a sub-component.
