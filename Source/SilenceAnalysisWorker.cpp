@@ -1,4 +1,5 @@
 #include "SilenceAnalysisWorker.h"
+#include "SilenceScanner.h"
 
 #include "ControlPanel.h"
 #include "AudioPlayer.h"
@@ -38,6 +39,7 @@ void SilenceAnalysisWorker::detectInSilence(ControlPanel& ownerPanel, float thre
         return;
     }
 
+    // Keep this check to protect downstream int-based APIs
     if (lengthInSamples > std::numeric_limits<int>::max())
     {
         SilenceDetectionLogger::logAudioTooLarge(ownerPanel);
@@ -45,24 +47,17 @@ void SilenceAnalysisWorker::detectInSilence(ControlPanel& ownerPanel, float thre
         return;
     }
 
-    auto buffer = std::make_unique<juce::AudioBuffer<float>>(reader->numChannels, (int) lengthInSamples);
-    reader->read(buffer.get(), 0, (int) lengthInSamples, 0, true, true);
+    juce::int64 sample = SilenceScanner::findFirstSoundSample(reader, threshold);
 
-    for (int sample = 0; sample < buffer->getNumSamples(); ++sample)
+    if (sample >= 0)
     {
-        for (int channel = 0; channel < buffer->getNumChannels(); ++channel)
-        {
-            if (std::abs(buffer->getSample(channel, sample)) > threshold)
-            {
-                ownerPanel.setLoopStart(sample);
-                SilenceDetectionLogger::logLoopStartSet(ownerPanel, sample, reader->sampleRate);
-                // Move playhead to the new loop-in position in cut mode
-                if (ownerPanel.isCutModeActive())
-                    audioPlayer.getTransportSource().setPosition(ownerPanel.getLoopInPosition());
-                resumeIfNeeded(audioPlayer, wasPlaying);
-                return;
-            }
-        }
+        ownerPanel.setLoopStart((int)sample);
+        SilenceDetectionLogger::logLoopStartSet(ownerPanel, (int)sample, reader->sampleRate);
+        // Move playhead to the new loop-in position in cut mode
+        if (ownerPanel.isCutModeActive())
+            audioPlayer.getTransportSource().setPosition(ownerPanel.getLoopInPosition());
+        resumeIfNeeded(audioPlayer, wasPlaying);
+        return;
     }
 
     SilenceDetectionLogger::logNoSoundFound(ownerPanel, "start");
@@ -93,6 +88,7 @@ void SilenceAnalysisWorker::detectOutSilence(ControlPanel& ownerPanel, float thr
         return;
     }
 
+    // Keep this check to protect downstream int-based APIs
     if (lengthInSamples > std::numeric_limits<int>::max())
     {
         SilenceDetectionLogger::logAudioTooLarge(ownerPanel);
@@ -100,25 +96,18 @@ void SilenceAnalysisWorker::detectOutSilence(ControlPanel& ownerPanel, float thr
         return;
     }
 
-    auto buffer = std::make_unique<juce::AudioBuffer<float>>(reader->numChannels, (int) lengthInSamples);
-    reader->read(buffer.get(), 0, (int) lengthInSamples, 0, true, true);
+    juce::int64 sample = SilenceScanner::findLastSoundSample(reader, threshold);
 
-    for (int sample = buffer->getNumSamples() - 1; sample >= 0; --sample)
+    if (sample >= 0)
     {
-        for (int channel = 0; channel < buffer->getNumChannels(); ++channel)
-        {
-            if (std::abs(buffer->getSample(channel, sample)) > threshold)
-            {
-                const juce::int64 tailSamples = (juce::int64) (reader->sampleRate * 0.05); // 50ms tail
-                const juce::int64 endPoint64 = (juce::int64) sample + tailSamples;
-                const int endPoint = (int) juce::jmin (endPoint64, (juce::int64) buffer->getNumSamples());
+        const juce::int64 tailSamples = (juce::int64) (reader->sampleRate * 0.05); // 50ms tail
+        const juce::int64 endPoint64 = sample + tailSamples;
+        const int endPoint = (int) juce::jmin (endPoint64, lengthInSamples);
 
-                ownerPanel.setLoopEnd(endPoint);
-                SilenceDetectionLogger::logLoopEndSet(ownerPanel, endPoint, reader->sampleRate);
-                resumeIfNeeded(audioPlayer, wasPlaying);
-                return;
-            }
-        }
+        ownerPanel.setLoopEnd(endPoint);
+        SilenceDetectionLogger::logLoopEndSet(ownerPanel, endPoint, reader->sampleRate);
+        resumeIfNeeded(audioPlayer, wasPlaying);
+        return;
     }
 
     SilenceDetectionLogger::logNoSoundFound(ownerPanel, "end");
