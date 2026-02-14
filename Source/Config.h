@@ -86,100 +86,103 @@ namespace Config {
     //==============================================================================
     // Layout & Sizing
     //==============================================================================
-    namespace Layout {
-        // Window
-        constexpr int windowBorderMargins = 15;
-        constexpr int initialWindowWidth = 1200;
-        constexpr int initialWindowHeight = 800;
+    struct Layout {
+        struct Window {
+            static constexpr int width = 1200;
+            static constexpr int height = 800;
+        };
+
+        // Window (Margins - kept at top level if not strictly window size)
+        static constexpr int windowBorderMargins = 15;
 
         // Button
-        constexpr int buttonHeight = 30;
-        constexpr int buttonWidth = 80;
-        constexpr int clearButtonWidth = 25;
-        constexpr int clearButtonMargin = 25;
-        constexpr float buttonCornerRadius = 5.0f;
-        constexpr float buttonOutlineThickness = 1.0f;
+        static constexpr int buttonHeight = 30;
+        static constexpr int buttonWidth = 80;
+        static constexpr int clearButtonWidth = 25;
+        static constexpr int clearButtonMargin = 25;
+        static constexpr float buttonCornerRadius = 5.0f;
+        static constexpr float buttonOutlineThickness = 1.0f;
 
         // Text & Editors
-        constexpr int loopTextWidth = 165;
-        constexpr int thresholdEditorWidth = 80;
-        constexpr int loopTextOffsetY = 10;
+        static constexpr int loopTextWidth = 165;
+        static constexpr int thresholdEditorWidth = 80;
+        static constexpr int loopTextOffsetY = 10;
 
-        namespace Text {
-            constexpr int playbackWidth = 520;
-            constexpr int playbackHeight = 30;
-            constexpr int playbackOffsetY = 25;
+        struct Text {
+            static constexpr int playbackWidth = 520;
+            static constexpr int playbackHeight = 30;
+            static constexpr int playbackOffsetY = 25;
 
-            constexpr int playbackSize = 30;
-            constexpr int mouseCursorSize = 20;
-            constexpr float buttonHeightScale = 0.45f;
-            constexpr float buttonPlayPauseHeightScale = 0.7f;
+            static constexpr int playbackSize = 30;
+            static constexpr int mouseCursorSize = 20;
+            static constexpr float buttonHeightScale = 0.45f;
+            static constexpr float buttonPlayPauseHeightScale = 0.7f;
 
-            constexpr float backgroundAlpha = 0.7f;
-            constexpr int editorOutlineThickness = 1;
-        }
+            static constexpr float backgroundAlpha = 0.7f;
+            static constexpr int editorOutlineThickness = 1;
+        };
 
         // Stats Display
-        namespace Stats {
-            constexpr int initialHeight = 150;
-            constexpr int minHeight = 50;
-            constexpr int maxHeight = 600;
-            constexpr float cornerRadius = 4.0f;
-            constexpr int handleAreaHeight = 12;
-            constexpr int handleWidth = 40;
-            constexpr int handleLineHeight = 2;
-            constexpr float handleAlpha = 0.3f;
-            constexpr int internalPadding = 2;
-            constexpr int sideMargin = 10;
-            constexpr int topMargin = 10;
-        }
+        struct Stats {
+            static constexpr int initialHeight = 150;
+            static constexpr int minHeight = 50;
+            static constexpr int maxHeight = 600;
+            static constexpr float cornerRadius = 4.0f;
+            static constexpr int handleAreaHeight = 12;
+            static constexpr int handleWidth = 40;
+            static constexpr int handleLineHeight = 2;
+            static constexpr float handleAlpha = 0.3f;
+            static constexpr int internalPadding = 2;
+            static constexpr int sideMargin = 10;
+            static constexpr int topMargin = 10;
+        };
 
         // Waveform
-        namespace Waveform {
-            constexpr float heightScale = 0.5f;
-            constexpr int pixelsPerSampleLow = 4;
-            constexpr int pixelsPerSampleMedium = 2;
-        }
+        struct Waveform {
+            static constexpr float heightScale = 0.5f;
+            static constexpr int pixelsPerSampleLow = 4;
+            static constexpr int pixelsPerSampleMedium = 2;
+        };
 
         // Glow & Lines
-        namespace Glow {
-             constexpr float offsetFactor = 0.5f;
-             constexpr int loopHollowHeightDivisor = 3;
-             constexpr float mouseAlpha = 0.3f;
-             constexpr int mousePadding = 2;
-             constexpr int mouseHighlightOffset = 2;
-             constexpr int mouseHighlightSize = 5;
-             constexpr float mouseAmplitudeAlpha = 0.7f;
-             constexpr int mouseTextOffset = 5;
+        struct Glow {
+             static constexpr float offsetFactor = 0.5f;
+             static constexpr int loopHollowHeightDivisor = 3;
+             static constexpr float mouseAlpha = 0.3f;
+             static constexpr int mousePadding = 2;
+             static constexpr int mouseHighlightOffset = 2;
+             static constexpr int mouseHighlightSize = 5;
+             static constexpr float mouseAmplitudeAlpha = 0.7f;
+             static constexpr int mouseTextOffset = 5;
 
              // Thicknesses
-             constexpr float mouseAmplitudeLineThickness = 1.0f;
-             constexpr float mouseAmplitudeGlowThickness = 3.0f;
-             constexpr float placementModeGlowThickness = 3.0f;
-             constexpr float thresholdGlowThickness = 3.0f;
-             constexpr float loopLineGlowThickness = 3.0f;
+             static constexpr float mouseAmplitudeLineThickness = 1.0f;
+             static constexpr float mouseAmplitudeGlowThickness = 3.0f;
+             static constexpr float placementModeGlowThickness = 3.0f;
+             static constexpr float thresholdGlowThickness = 3.0f;
+             static constexpr float loopLineGlowThickness = 3.0f;
 
              // Loop Markers
-             constexpr float loopMarkerWidthThin = 1.0f;
-             constexpr float loopBoxOutlineThickness = 1.5f;
-             constexpr float loopBoxOutlineThicknessInteracting = 3.0f;
-             constexpr float loopMarkerBoxWidth = 30.0f;
-             constexpr int loopMarkerBoxHeight = 30;
-             constexpr float loopMarkerCenterDivisor = 2.0f;
+             static constexpr float loopMarkerWidthThin = 1.0f;
+             static constexpr float loopBoxOutlineThickness = 1.5f;
+             static constexpr float loopBoxOutlineThicknessInteracting = 3.0f;
+             static constexpr float loopMarkerBoxWidth = 30.0f;
+             static constexpr int loopMarkerBoxHeight = 30;
+             static constexpr float loopMarkerCenterDivisor = 2.0f;
 
              // Playback Cursor
-             constexpr float cursorGlowRadius = 5.0f;
-             constexpr float cursorGlowLineThickness = 2.0f;
-        }
+             static constexpr float cursorGlowRadius = 5.0f;
+             static constexpr float cursorGlowLineThickness = 2.0f;
+        };
 
         // Zoom Popup
-        namespace Zoom {
-            constexpr float factor = 10.0f;
-            constexpr float popupScale = 0.8f;
-            constexpr float borderThickness = 2.0f;
-            constexpr float indicatorThickness = 1.0f;
-        }
-    }
+        struct Zoom {
+            static constexpr float factor = 10.0f;
+            static constexpr float popupScale = 0.8f;
+            static constexpr float borderThickness = 2.0f;
+            static constexpr float indicatorThickness = 1.0f;
+        };
+    };
 
     //==============================================================================
     // Animation
