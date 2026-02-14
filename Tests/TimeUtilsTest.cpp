@@ -44,6 +44,18 @@ public:
         expectEquals(TimeUtils::formatTime(360000.0), juce::String("100:00:00:000"));
         // 25 hours -> 25 * 3600 = 90000
         expectEquals(TimeUtils::formatTime(90000.0), juce::String("25:00:00:000"));
+
+        beginTest("formatTime handles precision edge cases");
+        // 0.99999 -> 00:00:00:999 (should not round up to 1s with current epsilon)
+        expectEquals(TimeUtils::formatTime(0.99999), juce::String("00:00:00:999"));
+
+        beginTest("formatTime handles negative zero");
+        expectEquals(TimeUtils::formatTime(-0.0), juce::String("00:00:00:000"));
+
+        beginTest("formatTime handles extremely large values");
+        // 2500 hours = 9,000,000 seconds -> 9,000,000,000 ms (fits in long long, exceeds int)
+        // 9000000 / 3600 = 2500
+        expectEquals(TimeUtils::formatTime(9000000.0), juce::String("2500:00:00:000"));
     }
 };
 
