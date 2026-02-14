@@ -1,4 +1,5 @@
 #include "AudioPlayer.h"
+#include "PlaybackHelpers.h"
 
 /**
  * @file AudioPlayer.cpp
@@ -250,11 +251,5 @@ juce::AudioFormatReader* AudioPlayer::getAudioFormatReader() const
  */
 void AudioPlayer::setPositionConstrained(double newPosition, double loopIn, double loopOut)
 {
-    // Ensure loopIn is not greater than loopOut to prevent jlimit issues
-    const double effectiveLoopIn = juce::jmin(loopIn, loopOut);
-    const double effectiveLoopOut = juce::jmax(loopIn, loopOut);
-
-    // Constrain the new position within the effective loop bounds
-    const double constrainedPosition = juce::jlimit(effectiveLoopIn, effectiveLoopOut, newPosition);
-    transportSource.setPosition(constrainedPosition);
+    transportSource.setPosition(PlaybackHelpers::constrainPosition(newPosition, loopIn, loopOut));
 }
