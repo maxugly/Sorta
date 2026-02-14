@@ -1,4 +1,5 @@
 #include "LoopPresenter.h"
+#include "FocusManager.h"
 
 #include "ControlPanel.h"
 #include "SilenceDetector.h"
@@ -296,8 +297,6 @@ void LoopPresenter::syncEditorToPosition(juce::TextEditor& editor, double positi
 void LoopPresenter::mouseEnter(const juce::MouseEvent& event)
 {
     // Don't switch if 'z' key is already holding a zoom point
-    if (owner.isZKeyDown())
-        return;
 
     if (event.eventComponent == &loopInEditor)
         owner.setActiveZoomPoint(ControlPanel::ActiveZoomPoint::In);
@@ -370,38 +369,21 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::Mo
     const double totalLength = getAudioTotalLength();
     if (totalLength <= 0.0)
         return;
-
     // Determine character index under the mouse to set step size contextually
     // Format is HH:MM:SS:mmm (012345678901)
     int charIndex = editor->getTextIndexAt(event.getPosition());
-    double step = Config::Audio::loopStepMilliseconds;
     
+    double baseStep = Config::Audio::loopStepMilliseconds;
     if (charIndex >= 0 && charIndex <= 1)      // HH
-        step = Config::Audio::loopStepHours;
+        baseStep = Config::Audio::loopStepHours;
     else if (charIndex >= 3 && charIndex <= 4) // MM
-        step = Config::Audio::loopStepMinutes;
+        baseStep = Config::Audio::loopStepMinutes;
     else if (charIndex >= 6 && charIndex <= 7) // SS
-        step = Config::Audio::loopStepSeconds;
-    else if (charIndex >= 9)                   // mmm
-    {
-        if (event.mods.isCtrlDown() && event.mods.isShiftDown())
-        {
-            // Sample accurate (audio frame)
-            auto& audioPlayer = owner.getAudioPlayer();
-            if (auto* reader = audioPlayer.getAudioFormatReader())
-                step = 1.0 / reader->sampleRate;
-            else
-                step = 0.0001; // Fallback
-        }
-        else if (event.mods.isShiftDown())
-        {
-            step = Config::Audio::loopStepMillisecondsFine; // 1ms
-        }
-        else
-        {
-            step = Config::Audio::loopStepMilliseconds; // 10ms
-        }
-    }
+        baseStep = Config::Audio::loopStepSeconds;
+    // else mmm (default baseStep)
+
+    double multiplier = FocusManager::getStepMultiplier(event.mods.isShiftDown(), event.mods.isCtrlDown());
+    double step = baseStep * multiplier;
 
     // Alt is a x10 multiplier
     if (event.mods.isAltDown())

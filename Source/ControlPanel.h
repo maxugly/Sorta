@@ -1,6 +1,7 @@
 #ifndef AUDIOFILER_CONTROLPANEL_H
 #define AUDIOFILER_CONTROLPANEL_H
 
+class FocusManager;
 #include <JuceHeader.h>
 #include <tuple>
 #include "Config.h"
@@ -387,6 +388,9 @@ public:
      */
     const juce::LookAndFeel& getLookAndFeel() const;
 
+    /** @brief Provides access to the FocusManager instance. */
+    FocusManager& getFocusManager() const { return *focusManager; }
+
     /** @} */
     //==============================================================================
 
@@ -491,6 +495,7 @@ private:
     std::unique_ptr<LoopEditorPresenter> loopEditorPresenter; ///< Manages loop editor setup and validation.
     std::unique_ptr<LoopButtonPresenter> loopButtonPresenter; ///< Handles loop button colouring.
     std::unique_ptr<LoopResetPresenter> loopResetPresenter; ///< Clears loop bounds.
+    std::unique_ptr<FocusManager> focusManager;
 
     // --- UI Components ---
     juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton; ///< Standard TextButtons for various actions.

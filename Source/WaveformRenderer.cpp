@@ -2,6 +2,7 @@
 
 #include "ControlPanel.h"
 #include "AudioPlayer.h"
+#include "FocusManager.h"
 #include "MouseHandler.h"
 #include "SilenceDetector.h"
 #include "Config.h"
@@ -409,22 +410,9 @@ void WaveformRenderer::drawZoomPopup(juce::Graphics& g) const
     
     // Determine the center time for the zoom window
     double zoomCenterTime = 0.0;
-    
-    // Priority 1: Dragging a handle
-    if (mouseHandler.getDraggedHandle() == MouseHandler::LoopMarkerHandle::In)
-        zoomCenterTime = controlPanel.getLoopInPosition();
-    else if (mouseHandler.getDraggedHandle() == MouseHandler::LoopMarkerHandle::Out)
-        zoomCenterTime = controlPanel.getLoopOutPosition();
-    // Priority 2: Hovering/Focusing an editor (activeZoomPoint)
-    else if (activePoint == ControlPanel::ActiveZoomPoint::In)
-        zoomCenterTime = controlPanel.getLoopInPosition();
-    else if (activePoint == ControlPanel::ActiveZoomPoint::Out)
-        zoomCenterTime = controlPanel.getLoopOutPosition();
-    // Priority 3: Playback position
-    else
-        zoomCenterTime = audioPlayer.getTransportSource().getCurrentPosition();
-
-    // Determine current time point for the indicator (the setting being adjusted)
+    // Use FocusManager to determine what time to center the zoom popup on
+    zoomCenterTime = controlPanel.getFocusManager().getFocusedTime();
+// Determine current time point for the indicator (the setting being adjusted)
     double indicatorTime = 0.0;
     if (activePoint == ControlPanel::ActiveZoomPoint::In)
         indicatorTime = controlPanel.getLoopInPosition();
