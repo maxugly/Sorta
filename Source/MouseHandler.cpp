@@ -1,4 +1,5 @@
 #include "MouseHandler.h"
+#include "FocusManager.h"
 #include "ControlPanel.h" // Full header required for ControlPanel access
 #include "AudioPlayer.h"    // Required for AudioPlayer types
 
@@ -56,6 +57,7 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
         else
         {
             mouseCursorTime = 0.0;
+    isScrubbingState = false;
         }
     }
     else
@@ -63,6 +65,7 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
         mouseCursorX = -1;
         mouseCursorY = -1;
         mouseCursorTime = 0.0;
+    isScrubbingState = false;
         hoveredHandle = LoopMarkerHandle::None;
     }
     owner.repaint(); // Trigger repaint on owner
@@ -141,6 +144,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
 
                         owner.getAudioPlayer().getTransportSource().setPosition(constrainedTime);
                         isDragging = true;
+            isScrubbingState = true;
                         mouseDragStartX = event.x;
                     }
                 }
@@ -205,6 +209,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
         else if (draggedHandle == LoopMarkerHandle::None)
         {
             isDragging = true;
+            isScrubbingState = true;
             mouseDragStartX = event.x;
             currentPlaybackPosOnDragStart = owner.getAudioPlayer().getTransportSource().getCurrentPosition();
             seekToMousePosition(event.x);
@@ -356,6 +361,7 @@ void MouseHandler::mouseUp(const juce::MouseEvent& event)
             owner.updateLoopButtonColors();
         }
         isDragging = false;
+    isScrubbingState = false;
         draggedHandle = LoopMarkerHandle::None;
         owner.repaint();
         // We don't return here yet because we might want to let the regular logic run too, 
@@ -365,6 +371,7 @@ void MouseHandler::mouseUp(const juce::MouseEvent& event)
     }
 
     isDragging = false;
+    isScrubbingState = false;
     draggedHandle = LoopMarkerHandle::None;
     owner.jumpToLoopIn(); // Jump after regular drag
     
@@ -423,6 +430,7 @@ void MouseHandler::mouseExit(const juce::MouseEvent& event)
     mouseCursorX = -1;
     mouseCursorY = -1;
     mouseCursorTime = 0.0;
+    isScrubbingState = false;
     hoveredHandle = LoopMarkerHandle::None;
     owner.repaint();
 }
@@ -449,14 +457,9 @@ void MouseHandler::mouseWheelMove(const juce::MouseEvent& event, const juce::Mou
     
     if (audioLength <= 0.0)
         return;
-
-    // Determine scrub step (e.g., 1% of the viewable range or fixed time)
-    // If zoomed, we should scrub smaller increments
-    double timeRange = audioLength;
-    if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
-        timeRange = audioLength / (double)owner.getZoomFactor();
-
-    double step = timeRange * 0.05 * std::abs(wheel.deltaY); // 5% of current view
+    // Use fixed time steps (0.01s base) scaled by FocusManager
+    double multiplier = FocusManager::getStepMultiplier(event.mods.isShiftDown(), event.mods.isCtrlDown());
+    double step = 0.01 * multiplier;
     
     // Alt is a x10 multiplier
     if (event.mods.isAltDown())

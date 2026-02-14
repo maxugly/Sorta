@@ -147,6 +147,9 @@ public:
     /** @brief Gets the handle currently being dragged. */
     LoopMarkerHandle getDraggedHandle() const { return draggedHandle; }
 
+    /** @brief Checks if the mouse is actively scrubbing the waveform (dragging without a handle). */
+    bool isScrubbing() const { return isScrubbingState; }
+
 private:
     //==============================================================================
     /** @name Private Member Variables
@@ -166,6 +169,7 @@ private:
     double dragStartLoopLength = 0.0;
     double dragStartMouseOffset = 0.0;
     bool interactionStartedInZoom = false;
+    bool isScrubbingState = false;
 
     /** @} */
     //==============================================================================
