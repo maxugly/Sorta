@@ -95,7 +95,21 @@ void PlaybackTextPresenter::render(juce::Graphics& g) const
 
 void PlaybackTextPresenter::textEditorTextChanged(juce::TextEditor& editor)
 {
-    // Validation logic similar to LoopPresenter
+    const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
+    const double newPosition = parseTime(editor.getText());
+
+    if (newPosition >= 0.0 && newPosition <= totalLength)
+    {
+        editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+    }
+    else if (newPosition == -1.0)
+    {
+        editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorError);
+    }
+    else
+    {
+        editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorWarning);
+    }
 }
 
 void PlaybackTextPresenter::textEditorReturnKeyPressed(juce::TextEditor& editor)
