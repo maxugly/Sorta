@@ -107,8 +107,7 @@ void ControlPanel::initialiseLookAndFeel() {
  * threshold editors.
  */
 void ControlPanel::initialiseLoopEditors() {
-  loopEditorPresenter = std::make_unique<LoopEditorPresenter>(*this);
-  loopEditorPresenter->initialiseEditors();
+
   loopResetPresenter = std::make_unique<LoopResetPresenter>(*this);
 
   addAndMakeVisible(silenceDetector->getInSilenceThresholdEditor());
