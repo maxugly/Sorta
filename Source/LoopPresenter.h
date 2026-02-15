@@ -116,6 +116,10 @@ private:
   juce::TextEditor &loopOutEditor;
   double loopInPosition{-1.0};
   double loopOutPosition{-1.0};
+  bool isEditingIn{false};
+  bool isEditingOut{false};
+
+  void mouseDown(const juce::MouseEvent &event) override;
 };
 
 #endif // AUDIOFILER_LOOPPRESENTER_H
