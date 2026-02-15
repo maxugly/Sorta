@@ -1,78 +1,126 @@
 #include "SilenceAnalysisWorker.h"
-
-#include "ControlPanel.h"
-#include "AudioPlayer.h"
-#include "SilenceDetectionLogger.h"
-#include <limits>
 #include <algorithm>
 #include <cmath>
 
-namespace
+SilenceAnalysisWorker::SilenceAnalysisWorker()
 {
-    constexpr int kChunkSize = 65536;
-    constexpr juce::int64 kMaxAnalyzableSamples = 2147483647; // INT_MAX, to prevent DoS
-    constexpr int kMaxChannels = 128; // Reasonable limit for audio channels
-
-    void resumeIfNeeded(AudioPlayer& player, bool wasPlaying)
-    {
-        if (wasPlaying)
-            player.getTransportSource().start();
-    }
 }
 
-void SilenceAnalysisWorker::detectInSilence(ControlPanel& ownerPanel, float threshold)
+SilenceAnalysisWorker::~SilenceAnalysisWorker()
 {
-    AudioPlayer& audioPlayer = ownerPanel.getAudioPlayer();
-    const bool wasPlaying = audioPlayer.isPlaying();
-    if (wasPlaying)
-        audioPlayer.getTransportSource().stop();
+    stop();
+}
 
-    juce::AudioFormatReader* reader = audioPlayer.getAudioFormatReader();
-    if (reader == nullptr)
-    {
-        SilenceDetectionLogger::logNoAudioLoaded(ownerPanel);
-        resumeIfNeeded(audioPlayer, wasPlaying);
-        return;
-    }
+void SilenceAnalysisWorker::stop()
+{
+    stopTimer();
+    currentReader = nullptr;
+}
 
-    const juce::int64 lengthInSamples = reader->lengthInSamples;
-    SilenceDetectionLogger::logReadingSamples(ownerPanel, "In", lengthInSamples);
+void SilenceAnalysisWorker::startInDetection(juce::AudioFormatReader* reader, float threshold)
+{
+    stop();
+    if (reader == nullptr) return;
 
-    // Security Fix: Check for invalid length to prevent processing errors
+    currentReader = reader;
+    currentThreshold = threshold;
+    isDetectingIn = true;
+    lengthInSamples = reader->lengthInSamples;
+
+    // Validate
     if (lengthInSamples <= 0)
     {
-        SilenceDetectionLogger::logZeroLength(ownerPanel);
-        resumeIfNeeded(audioPlayer, wasPlaying);
+        if (onError) onError("SilenceDetector: Audio length is 0, cannot detect silence.");
         return;
     }
 
-    // Security Fix: Prevent DoS by rejecting excessively large files
     if (lengthInSamples > kMaxAnalyzableSamples)
     {
-        SilenceDetectionLogger::logAudioTooLarge(ownerPanel);
-        resumeIfNeeded(audioPlayer, wasPlaying);
+        if (onError) onError("SilenceDetector: Audio file is too large for automated silence detection.");
         return;
     }
 
-    // Security Fix: Validate channel count to prevent invalid buffer allocation
     if (reader->numChannels <= 0 || reader->numChannels > kMaxChannels)
     {
-        // Log error if needed, for now just bail out
-        resumeIfNeeded(audioPlayer, wasPlaying);
+        if (onError) onError("SilenceDetector: Invalid number of channels (" + juce::String(reader->numChannels) + ")");
         return;
     }
 
-    // Security Fix: Process in chunks to avoid large memory allocation (unbounded allocation vulnerability) and integer overflow (files > 2GB cause negative size when cast to int)
-    juce::AudioBuffer<float> buffer(reader->numChannels, kChunkSize);
+    if (onLog) onLog("SilenceDetector: Reading " + juce::String(lengthInSamples) + " samples for In detection.");
 
-    juce::int64 currentPos = 0;
-    while (currentPos < lengthInSamples)
+    // Setup buffer (resizing only if needed)
+    buffer.setSize(reader->numChannels, kChunkSize);
+
+    currentPos = 0;
+    startTimer(1); // Start immediately with 1ms interval
+}
+
+void SilenceAnalysisWorker::startOutDetection(juce::AudioFormatReader* reader, float threshold)
+{
+    stop();
+    if (reader == nullptr) return;
+
+    currentReader = reader;
+    currentThreshold = threshold;
+    isDetectingIn = false;
+    lengthInSamples = reader->lengthInSamples;
+
+    // Validate
+    if (lengthInSamples <= 0)
     {
+        if (onError) onError("SilenceDetector: Audio length is 0, cannot detect silence.");
+        return;
+    }
+
+    if (lengthInSamples > kMaxAnalyzableSamples)
+    {
+        if (onError) onError("SilenceDetector: Audio file is too large for automated silence detection.");
+        return;
+    }
+
+    if (reader->numChannels <= 0 || reader->numChannels > kMaxChannels)
+    {
+        if (onError) onError("SilenceDetector: Invalid number of channels (" + juce::String(reader->numChannels) + ")");
+        return;
+    }
+
+    if (onLog) onLog("SilenceDetector: Reading " + juce::String(lengthInSamples) + " samples for Out detection.");
+
+    buffer.setSize(reader->numChannels, kChunkSize);
+    currentPos = lengthInSamples;
+    startTimer(1);
+}
+
+void SilenceAnalysisWorker::timerCallback()
+{
+    processNextChunk();
+}
+
+void SilenceAnalysisWorker::processNextChunk()
+{
+    if (currentReader == nullptr)
+    {
+        stop();
+        return;
+    }
+
+    if (isDetectingIn)
+    {
+        // IN Detection
+        if (currentPos >= lengthInSamples)
+        {
+            if (onNoSilenceFound) onNoSilenceFound("start");
+            stop();
+            return;
+        }
+
         const int numThisTime = (int) std::min((juce::int64) kChunkSize, lengthInSamples - currentPos);
         buffer.clear();
-        if (!reader->read(&buffer, 0, numThisTime, currentPos, true, true))
+
+        if (!currentReader->read(&buffer, 0, numThisTime, currentPos, true, true))
         {
-            resumeIfNeeded(audioPlayer, wasPlaying);
+            if (onError) onError("SilenceDetector: Failed to read audio.");
+            stop();
             return;
         }
 
@@ -80,82 +128,35 @@ void SilenceAnalysisWorker::detectInSilence(ControlPanel& ownerPanel, float thre
         {
             for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
             {
-                if (std::abs(buffer.getSample(channel, sample)) > threshold)
+                if (std::abs(buffer.getSample(channel, sample)) > currentThreshold)
                 {
                     const juce::int64 globalSample = currentPos + sample;
-                    ownerPanel.setLoopInPosition((double)globalSample / reader->sampleRate);
-                    SilenceDetectionLogger::logLoopStartSet(ownerPanel, globalSample, reader->sampleRate);
-
-                    // Move playhead to the new loop-in position in cut mode
-                    if (ownerPanel.isCutModeActive())
-                        audioPlayer.getTransportSource().setPosition(ownerPanel.getLoopInPosition());
-
-                    resumeIfNeeded(audioPlayer, wasPlaying);
+                    if (onSilenceFound) onSilenceFound(globalSample, currentReader->sampleRate);
+                    stop();
                     return;
                 }
             }
         }
         currentPos += numThisTime;
     }
-
-    SilenceDetectionLogger::logNoSoundFound(ownerPanel, "start");
-    resumeIfNeeded(audioPlayer, wasPlaying);
-}
-
-void SilenceAnalysisWorker::detectOutSilence(ControlPanel& ownerPanel, float threshold)
-{
-    AudioPlayer& audioPlayer = ownerPanel.getAudioPlayer();
-    const bool wasPlaying = audioPlayer.isPlaying();
-    if (wasPlaying)
-        audioPlayer.getTransportSource().stop();
-
-    juce::AudioFormatReader* reader = audioPlayer.getAudioFormatReader();
-    if (reader == nullptr)
+    else
     {
-        SilenceDetectionLogger::logNoAudioLoaded(ownerPanel);
-        resumeIfNeeded(audioPlayer, wasPlaying);
-        return;
-    }
+        // OUT Detection
+        if (currentPos <= 0)
+        {
+            if (onNoSilenceFound) onNoSilenceFound("end");
+            stop();
+            return;
+        }
 
-    const juce::int64 lengthInSamples = reader->lengthInSamples;
-    SilenceDetectionLogger::logReadingSamples(ownerPanel, "Out", lengthInSamples);
-
-    // Security Fix: Check for invalid length
-    if (lengthInSamples <= 0)
-    {
-        SilenceDetectionLogger::logZeroLength(ownerPanel);
-        resumeIfNeeded(audioPlayer, wasPlaying);
-        return;
-    }
-
-    // Security Fix: Prevent DoS by rejecting excessively large files
-    if (lengthInSamples > kMaxAnalyzableSamples)
-    {
-        SilenceDetectionLogger::logAudioTooLarge(ownerPanel);
-        resumeIfNeeded(audioPlayer, wasPlaying);
-        return;
-    }
-
-    // Security Fix: Validate channel count
-    if (reader->numChannels <= 0 || reader->numChannels > kMaxChannels)
-    {
-        resumeIfNeeded(audioPlayer, wasPlaying);
-        return;
-    }
-
-    // Security Fix: Process in chunks backwards to avoid unbounded memory allocation and integer overflow
-    juce::AudioBuffer<float> buffer(reader->numChannels, kChunkSize);
-
-    juce::int64 currentPos = lengthInSamples;
-    while (currentPos > 0)
-    {
         const int numThisTime = (int) std::min((juce::int64) kChunkSize, currentPos);
         const juce::int64 startSample = currentPos - numThisTime;
 
         buffer.clear();
-        if (!reader->read(&buffer, 0, numThisTime, startSample, true, true))
+        if (!currentReader->read(&buffer, 0, numThisTime, startSample, true, true))
         {
-            resumeIfNeeded(audioPlayer, wasPlaying);
+            if (onError) onError("SilenceDetector: Failed to read audio.");
+            stop();
             return;
         }
 
@@ -163,23 +164,19 @@ void SilenceAnalysisWorker::detectOutSilence(ControlPanel& ownerPanel, float thr
         {
             for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
             {
-                if (std::abs(buffer.getSample(channel, sample)) > threshold)
+                if (std::abs(buffer.getSample(channel, sample)) > currentThreshold)
                 {
                     const juce::int64 globalSample = startSample + sample;
-                    const juce::int64 tailSamples = (juce::int64) (reader->sampleRate * 0.05); // 50ms tail
+                    const juce::int64 tailSamples = (juce::int64) (currentReader->sampleRate * 0.05); // 50ms tail
                     const juce::int64 endPoint64 = globalSample + tailSamples;
                     const juce::int64 finalEndPoint = std::min(endPoint64, lengthInSamples);
 
-                    ownerPanel.setLoopOutPosition((double)finalEndPoint / reader->sampleRate);
-                    SilenceDetectionLogger::logLoopEndSet(ownerPanel, finalEndPoint, reader->sampleRate);
-                    resumeIfNeeded(audioPlayer, wasPlaying);
+                    if (onSilenceFound) onSilenceFound(finalEndPoint, currentReader->sampleRate);
+                    stop();
                     return;
                 }
             }
         }
         currentPos -= numThisTime;
     }
-
-    SilenceDetectionLogger::logNoSoundFound(ownerPanel, "end");
-    resumeIfNeeded(audioPlayer, wasPlaying);
 }

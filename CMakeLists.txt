@@ -132,6 +132,8 @@ endif()
 # Tests
 add_executable(tests
     Tests/TestMain.cpp
+    Tests/SilenceWorkerTest.cpp
+    Tests/JuceHeadlessHelper.cpp
     Tests/TimeUtilsTest.cpp
     Source/TimeUtils.cpp
     Source/PlaybackHelpers.cpp
@@ -140,6 +142,7 @@ add_executable(tests
     Source/AudioPlayer.cpp
     Tests/AudioPlayerTest.cpp
     Source/Config.cpp
+    Source/SilenceAnalysisWorker.cpp
 )
 
 target_compile_definitions(tests PRIVATE
@@ -149,6 +152,8 @@ target_compile_definitions(tests PRIVATE
     JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
     JUCE_DONT_DECLARE_PROJECTINFO=1
 )
+
+target_include_directories(tests PRIVATE Tests)
 
 target_link_libraries(tests PRIVATE
     juce::juce_core
