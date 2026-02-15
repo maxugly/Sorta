@@ -19,12 +19,17 @@ WaveformRenderer::WaveformRenderer(ControlPanel& controlPanelIn)
 {
 }
 
-void WaveformRenderer::render(juce::Graphics& g)
+void WaveformRenderer::renderWaveform(juce::Graphics& g)
 {
     AudioPlayer& audioPlayer = controlPanel.getAudioPlayer();
     drawWaveform(g, audioPlayer);
+}
 
+void WaveformRenderer::renderOverlays(juce::Graphics& g)
+{
+    AudioPlayer& audioPlayer = controlPanel.getAudioPlayer();
     const float audioLength = (float)audioPlayer.getThumbnail().getTotalLength();
+
     if (audioLength > 0.0f)
     {
         if (controlPanel.isCutModeActive())

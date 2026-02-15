@@ -28,7 +28,17 @@ public:
      * @brief Paints the waveform and overlays for the ControlPanel.
      * @param g Graphics context supplied by ControlPanel::paint.
      */
-    void render(juce::Graphics& g);
+    /**
+     * @brief Paints the cached waveform (static).
+     * @param g Graphics context supplied by ControlPanel::paint.
+     */
+    void renderWaveform(juce::Graphics& g);
+
+    /**
+     * @brief Paints the dynamic overlays (cursors, zoom, etc.).
+     * @param g Graphics context supplied by PlaybackOverlay::paint.
+     */
+    void renderOverlays(juce::Graphics& g);
 
 private:
     mutable juce::Image waveformCache;
