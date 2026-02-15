@@ -2,7 +2,6 @@
 #include "AudioPlayer.h" // Required for AudioPlayer types in public methods
 #include "Config.h"
 #include "ControlButtonsPresenter.h"
-#include "ControlPanelCopy.h"
 #include "ControlStatePresenter.h"
 #include "FocusManager.h"
 #include "LayoutManager.h"
@@ -158,8 +157,8 @@ void ControlPanel::paint(juce::Graphics &g) {
 }
 
 void ControlPanel::updatePlayButtonText(bool isPlaying) {
-  playStopButton.setButtonText(isPlaying ? ControlPanelCopy::stopButtonText()
-                                         : ControlPanelCopy::playButtonText());
+  playStopButton.setButtonText(isPlaying ? Config::Labels::stopButton
+                                         : Config::Labels::playButton);
 }
 
 void ControlPanel::setZKeyDown(bool isDown) {
@@ -227,6 +226,22 @@ void ControlPanel::updateComponentStates() {
     controlStatePresenter->refreshStates();
 }
 
+void ControlPanel::setInteractionsEnabled(bool shouldBeEnabled)
+{
+  openButton.setEnabled(shouldBeEnabled);
+  playStopButton.setEnabled(shouldBeEnabled);
+  loopButton.setEnabled(shouldBeEnabled);
+  autoplayButton.setEnabled(shouldBeEnabled);
+  cutButton.setEnabled(shouldBeEnabled);
+  loopInButton.setEnabled(shouldBeEnabled);
+  loopOutButton.setEnabled(shouldBeEnabled);
+  clearLoopInButton.setEnabled(shouldBeEnabled);
+  clearLoopOutButton.setEnabled(shouldBeEnabled);
+  modeButton.setEnabled(shouldBeEnabled);
+  channelViewButton.setEnabled(shouldBeEnabled);
+  qualityButton.setEnabled(shouldBeEnabled);
+}
+
 /**
  * @brief Lays out the buttons for the top row of the control panel.
  * @param bounds The current bounds of the control panel.
@@ -235,11 +250,11 @@ void ControlPanel::updateComponentStates() {
 
 void ControlPanel::updateQualityButtonText() {
   if (currentQuality == AppEnums::ThumbnailQuality::High)
-    qualityButton.setButtonText(ControlPanelCopy::qualityHighText());
+    qualityButton.setButtonText(Config::Labels::qualityHigh);
   else if (currentQuality == AppEnums::ThumbnailQuality::Medium)
-    qualityButton.setButtonText(ControlPanelCopy::qualityMediumText());
+    qualityButton.setButtonText(Config::Labels::qualityMedium);
   else
-    qualityButton.setButtonText(ControlPanelCopy::qualityLowText());
+    qualityButton.setButtonText(Config::Labels::qualityLow);
 }
 
 /**

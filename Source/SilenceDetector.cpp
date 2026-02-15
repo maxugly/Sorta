@@ -3,6 +3,7 @@
 #include "AudioPlayer.h"
 #include "SilenceThresholdPresenter.h"
 #include "SilenceAnalysisWorker.h"
+#include "SilenceDetectionLogger.h"
 
 /**
  * @file SilenceDetector.cpp
@@ -31,6 +32,7 @@ SilenceDetector::SilenceDetector(ControlPanel& ownerPanel)
       currentOutSilenceThreshold(Config::Audio::silenceThresholdOut)
 {
     thresholdPresenter = std::make_unique<SilenceThresholdPresenter>(*this, owner);
+    worker = std::make_unique<SilenceAnalysisWorker>();
 }
 
 /**
@@ -53,7 +55,57 @@ SilenceDetector::~SilenceDetector() = default;
  */
 void SilenceDetector::detectInSilence()
 {
-    SilenceAnalysisWorker::detectInSilence(owner, currentInSilenceThreshold);
+    AudioPlayer& audioPlayer = owner.getAudioPlayer();
+
+    // Capture playing state only if not already working (to handle consecutive clicks)
+    if (!worker->isWorking())
+    {
+        wasPlayingBeforeScan = audioPlayer.isPlaying();
+    }
+
+    if (audioPlayer.isPlaying())
+        audioPlayer.getTransportSource().stop();
+
+    juce::AudioFormatReader* reader = audioPlayer.getAudioFormatReader();
+    if (reader == nullptr)
+    {
+        SilenceDetectionLogger::logNoAudioLoaded(owner);
+        if (wasPlayingBeforeScan) audioPlayer.getTransportSource().start();
+        return;
+    }
+
+    owner.setInteractionsEnabled(false);
+
+    // Setup callbacks specific to In Detection
+    worker->onSilenceFound = [this, &audioPlayer](juce::int64 sampleIndex, double sampleRate) {
+        owner.setLoopInPosition((double)sampleIndex / sampleRate);
+        SilenceDetectionLogger::logLoopStartSet(owner, sampleIndex, sampleRate);
+
+        // Move playhead to the new loop-in position in cut mode
+        if (owner.isCutModeActive())
+            audioPlayer.getTransportSource().setPosition(owner.getLoopInPosition());
+
+        if (wasPlayingBeforeScan) audioPlayer.getTransportSource().start();
+        owner.setInteractionsEnabled(true);
+    };
+
+    worker->onNoSilenceFound = [this, &audioPlayer](juce::String desc) {
+        SilenceDetectionLogger::logNoSoundFound(owner, desc);
+        if (wasPlayingBeforeScan) audioPlayer.getTransportSource().start();
+        owner.setInteractionsEnabled(true);
+    };
+
+    worker->onError = [this, &audioPlayer](juce::String msg) {
+        owner.getStatsDisplay().insertTextAtCaret(msg + "\n");
+        if (wasPlayingBeforeScan) audioPlayer.getTransportSource().start();
+        owner.setInteractionsEnabled(true);
+    };
+
+    worker->onLog = [this](juce::String msg) {
+        owner.getStatsDisplay().insertTextAtCaret(msg + "\n");
+    };
+
+    worker->startInDetection(reader, currentInSilenceThreshold);
 }
 
 
@@ -69,17 +121,49 @@ void SilenceDetector::detectInSilence()
  */
 void SilenceDetector::detectOutSilence()
 {
-    SilenceAnalysisWorker::detectOutSilence(owner, currentOutSilenceThreshold);
+    AudioPlayer& audioPlayer = owner.getAudioPlayer();
+
+    if (!worker->isWorking())
+    {
+        wasPlayingBeforeScan = audioPlayer.isPlaying();
+    }
+
+    if (audioPlayer.isPlaying())
+        audioPlayer.getTransportSource().stop();
+
+    juce::AudioFormatReader* reader = audioPlayer.getAudioFormatReader();
+    if (reader == nullptr)
+    {
+        SilenceDetectionLogger::logNoAudioLoaded(owner);
+        if (wasPlayingBeforeScan) audioPlayer.getTransportSource().start();
+        return;
+    }
+
+    owner.setInteractionsEnabled(false);
+
+    // Setup callbacks specific to Out Detection
+    worker->onSilenceFound = [this, &audioPlayer](juce::int64 sampleIndex, double sampleRate) {
+        owner.setLoopOutPosition((double)sampleIndex / sampleRate);
+        SilenceDetectionLogger::logLoopEndSet(owner, sampleIndex, sampleRate);
+        if (wasPlayingBeforeScan) audioPlayer.getTransportSource().start();
+        owner.setInteractionsEnabled(true);
+    };
+
+    worker->onNoSilenceFound = [this, &audioPlayer](juce::String desc) {
+        SilenceDetectionLogger::logNoSoundFound(owner, desc);
+        if (wasPlayingBeforeScan) audioPlayer.getTransportSource().start();
+        owner.setInteractionsEnabled(true);
+    };
+
+    worker->onError = [this, &audioPlayer](juce::String msg) {
+        owner.getStatsDisplay().insertTextAtCaret(msg + "\n");
+        if (wasPlayingBeforeScan) audioPlayer.getTransportSource().start();
+        owner.setInteractionsEnabled(true);
+    };
+
+    worker->onLog = [this](juce::String msg) {
+        owner.getStatsDisplay().insertTextAtCaret(msg + "\n");
+    };
+
+    worker->startOutDetection(reader, currentOutSilenceThreshold);
 }
-
-
-/**
- * @brief Provides real-time visual feedback as the user types in a threshold editor.
- * @param editor The TextEditor that has changed.
- *
- * This callback is triggered on every keystroke within the threshold editors. It checks if the
- * entered value (as a percentage) is within the valid range of 1-99. If it is, the text color
- * is normal. If not, the color changes to an "out of range" color. This immediate feedback
- * improves usability by guiding the user toward valid input without waiting for them to press
- * Enter or lose focus.
- */
