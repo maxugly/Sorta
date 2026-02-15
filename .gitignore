@@ -36,3 +36,6 @@ tmp/
 /Source/counter.py
 CMakeCache.txt
 CMakeFiles/
+
+# --- Local Rools ---
+*.py
