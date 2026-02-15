@@ -561,12 +561,24 @@ void MouseHandler::seekToMousePosition(int x)
 
 void MouseHandler::clearTextEditorFocusIfNeeded(const juce::Point<int>& clickPosition)
 {
+    // Ensure we are not clearing focus if the click is actually within any
+    // text editor child (like the LoopPresenter editors or playback text)
+    for (int i = 0; i < owner.getNumChildComponents(); ++i)
+    {
+        auto* child = owner.getChildComponent(i);
+        if (auto* editorChild = dynamic_cast<juce::TextEditor*>(child))
+        {
+            if (editorChild->getBounds().contains(clickPosition))
+                return; // Stop immediately, do not clear focus
+        }
+    }
+
+    // Otherwise, if clicking elsewhere (like the waveform), clear focus from all editors
     for (int i = 0; i < owner.getNumChildComponents(); ++i)
     {
         if (auto* editorChild = dynamic_cast<juce::TextEditor*>(owner.getChildComponent(i)))
         {
-            const bool clickInsideEditor = editorChild->getBoundsInParent().contains(clickPosition);
-            if (editorChild->hasKeyboardFocus(false) && ! clickInsideEditor)
+            if (editorChild->hasKeyboardFocus(false))
             {
                 editorChild->giveAwayKeyboardFocus();
             }

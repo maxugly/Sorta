@@ -297,7 +297,9 @@ void PlaybackTextPresenter::mouseWheelMove(
     return;
 
   // Don't allow wheel adjustments if we are actively typing
-  if (editor->hasKeyboardFocus(true))
+  if ((editor == &owner.elapsedTimeEditor && isEditingElapsed) ||
+      (editor == &owner.remainingTimeEditor && isEditingRemaining) ||
+      (editor == &owner.loopLengthEditor && isEditingLoopLength))
     return;
 
   double currentVal = TimeUtils::parseTime(editor->getText());

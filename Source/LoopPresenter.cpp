@@ -385,6 +385,11 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent &event,
   if (editor == nullptr)
     return;
 
+  // NEW GUARD: If typing, ignore the wheel
+  if ((editor == &loopInEditor && isEditingIn) ||
+      (editor == &loopOutEditor && isEditingOut))
+    return;
+
   const double totalLength = getAudioTotalLength();
   if (totalLength <= 0.0)
     return;
