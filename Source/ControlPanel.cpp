@@ -7,7 +7,7 @@
 #include "FocusManager.h"
 #include "LayoutManager.h"
 #include "LoopButtonPresenter.h"
-#include "LoopEditorPresenter.h"
+
 #include "LoopPresenter.h"
 #include "LoopResetPresenter.h"
 #include "MainComponent.h" // Full header required for MainComponent access (e.g., getAudioPlayer)
