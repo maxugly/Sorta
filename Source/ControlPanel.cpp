@@ -227,6 +227,22 @@ void ControlPanel::updateComponentStates() {
     controlStatePresenter->refreshStates();
 }
 
+void ControlPanel::setInteractionsEnabled(bool shouldBeEnabled)
+{
+  openButton.setEnabled(shouldBeEnabled);
+  playStopButton.setEnabled(shouldBeEnabled);
+  loopButton.setEnabled(shouldBeEnabled);
+  autoplayButton.setEnabled(shouldBeEnabled);
+  cutButton.setEnabled(shouldBeEnabled);
+  loopInButton.setEnabled(shouldBeEnabled);
+  loopOutButton.setEnabled(shouldBeEnabled);
+  clearLoopInButton.setEnabled(shouldBeEnabled);
+  clearLoopOutButton.setEnabled(shouldBeEnabled);
+  modeButton.setEnabled(shouldBeEnabled);
+  channelViewButton.setEnabled(shouldBeEnabled);
+  qualityButton.setEnabled(shouldBeEnabled);
+}
+
 /**
  * @brief Lays out the buttons for the top row of the control panel.
  * @param bounds The current bounds of the control panel.
