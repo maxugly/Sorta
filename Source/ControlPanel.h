@@ -141,6 +141,15 @@ public:
   /** @brief Updates only the cursor/overlay part of the UI. */
   void updateCursorPosition();
 
+  /**
+   * @brief Enables or disables user interactions with key control elements.
+   *
+   * This is used during long-running operations (like silence detection) to prevent
+   * race conditions such as file loading or playback initiation.
+   * @param shouldBeEnabled True to enable interactions, false to disable.
+   */
+  void setInteractionsEnabled(bool shouldBeEnabled);
+
   /** @} */
   //==============================================================================
 

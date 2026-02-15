@@ -6,6 +6,7 @@
 #include "FocusManager.h"
 #include "LayoutManager.h"
 #include "LoopButtonPresenter.h"
+
 #include "LoopPresenter.h"
 #include "LoopResetPresenter.h"
 #include "MainComponent.h" // Full header required for MainComponent access (e.g., getAudioPlayer)
@@ -105,6 +106,7 @@ void ControlPanel::initialiseLookAndFeel() {
  * threshold editors.
  */
 void ControlPanel::initialiseLoopEditors() {
+
   loopResetPresenter = std::make_unique<LoopResetPresenter>(*this);
 
   addAndMakeVisible(silenceDetector->getInSilenceThresholdEditor());
@@ -222,6 +224,22 @@ void ControlPanel::updateLoopLabels() {
 void ControlPanel::updateComponentStates() {
   if (controlStatePresenter != nullptr)
     controlStatePresenter->refreshStates();
+}
+
+void ControlPanel::setInteractionsEnabled(bool shouldBeEnabled)
+{
+  openButton.setEnabled(shouldBeEnabled);
+  playStopButton.setEnabled(shouldBeEnabled);
+  loopButton.setEnabled(shouldBeEnabled);
+  autoplayButton.setEnabled(shouldBeEnabled);
+  cutButton.setEnabled(shouldBeEnabled);
+  loopInButton.setEnabled(shouldBeEnabled);
+  loopOutButton.setEnabled(shouldBeEnabled);
+  clearLoopInButton.setEnabled(shouldBeEnabled);
+  clearLoopOutButton.setEnabled(shouldBeEnabled);
+  modeButton.setEnabled(shouldBeEnabled);
+  channelViewButton.setEnabled(shouldBeEnabled);
+  qualityButton.setEnabled(shouldBeEnabled);
 }
 
 /**

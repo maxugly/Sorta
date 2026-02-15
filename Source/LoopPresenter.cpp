@@ -128,9 +128,9 @@ void LoopPresenter::ensureLoopOrder() {
 }
 
 void LoopPresenter::updateLoopLabels() {
-  if (!loopInEditor.hasKeyboardFocus(false))
+  if (!isEditingIn && !loopInEditor.hasKeyboardFocus(false))
     syncEditorToPosition(loopInEditor, loopInPosition);
-  if (!loopOutEditor.hasKeyboardFocus(false))
+  if (!isEditingOut && !loopOutEditor.hasKeyboardFocus(false))
     syncEditorToPosition(loopOutEditor, loopOutPosition);
 }
 
@@ -162,6 +162,11 @@ void LoopPresenter::textEditorTextChanged(juce::TextEditor &editor) {
 }
 
 void LoopPresenter::textEditorReturnKeyPressed(juce::TextEditor &editor) {
+  if (&editor == &loopInEditor)
+    isEditingIn = false;
+  if (&editor == &loopOutEditor)
+    isEditingOut = false;
+
   const double newPosition = TimeUtils::parseTime(editor.getText());
   if (&editor == &loopInEditor) {
     applyLoopInFromEditor(newPosition, editor);
@@ -172,6 +177,11 @@ void LoopPresenter::textEditorReturnKeyPressed(juce::TextEditor &editor) {
 }
 
 void LoopPresenter::textEditorEscapeKeyPressed(juce::TextEditor &editor) {
+  if (&editor == &loopInEditor)
+    isEditingIn = false;
+  if (&editor == &loopOutEditor)
+    isEditingOut = false;
+
   if (&editor == &loopInEditor) {
     syncEditorToPosition(editor, loopInPosition);
   } else if (&editor == &loopOutEditor) {
@@ -183,6 +193,11 @@ void LoopPresenter::textEditorEscapeKeyPressed(juce::TextEditor &editor) {
 }
 
 void LoopPresenter::textEditorFocusLost(juce::TextEditor &editor) {
+  if (&editor == &loopInEditor)
+    isEditingIn = false;
+  if (&editor == &loopOutEditor)
+    isEditingOut = false;
+
   const double newPosition = TimeUtils::parseTime(editor.getText());
   if (&editor == &loopInEditor) {
     applyLoopInFromEditor(newPosition, editor);
@@ -193,6 +208,13 @@ void LoopPresenter::textEditorFocusLost(juce::TextEditor &editor) {
   // Clear zoom on focus lost
   owner.setActiveZoomPoint(ControlPanel::ActiveZoomPoint::None);
   owner.performDelayedJumpIfNeeded();
+}
+
+void LoopPresenter::mouseDown(const juce::MouseEvent &event) {
+  if (event.eventComponent == &loopInEditor)
+    isEditingIn = true;
+  else if (event.eventComponent == &loopOutEditor)
+    isEditingOut = true;
 }
 
 void LoopPresenter::textEditorFocusGained(juce::TextEditor &editor) {
@@ -293,6 +315,13 @@ void LoopPresenter::mouseUp(const juce::MouseEvent &event) {
   if (editor == nullptr)
     return;
 
+  if (editor == &loopInEditor)
+    isEditingIn = true;
+  else if (editor == &loopOutEditor)
+    isEditingOut = true;
+
+  editor->grabKeyboardFocus();
+
   // Only apply smart highlight if the user hasn't made a manual selection
   if (editor->getHighlightedRegion().getLength() > 0)
     return;
@@ -311,14 +340,26 @@ void LoopPresenter::mouseUp(const juce::MouseEvent &event) {
   // :   8
   // mmm: 9-11 (3 chars)
 
+  juce::Range<int> newRange;
+
   if (charIndex <= 1)
-    editor->setHighlightedRegion(juce::Range<int>(0, 2)); // HH
+    newRange = juce::Range<int>(0, 2); // HH
   else if (charIndex >= 3 && charIndex <= 4)
-    editor->setHighlightedRegion(juce::Range<int>(3, 5)); // MM
+    newRange = juce::Range<int>(3, 5); // MM
   else if (charIndex >= 6 && charIndex <= 7)
-    editor->setHighlightedRegion(juce::Range<int>(6, 8)); // SS
+    newRange = juce::Range<int>(6, 8); // SS
   else if (charIndex >= 9 && charIndex <= 11)
-    editor->setHighlightedRegion(juce::Range<int>(9, 12)); // mmm
+    newRange = juce::Range<int>(9, 12); // mmm
+  else
+    return;
+
+  // Use callAsync to set the selection AFTER the TextEditor's internal mouseUp
+  // has finished. This prevents the TextEditor from resetting the caret
+  // position immediately.
+  juce::MessageManager::callAsync([editor, newRange] {
+    if (editor != nullptr)
+      editor->setHighlightedRegion(newRange);
+  });
 }
 
 void LoopPresenter::mouseWheelMove(const juce::MouseEvent &event,
