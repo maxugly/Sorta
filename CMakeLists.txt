@@ -153,7 +153,7 @@ target_compile_definitions(tests PRIVATE
     JUCE_DONT_DECLARE_PROJECTINFO=1
 )
 
-target_include_directories(tests PRIVATE Tests)
+target_include_directories(tests PRIVATE Tests Source)
 
 target_link_libraries(tests PRIVATE
     juce::juce_core
