@@ -16,6 +16,7 @@
 #include "LoopResetPresenter.h"
 #include "WaveformRenderer.h"
 #include "PlaybackTextPresenter.h"
+#include "PlaybackOverlay.h"
 #include "FocusManager.h"
 #include <cmath> // For std::abs
 
@@ -51,6 +52,9 @@ ControlPanel::ControlPanel(MainComponent& ownerComponent)
     statsPresenter = std::make_unique<StatsPresenter>(*this);
     silenceDetectionPresenter = std::make_unique<SilenceDetectionPresenter>(*this);
     playbackTextPresenter = std::make_unique<PlaybackTextPresenter>(*this);
+    playbackOverlay = std::make_unique<PlaybackOverlay>(*this);
+    addAndMakeVisible(playbackOverlay.get());
+    playbackOverlay->setInterceptsMouseClicks(false, false);
     buttonPresenter = std::make_unique<ControlButtonsPresenter>(*this);
     buttonPresenter->initialiseAllButtons();
     initialiseLoopEditors();
@@ -140,13 +144,16 @@ void ControlPanel::resized()
 
     if (playbackTextPresenter != nullptr)
         playbackTextPresenter->layoutEditors();
+
+    if (playbackOverlay != nullptr)
+        playbackOverlay->setBounds(layoutCache.waveformBounds);
 }
 
 void ControlPanel::paint(juce::Graphics& g)
 {
     g.fillAll (Config::Colors::Window::background);
     if (waveformRenderer != nullptr)
-        waveformRenderer->render(g);
+        waveformRenderer->renderWaveform(g);
     if (playbackTextPresenter != nullptr)
         playbackTextPresenter->render(g);
 }
@@ -415,4 +422,16 @@ void ControlPanel::changeListenerCallback(juce::ChangeBroadcaster* source)
         forceInvalidateWaveformCache();
         repaint();
     }
+}
+
+void ControlPanel::renderOverlays(juce::Graphics& g)
+{
+    if (waveformRenderer != nullptr)
+        waveformRenderer->renderOverlays(g);
+}
+
+void ControlPanel::updateCursorPosition()
+{
+    if (playbackOverlay != nullptr)
+        playbackOverlay->repaint();
 }

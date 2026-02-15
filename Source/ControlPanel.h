@@ -27,6 +27,7 @@ class LoopEditorPresenter;
 class LoopResetPresenter;
 class LoopButtonPresenter;
 class PlaybackTextPresenter;
+class PlaybackOverlay;
 
 /**
  * @file ControlPanel.h
@@ -120,6 +121,11 @@ public:
      * drawing bounds (like `waveformBounds`) to adapt to new dimensions.
      */
     void resized() override;
+
+    /** @brief Renders the dynamic overlays (cursors, etc.). Called by PlaybackOverlay. */
+    void renderOverlays(juce::Graphics& g);
+    /** @brief Updates only the cursor/overlay part of the UI. */
+    void updateCursorPosition();
     
     /** @} */
     //==============================================================================
@@ -498,6 +504,7 @@ private:
     std::unique_ptr<LoopButtonPresenter> loopButtonPresenter; ///< Handles loop button colouring.
     std::unique_ptr<LoopResetPresenter> loopResetPresenter; ///< Clears loop bounds.
     std::unique_ptr<FocusManager> focusManager;
+    std::unique_ptr<PlaybackOverlay> playbackOverlay;
 
     // --- UI Components ---
     juce::TextButton openButton, playStopButton, modeButton, exitButton, statsButton, loopButton, channelViewButton, qualityButton; ///< Standard TextButtons for various actions.

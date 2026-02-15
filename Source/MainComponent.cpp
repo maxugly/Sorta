@@ -97,8 +97,8 @@ void MainComponent::timerCallback()
     // Keep editors in sync
     controlPanel->updateLoopLabels();
 
-    // Redraw the control panel (includes waveform and cursor)
-    controlPanel->repaint();
+    // Update only the cursor/overlays to avoid full repaint
+    controlPanel->updateCursorPosition();
 }
 
 //==============================================================================
