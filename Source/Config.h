@@ -195,6 +195,8 @@ namespace Config {
          constexpr double loopStepMilliseconds = 0.01;
          constexpr double loopStepMillisecondsFine = 0.001;
 
+         constexpr int readAheadBufferSize = 32768;
+
          constexpr float silenceThresholdIn = 0.01f;
          constexpr float silenceThresholdOut = 0.01f;
          constexpr bool lockHandlesWhenAutoCutActive = false;

@@ -22,10 +22,14 @@
 AudioPlayer::AudioPlayer()
     #if !defined(JUCE_HEADLESS)
     : thumbnailCache(Config::Audio::thumbnailCacheSize), // Initialize thumbnail cache with a configured size
-      thumbnail(Config::Audio::thumbnailSizePixels, formatManager, thumbnailCache) // Initialize thumbnail with configured size
+      thumbnail(Config::Audio::thumbnailSizePixels, formatManager, thumbnailCache), // Initialize thumbnail with configured size
+    #else
+    :
     #endif
+      readAheadThread("Audio File Reader")
 {
     formatManager.registerBasicFormats(); // Register standard audio file formats
+    readAheadThread.startThread(); // Start background thread for file reading
     transportSource.addChangeListener(this); // Listen to transportSource for changes (e.g., playback finished)
 }
 
@@ -38,6 +42,8 @@ AudioPlayer::AudioPlayer()
  */
 AudioPlayer::~AudioPlayer()
 {
+    transportSource.setSource(nullptr); // Ensure source is detached before thread stops
+    readAheadThread.stopThread(1000); // Stop background thread
     transportSource.removeChangeListener(this);
 }
 
@@ -61,7 +67,8 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
     {
         loadedFile = file; // Store the loaded file for later reference
         auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true); // True means reader is owned by source
-        transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate); // Set new source for playback
+        // Use background thread for file reading with configured buffer size
+        transportSource.setSource(newSource.get(), Config::Audio::readAheadBufferSize, &readAheadThread, reader->sampleRate);
         #if !defined(JUCE_HEADLESS)
         thumbnail.setSource(new juce::FileInputSource(file)); // Update thumbnail to reflect new file
         #endif
