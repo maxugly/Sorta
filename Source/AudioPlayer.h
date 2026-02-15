@@ -2,6 +2,7 @@
 #define AUDIOFILER_AUDIOPLAYER_H
 
 #if defined(JUCE_HEADLESS)
+    #include <juce_core/juce_core.h>
     #include <juce_audio_basics/juce_audio_basics.h>
     #include <juce_audio_formats/juce_audio_formats.h>
     #include <juce_audio_devices/juce_audio_devices.h>
@@ -238,6 +239,7 @@ private:
 
     juce::AudioFormatManager formatManager;                 ///< Manages registered audio file formats (e.g., WAV, AIFF, OGG).
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource; ///< Handles reading audio data from a file.
+    juce::TimeSliceThread readAheadThread;                  ///< Thread for background audio file reading.
     juce::AudioTransportSource transportSource;             ///< Controls playback, such as starting, stopping, and positioning.
 
     #if !defined(JUCE_HEADLESS)
