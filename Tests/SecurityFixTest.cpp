@@ -23,6 +23,11 @@ public:
         expect(truncatedLength < 0);
 
         // The Fix: Chunking logic
+        // This approach allows processing files of any size (even > INT_MAX)
+        // by only processing small chunks at a time, avoiding large allocations
+        // and integer overflow in size calculations.
+        // We previously had an artificial limit (kMaxAnalyzableSamples), but it
+        // has been removed as this logic handles large files correctly.
         int kChunkSize = 65536;
         juce::int64 currentPos = 0;
 

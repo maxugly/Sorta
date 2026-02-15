@@ -10,7 +10,7 @@
 namespace
 {
     constexpr int kChunkSize = 65536;
-    constexpr juce::int64 kMaxAnalyzableSamples = 2147483647; // INT_MAX, to prevent DoS
+    // kMaxAnalyzableSamples was removed as chunk-based processing supports large files safely
     constexpr int kMaxChannels = 128; // Reasonable limit for audio channels
 
     void resumeIfNeeded(AudioPlayer& player, bool wasPlaying)
@@ -42,14 +42,6 @@ void SilenceAnalysisWorker::detectInSilence(ControlPanel& ownerPanel, float thre
     if (lengthInSamples <= 0)
     {
         SilenceDetectionLogger::logZeroLength(ownerPanel);
-        resumeIfNeeded(audioPlayer, wasPlaying);
-        return;
-    }
-
-    // Security Fix: Prevent DoS by rejecting excessively large files
-    if (lengthInSamples > kMaxAnalyzableSamples)
-    {
-        SilenceDetectionLogger::logAudioTooLarge(ownerPanel);
         resumeIfNeeded(audioPlayer, wasPlaying);
         return;
     }
@@ -124,14 +116,6 @@ void SilenceAnalysisWorker::detectOutSilence(ControlPanel& ownerPanel, float thr
     if (lengthInSamples <= 0)
     {
         SilenceDetectionLogger::logZeroLength(ownerPanel);
-        resumeIfNeeded(audioPlayer, wasPlaying);
-        return;
-    }
-
-    // Security Fix: Prevent DoS by rejecting excessively large files
-    if (lengthInSamples > kMaxAnalyzableSamples)
-    {
-        SilenceDetectionLogger::logAudioTooLarge(ownerPanel);
         resumeIfNeeded(audioPlayer, wasPlaying);
         return;
     }
