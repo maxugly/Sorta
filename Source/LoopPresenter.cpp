@@ -222,12 +222,6 @@ void LoopPresenter::mouseDown(const juce::MouseEvent &event) {
     isEditingOut = true;
 }
 
-void LoopPresenter::textEditorFocusGained(juce::TextEditor &editor) {
-  if (&editor == &loopInEditor)
-    owner.setActiveZoomPoint(ControlPanel::ActiveZoomPoint::In);
-  else if (&editor == &loopOutEditor)
-    owner.setActiveZoomPoint(ControlPanel::ActiveZoomPoint::Out);
-}
 
 double LoopPresenter::getAudioTotalLength() const {
   return owner.getAudioPlayer().getThumbnail().getTotalLength();

@@ -154,14 +154,6 @@ void PlaybackTextPresenter::textEditorFocusLost(juce::TextEditor &editor) {
   applyTimeEdit(editor);
 }
 
-void PlaybackTextPresenter::textEditorFocusGained(juce::TextEditor &editor) {
-  if (&editor == &owner.elapsedTimeEditor)
-    isEditingElapsed = true;
-  else if (&editor == &owner.remainingTimeEditor)
-    isEditingRemaining = true;
-  else if (&editor == &owner.loopLengthEditor)
-    isEditingLoopLength = true;
-}
 
 void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
   double newTime = TimeUtils::parseTime(editor.getText());
