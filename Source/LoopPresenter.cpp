@@ -294,6 +294,11 @@ bool LoopPresenter::applyLoopOutFromEditor(double newPosition,
 
 void LoopPresenter::syncEditorToPosition(juce::TextEditor &editor,
                                          double positionSeconds) {
+  // If the user is currently interacting with this box, don't touch it!
+  if (editor.hasKeyboardFocus(true)) {
+    return;
+  }
+
   juce::String newText = owner.formatTime(positionSeconds);
   if (editor.getText() != newText)
     editor.setText(newText, juce::dontSendNotification);

@@ -204,6 +204,11 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
 void PlaybackTextPresenter::syncEditorToPosition(juce::TextEditor &editor,
                                                  double positionSeconds,
                                                  bool isRemaining) {
+  // If the user is currently interacting with this box, don't touch it!
+  if (editor.hasKeyboardFocus(true)) {
+    return;
+  }
+
   juce::String text = owner.formatTime(positionSeconds);
   if (isRemaining)
     text = "-" + text;
