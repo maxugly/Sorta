@@ -11,7 +11,6 @@ LayoutManager::LayoutManager(ControlPanel& controlPanelIn)
 {
 }
 
-/** Executes the layout logic for all control panel components. */
 void LayoutManager::performLayout()
 {
     auto bounds = controlPanel.getLocalBounds();

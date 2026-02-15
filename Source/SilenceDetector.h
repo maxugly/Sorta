@@ -7,7 +7,6 @@
 // Forward declaration to avoid circular header dependencies.
 class ControlPanel;
 class SilenceThresholdPresenter;
-class SilenceAnalysisWorker;
 
 /**
  * @file SilenceDetector.h
@@ -136,9 +135,7 @@ private:
     float currentOutSilenceThreshold; ///< Normalized (0.0-1.0) threshold for detecting the end of sound.
     bool m_isAutoCutInActive = false;  ///< If true, `detectInSilence` is run automatically when the threshold changes.
     bool m_isAutoCutOutActive = false; ///< If true, `detectOutSilence` is run automatically when the threshold changes.
-    bool wasPlayingBeforeScan = false;
     std::unique_ptr<SilenceThresholdPresenter> thresholdPresenter;
-    std::unique_ptr<SilenceAnalysisWorker> worker;
 
     friend class SilenceThresholdPresenter;
     
