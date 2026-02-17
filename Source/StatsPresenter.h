@@ -16,8 +16,11 @@ public:
     StatsOverlay()
         : resizer (this, &constrainer, juce::ResizableEdgeComponent::bottomEdge)
     {
+        setInterceptsMouseClicks(false, true);
         addAndMakeVisible(statsDisplay);
         addAndMakeVisible(resizer);
+
+        statsDisplay.setInterceptsMouseClicks(false, false);
         
         constrainer.setMinimumHeight(Config::Layout::Stats::minHeight);
         constrainer.setMaximumHeight(Config::Layout::Stats::maxHeight);
