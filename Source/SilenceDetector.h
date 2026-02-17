@@ -4,6 +4,7 @@
 #include <JuceHeader.h>
 #include "Config.h"
 #include "SilenceAnalysisWorker.h"
+#include "SessionState.h"
 
 // Forward declaration to avoid circular header dependencies.
 class ControlPanel;
@@ -27,7 +28,7 @@ public:
      *              access the AudioPlayer and to update the main application state
      *              (e.g., setting loop points).
      */
-    explicit SilenceDetector(ControlPanel& owner);
+    explicit SilenceDetector(ControlPanel& owner, const SessionState& sessionState);
 
     /**
      * @brief Destructor.

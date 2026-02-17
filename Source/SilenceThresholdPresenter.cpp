@@ -75,12 +75,14 @@ void SilenceThresholdPresenter::applyThresholdFromEditor(juce::TextEditor& edito
         if (isInEditor(editor))
         {
             detector.currentInSilenceThreshold = normalized;
+            owner.getSessionState().thresholdIn = normalized;
             if (detector.getIsAutoCutInActive())
                 detector.detectInSilence();
         }
         else
         {
             detector.currentOutSilenceThreshold = normalized;
+            owner.getSessionState().thresholdOut = normalized;
             if (detector.getIsAutoCutOutActive())
                 detector.detectOutSilence();
         }
