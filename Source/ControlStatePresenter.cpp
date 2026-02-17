@@ -80,8 +80,8 @@ void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, boo
     owner.autoCutInButton.setToggleState(owner.silenceDetector->getIsAutoCutInActive(), juce::dontSendNotification);
     owner.autoCutOutButton.setToggleState(owner.silenceDetector->getIsAutoCutOutActive(), juce::dontSendNotification);
 
-    owner.silenceDetector->getInSilenceThresholdEditor().setEnabled(enabled && isCutModeActive);
-    owner.silenceDetector->getOutSilenceThresholdEditor().setEnabled(enabled && isCutModeActive);
+    owner.silenceDetector->getInSilenceThresholdEditor().setEnabled(isCutModeActive);
+    owner.silenceDetector->getOutSilenceThresholdEditor().setEnabled(isCutModeActive);
 
     owner.loopInButton.setVisible(isCutModeActive);
     owner.loopOutButton.setVisible(isCutModeActive);

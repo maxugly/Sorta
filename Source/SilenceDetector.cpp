@@ -25,10 +25,12 @@
  * The use of percentages in the UI (e.g., "5" for 5%) is a user-friendly abstraction over the internal
  * floating-point representation (0.05f).
  */
-SilenceDetector::SilenceDetector(ControlPanel& ownerPanel)
+SilenceDetector::SilenceDetector(ControlPanel& ownerPanel, const SessionState& sessionState)
     : owner(ownerPanel),
-      currentInSilenceThreshold(Config::Audio::silenceThresholdIn),
-      currentOutSilenceThreshold(Config::Audio::silenceThresholdOut),
+      currentInSilenceThreshold(sessionState.thresholdIn),
+      currentOutSilenceThreshold(sessionState.thresholdOut),
+      m_isAutoCutInActive(sessionState.autoCutIn),
+      m_isAutoCutOutActive(sessionState.autoCutOut),
       worker(ownerPanel)
 {
     thresholdPresenter = std::make_unique<SilenceThresholdPresenter>(*this, owner);

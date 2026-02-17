@@ -43,11 +43,11 @@
  */
 ControlPanel::ControlPanel(MainComponent &ownerComponent)
     : owner(ownerComponent), modernLF(),
-      silenceDetector(std::make_unique<SilenceDetector>(*this)),
+      silenceDetector(std::make_unique<SilenceDetector>(*this, sessionState)),
       mouseHandler(std::make_unique<MouseHandler>(*this)),
       layoutManager(std::make_unique<LayoutManager>(*this)),
       waveformRenderer(std::make_unique<WaveformRenderer>(*this)),
-      focusManager(std::make_unique<FocusManager>(*this)) {
+      focusManager(std::make_unique<FocusManager>(*this)), m_shouldAutoplay(sessionState.autoplay), m_isCutModeActive(sessionState.cutModeActive) {
   initialiseLookAndFeel();
   statsPresenter = std::make_unique<StatsPresenter>(*this);
   silenceDetectionPresenter =
