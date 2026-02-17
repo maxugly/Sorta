@@ -19,14 +19,15 @@
  * Finally, it adds itself as a `ChangeListener` to `transportSource` so it can react
  * to playback state changes (e.g., reaching the end of the file).
  */
-AudioPlayer::AudioPlayer()
+AudioPlayer::AudioPlayer(SessionState* state)
     #if !defined(JUCE_HEADLESS)
     : thumbnailCache(Config::Audio::thumbnailCacheSize), // Initialize thumbnail cache with a configured size
       thumbnail(Config::Audio::thumbnailSizePixels, formatManager, thumbnailCache), // Initialize thumbnail with configured size
     #else
     :
     #endif
-      readAheadThread("Audio File Reader")
+      readAheadThread("Audio File Reader"),
+      sessionState(state)
 {
     formatManager.registerBasicFormats(); // Register standard audio file formats
     readAheadThread.startThread(); // Start background thread for file reading
@@ -209,6 +210,8 @@ void AudioPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
  */
 void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    if (sessionState == nullptr) return;
+
     // If no audio file is loaded, clear the buffer to prevent silence or clicks
     if (readerSource.get() == nullptr)
     {
@@ -324,7 +327,7 @@ juce::AudioFormatReader* AudioPlayer::getAudioFormatReader() const
  */
 void AudioPlayer::setPositionConstrained(double newPosition, double in, double out)
 {
-    if (cutModeActive)
+    if (sessionState != nullptr && sessionState->cutModeActive)
     {
         // Use member variables cutIn and cutOut or arguments?
         // The method signature takes arguments, but we also have internal state.

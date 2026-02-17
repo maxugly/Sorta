@@ -53,7 +53,7 @@ class ControlPanel final : public juce::Component,
                            public juce::ChangeListener,
                            public SilenceWorkerClient {
 public:
-  SessionState& getSessionState() { return sessionState; }
+  SessionState& getSessionState() { return *sessionState; }
   //==============================================================================
   /** @name Constructors and Destructors
    *  @{
@@ -68,7 +68,7 @@ public:
    * reference is crucial for communicating user actions and updating global
    * application state.
    */
-  explicit ControlPanel(MainComponent &owner);
+  explicit ControlPanel(MainComponent &owner, SessionState* state);
 
   /**
    * @brief Destructor.
@@ -230,7 +230,7 @@ public:
    * @brief Ensures that `cutInPosition` is logically before or at
    * `cutOutPosition`.
    *
-   * If `cutInPosition` is greater than `cutOutPosition`, they are swapped.
+   * If `cutInPosition` is greater than `cutOutPosition`(or vice versa), they are swapped.
    */
   void ensureCutOrder();
 
@@ -542,7 +542,7 @@ private:
    *  @{
    */
 
-  SessionState sessionState; ///< Persistent user intent state.
+  SessionState* sessionState = nullptr; ///< Persistent user intent state.
   MainComponent &owner;       ///< A reference to the owning `MainComponent` for
                               ///< inter-component communication.
   ModernLookAndFeel modernLF; ///< Custom look and feel instance for UI styling.

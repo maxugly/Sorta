@@ -10,7 +10,11 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#if defined(JUCE_HEADLESS)
+    #include <juce_core/juce_core.h>
+#else
+    #include <JuceHeader.h>
+#endif
 
 struct SessionState
 {

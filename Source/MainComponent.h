@@ -1,9 +1,18 @@
 #ifndef AUDIOFILER_MAINCOMPONENT_H
 #define AUDIOFILER_MAINCOMPONENT_H
 
-#include <JuceHeader.h>
+#if defined(JUCE_HEADLESS)
+    #include <juce_audio_utils/juce_audio_utils.h>
+    #include <juce_gui_basics/juce_gui_basics.h>
+    #include <juce_graphics/juce_graphics.h>
+    #include <juce_events/juce_events.h>
+    #include <juce_opengl/juce_opengl.h>
+#else
+    #include <JuceHeader.h>
+#endif
 #include "AudioPlayer.h"
 #include "ControlPanel.h" 
+#include "SessionState.h"
 #include "AppEnums.h"
 
 class KeybindHandler;
@@ -201,6 +210,7 @@ private:
      *  Internal components and state of the MainComponent.
      *  @{
      */
+    SessionState sessionState;       ///< The persistent user intent state.
     std::unique_ptr<AudioPlayer> audioPlayer;       ///< The audio playback manager.
     std::unique_ptr<juce::FileChooser> chooser;     ///< Used for opening audio files.
     std::unique_ptr<ControlPanel> controlPanel;     ///< The main control panel containing buttons and displays.
