@@ -136,6 +136,17 @@ void AudioPlayer::setCutModeActive(bool isCutModeActive)
     cutModeActive = isCutModeActive;
 }
 
+void AudioPlayer::setShouldLoop(bool shouldLoopParam)
+{
+    shouldLoop = shouldLoopParam;
+}
+
+void AudioPlayer::setCutLimits(double cutInParam, double cutOutParam)
+{
+    cutIn = cutInParam;
+    cutOut = cutOutParam;
+}
+
 /**
  * @brief Gets a reference to the internal `juce::AudioThumbnail`.
  * @return A reference to the `juce::AudioThumbnail` object.
@@ -205,8 +216,57 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
         return;
     }
 
+    // Check bounds before processing (in case we are already outside)
+    if (cutModeActive)
+    {
+        double currentPos = transportSource.getCurrentPosition();
+        if (currentPos >= cutOut)
+        {
+            if (shouldLoop)
+            {
+                transportSource.setPosition(cutIn);
+            }
+            else
+            {
+                transportSource.stop();
+                transportSource.setPosition(cutOut);
+                bufferToFill.clearActiveBufferRegion();
+                return;
+            }
+        }
+    }
+    else if (shouldLoop)
+    {
+         // Standard looping of whole file if desired (using transport's built-in looping if we wanted,
+         // but manual control is safer given our mixed modes)
+         double total = transportSource.getLengthInSeconds();
+         if (transportSource.getCurrentPosition() >= total && total > 0)
+         {
+             transportSource.setPosition(0.0);
+         }
+    }
+
     // Request the next block of audio from the transport source
     transportSource.getNextAudioBlock(bufferToFill);
+
+    // Check bounds after processing (to catch crossing the boundary during this block)
+    // Note: getNextAudioBlock advances the stream.
+    if (cutModeActive && transportSource.isPlaying())
+    {
+        double currentPos = transportSource.getCurrentPosition();
+        if (currentPos >= cutOut)
+        {
+            if (shouldLoop)
+            {
+                transportSource.setPosition(cutIn);
+            }
+            else
+            {
+                transportSource.stop();
+                transportSource.setPosition(cutOut);
+            }
+        }
+    }
 }
 
 /**
@@ -260,9 +320,27 @@ juce::AudioFormatReader* AudioPlayer::getAudioFormatReader() const
  * @param cutOut The loop-out position in seconds.
  *
  * This method ensures that the playback position is always within the
- * specified loop-in and loop-out bounds.
+ * specified loop-in and loop-out bounds if cutModeActive is true.
  */
-void AudioPlayer::setPositionConstrained(double newPosition, double cutIn, double cutOut)
+void AudioPlayer::setPositionConstrained(double newPosition, double in, double out)
 {
-    transportSource.setPosition(PlaybackHelpers::constrainPosition(newPosition, cutIn, cutOut));
+    if (cutModeActive)
+    {
+        // Use member variables cutIn and cutOut or arguments?
+        // The method signature takes arguments, but we also have internal state.
+        // The caller passes what it thinks are the bounds.
+        // For consistency with the "Stick" requirement:
+        // "If a user tries to scrub or snap outside these bounds, the playhead should "stick" to the marker"
+
+        // We trust the caller's arguments as they reflect the UI state which might be newer than AudioPlayer's state update?
+        // Actually, AudioPlayer should be the source of truth for playback constraints.
+        // But the previous implementation used arguments. I will keep using arguments but effectively they match.
+        transportSource.setPosition(PlaybackHelpers::constrainPosition(newPosition, in, out));
+    }
+    else
+    {
+        // No constraint other than 0 to end
+        double length = transportSource.getLengthInSeconds();
+        transportSource.setPosition(juce::jlimit(0.0, length, newPosition));
+    }
 }

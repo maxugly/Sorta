@@ -23,10 +23,16 @@ public:
     explicit TransportPresenter(ControlPanel& ownerPanel);
 
     /**
-     * @brief Handles the loop button toggle event.
-     * @param cutModeActive True if looping should be enabled.
+     * @brief Handles the cut mode toggle event.
+     * @param cutModeActive True if cut mode should be enabled.
      */
     void handleCutModeToggle(bool cutModeActive);
+
+    /**
+     * @brief Handles the loop toggle event.
+     * @param shouldLoop True if looping should be enabled.
+     */
+    void handleLoopToggle(bool shouldLoop);
 
     /**
      * @brief Handles the autoplay button toggle event.
@@ -34,10 +40,6 @@ public:
      */
     void handleAutoplayToggle(bool shouldAutoplay);
 
-    /**
-     * @brief Handles the cut mode button toggle event.
-     * @param enableCutMode True to enable cut mode, false to disable.
-     */
 
 private:
     void enforceCutLoopBounds() const;

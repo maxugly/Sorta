@@ -43,24 +43,36 @@ void PlaybackTextPresenter::initialiseEditors() {
 }
 
 void PlaybackTextPresenter::updateEditors() {
-  if (!isEditingElapsed && !owner.elapsedTimeEditor.hasKeyboardFocus(true))
-    syncEditorToPosition(
-        owner.elapsedTimeEditor,
-        owner.getAudioPlayer().getTransportSource().getCurrentPosition());
+  const double currentPos = owner.getAudioPlayer().getTransportSource().getCurrentPosition();
+  const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
 
-  if (!isEditingRemaining &&
-      !owner.remainingTimeEditor.hasKeyboardFocus(true)) {
-    const auto total = owner.getAudioPlayer().getThumbnail().getTotalLength();
-    const auto remaining = juce::jmax(
-        0.0,
-        total -
-            owner.getAudioPlayer().getTransportSource().getCurrentPosition());
-    syncEditorToPosition(owner.remainingTimeEditor, remaining, true);
+  double effectiveTotal = totalLength;
+  double effectiveElapsed = currentPos;
+  double effectiveRemaining = totalLength - currentPos;
+
+  if (owner.isCutModeActive())
+  {
+      effectiveTotal = owner.getCutOutPosition() - owner.getCutInPosition();
+      effectiveElapsed = currentPos - owner.getCutInPosition();
+      effectiveRemaining = owner.getCutOutPosition() - currentPos;
+  }
+
+  // Clamp negative values (e.g. if playhead is before cutIn or after cutOut temporarily)
+  // Although "effectiveElapsed" can be negative if we are before cutIn, which is useful info.
+  // But standard display usually clamps or shows negative. Let's just pass raw values and see.
+  // Actually, formatTime likely handles positive numbers nicely.
+
+  if (!isEditingElapsed && !owner.elapsedTimeEditor.hasKeyboardFocus(true))
+    syncEditorToPosition(owner.elapsedTimeEditor, juce::jmax(0.0, effectiveElapsed));
+
+  if (!isEditingRemaining && !owner.remainingTimeEditor.hasKeyboardFocus(true)) {
+    syncEditorToPosition(owner.remainingTimeEditor, juce::jmax(0.0, effectiveRemaining), true);
   }
 
   if (!isEditingLoopLength && !owner.cutLengthEditor.hasKeyboardFocus(true)) {
-    double length =
-        std::abs(owner.getCutOutPosition() - owner.getCutInPosition());
+    // If cut mode is active, loop length IS the effective total duration.
+    // If not, it's just the distance between markers.
+    double length = std::abs(owner.getCutOutPosition() - owner.getCutInPosition());
     juce::String newText = owner.formatTime(length);
     if (owner.cutLengthEditor.getText() != newText)
       owner.cutLengthEditor.setText(newText, juce::dontSendNotification);
@@ -89,7 +101,6 @@ void PlaybackTextPresenter::render(juce::Graphics &g) const {
   if (owner.getAudioPlayer().getThumbnail().getTotalLength() <= 0.0)
     return;
 
-  // Draw the static total time part behind or next to the loop length
   const int textY =
       owner.getBottomRowTopY() - Config::Layout::Text::playbackOffsetY;
   auto [leftX, centreX, rightX] = owner.getPlaybackLabelXs();
@@ -97,15 +108,15 @@ void PlaybackTextPresenter::render(juce::Graphics &g) const {
   g.setColour(Config::Colors::playbackText);
   g.setFont((float)Config::Layout::Text::playbackSize);
 
-  juce::String totalTimeStr = " / " + getTotalTimeStaticString();
+  // Calculate what "Total Time" to show
+  double displayTotal = owner.getAudioPlayer().getThumbnail().getTotalLength();
+  if (owner.isCutModeActive())
+  {
+      displayTotal = owner.getCutOutPosition() - owner.getCutInPosition();
+  }
 
-  // Position it relative to the loop length editor
-  int loopLenX = owner.cutLengthEditor.getX();
-  int loopLenW = owner.cutLengthEditor.getWidth();
+  juce::String totalTimeStr = " / " + owner.formatTime(displayTotal);
 
-  // We want to draw it centered-ish with the loop length
-  // But since loopLength is its own editor, let's just draw totalTime to the
-  // right of centreX + playbackTextWidth/2
   g.drawText(totalTimeStr, centreX + (Config::Layout::Text::playbackWidth / 2),
              textY, Config::Layout::Text::playbackWidth / 2,
              Config::Layout::Text::playbackHeight, juce::Justification::left,
@@ -120,9 +131,13 @@ void PlaybackTextPresenter::textEditorTextChanged(juce::TextEditor &editor) {
   else if (&editor == &owner.cutLengthEditor)
     isEditingLoopLength = true;
 
-  const double totalLength =
-      owner.getAudioPlayer().getThumbnail().getTotalLength();
-  TimeEntryHelpers::validateTimeEntry(editor, totalLength);
+  double validateMax = owner.getAudioPlayer().getThumbnail().getTotalLength();
+  if (owner.isCutModeActive() && (&editor == &owner.elapsedTimeEditor || &editor == &owner.remainingTimeEditor))
+  {
+      validateMax = owner.getCutOutPosition() - owner.getCutInPosition();
+  }
+
+  TimeEntryHelpers::validateTimeEntry(editor, validateMax);
 }
 
 void PlaybackTextPresenter::textEditorReturnKeyPressed(
@@ -172,22 +187,43 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
   double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
 
   if (&editor == &owner.elapsedTimeEditor) {
-    transport.setPosition(juce::jlimit(0.0, totalLength, newTime));
-  } else if (&editor == &owner.remainingTimeEditor) {
-    transport.setPosition(
-        juce::jlimit(0.0, totalLength, totalLength - newTime));
-  } else if (&editor == &owner.cutLengthEditor) {
-    // Adjust loop out based on loop in
-    double currentIn = owner.getCutInPosition();
+    double absolutePos = newTime;
+    if (owner.isCutModeActive())
+    {
+        // Treat newTime as relative to cutIn
+        absolutePos = owner.getCutInPosition() + newTime;
+        // Constrain
+        absolutePos = juce::jlimit(owner.getCutInPosition(), owner.getCutOutPosition(), absolutePos);
+    }
+    else
+    {
+        absolutePos = juce::jlimit(0.0, totalLength, absolutePos);
+    }
+    transport.setPosition(absolutePos);
 
-    // Clamp length to total length to prevent issues if cutIn is 0
-    newTime = juce::jlimit(0.0, totalLength, newTime);
+  } else if (&editor == &owner.remainingTimeEditor) {
+      double absolutePos;
+      if (owner.isCutModeActive())
+      {
+          // remaining = (cutOut - pos) -> pos = cutOut - remaining
+          absolutePos = owner.getCutOutPosition() - newTime;
+          absolutePos = juce::jlimit(owner.getCutInPosition(), owner.getCutOutPosition(), absolutePos);
+      }
+      else
+      {
+          absolutePos = totalLength - newTime;
+          absolutePos = juce::jlimit(0.0, totalLength, absolutePos);
+      }
+      transport.setPosition(absolutePos);
+
+  } else if (&editor == &owner.cutLengthEditor) {
+    // If cut mode is active, editing length changes cutOut
+    double currentIn = owner.getCutInPosition();
+    newTime = juce::jlimit(0.0, totalLength, newTime); // basic sanity check
 
     double proposedOut = currentIn + newTime;
 
     if (proposedOut > totalLength) {
-      // Shift In backwards so that [In, Out] has length newTime and Out <=
-      // totalLength
       double newIn = totalLength - newTime;
       owner.setCutInPosition(newIn);
       owner.setCutOutPosition(totalLength);
@@ -288,7 +324,6 @@ void PlaybackTextPresenter::mouseWheelMove(
   if (editor == nullptr)
     return;
 
-  // Don't allow wheel adjustments if we are actively typing or focused
   if (editor->hasKeyboardFocus(true) ||
       (editor == &owner.elapsedTimeEditor && isEditingElapsed) ||
       (editor == &owner.remainingTimeEditor && isEditingRemaining) ||
@@ -318,15 +353,42 @@ void PlaybackTextPresenter::mouseWheelMove(
   double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
   double newVal = juce::jmax(0.0, currentVal + (direction * step));
 
-  if (editor == &owner.elapsedTimeEditor) {
-    owner.getAudioPlayer().getTransportSource().setPosition(newVal);
-  } else if (editor == &owner.remainingTimeEditor) {
-    double total = owner.getAudioPlayer().getThumbnail().getTotalLength();
-    owner.getAudioPlayer().getTransportSource().setPosition(total - newVal);
-  } else if (editor == &owner.cutLengthEditor) {
-    owner.setCutOutPosition(owner.getCutInPosition() + newVal);
-    owner.ensureCutOrder();
-    owner.updateCutLabels();
+  // The logic below needs update for Cut Mode!
+  // If Cut Mode is active, "newVal" is relative.
+  // We should probably just call applyTimeEdit concept here, but we are doing it via text value manipulation.
+
+  if (owner.isCutModeActive())
+  {
+      // If we are editing Elapsed Time, newVal is desired elapsed relative to cutIn.
+      // So absolute = cutIn + newVal.
+      if (editor == &owner.elapsedTimeEditor) {
+          double newAbs = owner.getCutInPosition() + newVal;
+          owner.getAudioPlayer().setPositionConstrained(newAbs, owner.getCutInPosition(), owner.getCutOutPosition());
+      }
+      // If we are editing Remaining, newVal is desired remaining.
+      // So absolute = cutOut - newVal.
+      else if (editor == &owner.remainingTimeEditor) {
+          double newAbs = owner.getCutOutPosition() - newVal;
+          owner.getAudioPlayer().setPositionConstrained(newAbs, owner.getCutInPosition(), owner.getCutOutPosition());
+      }
+      else if (editor == &owner.cutLengthEditor) {
+          owner.setCutOutPosition(owner.getCutInPosition() + newVal);
+          owner.ensureCutOrder();
+          owner.updateCutLabels();
+      }
+  }
+  else
+  {
+      if (editor == &owner.elapsedTimeEditor) {
+        owner.getAudioPlayer().getTransportSource().setPosition(newVal);
+      } else if (editor == &owner.remainingTimeEditor) {
+        double total = owner.getAudioPlayer().getThumbnail().getTotalLength();
+        owner.getAudioPlayer().getTransportSource().setPosition(total - newVal);
+      } else if (editor == &owner.cutLengthEditor) {
+        owner.setCutOutPosition(owner.getCutInPosition() + newVal);
+        owner.ensureCutOrder();
+        owner.updateCutLabels();
+      }
   }
 
   updateEditors();
