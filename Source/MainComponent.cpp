@@ -8,11 +8,11 @@
 MainComponent::MainComponent()
 {
     // 1. Initialize logic and engines
-    audioPlayer = std::make_unique<AudioPlayer>();
+    audioPlayer = std::make_unique<AudioPlayer>(&sessionState);
     audioPlayer->addChangeListener(this);
     
     // 2. Initialize UI components
-    controlPanel = std::make_unique<ControlPanel>(*this);
+    controlPanel = std::make_unique<ControlPanel>(*this, &sessionState);
     addAndMakeVisible(controlPanel.get());
     
     // 3. Initialize controllers that bridge UI and Logic
@@ -161,4 +161,3 @@ bool MainComponent::keyPressed(const juce::KeyPress& key)
         return keybindHandler->handleKeyPress(key);
     return false;
 }
-

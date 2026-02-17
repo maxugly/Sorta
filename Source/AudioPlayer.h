@@ -12,6 +12,7 @@
 #endif
 
 #include "Config.h"
+#include "SessionState.h"
 
 /**
  * @file AudioPlayer.h
@@ -49,7 +50,7 @@ public:
      *
      * Initializes the JUCE audio format manager to support various audio file types.
      */
-    AudioPlayer();
+    explicit AudioPlayer(SessionState* state);
 
     /**
      * @brief Destructor.
@@ -266,6 +267,8 @@ private:
     bool shouldLoop = false;                                      ///< Flag indicating if playback should loop.
     double cutIn = 0.0;                                           ///< The loop-in position in seconds.
     double cutOut = 0.0;                                          ///< The loop-out position in seconds.
+
+    SessionState* sessionState = nullptr; ///< Pointer to the shared session state.
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPlayer) ///< Macro to prevent copying and detect memory leaks.
 
