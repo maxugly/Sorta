@@ -12,6 +12,9 @@
 #endif
 
 #include "Config.h"
+#include <mutex>
+
+class SessionState;
 
 /**
  * @file AudioPlayer.h
@@ -48,8 +51,9 @@ public:
      * @brief Constructs the AudioPlayer.
      *
      * Initializes the JUCE audio format manager to support various audio file types.
+     * @param state Reference to the global session state.
      */
-    AudioPlayer();
+    explicit AudioPlayer(SessionState& state);
 
     /**
      * @brief Destructor.
@@ -227,6 +231,14 @@ public:
      */
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 
+    void updateFromSession();
+    double getCutIn() const { return cutIn; }
+    double getCutOut() const { return cutOut; }
+    void setCutIn(double positionSeconds) { cutIn = positionSeconds; }
+    void setCutOut(double positionSeconds) { cutOut = positionSeconds; }
+    std::mutex& getReaderMutex() { return readerMutex; }
+    bool getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamplesOut) const;
+
     /** @} */
     //==============================================================================
 
@@ -248,6 +260,14 @@ private:
     #endif
 
     juce::File loadedFile;                                  ///< Stores the currently loaded audio file.
+    SessionState& sessionState;                             ///< Global preferences for the current session.
+    double cutIn{0.0};                                      ///< Track-specific cut-in position in seconds.
+    double cutOut{0.0};                                     ///< Track-specific cut-out position in seconds.
+    float lastAutoCutThresholdIn{-1.0f};
+    float lastAutoCutThresholdOut{-1.0f};
+    bool lastAutoCutInActive{false};
+    bool lastAutoCutOutActive{false};
+    mutable std::mutex readerMutex;
 
     bool looping = false;                                   ///< Flag indicating if playback should loop.
 

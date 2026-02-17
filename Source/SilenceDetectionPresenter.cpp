@@ -11,16 +11,14 @@ SilenceDetectionPresenter::SilenceDetectionPresenter(ControlPanel& ownerPanel)
 
 void SilenceDetectionPresenter::handleAutoCutInToggle(bool isActive)
 {
-    owner.silenceDetector->setIsAutoCutInActive(isActive);
-    owner.updateComponentStates();
+    owner.setAutoCutInActive(isActive);
     if (isActive && hasLoadedAudio())
         owner.silenceDetector->detectInSilence();
 }
 
 void SilenceDetectionPresenter::handleAutoCutOutToggle(bool isActive)
 {
-    owner.silenceDetector->setIsAutoCutOutActive(isActive);
-    owner.updateComponentStates();
+    owner.setAutoCutOutActive(isActive);
     if (isActive && hasLoadedAudio())
         owner.silenceDetector->detectOutSilence();
 }

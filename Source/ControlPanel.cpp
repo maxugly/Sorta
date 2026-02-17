@@ -41,8 +41,10 @@
  * is set to `CrosshairCursor` to provide immediate visual feedback for
  * interactive elements.
  */
-ControlPanel::ControlPanel(MainComponent &ownerComponent)
-    : owner(ownerComponent), modernLF(),
+ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionStateIn)
+    : owner(ownerComponent),
+      sessionState(sessionStateIn),
+      modernLF(),
       silenceDetector(std::make_unique<SilenceDetector>(*this)),
       mouseHandler(std::make_unique<MouseHandler>(*this)),
       layoutManager(std::make_unique<LayoutManager>(*this)),
@@ -61,7 +63,7 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent)
 
   loopButtonPresenter = std::make_unique<LoopButtonPresenter>(*this);
   loopPresenter = std::make_unique<LoopPresenter>(*this, *silenceDetector,
-                                                  loopInEditor, loopOutEditor);
+                                                  cutInEditor, cutOutEditor);
   loopPresenter->initialiseEditors();
 
   initialiseLoopEditors(); // Contains remaining init logic (reset presenter,
@@ -69,6 +71,7 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent)
 
   controlStatePresenter = std::make_unique<ControlStatePresenter>(*this);
   transportPresenter = std::make_unique<TransportPresenter>(*this);
+  updateUIFromState();
   finaliseSetup();
 
   getAudioPlayer().getThumbnail().addChangeListener(this);
@@ -103,7 +106,7 @@ void ControlPanel::initialiseLookAndFeel() {
 }
 
 /**
- * @brief Initializes the loop editors (`loopInEditor`, `loopOutEditor`) and
+ * @brief Initializes the loop editors (`cutInEditor`, `cutOutEditor`) and
  * threshold editors.
  */
 void ControlPanel::initialiseLoopEditors() {
@@ -197,11 +200,11 @@ void ControlPanel::performDelayedJumpIfNeeded() {
 }
 
 double ControlPanel::getLoopInPosition() const {
-  return loopPresenter != nullptr ? loopPresenter->getLoopInPosition() : -1.0;
+  return getAudioPlayer().getCutIn();
 }
 
 double ControlPanel::getLoopOutPosition() const {
-  return loopPresenter != nullptr ? loopPresenter->getLoopOutPosition() : -1.0;
+  return getAudioPlayer().getCutOut();
 }
 
 void ControlPanel::setLoopInPosition(double pos) {
@@ -225,6 +228,39 @@ void ControlPanel::updateLoopLabels() {
 void ControlPanel::updateComponentStates() {
   if (controlStatePresenter != nullptr)
     controlStatePresenter->refreshStates();
+}
+
+void ControlPanel::updateUIFromState() {
+  const auto &autoCut = sessionState.cutPrefs.autoCut;
+  autoCutInButton.setToggleState(autoCut.inActive, juce::dontSendNotification);
+  autoCutOutButton.setToggleState(autoCut.outActive, juce::dontSendNotification);
+  silenceDetector->setIsAutoCutInActive(autoCut.inActive);
+  silenceDetector->setIsAutoCutOutActive(autoCut.outActive);
+
+  const int inPercent = static_cast<int>(autoCut.thresholdIn * 100.0f);
+  const int outPercent = static_cast<int>(autoCut.thresholdOut * 100.0f);
+  silenceDetector->getInSilenceThresholdEditor()
+      .setText(juce::String(inPercent), juce::dontSendNotification);
+  silenceDetector->getOutSilenceThresholdEditor()
+      .setText(juce::String(outPercent), juce::dontSendNotification);
+}
+
+void ControlPanel::setAutoCutInActive(bool isActive) {
+  sessionState.cutPrefs.autoCut.inActive = isActive;
+  autoCutInButton.setToggleState(isActive, juce::dontSendNotification);
+  silenceDetector->setIsAutoCutInActive(isActive);
+  updateComponentStates();
+  if (isActive && getAudioPlayer().getThumbnail().getTotalLength() > 0.0)
+    silenceDetector->detectInSilence();
+}
+
+void ControlPanel::setAutoCutOutActive(bool isActive) {
+  sessionState.cutPrefs.autoCut.outActive = isActive;
+  autoCutOutButton.setToggleState(isActive, juce::dontSendNotification);
+  silenceDetector->setIsAutoCutOutActive(isActive);
+  updateComponentStates();
+  if (isActive && getAudioPlayer().getThumbnail().getTotalLength() > 0.0)
+    silenceDetector->detectOutSilence();
 }
 
 /**

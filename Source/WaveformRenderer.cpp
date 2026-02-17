@@ -386,17 +386,15 @@ void WaveformRenderer::drawMouseCursorOverlays(juce::Graphics& g, AudioPlayer& a
         float amplitude = 0.0f;
         if (audioPlayer.getThumbnail().getNumChannels() > 0)
         {
-            if (const auto* reader = audioPlayer.getAudioFormatReader())
+            double sampleRate = 0.0;
+            juce::int64 length = 0;
+            if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0)
             {
-                const double sampleRate = reader->sampleRate;
-                if (sampleRate > 0.0)
-                {
-                    float minVal = 0.0f, maxVal = 0.0f;
-                    audioPlayer.getThumbnail().getApproximateMinMax(mouseHandler.getMouseCursorTime(),
-                                                                    mouseHandler.getMouseCursorTime() + (1.0 / sampleRate),
-                                                                    0, minVal, maxVal);
-                    amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
-                }
+                float minVal = 0.0f, maxVal = 0.0f;
+                audioPlayer.getThumbnail().getApproximateMinMax(mouseHandler.getMouseCursorTime(),
+                                                                mouseHandler.getMouseCursorTime() + (1.0 / sampleRate),
+                                                                0, minVal, maxVal);
+                amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
             }
         }
 

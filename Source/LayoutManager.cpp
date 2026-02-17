@@ -62,7 +62,7 @@ void LayoutManager::layoutLoopAndCutControls(juce::Rectangle<int>& bounds, int r
     // Group "In" controls
     controlPanel.loopInButton.setBounds(loopRow.removeFromLeft(buttonWidth));
     loopRow.removeFromLeft(margin);
-    controlPanel.loopInEditor.setBounds(loopRow.removeFromLeft(loopTextWidth));
+    controlPanel.cutInEditor.setBounds(loopRow.removeFromLeft(loopTextWidth));
     loopRow.removeFromLeft(margin / 2);
     controlPanel.clearLoopInButton.setBounds(loopRow.removeFromLeft(clearButtonWidth));
     loopRow.removeFromLeft(margin);
@@ -76,7 +76,7 @@ void LayoutManager::layoutLoopAndCutControls(juce::Rectangle<int>& bounds, int r
     // Group "Out" controls
     controlPanel.loopOutButton.setBounds(loopRow.removeFromLeft(buttonWidth));
     loopRow.removeFromLeft(margin);
-    controlPanel.loopOutEditor.setBounds(loopRow.removeFromLeft(loopTextWidth));
+    controlPanel.cutOutEditor.setBounds(loopRow.removeFromLeft(loopTextWidth));
     loopRow.removeFromLeft(margin / 2);
     controlPanel.clearLoopOutButton.setBounds(loopRow.removeFromLeft(clearButtonWidth));
     loopRow.removeFromLeft(margin);

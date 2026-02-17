@@ -10,6 +10,10 @@ SilenceThresholdPresenter::SilenceThresholdPresenter(SilenceDetector& detectorIn
     : detector(detectorIn),
       owner(ownerPanel)
 {
+    auto& autoCut = owner.getSessionState().cutPrefs.autoCut;
+    detector.currentInSilenceThreshold = autoCut.thresholdIn;
+    detector.currentOutSilenceThreshold = autoCut.thresholdOut;
+
     configureEditor(detector.inSilenceThresholdEditor,
                     detector.currentInSilenceThreshold,
                     ControlPanelCopy::silenceThresholdInTooltip());
@@ -53,6 +57,8 @@ void SilenceThresholdPresenter::textEditorTextChanged(juce::TextEditor& editor)
 
     editor.setColour(juce::TextEditor::backgroundColourId,
                      owner.getLookAndFeel().findColour(juce::TextEditor::backgroundColourId));
+
+    updateThresholdFromEditorIfValid(editor);
 }
 
 void SilenceThresholdPresenter::textEditorReturnKeyPressed(juce::TextEditor& editor)
@@ -71,19 +77,7 @@ void SilenceThresholdPresenter::applyThresholdFromEditor(juce::TextEditor& edito
 
     if (isValidPercentage(intValue))
     {
-        const float normalized = static_cast<float>(intValue) / 100.0f;
-        if (isInEditor(editor))
-        {
-            detector.currentInSilenceThreshold = normalized;
-            if (detector.getIsAutoCutInActive())
-                detector.detectInSilence();
-        }
-        else
-        {
-            detector.currentOutSilenceThreshold = normalized;
-            if (detector.getIsAutoCutOutActive())
-                detector.detectOutSilence();
-        }
+        updateThresholdFromEditorIfValid(editor);
 
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
         editor.setColour(juce::TextEditor::backgroundColourId,
@@ -95,6 +89,33 @@ void SilenceThresholdPresenter::applyThresholdFromEditor(juce::TextEditor& edito
         restoreEditorToCurrentValue(editor);
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorWarning);
         owner.getStatsDisplay().insertTextAtCaret("Warning: Threshold value must be between 1 and 99. Restored to last valid value.\n");
+    }
+}
+
+void SilenceThresholdPresenter::updateThresholdFromEditorIfValid(juce::TextEditor& editor)
+{
+    const int intValue = editor.getText().getIntValue();
+    if (!isValidPercentage(intValue))
+        return;
+
+    const float normalized = static_cast<float>(intValue) / 100.0f;
+    if (isInEditor(editor))
+    {
+        if (detector.currentInSilenceThreshold == normalized)
+            return;
+        detector.currentInSilenceThreshold = normalized;
+        owner.getSessionState().cutPrefs.autoCut.thresholdIn = normalized;
+        if (detector.getIsAutoCutInActive())
+            detector.detectInSilence();
+    }
+    else
+    {
+        if (detector.currentOutSilenceThreshold == normalized)
+            return;
+        detector.currentOutSilenceThreshold = normalized;
+        owner.getSessionState().cutPrefs.autoCut.thresholdOut = normalized;
+        if (detector.getIsAutoCutOutActive())
+            detector.detectOutSilence();
     }
 }
 

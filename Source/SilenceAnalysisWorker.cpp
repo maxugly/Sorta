@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <mutex>
 
 SilenceAnalysisWorker::SilenceAnalysisWorker(SilenceWorkerClient& owner)
     : Thread("SilenceWorker"), client(owner)
@@ -48,6 +49,7 @@ void SilenceAnalysisWorker::run()
     // Capture necessary state
     // Note: We assume the file is not unloaded during scan.
     AudioPlayer& audioPlayer = client.getAudioPlayer();
+    std::lock_guard<std::mutex> lock(audioPlayer.getReaderMutex());
     juce::AudioFormatReader* reader = audioPlayer.getAudioFormatReader();
     
     juce::int64 result = -1;

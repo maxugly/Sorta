@@ -5,6 +5,7 @@
 #include "AudioPlayer.h"
 #include "ControlPanel.h" 
 #include "AppEnums.h"
+#include "SessionState.h"
 
 class KeybindHandler;
 class PlaybackLoopController;
@@ -201,6 +202,7 @@ private:
      *  Internal components and state of the MainComponent.
      *  @{
      */
+    SessionState sessionState;
     std::unique_ptr<AudioPlayer> audioPlayer;       ///< The audio playback manager.
     std::unique_ptr<juce::FileChooser> chooser;     ///< Used for opening audio files.
     std::unique_ptr<ControlPanel> controlPanel;     ///< The main control panel containing buttons and displays.

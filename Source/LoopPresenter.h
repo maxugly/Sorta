@@ -46,13 +46,13 @@ public:
    * @brief Retrieves the loop-in position in seconds.
    * @return Current loop-in value.
    */
-  double getLoopInPosition() const noexcept { return loopInPosition; }
+  double getLoopInPosition() const noexcept;
 
   /**
    * @brief Retrieves the loop-out position in seconds.
    * @return Current loop-out value.
    */
-  double getLoopOutPosition() const noexcept { return loopOutPosition; }
+  double getLoopOutPosition() const noexcept;
 
   /**
    * @brief Directly sets the loop-in position without additional validation.
@@ -111,10 +111,8 @@ private:
 
   ControlPanel &owner;
   SilenceDetector &silenceDetector;
-  juce::TextEditor &loopInEditor;
-  juce::TextEditor &loopOutEditor;
-  double loopInPosition{-1.0};
-  double loopOutPosition{-1.0};
+  juce::TextEditor &cutInEditor;
+  juce::TextEditor &cutOutEditor;
   bool isEditingIn{false};
   bool isEditingOut{false};
 

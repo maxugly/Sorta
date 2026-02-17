@@ -1,6 +1,7 @@
 #include <juce_core/juce_core.h>
 #include <juce_audio_basics/juce_audio_basics.h>
 #include "../Source/AudioPlayer.h"
+#include "../Source/SessionState.h"
 
 // Simple Mock Source
 class MockAudioSource : public juce::PositionableAudioSource
@@ -36,7 +37,8 @@ public:
         beginTest("setPositionConstrained constrains position correctly");
         {
             // Create AudioPlayer
-            AudioPlayer player;
+            SessionState sessionState;
+            AudioPlayer player(sessionState);
 
             // Setup Mock Source
             MockAudioSource mockSource;

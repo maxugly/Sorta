@@ -17,8 +17,7 @@ void LoopResetPresenter::clearLoopIn()
     owner.ensureLoopOrder();
     owner.updateLoopButtonColors();
     owner.updateLoopLabels();
-    owner.silenceDetector->setIsAutoCutInActive(false);
-    owner.updateComponentStates();
+    owner.setAutoCutInActive(false);
     owner.repaint();
 }
 
@@ -28,8 +27,6 @@ void LoopResetPresenter::clearLoopOut()
     owner.ensureLoopOrder();
     owner.updateLoopButtonColors();
     owner.updateLoopLabels();
-    owner.silenceDetector->setIsAutoCutOutActive(false);
-    owner.updateComponentStates();
+    owner.setAutoCutOutActive(false);
     owner.repaint();
 }
-

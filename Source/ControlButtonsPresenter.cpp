@@ -181,7 +181,7 @@ void ControlButtonsPresenter::initialiseLoopButtons()
         owner.setLoopInPosition(owner.getAudioPlayer().getTransportSource().getCurrentPosition());
         owner.ensureLoopOrder();
         owner.updateLoopButtonColors();
-        owner.silenceDetector->setIsAutoCutInActive(false);
+        owner.setAutoCutInActive(false);
         owner.repaint();
     };
     owner.loopInButton.onRightClick = [this] {
@@ -196,6 +196,7 @@ void ControlButtonsPresenter::initialiseLoopButtons()
         owner.setLoopOutPosition(owner.getAudioPlayer().getTransportSource().getCurrentPosition());
         owner.ensureLoopOrder();
         owner.updateLoopButtonColors();
+        owner.setAutoCutOutActive(false);
         owner.repaint();
     };
     owner.loopOutButton.onRightClick = [this] {

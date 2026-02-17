@@ -35,6 +35,7 @@ private:
     void textEditorFocusLost(juce::TextEditor& editor) override;
 
     void applyThresholdFromEditor(juce::TextEditor& editor);
+    void updateThresholdFromEditorIfValid(juce::TextEditor& editor);
     void restoreEditorToCurrentValue(juce::TextEditor& editor);
     bool isInEditor(const juce::TextEditor& editor) const noexcept;
     bool isValidPercentage(int value) const noexcept { return value >= 1 && value <= 99; }

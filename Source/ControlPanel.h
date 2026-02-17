@@ -9,6 +9,7 @@ class FocusManager;
 #include "LoopButton.h"
 #include "ModernLookAndFeel.h" // Added include for ModernLookAndFeel
 #include "MouseHandler.h"      // Include the new MouseHandler class
+#include "SessionState.h"
 #include "SilenceDetector.h"   // Include the new SilenceDetector class
 #include "SilenceWorkerClient.h"
 #include <JuceHeader.h>
@@ -66,7 +67,7 @@ public:
    * reference is crucial for communicating user actions and updating global
    * application state.
    */
-  explicit ControlPanel(MainComponent &owner);
+  explicit ControlPanel(MainComponent &owner, SessionState &sessionStateIn);
 
   /**
    * @brief Destructor.
@@ -160,7 +161,7 @@ public:
   void updatePlayButtonText(bool isPlaying);
 
   /**
-   * @brief Updates the text in the `loopInEditor` and `loopOutEditor` based on
+   * @brief Updates the text in the `cutInEditor` and `cutOutEditor` based on
    * current loop positions.
    */
   void updateLoopLabels();
@@ -173,6 +174,9 @@ public:
    * (e.g., play button disabled if no file loaded).
    */
   void updateComponentStates();
+  void updateUIFromState();
+  void setAutoCutInActive(bool isActive);
+  void setAutoCutOutActive(bool isActive);
 
   /**
    * @brief Updates the colors of the `loopInButton` and `loopOutButton` based
@@ -225,10 +229,10 @@ public:
   void setLoopOutPosition(double pos);
 
   /**
-   * @brief Ensures that `loopInPosition` is logically before or at
-   * `loopOutPosition`.
+   * @brief Ensures that `cutInPosition` is logically before or at
+   * `cutOutPosition`.
    *
-   * If `loopInPosition` is greater than `loopOutPosition`, they are swapped.
+   * If `cutInPosition` is greater than `cutOutPosition`, they are swapped.
    */
   void ensureLoopOrder();
 
@@ -356,6 +360,8 @@ public:
    */
   AudioPlayer &getAudioPlayer() override;
   AudioPlayer &getAudioPlayer() const;
+  SessionState &getSessionState() { return sessionState; }
+  const SessionState &getSessionState() const { return sessionState; }
 
   /**
    * @brief Retrieves the current waveform thumbnail quality setting.
@@ -420,7 +426,7 @@ public:
    * @brief Sets the loop-in position using a sample index.
    *
    * This method converts the sample index to a time in seconds and updates
-   * the `loopInPosition` and its corresponding UI editor.
+   * the `cutInPosition` and its corresponding UI editor.
    * @param sampleIndex The sample index to set as the loop-in point.
    */
   void setLoopStart(int sampleIndex);
@@ -429,7 +435,7 @@ public:
    * @brief Sets the loop-out position using a sample index.
    *
    * This method converts the sample index to a time in seconds and updates
-   * the `loopOutPosition` and its corresponding UI editor.
+   * the `cutOutPosition` and its corresponding UI editor.
    * @param sampleIndex The sample index to set as the loop-out point.
    */
   void setLoopEnd(int sampleIndex);
@@ -542,6 +548,7 @@ private:
 
   MainComponent &owner;       ///< A reference to the owning `MainComponent` for
                               ///< inter-component communication.
+  SessionState &sessionState; ///< Global session preferences for UI sync.
   ModernLookAndFeel modernLF; ///< Custom look and feel instance for UI styling.
   std::unique_ptr<SilenceDetector>
       silenceDetector; ///< Manages silence detection logic and its UI.
@@ -578,8 +585,8 @@ private:
       qualityButton; ///< Standard TextButtons for various actions.
   juce::TextButton clearLoopInButton,
       clearLoopOutButton; ///< Small buttons to clear specific loop points.
-  juce::TextEditor loopInEditor,
-      loopOutEditor; ///< TextEditors for displaying statistics and editing loop
+  juce::TextEditor cutInEditor,
+      cutOutEditor; ///< TextEditors for displaying statistics and editing loop
                      ///< points.
   juce::TextEditor elapsedTimeEditor, remainingTimeEditor,
       loopLengthEditor; ///< Editors for playback and loop length.
@@ -640,7 +647,7 @@ private:
   /** @brief Initializes the custom `ModernLookAndFeel` for this component. */
   void initialiseLookAndFeel();
   /** @brief Initializes the `juce::TextEditor` instances for loop point display
-   * (`loopInEditor`, `loopOutEditor`). */
+   * (`cutInEditor`, `cutOutEditor`). */
   void initialiseLoopEditors();
   void invokeOwnerOpenDialog();
   /** @brief Performs final setup steps after all components are initialized. */

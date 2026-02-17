@@ -60,6 +60,9 @@ if (NOT BUILD_TESTS_ONLY)
             Source/TimeUtils.cpp
             Source/AudioPlayer.h
             Source/AudioPlayer.cpp
+            Source/MainDomain.h
+            Source/SessionState.h
+            Source/SessionState.cpp
             Source/ControlPanel.h
             Source/ControlPanel.cpp
             Source/AppEnums.h
@@ -142,6 +145,7 @@ add_executable(tests
     Source/AudioPlayer.cpp
     Tests/AudioPlayerTest.cpp
     Source/Config.cpp
+    Source/SessionState.cpp
     Source/SilenceAnalysisAlgorithms.cpp
     Tests/SilenceAnalysisTest.cpp
 )

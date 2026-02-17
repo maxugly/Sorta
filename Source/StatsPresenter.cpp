@@ -78,13 +78,14 @@ juce::String StatsPresenter::buildStatsString() const
     juce::String stats;
     AudioPlayer& audioPlayer = owner.getAudioPlayer();
     auto& thumbnail = audioPlayer.getThumbnail();
-    auto* reader = audioPlayer.getAudioFormatReader();
+    double sampleRate = 0.0;
+    juce::int64 lengthInSamples = 0;
 
-    if (thumbnail.getTotalLength() > 0.0 && reader != nullptr)
+    if (thumbnail.getTotalLength() > 0.0 && audioPlayer.getReaderInfo(sampleRate, lengthInSamples))
     {
         stats << "File: " << audioPlayer.getLoadedFile().getFileName() << "\n";
-        stats << "Samples Loaded: " << reader->lengthInSamples << "\n";
-        stats << "Sample Rate: " << reader->sampleRate << " Hz\n";
+        stats << "Samples Loaded: " << lengthInSamples << "\n";
+        stats << "Sample Rate: " << sampleRate << " Hz\n";
         stats << "Channels: " << thumbnail.getNumChannels() << "\n";
         stats << "Length: " << owner.formatTime(thumbnail.getTotalLength()) << "\n";
 

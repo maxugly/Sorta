@@ -1,5 +1,8 @@
 #include "AudioPlayer.h"
 #include "PlaybackHelpers.h"
+#include "SessionState.h"
+#include "SilenceAnalysisAlgorithms.h"
+#include <algorithm>
 
 /**
  * @file AudioPlayer.cpp
@@ -19,18 +22,24 @@
  * Finally, it adds itself as a `ChangeListener` to `transportSource` so it can react
  * to playback state changes (e.g., reaching the end of the file).
  */
-AudioPlayer::AudioPlayer()
+AudioPlayer::AudioPlayer(SessionState& state)
     #if !defined(JUCE_HEADLESS)
     : thumbnailCache(Config::Audio::thumbnailCacheSize), // Initialize thumbnail cache with a configured size
       thumbnail(Config::Audio::thumbnailSizePixels, formatManager, thumbnailCache), // Initialize thumbnail with configured size
     #else
     :
     #endif
-      readAheadThread("Audio File Reader")
+      readAheadThread("Audio File Reader"),
+      sessionState(state)
 {
     formatManager.registerBasicFormats(); // Register standard audio file formats
     readAheadThread.startThread(); // Start background thread for file reading
     transportSource.addChangeListener(this); // Listen to transportSource for changes (e.g., playback finished)
+
+    lastAutoCutThresholdIn = sessionState.cutPrefs.autoCut.thresholdIn;
+    lastAutoCutThresholdOut = sessionState.cutPrefs.autoCut.thresholdOut;
+    lastAutoCutInActive = sessionState.cutPrefs.autoCut.inActive;
+    lastAutoCutOutActive = sessionState.cutPrefs.autoCut.outActive;
 }
 
 /**
@@ -65,6 +74,36 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
 
     if (reader != nullptr)
     {
+        std::lock_guard<std::mutex> lock(readerMutex);
+        cutIn = 0.0;
+        cutOut = reader->sampleRate > 0.0
+            ? reader->lengthInSamples / reader->sampleRate
+            : 0.0;
+
+        if (sessionState.cutPrefs.autoCut.inActive)
+        {
+            const auto sampleIndex = SilenceAnalysisAlgorithms::findSilenceIn(
+                *reader, sessionState.cutPrefs.autoCut.thresholdIn);
+            if (sampleIndex >= 0 && reader->sampleRate > 0.0)
+                cutIn = static_cast<double>(sampleIndex) / reader->sampleRate;
+        }
+        if (sessionState.cutPrefs.autoCut.outActive)
+        {
+            const auto sampleIndex = SilenceAnalysisAlgorithms::findSilenceOut(
+                *reader, sessionState.cutPrefs.autoCut.thresholdOut);
+            if (sampleIndex >= 0 && reader->sampleRate > 0.0)
+            {
+                const auto tailSamples = static_cast<juce::int64>(reader->sampleRate * 0.05);
+                const auto endPoint = std::min(sampleIndex + tailSamples, reader->lengthInSamples);
+                cutOut = static_cast<double>(endPoint) / reader->sampleRate;
+            }
+        }
+
+        lastAutoCutThresholdIn = sessionState.cutPrefs.autoCut.thresholdIn;
+        lastAutoCutThresholdOut = sessionState.cutPrefs.autoCut.thresholdOut;
+        lastAutoCutInActive = sessionState.cutPrefs.autoCut.inActive;
+        lastAutoCutOutActive = sessionState.cutPrefs.autoCut.outActive;
+
         loadedFile = file; // Store the loaded file for later reference
         auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true); // True means reader is owned by source
         // Use background thread for file reading with configured buffer size
@@ -238,6 +277,56 @@ void AudioPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
     }
 }
 
+void AudioPlayer::updateFromSession()
+{
+    const auto& autoCut = sessionState.cutPrefs.autoCut;
+    const bool inThresholdChanged = autoCut.thresholdIn != lastAutoCutThresholdIn;
+    const bool outThresholdChanged = autoCut.thresholdOut != lastAutoCutThresholdOut;
+    const bool inActiveChanged = autoCut.inActive != lastAutoCutInActive;
+    const bool outActiveChanged = autoCut.outActive != lastAutoCutOutActive;
+
+    if ((inThresholdChanged || outThresholdChanged || inActiveChanged || outActiveChanged))
+    {
+        std::lock_guard<std::mutex> lock(readerMutex);
+        if (readerSource == nullptr)
+        {
+            lastAutoCutThresholdIn = autoCut.thresholdIn;
+            lastAutoCutThresholdOut = autoCut.thresholdOut;
+            lastAutoCutInActive = autoCut.inActive;
+            lastAutoCutOutActive = autoCut.outActive;
+            return;
+        }
+
+        if (auto* reader = readerSource->getAudioFormatReader())
+        {
+            if ((inThresholdChanged || inActiveChanged) && autoCut.inActive)
+            {
+                const auto sampleIndex =
+                    SilenceAnalysisAlgorithms::findSilenceIn(*reader, autoCut.thresholdIn);
+                if (sampleIndex >= 0 && reader->sampleRate > 0.0)
+                    cutIn = static_cast<double>(sampleIndex) / reader->sampleRate;
+            }
+
+            if ((outThresholdChanged || outActiveChanged) && autoCut.outActive)
+            {
+                const auto sampleIndex =
+                    SilenceAnalysisAlgorithms::findSilenceOut(*reader, autoCut.thresholdOut);
+                if (sampleIndex >= 0 && reader->sampleRate > 0.0)
+                {
+                    const auto tailSamples = static_cast<juce::int64>(reader->sampleRate * 0.05);
+                    const auto endPoint = std::min(sampleIndex + tailSamples, reader->lengthInSamples);
+                    cutOut = static_cast<double>(endPoint) / reader->sampleRate;
+                }
+            }
+        }
+    }
+
+    lastAutoCutThresholdIn = autoCut.thresholdIn;
+    lastAutoCutThresholdOut = autoCut.thresholdOut;
+    lastAutoCutInActive = autoCut.inActive;
+    lastAutoCutOutActive = autoCut.outActive;
+}
+
 /**
  * @brief Gets the underlying `juce::AudioFormatReader` for the currently loaded file.
  * @return A pointer to the `juce::AudioFormatReader`, or `nullptr` if no file is loaded.
@@ -251,6 +340,21 @@ juce::AudioFormatReader* AudioPlayer::getAudioFormatReader() const
     if (readerSource != nullptr)
         return readerSource->getAudioFormatReader();
     return nullptr;
+}
+
+bool AudioPlayer::getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamplesOut) const
+{
+    std::lock_guard<std::mutex> lock(readerMutex);
+    if (readerSource == nullptr)
+        return false;
+
+    auto* reader = readerSource->getAudioFormatReader();
+    if (reader == nullptr)
+        return false;
+
+    sampleRateOut = reader->sampleRate;
+    lengthInSamplesOut = reader->lengthInSamples;
+    return true;
 }
 
 /**

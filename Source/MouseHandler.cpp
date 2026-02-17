@@ -101,14 +101,12 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                 if (currentPlacementMode == AppEnums::PlacementMode::LoopIn)
                 {
                     owner.setLoopInPosition(zoomedTime);
-                    owner.getSilenceDetector().setIsAutoCutInActive(false);
-                    owner.updateComponentStates();
+                    owner.setAutoCutInActive(false);
                 }
                 else if (currentPlacementMode == AppEnums::PlacementMode::LoopOut)
                 {
                     owner.setLoopOutPosition(zoomedTime);
-                    owner.getSilenceDetector().setIsAutoCutOutActive(false);
-                    owner.updateComponentStates();
+                    owner.setAutoCutOutActive(false);
                 }
                 else
                 {
@@ -130,10 +128,10 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                                          ? LoopMarkerHandle::In : LoopMarkerHandle::Out;
                         dragStartMouseOffset = zoomedTime - loopPointTime; // Prevent jump
                         
-                        auto& silenceDetector = owner.getSilenceDetector();
-                        if (draggedHandle == LoopMarkerHandle::In) silenceDetector.setIsAutoCutInActive(false);
-                        else silenceDetector.setIsAutoCutOutActive(false);
-                        owner.updateComponentStates();
+                        if (draggedHandle == LoopMarkerHandle::In)
+                            owner.setAutoCutInActive(false);
+                        else
+                            owner.setAutoCutOutActive(false);
                     }
                     else
                     {
@@ -178,18 +176,14 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
         // Auto-disable logic (if not locked)
         if (draggedHandle != LoopMarkerHandle::None)
         {
-            bool stateChanged = false;
             if (draggedHandle == LoopMarkerHandle::In || draggedHandle == LoopMarkerHandle::Full)
             {
-                if (silenceDetector.getIsAutoCutInActive()) { silenceDetector.setIsAutoCutInActive(false); stateChanged = true; }
+                if (silenceDetector.getIsAutoCutInActive()) { owner.setAutoCutInActive(false); }
             }
             if (draggedHandle == LoopMarkerHandle::Out || draggedHandle == LoopMarkerHandle::Full)
             {
-                if (silenceDetector.getIsAutoCutOutActive()) { silenceDetector.setIsAutoCutOutActive(false); stateChanged = true; }
+                if (silenceDetector.getIsAutoCutOutActive()) { owner.setAutoCutOutActive(false); }
             }
-            
-            if (stateChanged)
-                owner.updateComponentStates();
         }
 
         // Initialize drag operations
@@ -390,14 +384,12 @@ void MouseHandler::mouseUp(const juce::MouseEvent& event)
                 if (currentPlacementMode == AppEnums::PlacementMode::LoopIn)
                 {
                     owner.setLoopInPosition(time);
-                    owner.getSilenceDetector().setIsAutoCutInActive(false);
-                    owner.updateComponentStates();
+                    owner.setAutoCutInActive(false);
                 }
                 else if (currentPlacementMode == AppEnums::PlacementMode::LoopOut)
                 {
                     owner.setLoopOutPosition(time);
-                    owner.getSilenceDetector().setIsAutoCutOutActive(false);
-                    owner.updateComponentStates();
+                    owner.setAutoCutOutActive(false);
                 }
                 owner.ensureLoopOrder();
                 owner.updateLoopLabels();
@@ -498,14 +490,13 @@ void MouseHandler::handleRightClickForLoopPlacement(int x)
     if (currentPlacementMode == AppEnums::PlacementMode::LoopIn)
     {
         owner.setLoopInPosition(time);
-        owner.getSilenceDetector().setIsAutoCutInActive(false);
+        owner.setAutoCutInActive(false);
     }
     else if (currentPlacementMode == AppEnums::PlacementMode::LoopOut)
     {
         owner.setLoopOutPosition(time);
-        owner.getSilenceDetector().setIsAutoCutOutActive(false);
+        owner.setAutoCutOutActive(false);
     }
-    owner.updateComponentStates();
     owner.ensureLoopOrder();
     owner.updateLoopButtonColors();
     owner.updateLoopLabels();

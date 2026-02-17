@@ -309,8 +309,8 @@ void PlaybackTextPresenter::mouseWheelMove(
   int effectiveIndex = charIndex - offset;
 
   double sampleRate = 0.0;
-  if (auto *reader = owner.getAudioPlayer().getAudioFormatReader())
-    sampleRate = reader->sampleRate;
+  juce::int64 length = 0;
+  owner.getAudioPlayer().getReaderInfo(sampleRate, length);
 
   double step = TimeEntryHelpers::calculateStepSize(effectiveIndex, event.mods,
                                                     sampleRate);
