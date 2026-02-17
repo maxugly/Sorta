@@ -19,13 +19,12 @@
  * Finally, it adds itself as a `ChangeListener` to `transportSource` so it can react
  * to playback state changes (e.g., reaching the end of the file).
  */
-AudioPlayer::AudioPlayer()
-    #if !defined(JUCE_HEADLESS)
-    : thumbnailCache(Config::Audio::thumbnailCacheSize), // Initialize thumbnail cache with a configured size
+AudioPlayer::AudioPlayer(SessionState* state)
+    : sessionState(state),
+#if !defined(JUCE_HEADLESS)
+      thumbnailCache(Config::Audio::thumbnailCacheSize), // Initialize thumbnail cache with a configured size
       thumbnail(Config::Audio::thumbnailSizePixels, formatManager, thumbnailCache), // Initialize thumbnail with configured size
-    #else
-    :
-    #endif
+#endif
       readAheadThread("Audio File Reader")
 {
     formatManager.registerBasicFormats(); // Register standard audio file formats
@@ -119,10 +118,6 @@ bool AudioPlayer::isPlaying() const
  * @brief Checks if cutModeActive is enabled.
  * @return True if the internal `cutModeActive` flag is set, false otherwise.
  */
-bool AudioPlayer::isCutModeActive() const
-{
-    return cutModeActive;
-}
 
 /**
  * @brief Enables or disables cutModeActive.
@@ -131,21 +126,6 @@ bool AudioPlayer::isCutModeActive() const
  * This method updates an internal flag. The actual cutModeActive logic is handled
  * within `getNextAudioBlock` when the stream finishes.
  */
-void AudioPlayer::setCutModeActive(bool isCutModeActive)
-{
-    cutModeActive = isCutModeActive;
-}
-
-void AudioPlayer::setShouldLoop(bool shouldLoopParam)
-{
-    shouldLoop = shouldLoopParam;
-}
-
-void AudioPlayer::setCutLimits(double cutInParam, double cutOutParam)
-{
-    cutIn = cutInParam;
-    cutOut = cutOutParam;
-}
 
 /**
  * @brief Gets a reference to the internal `juce::AudioThumbnail`.
@@ -209,6 +189,8 @@ void AudioPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
  */
 void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    if (!sessionState) { bufferToFill.clearActiveBufferRegion(); return; }
+
     // If no audio file is loaded, clear the buffer to prevent silence or clicks
     if (readerSource.get() == nullptr)
     {
@@ -217,28 +199,27 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
     }
 
     // Check bounds before processing (in case we are already outside)
-    if (cutModeActive)
+    if (sessionState->cutModeActive)
     {
         double currentPos = transportSource.getCurrentPosition();
-        if (currentPos >= cutOut)
+        if (currentPos >= sessionState->cutOut)
         {
-            if (shouldLoop)
+            if (sessionState->shouldLoop)
             {
-                transportSource.setPosition(cutIn);
+                transportSource.setPosition(sessionState->cutIn);
             }
             else
             {
                 transportSource.stop();
-                transportSource.setPosition(cutOut);
+                transportSource.setPosition(sessionState->cutOut);
                 bufferToFill.clearActiveBufferRegion();
                 return;
             }
         }
     }
-    else if (shouldLoop)
+    else if (sessionState->shouldLoop)
     {
-         // Standard looping of whole file if desired (using transport's built-in looping if we wanted,
-         // but manual control is safer given our mixed modes)
+         // Standard looping of whole file if desired
          double total = transportSource.getLengthInSeconds();
          if (transportSource.getCurrentPosition() >= total && total > 0)
          {
@@ -249,21 +230,20 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
     // Request the next block of audio from the transport source
     transportSource.getNextAudioBlock(bufferToFill);
 
-    // Check bounds after processing (to catch crossing the boundary during this block)
-    // Note: getNextAudioBlock advances the stream.
-    if (cutModeActive && transportSource.isPlaying())
+    // Check bounds after processing
+    if (sessionState->cutModeActive && transportSource.isPlaying())
     {
         double currentPos = transportSource.getCurrentPosition();
-        if (currentPos >= cutOut)
+        if (currentPos >= sessionState->cutOut)
         {
-            if (shouldLoop)
+            if (sessionState->shouldLoop)
             {
-                transportSource.setPosition(cutIn);
+                transportSource.setPosition(sessionState->cutIn);
             }
             else
             {
                 transportSource.stop();
-                transportSource.setPosition(cutOut);
+                transportSource.setPosition(sessionState->cutOut);
             }
         }
     }
@@ -322,24 +302,16 @@ juce::AudioFormatReader* AudioPlayer::getAudioFormatReader() const
  * This method ensures that the playback position is always within the
  * specified loop-in and loop-out bounds if cutModeActive is true.
  */
-void AudioPlayer::setPositionConstrained(double newPosition, double in, double out)
+void AudioPlayer::setPositionConstrained(double newPosition)
 {
-    if (cutModeActive)
-    {
-        // Use member variables cutIn and cutOut or arguments?
-        // The method signature takes arguments, but we also have internal state.
-        // The caller passes what it thinks are the bounds.
-        // For consistency with the "Stick" requirement:
-        // "If a user tries to scrub or snap outside these bounds, the playhead should "stick" to the marker"
+    if (!sessionState) return;
 
-        // We trust the caller's arguments as they reflect the UI state which might be newer than AudioPlayer's state update?
-        // Actually, AudioPlayer should be the source of truth for playback constraints.
-        // But the previous implementation used arguments. I will keep using arguments but effectively they match.
-        transportSource.setPosition(PlaybackHelpers::constrainPosition(newPosition, in, out));
+    if (sessionState->cutModeActive)
+    {
+        transportSource.setPosition(PlaybackHelpers::constrainPosition(newPosition, sessionState->cutIn, sessionState->cutOut));
     }
     else
     {
-        // No constraint other than 0 to end
         double length = transportSource.getLengthInSeconds();
         transportSource.setPosition(juce::jlimit(0.0, length, newPosition));
     }

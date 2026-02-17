@@ -5,6 +5,7 @@
 #include "AudioPlayer.h"
 #include "ControlPanel.h" 
 #include "AppEnums.h"
+#include "SessionState.h"
 
 class KeybindHandler;
 class PlaybackLoopController;
@@ -207,6 +208,7 @@ private:
     std::unique_ptr<KeybindHandler> keybindHandler; ///< Delegates keyboard shortcut logic.
     std::unique_ptr<PlaybackLoopController> playbackLoopController; ///< Enforces loop bounds during playback.
     juce::OpenGLContext openGLContext; ///< Context for OpenGL rendering.
+    SessionState sessionState; ///< Persistent user intent state.
     
     /** @} */
     //==============================================================================

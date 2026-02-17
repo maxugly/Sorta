@@ -12,6 +12,7 @@
 #endif
 
 #include "Config.h"
+#include "SessionState.h"
 
 /**
  * @file AudioPlayer.h
@@ -49,7 +50,7 @@ public:
      *
      * Initializes the JUCE audio format manager to support various audio file types.
      */
-    AudioPlayer();
+    explicit AudioPlayer(SessionState* state);
 
     /**
      * @brief Destructor.
@@ -65,7 +66,7 @@ public:
      * @param cutIn The loop-in position in seconds.
      * @param cutOut The loop-out position in seconds.
      */
-    void setPositionConstrained(double newPosition, double cutIn, double cutOut);
+    void setPositionConstrained(double newPosition);
 
     /** @} */
     //==============================================================================
@@ -113,26 +114,22 @@ public:
      * @brief Checks if cutModeActive is enabled for the current playback.
      * @return True if cut mode is active, meaning start/end are defined by cutIn/cutOut.
      */
-    bool isCutModeActive() const;
 
     /**
      * @brief Enables or disables cutModeActive for playback.
      * @param isCutModeActive True to enable cutModeActive, false to disable.
      */
-    void setCutModeActive(bool isCutModeActive);
 
     /**
      * @brief Sets whether playback should loop when reaching the end of the effective duration.
      * @param shouldLoop True to loop, false to stop.
      */
-    void setShouldLoop(bool shouldLoop);
 
     /**
      * @brief Sets the cut limits for playback.
      * @param cutIn The start position in seconds.
      * @param cutOut The end position in seconds.
      */
-    void setCutLimits(double cutIn, double cutOut);
 
     /** @} */
     //==============================================================================
@@ -261,11 +258,8 @@ private:
     #endif
 
     juce::File loadedFile;                                  ///< Stores the currently loaded audio file.
+    SessionState* sessionState = nullptr;
 
-    bool cutModeActive = false;                                   ///< Flag indicating if cut mode is active.
-    bool shouldLoop = false;                                      ///< Flag indicating if playback should loop.
-    double cutIn = 0.0;                                           ///< The loop-in position in seconds.
-    double cutOut = 0.0;                                          ///< The loop-out position in seconds.
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPlayer) ///< Macro to prevent copying and detect memory leaks.
 

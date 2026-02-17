@@ -53,7 +53,7 @@ class ControlPanel final : public juce::Component,
                            public juce::ChangeListener,
                            public SilenceWorkerClient {
 public:
-  SessionState& getSessionState() { return sessionState; }
+  SessionState& getSessionState() { return *sessionState; }
   //==============================================================================
   /** @name Constructors and Destructors
    *  @{
@@ -68,7 +68,7 @@ public:
    * reference is crucial for communicating user actions and updating global
    * application state.
    */
-  explicit ControlPanel(MainComponent &owner);
+  ControlPanel(MainComponent &owner, SessionState* state);
 
   /**
    * @brief Destructor.
@@ -196,7 +196,7 @@ public:
   /** @brief Checks if cutModeActive is enabled.
    *  @return True if the loop feature is active, false otherwise.
    */
-  bool getShouldLoop() const { return cutModeActive; }
+  bool getShouldLoop() const { return sessionState->cutModeActive; }
 
   /**
    * @brief Sets whether audio playback should loop.
@@ -328,12 +328,12 @@ public:
   /** @brief Returns whether autoplay is currently enabled.
    *  @return True if autoplay is enabled, false otherwise.
    */
-  bool shouldAutoplay() const { return m_shouldAutoplay; }
+  bool shouldAutoplay() const { return sessionState->autoplay; }
 
   /** @brief Returns whether "Cut Mode" is currently active.
    *  @return True if Cut Mode is active, false otherwise.
    */
-  bool isCutModeActive() const { return cutModeActive; }
+  bool isCutModeActive() const { return sessionState->cutModeActive; }
 
   /** @} */
   //==============================================================================
@@ -542,7 +542,7 @@ private:
    *  @{
    */
 
-  SessionState sessionState; ///< Persistent user intent state.
+  SessionState* sessionState = nullptr; ///< Persistent user intent state.
   MainComponent &owner;       ///< A reference to the owning `MainComponent` for
                               ///< inter-component communication.
   ModernLookAndFeel modernLF; ///< Custom look and feel instance for UI styling.
@@ -606,15 +606,12 @@ private:
       AppEnums::ThumbnailQuality::Low; ///< The currently selected waveform
                                        ///< thumbnail quality.
 
-  bool cutModeActive = false; ///< Flag indicating if audio playback should loop.
 
   juce::String cutInDisplayString,
       cutOutDisplayString; ///< Formatted strings for loop in/out display.
   int cutInTextX = 0, cutOutTextX = 0,
       cutTextY = 0; ///< Coordinates for loop point text displays.
 
-  bool m_shouldAutoplay =
-      false; ///< Flag indicating if autoplay is currently enabled.
   float glowAlpha =
       0.0f; ///< Alpha value for animation effects (e.g., pulsing lines).
 

@@ -12,12 +12,10 @@ void TransportPresenter::handleCutModeToggle(bool active)
 {
     owner.setCutModeActive(active);
     owner.getSessionState().cutModeActive = active;
-    owner.getAudioPlayer().setCutModeActive(active);
 
     // Sync current bounds to AudioPlayer to ensure it has the latest values
     if (active)
     {
-        owner.getAudioPlayer().setCutLimits(owner.getCutInPosition(), owner.getCutOutPosition());
         enforceCutLoopBounds();
     }
 }
@@ -25,12 +23,10 @@ void TransportPresenter::handleCutModeToggle(bool active)
 void TransportPresenter::handleLoopToggle(bool shouldLoop)
 {
     owner.getSessionState().shouldLoop = shouldLoop;
-    owner.getAudioPlayer().setShouldLoop(shouldLoop);
 }
 
 void TransportPresenter::handleAutoplayToggle(bool shouldAutoplay)
 {
-    owner.m_shouldAutoplay = shouldAutoplay;
     owner.getSessionState().autoplay = shouldAutoplay;
 
     if (shouldAutoplay)
