@@ -61,6 +61,7 @@ void LoopPresenter::setCutInPosition(double positionSeconds) {
       silenceDetector.getIsAutoCutOutActive()) {
     silenceDetector.setIsAutoCutOutActive(false);
     owner.updateComponentStates();
+    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
   }
 
   cutInPosition = newPos;
@@ -76,6 +77,7 @@ void LoopPresenter::setCutInPosition(double positionSeconds) {
 
   // Constrain playback head if it's outside new cutIn
   auto &audioPlayer = owner.getAudioPlayer();
+  audioPlayer.setCutLimits(cutInPosition, cutOutPosition);
   audioPlayer.setPositionConstrained(
       audioPlayer.getTransportSource().getCurrentPosition(), cutInPosition,
       cutOutPosition);
@@ -91,6 +93,7 @@ void LoopPresenter::setCutOutPosition(double positionSeconds) {
       silenceDetector.getIsAutoCutInActive()) {
     silenceDetector.setIsAutoCutInActive(false);
     owner.updateComponentStates();
+    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
   }
 
   cutOutPosition = newPos;
@@ -106,6 +109,7 @@ void LoopPresenter::setCutOutPosition(double positionSeconds) {
 
   // Constrain playback head if it's outside new cutOut
   auto &audioPlayer = owner.getAudioPlayer();
+  audioPlayer.setCutLimits(cutInPosition, cutOutPosition);
   audioPlayer.setPositionConstrained(
       audioPlayer.getTransportSource().getCurrentPosition(), cutInPosition,
       cutOutPosition);
@@ -125,6 +129,7 @@ void LoopPresenter::ensureCutOrder() {
 
     // Ensure UI buttons reflect the swapped auto states
     owner.updateComponentStates();
+    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
   }
 }
 
@@ -241,6 +246,7 @@ bool LoopPresenter::applyCutInFromEditor(double newPosition,
     owner.updateCutButtonColors();
     silenceDetector.setIsAutoCutInActive(false);
     owner.updateComponentStates();
+    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
 
     if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
       owner.setNeedsJumpToLoopIn(true);
@@ -273,6 +279,7 @@ bool LoopPresenter::applyCutOutFromEditor(double newPosition,
     owner.updateCutButtonColors();
     silenceDetector.setIsAutoCutOutActive(false);
     owner.updateComponentStates();
+    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
 
     if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
       owner.setNeedsJumpToLoopIn(true);
@@ -408,6 +415,7 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent &event,
       setCutInPosition(newPos);
       silenceDetector.setIsAutoCutInActive(false);
       owner.updateComponentStates();
+    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
       owner.setNeedsJumpToLoopIn(true);
       ensureCutOrder();
       updateCutLabels();
@@ -419,6 +427,7 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent &event,
       setCutOutPosition(newPos);
       silenceDetector.setIsAutoCutOutActive(false);
       owner.updateComponentStates();
+    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
       owner.setNeedsJumpToLoopIn(true);
       ensureCutOrder();
       updateCutLabels();

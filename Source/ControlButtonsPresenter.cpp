@@ -123,7 +123,7 @@ void ControlButtonsPresenter::initialiseCutModeButton()
     owner.cutModeButton.setClickingTogglesState(true);
     owner.cutModeButton.onClick = [this] {
         if (owner.transportPresenter != nullptr)
-            owner.transportPresenter->handleCutModeToggle(owner.cutModeButton.getToggleState());
+            owner.transportPresenter->handleLoopToggle(owner.cutModeButton.getToggleState());
     };
 }
 

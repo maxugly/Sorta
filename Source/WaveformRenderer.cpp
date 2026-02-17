@@ -211,13 +211,13 @@ void WaveformRenderer::drawCutModeOverlays(juce::Graphics& g, AudioPlayer& audio
         
         // 1. Black out the area beyond the fade
         juce::Rectangle<float> solidBlackLeft = leftRegion.withWidth(leftRegion.getWidth() - actualFade);
-        g.setColour(juce::Colours::black);
+        g.setColour(juce::Colours::black.withAlpha(0.8f));
         g.fillRect(solidBlackLeft);
 
         // 2. Fade from blue loop color to black
         juce::Rectangle<float> fadeAreaLeft(inX - actualFade, (float)waveformBounds.getY(), actualFade, (float)waveformBounds.getHeight());
         juce::ColourGradient leftFadeGradient(Config::Colors::loopRegion, inX, leftRegion.getCentreY(),
-                                              juce::Colours::black, inX - actualFade, leftRegion.getCentreY(), false);
+                                              juce::Colours::black.withAlpha(0.8f), inX - actualFade, leftRegion.getCentreY(), false);
         g.setGradientFill(leftFadeGradient);
         g.fillRect(fadeAreaLeft);
     }
@@ -230,13 +230,13 @@ void WaveformRenderer::drawCutModeOverlays(juce::Graphics& g, AudioPlayer& audio
         // 1. Black out the area beyond the fade
         float solidBlackStart = outX + actualFade;
         juce::Rectangle<float> solidBlackRight(solidBlackStart, (float)waveformBounds.getY(), (float)waveformBounds.getRight() - solidBlackStart, (float)waveformBounds.getHeight());
-        g.setColour(juce::Colours::black);
+        g.setColour(juce::Colours::black.withAlpha(0.8f));
         g.fillRect(solidBlackRight);
 
         // 2. Fade from blue loop color to black
         juce::Rectangle<float> fadeAreaRight(outX, (float)waveformBounds.getY(), actualFade, (float)waveformBounds.getHeight());
         juce::ColourGradient rightFadeGradient(Config::Colors::loopRegion, outX, rightRegion.getCentreY(),
-                                               juce::Colours::black, outX + actualFade, rightRegion.getCentreY(), false);
+                                               juce::Colours::black.withAlpha(0.8f), outX + actualFade, rightRegion.getCentreY(), false);
         g.setGradientFill(rightFadeGradient);
         g.fillRect(fadeAreaRight);
     }
