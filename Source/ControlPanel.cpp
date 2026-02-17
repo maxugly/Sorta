@@ -325,8 +325,6 @@ void ControlPanel::resetIn() { resetInButton.triggerClick(); }
  */
 void ControlPanel::resetOut() { resetOutButton.triggerClick(); }
 
-void ControlPanel::clearLoopIn() { resetIn(); }
-void ControlPanel::clearLoopOut() { resetOut(); }
 
 /**
  * @brief Parses a time string (HH:MM:SS:mmm) into a double representing

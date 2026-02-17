@@ -272,9 +272,6 @@ public:
    * cut-out boundary. */
   void resetOut();
 
-  /** @brief Legacy wrappers for reset actions. */
-  void clearLoopIn();
-  void clearLoopOut();
   void forceInvalidateWaveformCache();
 
   /** @} */
