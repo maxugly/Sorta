@@ -70,6 +70,7 @@ public:
      * @param loopOut The loop-out position in seconds.
      */
     void setPositionConstrained(double newPosition, double loopIn, double loopOut);
+    void setPlayheadPosition(double seconds);
 
     /** @} */
     //==============================================================================

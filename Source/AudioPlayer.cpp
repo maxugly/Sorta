@@ -112,6 +112,7 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
         thumbnail.setSource(new juce::FileInputSource(file)); // Update thumbnail to reflect new file
         #endif
         readerSource.reset(newSource.release()); // Transfer ownership to unique_ptr
+        setPlayheadPosition(cutIn);
         return juce::Result::ok();
     }
 
@@ -369,4 +370,15 @@ bool AudioPlayer::getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamp
 void AudioPlayer::setPositionConstrained(double newPosition, double loopIn, double loopOut)
 {
     transportSource.setPosition(PlaybackHelpers::constrainPosition(newPosition, loopIn, loopOut));
+}
+
+void AudioPlayer::setPlayheadPosition(double seconds)
+{
+    if (readerSource == nullptr)
+        return;
+
+    const double effectiveIn = juce::jmin(cutIn, cutOut);
+    const double effectiveOut = juce::jmax(cutIn, cutOut);
+
+    transportSource.setPosition(juce::jlimit(effectiveIn, effectiveOut, seconds));
 }

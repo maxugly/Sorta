@@ -172,10 +172,9 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
   double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
 
   if (&editor == &owner.elapsedTimeEditor) {
-    transport.setPosition(juce::jlimit(0.0, totalLength, newTime));
+    owner.getAudioPlayer().setPlayheadPosition(newTime);
   } else if (&editor == &owner.remainingTimeEditor) {
-    transport.setPosition(
-        juce::jlimit(0.0, totalLength, totalLength - newTime));
+    owner.getAudioPlayer().setPlayheadPosition(totalLength - newTime);
   } else if (&editor == &owner.loopLengthEditor) {
     // Adjust loop out based on loop in
     double currentIn = owner.getLoopInPosition();
@@ -319,10 +318,10 @@ void PlaybackTextPresenter::mouseWheelMove(
   double newVal = juce::jmax(0.0, currentVal + (direction * step));
 
   if (editor == &owner.elapsedTimeEditor) {
-    owner.getAudioPlayer().getTransportSource().setPosition(newVal);
+    owner.getAudioPlayer().setPlayheadPosition(newVal);
   } else if (editor == &owner.remainingTimeEditor) {
     double total = owner.getAudioPlayer().getThumbnail().getTotalLength();
-    owner.getAudioPlayer().getTransportSource().setPosition(total - newVal);
+    owner.getAudioPlayer().setPlayheadPosition(total - newVal);
   } else if (editor == &owner.loopLengthEditor) {
     owner.setLoopOutPosition(owner.getLoopInPosition() + newVal);
     owner.ensureLoopOrder();

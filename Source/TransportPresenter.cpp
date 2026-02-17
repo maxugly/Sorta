@@ -47,6 +47,6 @@ void TransportPresenter::enforceCutLoopBounds() const
     if (loopOut > loopIn
         && (currentPosition < loopIn || currentPosition >= loopOut))
     {
-        transport.setPosition(loopIn);
+        audioPlayer.setPlayheadPosition(loopIn);
     }
 }

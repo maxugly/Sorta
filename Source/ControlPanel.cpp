@@ -190,7 +190,7 @@ void ControlPanel::setZKeyDown(bool isDown) {
 }
 
 void ControlPanel::jumpToLoopIn() {
-  getAudioPlayer().getTransportSource().setPosition(getLoopInPosition());
+  getAudioPlayer().setPlayheadPosition(getLoopInPosition());
   m_needsJumpToLoopIn = false;
 }
 

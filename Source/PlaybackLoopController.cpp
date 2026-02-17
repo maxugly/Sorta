@@ -31,12 +31,12 @@ void PlaybackLoopController::enforceLoopBounds() const
     if (controlPanel.isCutModeActive())
     {
         if (controlPanel.getShouldLoop())
-            transport.setPosition(loopIn);
+            audioPlayer.setPlayheadPosition(loopIn);
         else
             transport.stop();
         return;
     }
 
     if (controlPanel.getShouldLoop())
-        transport.setPosition(loopIn);
+        audioPlayer.setPlayheadPosition(loopIn);
 }

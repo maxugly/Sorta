@@ -140,7 +140,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                         double effectiveLoopOut = owner.getLoopOutPosition();
                         double constrainedTime = juce::jlimit(effectiveLoopIn, effectiveLoopOut, zoomedTime);
 
-                        owner.getAudioPlayer().getTransportSource().setPosition(constrainedTime);
+                        owner.getAudioPlayer().setPlayheadPosition(constrainedTime);
                         isDragging = true;
             isScrubbingState = true;
                         mouseDragStartX = event.x;
@@ -274,7 +274,7 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
                 double effectiveLoopOut = owner.getLoopOutPosition();
                 double constrainedTime = juce::jlimit(effectiveLoopIn, effectiveLoopOut, zoomedTime);
                 
-                owner.getAudioPlayer().getTransportSource().setPosition(constrainedTime);
+                owner.getAudioPlayer().setPlayheadPosition(constrainedTime);
             }
 
             owner.updateLoopLabels();
@@ -322,8 +322,7 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
                 owner.getAudioPlayer().setCutOut(newOut);
 
                 // Ensure cursor stays in the moving loop
-                audioPlayer.setPositionConstrained(audioPlayer.getTransportSource().getCurrentPosition(),
-                                                   newIn, newOut);
+                audioPlayer.setPlayheadPosition(audioPlayer.getTransportSource().getCurrentPosition());
             }
 
             owner.ensureLoopOrder();
@@ -467,7 +466,7 @@ void MouseHandler::mouseWheelMove(const juce::MouseEvent& event, const juce::Mou
     double effectiveLoopOut = owner.getLoopOutPosition();
     if (effectiveLoopOut <= 0.0) effectiveLoopOut = audioLength;
 
-    transport.setPosition(juce::jlimit(effectiveLoopIn, effectiveLoopOut, newPos));
+    audioPlayer.setPlayheadPosition(newPos);
     owner.repaint();
 }
 
@@ -523,33 +522,7 @@ void MouseHandler::seekToMousePosition(int x)
     float proportion = (float)(x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
     double time = proportion * audioLength;
 
-    double effectiveLoopIn = owner.getLoopInPosition();
-    if (effectiveLoopIn < 0.0)
-    {
-        effectiveLoopIn = 0.0;
-    }
-
-    double effectiveLoopOut = owner.getLoopOutPosition();
-    if (effectiveLoopOut < 0.0 || effectiveLoopOut > audioLength) // If loopOut is not set or beyond file length, use file length
-    {
-        effectiveLoopOut = audioLength;
-    }
-    
-    // Ensure loopIn is not greater than loopOut
-    if (effectiveLoopIn > effectiveLoopOut) {
-        effectiveLoopIn = 0.0; // Fallback to 0 if invalid
-        effectiveLoopOut = audioLength; // Fallback to full length if invalid
-    }
-
-
-    if (time < effectiveLoopIn || time > effectiveLoopOut)
-    {
-        audioPlayer.getTransportSource().setPosition(effectiveLoopIn);
-    }
-    else
-    {
-        audioPlayer.getTransportSource().setPosition(time);
-    }
+    audioPlayer.setPlayheadPosition(time);
 }
 
 void MouseHandler::clearTextEditorFocusIfNeeded(const juce::MouseEvent& event)

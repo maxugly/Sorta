@@ -283,7 +283,7 @@ bool LoopPresenter::applyLoopOutFromEditor(double newPosition,
     auto &transport = audioPlayer.getTransportSource();
     if (owner.getShouldLoop() &&
         transport.getCurrentPosition() >= owner.getAudioPlayer().getCutOut())
-      transport.setPosition(owner.getAudioPlayer().getCutIn());
+      owner.getAudioPlayer().setPlayheadPosition(owner.getAudioPlayer().getCutIn());
 
     setLoopOutPosition(newPosition);
     owner.updateLoopButtonColors();

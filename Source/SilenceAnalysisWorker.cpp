@@ -105,7 +105,7 @@ void SilenceAnalysisWorker::run()
                          client.logStatusMessage(juce::String("Loop start set to sample ") + juce::String(result));
 
                          if (client.isCutModeActive())
-                             player.getTransportSource().setPosition(client.getLoopInPosition());
+                             player.setPlayheadPosition(client.getLoopInPosition());
                      }
                      else
                      {
