@@ -80,9 +80,7 @@ void LoopPresenter::setCutInPosition(double positionSeconds) {
 
   // Constrain playback head if it's outside new cutIn
   auto &audioPlayer = owner.getAudioPlayer();
-  audioPlayer.setPositionConstrained(
-      audioPlayer.getTransportSource().getCurrentPosition(), owner.getSessionState().cutIn,
-      owner.getSessionState().cutOut);
+  audioPlayer.setPositionConstrained(audioPlayer.getTransportSource().getCurrentPosition());
   ensureCutOrder();
 }
 
@@ -110,9 +108,7 @@ void LoopPresenter::setCutOutPosition(double positionSeconds) {
 
   // Constrain playback head if it's outside new cutOut
   auto &audioPlayer = owner.getAudioPlayer();
-  audioPlayer.setPositionConstrained(
-      audioPlayer.getTransportSource().getCurrentPosition(), owner.getSessionState().cutIn,
-      owner.getSessionState().cutOut);
+  audioPlayer.setPositionConstrained(audioPlayer.getTransportSource().getCurrentPosition());
   ensureCutOrder();
 }
 
