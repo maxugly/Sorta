@@ -53,7 +53,7 @@ class ControlPanel final : public juce::Component,
                            public juce::ChangeListener,
                            public SilenceWorkerClient {
 public:
-  SessionState& getSessionState() { return *sessionState; }
+  SessionState& getSessionState() { jassert(sessionState != nullptr); return *sessionState; }
   //==============================================================================
   /** @name Constructors and Destructors
    *  @{
