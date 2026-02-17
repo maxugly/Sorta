@@ -34,7 +34,7 @@ public:
 
     void runTest() override
     {
-        beginTest("setPositionConstrained constrains position correctly");
+        beginTest("setPlayheadPosition clamps position correctly");
         {
             // Create AudioPlayer
             SessionState sessionState;
@@ -50,28 +50,30 @@ public:
             // Verify initial state
             expectEquals(player.getTransportSource().getCurrentPosition(), 0.0);
 
-            // Mock loop points
-            double loopIn = 2.0;
-            double loopOut = 8.0;
+            // Mock cut points
+            player.setCutIn(2.0);
+            player.setCutOut(8.0);
 
             // Test case 1: Position within range
-            player.setPositionConstrained(5.0, loopIn, loopOut);
+            player.setPlayheadPosition(5.0);
             expectEquals(player.getTransportSource().getCurrentPosition(), 5.0);
 
             // Test case 2: Position outside range (below)
-            player.setPositionConstrained(1.0, loopIn, loopOut);
-            expectEquals(player.getTransportSource().getCurrentPosition(), loopIn);
+            player.setPlayheadPosition(1.0);
+            expectEquals(player.getTransportSource().getCurrentPosition(), 2.0);
 
             // Test case 3: Position outside range (above)
-            player.setPositionConstrained(9.0, loopIn, loopOut);
-            expectEquals(player.getTransportSource().getCurrentPosition(), loopOut);
+            player.setPlayheadPosition(9.0);
+            expectEquals(player.getTransportSource().getCurrentPosition(), 8.0);
 
             // Test case 4: Swapped loop points
-            player.setPositionConstrained(5.0, loopOut, loopIn);
+            player.setCutIn(8.0);
+            player.setCutOut(2.0);
+            player.setPlayheadPosition(5.0);
             expectEquals(player.getTransportSource().getCurrentPosition(), 5.0);
 
-            player.setPositionConstrained(1.0, loopOut, loopIn);
-            expectEquals(player.getTransportSource().getCurrentPosition(), loopIn); // Expect min(loopIn, loopOut) which is 2.0
+            player.setPlayheadPosition(1.0);
+            expectEquals(player.getTransportSource().getCurrentPosition(), 2.0); // Expect min(cutIn, cutOut) which is 2.0
 
             // Cleanup
             player.getTransportSource().setSource(nullptr);

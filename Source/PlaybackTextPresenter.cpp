@@ -50,10 +50,10 @@ void PlaybackTextPresenter::updateEditors() {
 
   if (!isEditingRemaining &&
       !owner.remainingTimeEditor.hasKeyboardFocus(true)) {
-    const auto total = owner.getAudioPlayer().getThumbnail().getTotalLength();
+    const auto cutOut = owner.getAudioPlayer().getCutOut();
     const auto remaining = juce::jmax(
         0.0,
-        total -
+        cutOut -
             owner.getAudioPlayer().getTransportSource().getCurrentPosition());
     syncEditorToPosition(owner.remainingTimeEditor, remaining, true);
   }
@@ -168,13 +168,13 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
   if (newTime < 0.0)
     return;
 
-  auto &transport = owner.getAudioPlayer().getTransportSource();
   double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
+  double cutOut = owner.getAudioPlayer().getCutOut();
 
   if (&editor == &owner.elapsedTimeEditor) {
     owner.getAudioPlayer().setPlayheadPosition(newTime);
   } else if (&editor == &owner.remainingTimeEditor) {
-    owner.getAudioPlayer().setPlayheadPosition(totalLength - newTime);
+    owner.getAudioPlayer().setPlayheadPosition(cutOut - newTime);
   } else if (&editor == &owner.loopLengthEditor) {
     // Adjust loop out based on loop in
     double currentIn = owner.getLoopInPosition();

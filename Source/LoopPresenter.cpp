@@ -84,9 +84,8 @@ void LoopPresenter::setLoopInPosition(double positionSeconds) {
   }
 
   // Constrain playback head if it's outside new loopIn
-  audioPlayer.setPositionConstrained(
-      audioPlayer.getTransportSource().getCurrentPosition(),
-      audioPlayer.getCutIn(), audioPlayer.getCutOut());
+  audioPlayer.setPlayheadPosition(
+      audioPlayer.getTransportSource().getCurrentPosition());
   ensureLoopOrder();
 }
 
@@ -114,9 +113,8 @@ void LoopPresenter::setLoopOutPosition(double positionSeconds) {
   }
 
   // Constrain playback head if it's outside new loopOut
-  audioPlayer.setPositionConstrained(
-      audioPlayer.getTransportSource().getCurrentPosition(),
-      audioPlayer.getCutIn(), audioPlayer.getCutOut());
+  audioPlayer.setPlayheadPosition(
+      audioPlayer.getTransportSource().getCurrentPosition());
   ensureLoopOrder();
 }
 

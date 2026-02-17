@@ -358,20 +358,6 @@ bool AudioPlayer::getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamp
     return true;
 }
 
-/**
- * @brief Sets the playback position, constrained by provided loop points.
- * @param newPosition The desired new position in seconds.
- * @param loopIn The loop-in position in seconds.
- * @param loopOut The loop-out position in seconds.
- *
- * This method ensures that the playback position is always within the
- * specified loop-in and loop-out bounds.
- */
-void AudioPlayer::setPositionConstrained(double newPosition, double loopIn, double loopOut)
-{
-    transportSource.setPosition(PlaybackHelpers::constrainPosition(newPosition, loopIn, loopOut));
-}
-
 void AudioPlayer::setPlayheadPosition(double seconds)
 {
     if (readerSource == nullptr)
