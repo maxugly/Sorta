@@ -24,8 +24,6 @@ struct SessionState
     bool autoCutIn = true;
     bool autoCutOut = true;
 
-    double cutIn = 0.0;
-    double cutOut = 0.0;
 
     float thresholdIn = 0.15f;
     float thresholdOut = 0.15f;

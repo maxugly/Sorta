@@ -1,3 +1,5 @@
+#include "SessionState.h"
+#include "SilenceAnalysisAlgorithms.h"
 #include "AudioPlayer.h"
 #include "PlaybackHelpers.h"
 
@@ -73,6 +75,27 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
         #if !defined(JUCE_HEADLESS)
         thumbnail.setSource(new juce::FileInputSource(file)); // Update thumbnail to reflect new file
         #endif
+
+        // Reset cutIn and cutOut
+        cutIn = 0.0;
+        double totalDuration = (double)reader->lengthInSamples / reader->sampleRate;
+        cutOut = totalDuration;
+
+        if (sessionState != nullptr)
+        {
+            if (sessionState->autoCutIn)
+            {
+                juce::int64 detectedSample = SilenceAnalysisAlgorithms::findSilenceIn(*reader, sessionState->thresholdIn);
+                if (detectedSample >= 0)
+                    cutIn = (double)detectedSample / reader->sampleRate;
+            }
+            if (sessionState->autoCutOut)
+            {
+                juce::int64 detectedSample = SilenceAnalysisAlgorithms::findSilenceOut(*reader, sessionState->thresholdOut);
+                if (detectedSample >= 0)
+                    cutOut = (double)detectedSample / reader->sampleRate;
+            }
+        }
         readerSource.reset(newSource.release()); // Transfer ownership to unique_ptr
         return juce::Result::ok();
     }
@@ -346,4 +369,24 @@ void AudioPlayer::setPositionConstrained(double newPosition, double in, double o
         double length = transportSource.getLengthInSeconds();
         transportSource.setPosition(juce::jlimit(0.0, length, newPosition));
     }
+}
+
+double AudioPlayer::getCutIn() const
+{
+    return cutIn;
+}
+
+double AudioPlayer::getCutOut() const
+{
+    return cutOut;
+}
+
+void AudioPlayer::setCutIn(double newCutIn)
+{
+    cutIn = newCutIn;
+}
+
+void AudioPlayer::setCutOut(double newCutOut)
+{
+    cutOut = newCutOut;
 }

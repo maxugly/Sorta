@@ -118,15 +118,11 @@ void MainComponent::openButtonClicked()
             if (result.wasOk())
             {
                 controlPanel->setTotalTimeStaticString(TimeUtils::formatTime(audioPlayer->getThumbnail().getTotalLength()));
-                controlPanel->setCutInPosition(0.0);
-                controlPanel->setCutOutPosition(audioPlayer->getThumbnail().getTotalLength());
+                controlPanel->setCutInPosition(audioPlayer->getCutIn());
+                controlPanel->setCutOutPosition(audioPlayer->getCutOut());
                 controlPanel->updateCutLabels();
                 controlPanel->updateComponentStates();
                 controlPanel->updateStatsFromAudio();
-
-                auto& sd = controlPanel->getSilenceDetector();
-                if (sd.getIsAutoCutInActive()) sd.detectInSilence();
-                if (sd.getIsAutoCutOutActive()) sd.detectOutSilence();
 
                 if (controlPanel->shouldAutoplay())
                    audioPlayer->togglePlayStop();

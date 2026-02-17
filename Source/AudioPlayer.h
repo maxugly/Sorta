@@ -135,6 +135,30 @@ public:
      */
     void setCutLimits(double cutIn, double cutOut);
 
+    /**
+     * @brief Gets the current cut-in position.
+     * @return The start position in seconds.
+     */
+    double getCutIn() const;
+
+    /**
+     * @brief Gets the current cut-out position.
+     * @return The end position in seconds.
+     */
+    double getCutOut() const;
+
+    /**
+     * @brief Sets the cut-in position.
+     * @param cutIn The new start position in seconds.
+     */
+    void setCutIn(double cutIn);
+
+    /**
+     * @brief Sets the cut-out position.
+     * @param cutOut The new end position in seconds.
+     */
+    void setCutOut(double cutOut);
+
     /** @} */
     //==============================================================================
 
