@@ -41,13 +41,14 @@
  * is set to `CrosshairCursor` to provide immediate visual feedback for
  * interactive elements.
  */
-ControlPanel::ControlPanel(MainComponent &ownerComponent)
-    : owner(ownerComponent), modernLF(),
-      silenceDetector(std::make_unique<SilenceDetector>(*this, sessionState)),
+ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState* state)
+    : sessionState(state), owner(ownerComponent), modernLF(),
+      silenceDetector(std::make_unique<SilenceDetector>(*this, *state)),
       mouseHandler(std::make_unique<MouseHandler>(*this)),
       layoutManager(std::make_unique<LayoutManager>(*this)),
       waveformRenderer(std::make_unique<WaveformRenderer>(*this)),
-      focusManager(std::make_unique<FocusManager>(*this)), m_shouldAutoplay(sessionState.autoplay), cutModeActive(sessionState.cutModeActive) {
+      focusManager(std::make_unique<FocusManager>(*this)) {
+  jassert(sessionState != nullptr);
   initialiseLookAndFeel();
   statsPresenter = std::make_unique<StatsPresenter>(*this);
   silenceDetectionPresenter =
@@ -336,7 +337,7 @@ void ControlPanel::setTotalTimeStaticString(const juce::String &timeString) {
 }
 
 void ControlPanel::setCutModeActive(bool cutModeActiveParam) {
-  cutModeActive = cutModeActiveParam;
+  sessionState->cutModeActive = cutModeActiveParam;
   updateCutUI();
 }
 void ControlPanel::updateCutButtonColors() {
@@ -429,7 +430,7 @@ void ControlPanel::updateCursorPosition() {
 
 void ControlPanel::updateCutUI()
 {
-    const bool cutActive = sessionState.cutModeActive;
+    const bool cutActive = sessionState->cutModeActive;
     // Check if file is loaded (length > 0)
     bool fileLoaded = false;
     // Use getAudioPlayer() if available. Logic from ControlStatePresenter used getThumbnail().getTotalLength().

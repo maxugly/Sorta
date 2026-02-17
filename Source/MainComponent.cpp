@@ -8,11 +8,11 @@
 MainComponent::MainComponent()
 {
     // 1. Initialize logic and engines
-    audioPlayer = std::make_unique<AudioPlayer>();
+    audioPlayer = std::make_unique<AudioPlayer>(&sessionState);
     audioPlayer->addChangeListener(this);
     
     // 2. Initialize UI components
-    controlPanel = std::make_unique<ControlPanel>(*this);
+    controlPanel = std::make_unique<ControlPanel>(*this, &sessionState);
     addAndMakeVisible(controlPanel.get());
     
     // 3. Initialize controllers that bridge UI and Logic
@@ -149,9 +149,7 @@ void MainComponent::seekToPosition(int x)
         auto proportion = relativeX / (double)controlPanel->getWaveformBounds().getWidth();
         auto newPosition = juce::jlimit(0.0, 1.0, proportion) * audioPlayer->getThumbnail().getTotalLength();
         
-        audioPlayer->setPositionConstrained(newPosition,
-                                           controlPanel->getCutInPosition(),
-                                           controlPanel->getCutOutPosition());
+        audioPlayer->setPositionConstrained(newPosition);
     }
 }
 

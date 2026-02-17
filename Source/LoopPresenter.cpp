@@ -52,23 +52,26 @@ LoopPresenter::~LoopPresenter() {
   cutOutEditor.removeMouseListener(this);
 }
 
+
+double LoopPresenter::getCutInPosition() const { return owner.getSessionState().cutIn; }
+double LoopPresenter::getCutOutPosition() const { return owner.getSessionState().cutOut; }
+
 void LoopPresenter::setCutInPosition(double positionSeconds) {
   const double totalLength = getAudioTotalLength();
   const double newPos = juce::jlimit(0.0, totalLength, positionSeconds);
 
   // Crossing Logic: If we manually move In past an Auto-Out, turn off Auto-Out
-  if (!silenceDetector.getIsAutoCutInActive() && newPos >= cutOutPosition &&
+  if (!silenceDetector.getIsAutoCutInActive() && newPos >= owner.getSessionState().cutOut &&
       silenceDetector.getIsAutoCutOutActive()) {
     silenceDetector.setIsAutoCutOutActive(false);
     owner.updateComponentStates();
-    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
   }
 
-  cutInPosition = newPos;
+  owner.getSessionState().cutIn = newPos;
 
   // Push Logic: If In crosses Out and AC In is active
   if (silenceDetector.getIsAutoCutInActive() &&
-      cutInPosition >= cutOutPosition) {
+      owner.getSessionState().cutIn >= owner.getSessionState().cutOut) {
     // Push Out to the end, then re-detect if AC Out is active
     setCutOutPosition(totalLength);
     if (silenceDetector.getIsAutoCutOutActive())
@@ -77,10 +80,7 @@ void LoopPresenter::setCutInPosition(double positionSeconds) {
 
   // Constrain playback head if it's outside new cutIn
   auto &audioPlayer = owner.getAudioPlayer();
-  audioPlayer.setCutLimits(cutInPosition, cutOutPosition);
-  audioPlayer.setPositionConstrained(
-      audioPlayer.getTransportSource().getCurrentPosition(), cutInPosition,
-      cutOutPosition);
+  audioPlayer.setPositionConstrained(audioPlayer.getTransportSource().getCurrentPosition());
   ensureCutOrder();
 }
 
@@ -89,18 +89,17 @@ void LoopPresenter::setCutOutPosition(double positionSeconds) {
   const double newPos = juce::jlimit(0.0, totalLength, positionSeconds);
 
   // Crossing Logic: If we manually move Out past an Auto-In, turn off Auto-In
-  if (!silenceDetector.getIsAutoCutOutActive() && newPos <= cutInPosition &&
+  if (!silenceDetector.getIsAutoCutOutActive() && newPos <= owner.getSessionState().cutIn &&
       silenceDetector.getIsAutoCutInActive()) {
     silenceDetector.setIsAutoCutInActive(false);
     owner.updateComponentStates();
-    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
   }
 
-  cutOutPosition = newPos;
+  owner.getSessionState().cutOut = newPos;
 
   // Pull Logic: If Out crosses In and AC Out is active
   if (silenceDetector.getIsAutoCutOutActive() &&
-      cutOutPosition <= cutInPosition) {
+      owner.getSessionState().cutOut <= owner.getSessionState().cutIn) {
     // Pull In to the start, then re-detect if AC In is active
     setCutInPosition(0.0);
     if (silenceDetector.getIsAutoCutInActive())
@@ -109,16 +108,13 @@ void LoopPresenter::setCutOutPosition(double positionSeconds) {
 
   // Constrain playback head if it's outside new cutOut
   auto &audioPlayer = owner.getAudioPlayer();
-  audioPlayer.setCutLimits(cutInPosition, cutOutPosition);
-  audioPlayer.setPositionConstrained(
-      audioPlayer.getTransportSource().getCurrentPosition(), cutInPosition,
-      cutOutPosition);
+  audioPlayer.setPositionConstrained(audioPlayer.getTransportSource().getCurrentPosition());
   ensureCutOrder();
 }
 
 void LoopPresenter::ensureCutOrder() {
-  if (cutInPosition > cutOutPosition) {
-    std::swap(cutInPosition, cutOutPosition);
+  if (owner.getSessionState().cutIn > owner.getSessionState().cutOut) {
+    std::swap(owner.getSessionState().cutIn, owner.getSessionState().cutOut);
 
     // Swap Auto-Cut states as well so the "Auto" property follows the detected
     // value
@@ -129,18 +125,17 @@ void LoopPresenter::ensureCutOrder() {
 
     // Ensure UI buttons reflect the swapped auto states
     owner.updateComponentStates();
-    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
   }
 }
 
 void LoopPresenter::updateCutLabels() {
   // Guard against timer overwriting while editing OR focused
   if (!isEditingCutIn && !cutInEditor.hasKeyboardFocus(true)) {
-    syncEditorToPosition(cutInEditor, cutInPosition);
+    syncEditorToPosition(cutInEditor, owner.getSessionState().cutIn);
   }
 
   if (!isEditingCutOut && !cutOutEditor.hasKeyboardFocus(true)) {
-    syncEditorToPosition(cutOutEditor, cutOutPosition);
+    syncEditorToPosition(cutOutEditor, owner.getSessionState().cutOut);
   }
 }
 
@@ -198,9 +193,9 @@ void LoopPresenter::textEditorEscapeKeyPressed(juce::TextEditor &editor) {
     isEditingCutOut = false;
 
   if (&editor == &cutInEditor) {
-    syncEditorToPosition(editor, cutInPosition);
+    syncEditorToPosition(editor, owner.getSessionState().cutIn);
   } else if (&editor == &cutOutEditor) {
-    syncEditorToPosition(editor, cutOutPosition);
+    syncEditorToPosition(editor, owner.getSessionState().cutOut);
   }
   editor.setColour(juce::TextEditor::textColourId,
                    Config::Colors::playbackText);
@@ -246,7 +241,6 @@ bool LoopPresenter::applyCutInFromEditor(double newPosition,
     owner.updateCutButtonColors();
     silenceDetector.setIsAutoCutInActive(false);
     owner.updateComponentStates();
-    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
 
     if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
       owner.setNeedsJumpToLoopIn(true);
@@ -258,7 +252,7 @@ bool LoopPresenter::applyCutInFromEditor(double newPosition,
     return true;
   }
 
-  syncEditorToPosition(editor, cutInPosition);
+  syncEditorToPosition(editor, owner.getSessionState().cutIn);
   editor.setColour(juce::TextEditor::textColourId,
                    Config::Colors::textEditorError);
   owner.repaint();
@@ -272,14 +266,13 @@ bool LoopPresenter::applyCutOutFromEditor(double newPosition,
     AudioPlayer &audioPlayer = owner.getAudioPlayer();
     auto &transport = audioPlayer.getTransportSource();
     if (owner.getShouldLoop() &&
-        transport.getCurrentPosition() >= cutOutPosition)
-      transport.setPosition(cutInPosition);
+        transport.getCurrentPosition() >= owner.getSessionState().cutOut)
+      transport.setPosition(owner.getSessionState().cutIn);
 
     setCutOutPosition(newPosition);
     owner.updateCutButtonColors();
     silenceDetector.setIsAutoCutOutActive(false);
     owner.updateComponentStates();
-    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
 
     if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
       owner.setNeedsJumpToLoopIn(true);
@@ -291,7 +284,7 @@ bool LoopPresenter::applyCutOutFromEditor(double newPosition,
     return true;
   }
 
-  syncEditorToPosition(editor, cutOutPosition);
+  syncEditorToPosition(editor, owner.getSessionState().cutOut);
   editor.setColour(juce::TextEditor::textColourId,
                    Config::Colors::textEditorError);
   owner.repaint();
@@ -410,24 +403,22 @@ void LoopPresenter::mouseWheelMove(const juce::MouseEvent &event,
   const double delta = direction * step;
 
   if (editor == &cutInEditor) {
-    double newPos = juce::jlimit(0.0, totalLength, cutInPosition + delta);
-    if (newPos != cutInPosition) {
+    double newPos = juce::jlimit(0.0, totalLength, owner.getSessionState().cutIn + delta);
+    if (newPos != owner.getSessionState().cutIn) {
       setCutInPosition(newPos);
       silenceDetector.setIsAutoCutInActive(false);
       owner.updateComponentStates();
-    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
       owner.setNeedsJumpToLoopIn(true);
       ensureCutOrder();
       updateCutLabels();
       owner.repaint();
     }
   } else if (editor == &cutOutEditor) {
-    double newPos = juce::jlimit(0.0, totalLength, cutOutPosition + delta);
-    if (newPos != cutOutPosition) {
+    double newPos = juce::jlimit(0.0, totalLength, owner.getSessionState().cutOut + delta);
+    if (newPos != owner.getSessionState().cutOut) {
       setCutOutPosition(newPos);
       silenceDetector.setIsAutoCutOutActive(false);
       owner.updateComponentStates();
-    owner.getAudioPlayer().setCutLimits(cutInPosition, cutOutPosition);
       owner.setNeedsJumpToLoopIn(true);
       ensureCutOrder();
       updateCutLabels();

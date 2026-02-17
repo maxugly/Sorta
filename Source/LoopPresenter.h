@@ -46,13 +46,13 @@ public:
    * @brief Retrieves the loop-in position in seconds.
    * @return Current loop-in value.
    */
-  double getCutInPosition() const noexcept { return cutInPosition; }
+  double getCutInPosition() const;
 
   /**
    * @brief Retrieves the loop-out position in seconds.
    * @return Current loop-out value.
    */
-  double getCutOutPosition() const noexcept { return cutOutPosition; }
+  double getCutOutPosition() const;
 
   /**
    * @brief Directly sets the loop-in position without additional validation.
@@ -113,8 +113,6 @@ private:
   SilenceDetector &silenceDetector;
   juce::TextEditor &cutInEditor;
   juce::TextEditor &cutOutEditor;
-  double cutInPosition{-1.0};
-  double cutOutPosition{-1.0};
   bool isEditingCutIn{false};
   bool isEditingCutOut{false};
 
