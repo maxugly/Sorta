@@ -22,6 +22,6 @@ struct SessionState
 
     double getEffectiveDuration(double rawTotal, double start, double end) const
     {
-        return cutModeActive ? (end - start) : rawTotal;
+        return cutModeActive ? juce::jmax(0.0, end - start) : rawTotal;
     }
 };
