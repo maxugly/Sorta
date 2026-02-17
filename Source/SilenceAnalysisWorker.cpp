@@ -34,6 +34,7 @@ void SilenceAnalysisWorker::startAnalysis(float thresholdVal, bool isIn)
     AudioPlayer& audioPlayer = client.getAudioPlayer();
     wasPlayingBeforeScan = audioPlayer.isPlaying();
 
+    
     if (wasPlayingBeforeScan)
         audioPlayer.getTransportSource().stop();
 
@@ -48,7 +49,7 @@ void SilenceAnalysisWorker::run()
     // Note: We assume the file is not unloaded during scan.
     AudioPlayer& audioPlayer = client.getAudioPlayer();
     juce::AudioFormatReader* reader = audioPlayer.getAudioFormatReader();
-
+    
     juce::int64 result = -1;
     bool success = false;
     juce::int64 sampleRate = 0;
@@ -85,7 +86,7 @@ void SilenceAnalysisWorker::run()
 
             if (!success || lengthInSamples <= 0)
             {
-                 if (lengthInSamples <= 0 && success)
+                 if (lengthInSamples <= 0 && success) 
                      client.logStatusMessage("Error: Audio file has zero length.", true);
                  else
                      client.logStatusMessage("No audio loaded.", true);

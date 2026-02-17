@@ -9,7 +9,7 @@
 // If we can't include juce_graphics, we must mock Colour or hide these configs.
 // But ModernLookAndFeel uses them. So we MUST include juce_graphics even in headless if we test UI classes.
 // I will include juce_graphics/juce_graphics.h if possible, or assume it's available in test build.
-#include <juce_graphics/juce_graphics.h>
+#include <juce_graphics/juce_graphics.h> 
 #endif
 
 /**
@@ -24,6 +24,7 @@ namespace Config {
     namespace Colors {
         // Removed #if !defined(JUCE_HEADLESS) guard to allow compilation of UI logic in tests
 
+        
         struct Window {
             static const juce::Colour background;
         };
@@ -85,6 +86,7 @@ namespace Config {
         extern const juce::Colour zoomPopupPlaybackLine;
         extern const juce::Colour zoomPopupZeroLine;
 
+        
 
     }
 
