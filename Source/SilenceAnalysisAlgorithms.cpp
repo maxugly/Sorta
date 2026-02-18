@@ -10,7 +10,8 @@ namespace
     constexpr int kMaxChannels = 128; // Reasonable limit for audio channels
 }
 
-juce::int64 SilenceAnalysisAlgorithms::findSilenceIn(juce::AudioFormatReader& reader, float threshold)
+juce::int64 SilenceAnalysisAlgorithms::findSilenceIn(juce::AudioFormatReader& reader, float threshold,
+                                                     juce::Thread* thread)
 {
     const juce::int64 lengthInSamples = reader.lengthInSamples;
 
@@ -31,6 +32,8 @@ juce::int64 SilenceAnalysisAlgorithms::findSilenceIn(juce::AudioFormatReader& re
 
         for (int sample = 0; sample < numThisTime; ++sample)
         {
+            if (thread != nullptr && thread->threadShouldExit())
+                return -1;
             for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
             {
                 if (std::abs(buffer.getSample(channel, sample)) > threshold)
@@ -44,7 +47,8 @@ juce::int64 SilenceAnalysisAlgorithms::findSilenceIn(juce::AudioFormatReader& re
     return -1;
 }
 
-juce::int64 SilenceAnalysisAlgorithms::findSilenceOut(juce::AudioFormatReader& reader, float threshold)
+juce::int64 SilenceAnalysisAlgorithms::findSilenceOut(juce::AudioFormatReader& reader, float threshold,
+                                                      juce::Thread* thread)
 {
     const juce::int64 lengthInSamples = reader.lengthInSamples;
 
@@ -67,6 +71,8 @@ juce::int64 SilenceAnalysisAlgorithms::findSilenceOut(juce::AudioFormatReader& r
 
         for (int sample = numThisTime - 1; sample >= 0; --sample)
         {
+            if (thread != nullptr && thread->threadShouldExit())
+                return -1;
             for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
             {
                 if (std::abs(buffer.getSample(channel, sample)) > threshold)

@@ -18,7 +18,8 @@ public:
      * @param threshold The normalized amplitude threshold (0-1).
      * @return The sample index of the first sound, or -1 if none found.
      */
-    static juce::int64 findSilenceIn(juce::AudioFormatReader& reader, float threshold);
+    static juce::int64 findSilenceIn(juce::AudioFormatReader& reader, float threshold,
+                                     juce::Thread* thread = nullptr);
 
     /**
      * @brief Finds the sample index where sound ends (silence begins).
@@ -26,7 +27,8 @@ public:
      * @param threshold The normalized amplitude threshold (0-1).
      * @return The sample index where sound ends, or -1 if none found.
      */
-    static juce::int64 findSilenceOut(juce::AudioFormatReader& reader, float threshold);
+    static juce::int64 findSilenceOut(juce::AudioFormatReader& reader, float threshold,
+                                      juce::Thread* thread = nullptr);
 };
 
 #endif // SILENCE_ANALYSIS_ALGORITHMS_H

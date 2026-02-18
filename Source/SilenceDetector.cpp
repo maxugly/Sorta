@@ -2,7 +2,6 @@
 #include "ControlPanel.h" // Full header required for implementation details.
 #include "AudioPlayer.h"
 #include "SilenceThresholdPresenter.h"
-#include "SilenceAnalysisWorker.h"
 
 /**
  * @file SilenceDetector.cpp
@@ -28,8 +27,7 @@
 SilenceDetector::SilenceDetector(ControlPanel& ownerPanel)
     : owner(ownerPanel),
       currentInSilenceThreshold(Config::Audio::silenceThresholdIn),
-      currentOutSilenceThreshold(Config::Audio::silenceThresholdOut),
-      worker(ownerPanel, ownerPanel.getSessionState())
+      currentOutSilenceThreshold(Config::Audio::silenceThresholdOut)
 {
     thresholdPresenter = std::make_unique<SilenceThresholdPresenter>(*this, owner);
 }
@@ -55,7 +53,7 @@ SilenceDetector::~SilenceDetector() = default;
 void SilenceDetector::detectInSilence()
 {
     // Delegate the heavy lifting to the worker thread to keep the UI responsive
-    worker.startAnalysis(currentInSilenceThreshold, true);
+    owner.getAudioPlayer().startSilenceAnalysis(currentInSilenceThreshold, true);
 }
 
 
@@ -72,5 +70,5 @@ void SilenceDetector::detectInSilence()
 void SilenceDetector::detectOutSilence()
 {
     // Delegate the heavy lifting to the worker thread to keep the UI responsive
-    worker.startAnalysis(currentOutSilenceThreshold, false);
+    owner.getAudioPlayer().startSilenceAnalysis(currentOutSilenceThreshold, false);
 }

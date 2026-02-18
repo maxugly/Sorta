@@ -3,7 +3,6 @@
 
 #include <JuceHeader.h>
 #include "Config.h"
-#include "SilenceAnalysisWorker.h"
 
 // Forward declaration to avoid circular header dependencies.
 class ControlPanel;
@@ -137,8 +136,6 @@ private:
     bool m_isAutoCutInActive = false;  ///< If true, `detectInSilence` is run automatically when the threshold changes.
     bool m_isAutoCutOutActive = false; ///< If true, `detectOutSilence` is run automatically when the threshold changes.
     std::unique_ptr<SilenceThresholdPresenter> thresholdPresenter;
-    SilenceAnalysisWorker worker;
-
     friend class SilenceThresholdPresenter;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SilenceDetector)

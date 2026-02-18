@@ -110,6 +110,13 @@ public:
      */
     bool isPlaying() const;
 
+    /**
+     * @brief Starts a background silence analysis using the internal worker.
+     * @param threshold The normalized amplitude threshold (0-1).
+     * @param detectingIn True to find the start of sound (In), false for end (Out).
+     */
+    void startSilenceAnalysis(float threshold, bool detectingIn);
+
     /** @} */
     //==============================================================================
 

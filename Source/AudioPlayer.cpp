@@ -73,7 +73,7 @@ AudioPlayer::~AudioPlayer()
  */
 juce::Result AudioPlayer::loadFile(const juce::File& file)
 {
-    silenceWorker.stopThread(1000);
+    silenceWorker.signalThreadShouldExit();
     auto* reader = formatManager.createReaderFor(file);
 
     if (reader != nullptr)
@@ -134,6 +134,11 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
 juce::File AudioPlayer::getLoadedFile() const
 {
     return loadedFile;
+}
+
+void AudioPlayer::startSilenceAnalysis(float threshold, bool detectingIn)
+{
+    silenceWorker.startAnalysis(threshold, detectingIn);
 }
 
 /**

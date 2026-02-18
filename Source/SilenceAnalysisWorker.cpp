@@ -67,11 +67,11 @@ void SilenceAnalysisWorker::run()
         // Run the heavy algorithm
         if (detectingIn.load())
         {
-            result = SilenceAnalysisAlgorithms::findSilenceIn(*localReader, threshold.load());
+            result = SilenceAnalysisAlgorithms::findSilenceIn(*localReader, threshold.load(), this);
         }
         else
         {
-            result = SilenceAnalysisAlgorithms::findSilenceOut(*localReader, threshold.load());
+            result = SilenceAnalysisAlgorithms::findSilenceOut(*localReader, threshold.load(), this);
         }
         success = true;
     }
