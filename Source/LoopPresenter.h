@@ -77,14 +77,14 @@ public:
   void updateCutLabels();
 
   /**
-   * @brief Converts a sample index to seconds and stores it as the loop-in
+   * @brief Converts a sample index to seconds and stores it as the cut-in
    * position.
    * @param sampleIndex Sample index relative to the loaded file.
    */
   void setCutStartFromSample(int sampleIndex);
 
   /**
-   * @brief Converts a sample index to seconds and stores it as the loop-out
+   * @brief Converts a sample index to seconds and stores it as the cut-out
    * position.
    * @param sampleIndex Sample index relative to the loaded file.
    */
