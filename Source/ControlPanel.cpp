@@ -74,7 +74,6 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   updateUIFromState();
   finaliseSetup();
 
-  getAudioPlayer().getThumbnail().addChangeListener(this);
   startTimerHz(60);
   setMouseCursor(juce::MouseCursor::CrosshairCursor);
 }
@@ -87,7 +86,6 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
  * the custom LookAndFeel outlives components that were using it.
  */
 ControlPanel::~ControlPanel() {
-  getAudioPlayer().getThumbnail().removeChangeListener(this);
   stopTimer();
   setLookAndFeel(nullptr);
 }
@@ -443,13 +441,6 @@ void ControlPanel::mouseWheelMove(const juce::MouseEvent &event,
 void ControlPanel::forceInvalidateWaveformCache() {
   if (waveformRenderer != nullptr)
     waveformRenderer->invalidateWaveformCache();
-}
-
-void ControlPanel::changeListenerCallback(juce::ChangeBroadcaster *source) {
-  if (source == &getAudioPlayer().getThumbnail()) {
-    forceInvalidateWaveformCache();
-    repaint();
-  }
 }
 
 void ControlPanel::renderOverlays(juce::Graphics &g) {

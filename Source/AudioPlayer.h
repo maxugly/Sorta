@@ -16,6 +16,9 @@
 #include "MainDomain.h"
 #include "SilenceWorkerClient.h"
 #include "SilenceAnalysisWorker.h"
+#if !defined(JUCE_HEADLESS)
+#include "WaveformManager.h"
+#endif
 #include <mutex>
 
 
@@ -154,6 +157,7 @@ public:
      */
     #if !defined(JUCE_HEADLESS)
     juce::AudioThumbnail& getThumbnail();
+    WaveformManager& getWaveformManager();
     #endif
 
     /**
@@ -270,8 +274,7 @@ private:
     juce::AudioTransportSource transportSource;             ///< Controls playback, such as starting, stopping, and positioning.
 
     #if !defined(JUCE_HEADLESS)
-    juce::AudioThumbnailCache thumbnailCache;               ///< Caches audio thumbnails to avoid re-generating them.
-    juce::AudioThumbnail thumbnail;                         ///< Generates and stores the visual waveform data.
+    WaveformManager waveformManager;                        ///< Owns waveform data and change notifications.
     #endif
 
     juce::File loadedFile;                                  ///< Stores the currently loaded audio file.

@@ -70,6 +70,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/SilenceDetector.cpp
             Source/LayoutManager.h
             Source/LayoutManager.cpp
+            Source/WaveformManager.h
+            Source/WaveformManager.cpp
             Source/WaveformRenderer.h
             Source/WaveformRenderer.cpp
             Source/KeybindHandler.h

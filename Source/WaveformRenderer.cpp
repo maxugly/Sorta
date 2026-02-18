@@ -17,6 +17,21 @@ void WaveformRenderer::invalidateWaveformCache()
 WaveformRenderer::WaveformRenderer(ControlPanel& controlPanelIn)
     : controlPanel(controlPanelIn)
 {
+    controlPanel.getAudioPlayer().getWaveformManager().addChangeListener(this);
+}
+
+WaveformRenderer::~WaveformRenderer()
+{
+    controlPanel.getAudioPlayer().getWaveformManager().removeChangeListener(this);
+}
+
+void WaveformRenderer::changeListenerCallback(juce::ChangeBroadcaster* source)
+{
+    if (source == &controlPanel.getAudioPlayer().getWaveformManager().getThumbnail())
+    {
+        invalidateWaveformCache();
+        controlPanel.repaint();
+    }
 }
 
 void WaveformRenderer::renderWaveform(juce::Graphics& g)
@@ -28,7 +43,7 @@ void WaveformRenderer::renderWaveform(juce::Graphics& g)
 void WaveformRenderer::renderOverlays(juce::Graphics& g)
 {
     AudioPlayer& audioPlayer = controlPanel.getAudioPlayer();
-    const float audioLength = (float)audioPlayer.getThumbnail().getTotalLength();
+    const float audioLength = (float)audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
 
     if (audioLength > 0.0f)
     {
@@ -44,12 +59,13 @@ void WaveformRenderer::renderOverlays(juce::Graphics& g)
 
 void WaveformRenderer::drawWaveform(juce::Graphics& g, AudioPlayer& audioPlayer) const
 {
-    const auto numChannels = audioPlayer.getThumbnail().getNumChannels();
+    auto& thumbnail = audioPlayer.getWaveformManager().getThumbnail();
+    const auto numChannels = thumbnail.getNumChannels();
     if (numChannels <= 0)
         return;
 
     const auto bounds = controlPanel.getWaveformBounds();
-    const double audioLength = audioPlayer.getThumbnail().getTotalLength();
+    const double audioLength = thumbnail.getTotalLength();
     const int quality = (int)controlPanel.getCurrentQualitySetting();
     const int channelMode = (int)controlPanel.getChannelViewMode();
     const float scale = g.getInternalContext().getPhysicalPixelScaleFactor();
@@ -85,7 +101,7 @@ void WaveformRenderer::drawWaveform(juce::Graphics& g, AudioPlayer& audioPlayer)
             if (pixelsPerSample > 1)
                 drawReducedQualityWaveform(ig, audioPlayer, 0, pixelsPerSample);
             else
-                audioPlayer.getThumbnail().drawChannel(ig, bounds, 0.0, audioPlayer.getThumbnail().getTotalLength(), 0, 1.0f);
+                thumbnail.drawChannel(ig, bounds, 0.0, thumbnail.getTotalLength(), 0, 1.0f);
         }
         else
         {
@@ -96,7 +112,7 @@ void WaveformRenderer::drawWaveform(juce::Graphics& g, AudioPlayer& audioPlayer)
             }
             else
             {
-                audioPlayer.getThumbnail().drawChannels(ig, bounds, 0.0, audioPlayer.getThumbnail().getTotalLength(), 1.0f);
+                thumbnail.drawChannels(ig, bounds, 0.0, thumbnail.getTotalLength(), 1.0f);
             }
         }
 
@@ -112,7 +128,8 @@ void WaveformRenderer::drawWaveform(juce::Graphics& g, AudioPlayer& audioPlayer)
 
 void WaveformRenderer::drawReducedQualityWaveform(juce::Graphics& g, AudioPlayer& audioPlayer, int channel, int pixelsPerSample) const
 {
-    const auto audioLength = audioPlayer.getThumbnail().getTotalLength();
+    auto& thumbnail = audioPlayer.getWaveformManager().getThumbnail();
+    const auto audioLength = thumbnail.getTotalLength();
     if (audioLength <= 0.0)
         return;
 
@@ -136,7 +153,7 @@ void WaveformRenderer::drawReducedQualityWaveform(juce::Graphics& g, AudioPlayer
     {
         const double time = (double)x * timePerPixel;
         float minVal = 0.0f, maxVal = 0.0f;
-        audioPlayer.getThumbnail().getApproximateMinMax(time, time + timeDelta, channel, minVal, maxVal);
+        thumbnail.getApproximateMinMax(time, time + timeDelta, channel, minVal, maxVal);
 
         const float topY = centerY - (maxVal * halfHeightScale);
         const float bottomY = centerY - (minVal * halfHeightScale);
@@ -386,16 +403,17 @@ void WaveformRenderer::drawMouseCursorOverlays(juce::Graphics& g, AudioPlayer& a
     if (audioLength > 0.0f)
     {
         float amplitude = 0.0f;
-        if (audioPlayer.getThumbnail().getNumChannels() > 0)
+        if (audioPlayer.getWaveformManager().getThumbnail().getNumChannels() > 0)
         {
             double sampleRate = 0.0;
             juce::int64 length = 0;
             if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0)
             {
                 float minVal = 0.0f, maxVal = 0.0f;
-                audioPlayer.getThumbnail().getApproximateMinMax(mouseHandler.getMouseCursorTime(),
-                                                                mouseHandler.getMouseCursorTime() + (1.0 / sampleRate),
-                                                                0, minVal, maxVal);
+                audioPlayer.getWaveformManager().getThumbnail().getApproximateMinMax(
+                    mouseHandler.getMouseCursorTime(),
+                    mouseHandler.getMouseCursorTime() + (1.0 / sampleRate),
+                    0, minVal, maxVal);
                 amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
             }
         }
@@ -447,7 +465,7 @@ void WaveformRenderer::drawZoomPopup(juce::Graphics& g) const
         return;
 
     AudioPlayer& audioPlayer = controlPanel.getAudioPlayer();
-    const double audioLength = audioPlayer.getThumbnail().getTotalLength();
+    const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
     if (audioLength <= 0.0)
         return;
 
@@ -498,12 +516,12 @@ void WaveformRenderer::drawZoomPopup(juce::Graphics& g) const
     // --- Draw zoomed waveform based on channel mode ---
     g.setColour(Config::Colors::waveform);
     const auto channelMode = controlPanel.getChannelViewMode();
-    const int numChannels = audioPlayer.getThumbnail().getNumChannels();
+    const int numChannels = audioPlayer.getWaveformManager().getThumbnail().getNumChannels();
 
     if (channelMode == AppEnums::ChannelViewMode::Mono || numChannels == 1)
     {
         // Mono: Use full height
-        audioPlayer.getThumbnail().drawChannel(g, popupBounds, startTime, endTime, 0, 1.0f);
+        audioPlayer.getWaveformManager().getThumbnail().drawChannel(g, popupBounds, startTime, endTime, 0, 1.0f);
         
         // Zero Line
         g.setColour(Config::Colors::zoomPopupZeroLine);
@@ -515,8 +533,8 @@ void WaveformRenderer::drawZoomPopup(juce::Graphics& g) const
         auto topBounds = popupBounds.withHeight(popupBounds.getHeight() / 2);
         auto bottomBounds = popupBounds.withTop(topBounds.getBottom()).withHeight(popupBounds.getHeight() / 2);
         
-        audioPlayer.getThumbnail().drawChannel(g, topBounds, startTime, endTime, 0, 1.0f);
-        audioPlayer.getThumbnail().drawChannel(g, bottomBounds, startTime, endTime, 1, 1.0f);
+        audioPlayer.getWaveformManager().getThumbnail().drawChannel(g, topBounds, startTime, endTime, 0, 1.0f);
+        audioPlayer.getWaveformManager().getThumbnail().drawChannel(g, bottomBounds, startTime, endTime, 1, 1.0f);
 
         // Zero Lines
         g.setColour(Config::Colors::zoomPopupZeroLine);

@@ -14,7 +14,7 @@ class AudioPlayer;
  * Extracting this class keeps ControlPanel::paint concise while making it easier to reason about
  * future visual tweaks or alternate render modes.
  */
-class WaveformRenderer
+class WaveformRenderer : public juce::ChangeListener
 {
 public:
     void invalidateWaveformCache();
@@ -23,6 +23,7 @@ public:
      * @param controlPanel Reference to the owning ControlPanel for accessing state and helpers.
      */
     explicit WaveformRenderer(ControlPanel& controlPanel);
+    ~WaveformRenderer() override;
 
     /**
      * @brief Paints the waveform and overlays for the ControlPanel.
@@ -41,6 +42,8 @@ public:
     void renderOverlays(juce::Graphics& g);
 
 private:
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+
     mutable juce::Image waveformCache;
     mutable juce::Rectangle<int> lastBounds;
     mutable double lastAudioLength = -1.0;

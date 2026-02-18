@@ -50,7 +50,6 @@ class PlaybackOverlay;
  * point setting.
  */
 class ControlPanel final : public juce::Component,
-                           public juce::ChangeListener,
                            public juce::Timer,
                            public SilenceWorkerClient {
 public:
@@ -518,7 +517,6 @@ public:
    */
   void mouseWheelMove(const juce::MouseEvent &event,
                       const juce::MouseWheelDetails &wheel) override;
-  void changeListenerCallback(juce::ChangeBroadcaster *source) override;
   void timerCallback() override;
 
   /** @} */

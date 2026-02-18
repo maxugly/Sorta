@@ -24,8 +24,7 @@
  */
 AudioPlayer::AudioPlayer(SessionState& state)
     #if !defined(JUCE_HEADLESS)
-    : thumbnailCache(Config::Audio::thumbnailCacheSize), // Initialize thumbnail cache with a configured size
-      thumbnail(Config::Audio::thumbnailSizePixels, formatManager, thumbnailCache), // Initialize thumbnail with configured size
+    : waveformManager(formatManager),
     #else
     :
     #endif
@@ -112,7 +111,7 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
             // Use background thread for file reading with configured buffer size
             transportSource.setSource(newSource.get(), Config::Audio::readAheadBufferSize, &readAheadThread, reader->sampleRate);
             #if !defined(JUCE_HEADLESS)
-            thumbnail.setSource(new juce::FileInputSource(file)); // Update thumbnail to reflect new file
+            waveformManager.loadFile(file);
             #endif
             readerSource.reset(newSource.release()); // Transfer ownership to unique_ptr
         }
@@ -195,7 +194,12 @@ void AudioPlayer::setRepeating(bool shouldRepeat)
 #if !defined(JUCE_HEADLESS)
 juce::AudioThumbnail& AudioPlayer::getThumbnail()
 {
-    return thumbnail;
+    return waveformManager.getThumbnail();
+}
+
+WaveformManager& AudioPlayer::getWaveformManager()
+{
+    return waveformManager;
 }
 #endif
 
