@@ -1,10 +1,18 @@
 #ifndef AUDIOFILER_SILENCEANALYSISWORKER_H
 #define AUDIOFILER_SILENCEANALYSISWORKER_H
 
-#include <JuceHeader.h>
+#if defined(JUCE_HEADLESS)
+    #include <juce_core/juce_core.h>
+    #include <juce_events/juce_events.h>
+#else
+    #include <JuceHeader.h>
+#endif
+
 #include <atomic>
 #include <memory>
 #include "SilenceWorkerClient.h"
+
+class SessionState;
 
 /**
  * @class SilenceAnalysisWorker
@@ -20,8 +28,9 @@ public:
     /**
      * @brief Constructs the worker thread.
      * @param client The component that owns this worker and receives updates (e.g., ControlPanel).
+     * @param sessionState The global session state to update results into.
      */
-    explicit SilenceAnalysisWorker(SilenceWorkerClient& client);
+    explicit SilenceAnalysisWorker(SilenceWorkerClient& client, SessionState& sessionState);
 
     /**
      * @brief Destructor.
@@ -54,6 +63,7 @@ private:
     void run() override;
 
     SilenceWorkerClient& client;
+    SessionState& sessionState;
     std::atomic<float> threshold { 0.0f };
     std::atomic<bool> detectingIn { true };
     std::atomic<bool> busy { false };

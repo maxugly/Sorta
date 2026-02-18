@@ -2,13 +2,14 @@
 #include "SilenceAnalysisAlgorithms.h"
 #include "AudioPlayer.h"
 #include "SilenceDetectionLogger.h"
+#include "SessionState.h"
 
 #include <algorithm>
 #include <cmath>
 #include <mutex>
 
-SilenceAnalysisWorker::SilenceAnalysisWorker(SilenceWorkerClient& owner)
-    : Thread("SilenceWorker"), client(owner)
+SilenceAnalysisWorker::SilenceAnalysisWorker(SilenceWorkerClient& owner, SessionState& state)
+    : Thread("SilenceWorker"), client(owner), sessionState(state)
 {
     lifeToken = std::make_shared<bool>(true);
 }
@@ -47,29 +48,30 @@ void SilenceAnalysisWorker::run()
     busy.store(true);
 
     // Capture necessary state
-    // Note: We assume the file is not unloaded during scan.
     AudioPlayer& audioPlayer = client.getAudioPlayer();
-    std::lock_guard<std::mutex> lock(audioPlayer.getReaderMutex());
-    juce::AudioFormatReader* reader = audioPlayer.getAudioFormatReader();
+    juce::File fileToAnalyze = audioPlayer.getLoadedFile();
+    
+    // Independent Reader: Create a local, temporary reader for the file
+    std::unique_ptr<juce::AudioFormatReader> localReader(audioPlayer.getFormatManager().createReaderFor(fileToAnalyze));
     
     juce::int64 result = -1;
     bool success = false;
     juce::int64 sampleRate = 0;
     juce::int64 lengthInSamples = 0;
 
-    if (reader != nullptr)
+    if (localReader != nullptr)
     {
-        sampleRate = (juce::int64)reader->sampleRate;
-        lengthInSamples = reader->lengthInSamples;
+        sampleRate = (juce::int64)localReader->sampleRate;
+        lengthInSamples = localReader->lengthInSamples;
 
         // Run the heavy algorithm
         if (detectingIn.load())
         {
-            result = SilenceAnalysisAlgorithms::findSilenceIn(*reader, threshold.load());
+            result = SilenceAnalysisAlgorithms::findSilenceIn(*localReader, threshold.load());
         }
         else
         {
-            result = SilenceAnalysisAlgorithms::findSilenceOut(*reader, threshold.load());
+            result = SilenceAnalysisAlgorithms::findSilenceOut(*localReader, threshold.load());
         }
         success = true;
     }
@@ -99,21 +101,23 @@ void SilenceAnalysisWorker::run()
 
                  if (result != -1)
                  {
+                     const double resultSeconds = (double)result / (double)sampleRate;
                      if (detectingIn.load())
                      {
-                         client.setCutInPosition((double)result / (double)sampleRate);
+                         sessionState.setCutIn(resultSeconds);
                          client.logStatusMessage(juce::String("Cut start set to sample ") + juce::String(result));
 
                          if (client.isCutModeActive())
-                             player.setPlayheadPosition(client.getCutInPosition());
+                             player.setPlayheadPosition(resultSeconds);
                      }
                      else
                      {
                          const juce::int64 tailSamples = (juce::int64)(sampleRate * 0.05); // 50ms tail
                          const juce::int64 endPoint64 = result + tailSamples;
                          const juce::int64 finalEndPoint = std::min(endPoint64, lengthInSamples);
+                         const double endSeconds = (double)finalEndPoint / (double)sampleRate;
 
-                         client.setCutOutPosition((double)finalEndPoint / (double)sampleRate);
+                         sessionState.setCutOut(endSeconds);
                          client.logStatusMessage(juce::String("Cut end set to sample ") + juce::String(finalEndPoint));
                      }
                  }

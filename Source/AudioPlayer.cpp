@@ -30,7 +30,8 @@ AudioPlayer::AudioPlayer(SessionState& state)
     :
     #endif
       readAheadThread("Audio File Reader"),
-      sessionState(state)
+      sessionState(state),
+      silenceWorker(*this, state)
 {
     formatManager.registerBasicFormats(); // Register standard audio file formats
     sessionState.addListener(this);
@@ -72,6 +73,7 @@ AudioPlayer::~AudioPlayer()
  */
 juce::Result AudioPlayer::loadFile(const juce::File& file)
 {
+    silenceWorker.stopThread(1000);
     auto* reader = formatManager.createReaderFor(file);
 
     if (reader != nullptr)

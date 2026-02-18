@@ -1,66 +1,74 @@
-# Audiofiler Architectural Map
+Audiofiler Architectural Map (v2.0)
 
-This document traces the "wires" of the application, showing ownership (Lifetimes) and references (Connections).
+1. The Core Hierarchy (Ownership)
 
-## 1. High-Level Ownership (The "Tree")
+The application follows a strict top-down ownership model to prevent memory leaks and dangling references.
 
-`MainComponent` is the root. It owns the core engines and the main UI.
+MainComponent: The Root Shell.
 
-```mermaid
-graph TD
-    Main[MainComponent] -->|unique_ptr| AP[AudioPlayer]
-    Main -->|unique_ptr| CP[ControlPanel]
-    Main -->|unique_ptr| KH[KeybindHandler]
-    Main -->|unique_ptr| PLC[PlaybackLoopController]
-    Main -->|unique_ptr| PTP[PlaybackTextPresenter]
-    Main -->|unique_ptr| SP[StatsPresenter]
-    Main -->|unique_ptr| LP[LoopPresenter]
-    Main -->|unique_ptr| WR[WaveformRenderer]
-    Main -->|unique_ptr| LM[LayoutManager]
-    Main -->|unique_ptr| SD[SilenceDetector]
-```
+SessionState: The "Brain" (Holds all settings/preferences).
 
-## 2. ControlPanel Composition (The "Hub")
+AudioPlayer: The "Audio Engine" (Handles file reading and playback).
 
-`ControlPanel` is the UI hub. It breaks down into "Lego bricks" — specialized managers and presenters.
+ControlPanel: The "Face" (All buttons, sliders, and visual feedback).
 
-```mermaid
-graph TD
-    CP[ControlPanel] -->|unique_ptr| FM[FocusManager]
-    CP -->|unique_ptr| MH[MouseHandler]
-    CP -->|unique_ptr| WR[WaveformRenderer]
-    CP -->|unique_ptr| LM[LayoutManager]
-    CP -->|unique_ptr| SD[SilenceDetector]
-    
-    subgraph Presenters [Presenters]
-        SP[StatsPresenter]
-        LP[LoopPresenter]
-        CSP[ControlStatePresenter]
-        TP[TransportPresenter]
-        SDP[SilenceDetectionPresenter]
-        CBP[ControlButtonsPresenter]
-        LEP[LoopEditorPresenter]
-        LButP[LoopButtonPresenter]
-        LRP[LoopResetPresenter]
-        PTP[PlaybackTextPresenter]
-    end
-    
-    CP --> Presenters
-```
+Presenters: Logic sub-modules (e.g., CutResetPresenter, StatsPresenter) that keep the ControlPanel code lean.
 
-## 3. The "Wires" (Data Flow & dependencies)
+SilenceDetector: The logic bridge for automation.
 
-Components often need to talk to each other. We use references (`&`) for this, typically passed via constructors.
+SilenceAnalysisWorker: A background thread for heavy math.
 
-*   **FocusManager**: Owned by `ControlPanel`. Validates user intent (Drag > Scrub > Hover > Playback).
-    *   *Queries*: `ControlPanel` state (is dragging? is scrubbing?).
-*   **MouseHandler**: Owned by `ControlPanel`. Handles raw input.
-    *   *Calls*: `ControlPanel::seekToPosition`, `FocusManager::getCurrentTarget` (implied logic).
-*   **WaveformRenderer**: Owned by `ControlPanel`. Draws the screen.
-    *   *Reads*: `ControlPanel::getWaveformBounds`, `AudioPlayer` (via CP), `FocusManager` (to know what to highlight).
+2. The State Handshake (Push Model)
 
-## 4. Key Data Models
+We use a Broadcasting Pattern to keep the UI and Engine in sync without circular dependencies.
 
-*   **AudioPlayer**: The source of truth for audio data (sample rate, position, thumbnail).
-*   **Config.h**: Static configuration (colors, layout constants).
-*   **AppEnums.h**: Shared enums (PlacementMode, ThumbnailQuality).
+The Radio Station: SessionState acts as the single source of truth.
+
+The Tune-In: AudioPlayer and ControlPanel inherit from SessionState::Listener.
+
+The Workflow:
+
+User clicks a button (UI).
+
+Presenter updates SessionState.
+
+SessionState broadcasts a "Change" message.
+
+AudioPlayer hears it and updates the playback engine instantly.
+
+ControlPanel hears it and refreshes the display on its next 60Hz heartbeat.
+
+3. The "Silence" Background Workflow (Anti-Freeze)
+
+The SilenceAnalysisWorker is designed to process massive files without locking the UI.
+
+The Problem (The Deadlock): Previously, the worker held a "Master Lock" on the audio reader, forcing the UI to freeze while it scanned.
+
+The Solution (Private Reader):
+
+The SilenceAnalysisWorker creates its own independent reader for the file.
+
+It crunches math on its own thread without touching the AudioPlayer mutex.
+
+When finished, it uses callAsync to push results back to SessionState.
+
+4. Critical "Don't Do" Rules for New Eyes
+
+Rule 1: No Polling. Never add logic to MainComponent::timerCallback to check if a variable has changed. Use a Listener instead.
+
+Rule 2: Boundary Authority. The AudioPlayer::getNextAudioBlock is the only place where playback boundaries (In/Out) are enforced for sample-accuracy.
+
+Rule 3: Private State. Never access cutPrefs directly. Use the getters and setters in SessionState to ensure every change is broadcasted to the engine.
+
+Status Registry (Where we are right now)
+
+Audio Engine: Sample-accurate, decoupled from the UI, and listens for state changes.
+
+UI Foundation: ControlPanel is decentralized with its own timer and uses Presenters for all button logic.
+
+Background Worker: Currently being refactored to use the "Private Reader" strategy to kill the permanent lockup.
+
+Next Architectural Goal: Finalize the 0-9 keyboard sorting logic using this clean "SessionState $\rightarrow$ Broadcast" pipeline.
+
+Would you like me to generate a specific "Agent Summary" file that you can keep in the repository for future AI assistance? It can act as a permanent memory for any fresh agent you bring in.
+

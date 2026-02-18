@@ -1,7 +1,12 @@
 #ifndef AUDIOFILER_SILENCEWORKERCLIENT_H
 #define AUDIOFILER_SILENCEWORKERCLIENT_H
 
-#include <JuceHeader.h>
+#if defined(JUCE_HEADLESS)
+    #include <juce_core/juce_core.h>
+#else
+    #include <JuceHeader.h>
+#endif
+
 class AudioPlayer;
 
 /**

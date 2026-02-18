@@ -147,6 +147,8 @@ add_executable(tests
     Source/Config.cpp
     Source/SessionState.cpp
     Source/SilenceAnalysisAlgorithms.cpp
+    Source/SilenceAnalysisWorker.cpp
+    Source/SilenceDetectionLogger.cpp
     Tests/SilenceAnalysisTest.cpp
 )
 

@@ -14,6 +14,8 @@
 #include "Config.h"
 #include "SessionState.h"
 #include "MainDomain.h"
+#include "SilenceWorkerClient.h"
+#include "SilenceAnalysisWorker.h"
 #include <mutex>
 
 
@@ -41,7 +43,8 @@
 class AudioPlayer : public juce::AudioSource,
                     public juce::ChangeListener,
                     public juce::ChangeBroadcaster,
-                    public SessionState::Listener
+                    public SessionState::Listener,
+                    public SilenceWorkerClient
 {
 public:
     //==============================================================================
@@ -236,6 +239,14 @@ public:
     std::mutex& getReaderMutex() { return readerMutex; }
     bool getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamplesOut) const;
 
+    // SilenceWorkerClient implementation
+    AudioPlayer& getAudioPlayer() override { return *this; }
+    void setCutInPosition(double seconds) override { sessionState.setCutIn(seconds); }
+    void setCutOutPosition(double seconds) override { sessionState.setCutOut(seconds); }
+    double getCutInPosition() const override { return sessionState.getCutPrefs().cutIn; }
+    bool isCutModeActive() const override { return sessionState.getCutPrefs().active; }
+    void logStatusMessage(const juce::String&, bool) override {}
+
     /** @} */
     //==============================================================================
 
@@ -264,6 +275,7 @@ private:
     bool lastAutoCutOutActive{false};
     mutable std::mutex readerMutex;
 
+    SilenceAnalysisWorker silenceWorker;
     bool repeating = false;                                   ///< Flag indicating if playback should loop.
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPlayer) ///< Macro to prevent copying and detect memory leaks.
