@@ -1,6 +1,7 @@
 #include "ControlButtonsPresenter.h"
 
 #include "ControlPanel.h"
+#include "WaveformView.h"
 #include "ControlPanelCopy.h"
 #include "TransportPresenter.h"
 #include "SilenceDetectionPresenter.h"
@@ -74,6 +75,8 @@ void ControlButtonsPresenter::initialiseChannelViewButton()
         owner.channelViewButton.setButtonText(owner.currentChannelViewMode == AppEnums::ChannelViewMode::Mono
                                               ? ControlPanelCopy::channelViewMonoText()
                                               : ControlPanelCopy::channelViewStereoText());
+        if (owner.waveformView != nullptr)
+            owner.waveformView->setChannelMode(owner.currentChannelViewMode);
         owner.repaint();
     };
 }
@@ -90,6 +93,8 @@ void ControlButtonsPresenter::initialiseQualityButton()
         else
             owner.currentQuality = AppEnums::ThumbnailQuality::High;
         owner.updateQualityButtonText();
+        if (owner.waveformView != nullptr)
+            owner.waveformView->setQuality(owner.currentQuality);
         owner.repaint();
     };
     owner.updateQualityButtonText();
@@ -185,7 +190,7 @@ void ControlButtonsPresenter::initialiseLoopButtons()
         owner.repaint();
     };
     owner.loopInButton.onRightClick = [this] {
-        owner.mouseHandler->setCurrentPlacementMode(AppEnums::PlacementMode::LoopIn);
+        owner.getMouseHandler().setCurrentPlacementMode(AppEnums::PlacementMode::LoopIn);
         owner.updateLoopButtonColors();
         owner.repaint();
     };
@@ -200,7 +205,7 @@ void ControlButtonsPresenter::initialiseLoopButtons()
         owner.repaint();
     };
     owner.loopOutButton.onRightClick = [this] {
-        owner.mouseHandler->setCurrentPlacementMode(AppEnums::PlacementMode::LoopOut);
+        owner.getMouseHandler().setCurrentPlacementMode(AppEnums::PlacementMode::LoopOut);
         owner.updateLoopButtonColors();
         owner.repaint();
     };

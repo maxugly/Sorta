@@ -1,44 +1,61 @@
-#include "WaveformRenderer.h"
+#include "WaveformView.h"
 
-#include "SessionState.h"
 #include "WaveformManager.h"
+#include <cmath>
 
-WaveformRenderer::WaveformRenderer(SessionState& sessionStateIn, WaveformManager& waveformManagerIn)
-    : sessionState(sessionStateIn),
-      waveformManager(waveformManagerIn)
+WaveformView::WaveformView(WaveformManager& waveformManagerIn)
+    : waveformManager(waveformManagerIn)
 {
     waveformManager.addChangeListener(this);
+    setInterceptsMouseClicks(false, false);
+    setOpaque(false);
 }
 
-WaveformRenderer::~WaveformRenderer()
+WaveformView::~WaveformView()
 {
     waveformManager.removeChangeListener(this);
 }
 
-void WaveformRenderer::invalidateWaveformCache()
+void WaveformView::invalidateWaveformCache()
 {
     waveformCache = juce::Image();
     lastAudioLength = -1.0;
 }
 
-void WaveformRenderer::changeListenerCallback(juce::ChangeBroadcaster* source)
+void WaveformView::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     if (source == &waveformManager.getThumbnail())
+    {
         invalidateWaveformCache();
+        repaint();
+    }
 }
 
-void WaveformRenderer::renderWaveform(juce::Graphics& g,
-                                      const juce::Rectangle<int>& bounds,
-                                      AppEnums::ThumbnailQuality quality,
-                                      AppEnums::ChannelViewMode channelMode)
+void WaveformView::setQuality(AppEnums::ThumbnailQuality quality)
 {
-    drawWaveform(g, bounds, quality, channelMode);
+    if (currentQuality == quality)
+        return;
+    currentQuality = quality;
+    invalidateWaveformCache();
+    repaint();
 }
 
-void WaveformRenderer::drawWaveform(juce::Graphics& g,
-                                    const juce::Rectangle<int>& bounds,
-                                    AppEnums::ThumbnailQuality quality,
-                                    AppEnums::ChannelViewMode channelMode) const
+void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode)
+{
+    if (currentChannelMode == channelMode)
+        return;
+    currentChannelMode = channelMode;
+    invalidateWaveformCache();
+    repaint();
+}
+
+void WaveformView::paint(juce::Graphics& g)
+{
+    drawWaveform(g, getLocalBounds());
+}
+
+void WaveformView::drawWaveform(juce::Graphics& g,
+                                const juce::Rectangle<int>& bounds) const
 {
     auto& thumbnail = waveformManager.getThumbnail();
     const auto numChannels = thumbnail.getNumChannels();
@@ -51,8 +68,8 @@ void WaveformRenderer::drawWaveform(juce::Graphics& g,
     if (!waveformCache.isValid()
         || lastBounds != bounds
         || std::abs(lastAudioLength - audioLength) > 0.001
-        || lastQuality != static_cast<int>(quality)
-        || lastChannelMode != static_cast<int>(channelMode)
+        || lastQuality != static_cast<int>(currentQuality)
+        || lastChannelMode != static_cast<int>(currentChannelMode)
         || std::abs(lastScale - scale) > 0.001f)
     {
         const int w = juce::roundToInt((float)bounds.getWidth() * scale);
@@ -68,13 +85,13 @@ void WaveformRenderer::drawWaveform(juce::Graphics& g,
         ig.setOrigin(-bounds.getX(), -bounds.getY());
 
         int pixelsPerSample = 1;
-        if (quality == AppEnums::ThumbnailQuality::Low)
+        if (currentQuality == AppEnums::ThumbnailQuality::Low)
             pixelsPerSample = Config::Layout::Waveform::pixelsPerSampleLow;
-        else if (quality == AppEnums::ThumbnailQuality::Medium)
+        else if (currentQuality == AppEnums::ThumbnailQuality::Medium)
             pixelsPerSample = Config::Layout::Waveform::pixelsPerSampleMedium;
 
         ig.setColour(Config::Colors::waveform);
-        if (channelMode == AppEnums::ChannelViewMode::Mono || numChannels == 1)
+        if (currentChannelMode == AppEnums::ChannelViewMode::Mono || numChannels == 1)
         {
             if (pixelsPerSample > 1)
                 drawReducedQualityWaveform(ig, thumbnail, bounds, 0, pixelsPerSample);
@@ -96,19 +113,19 @@ void WaveformRenderer::drawWaveform(juce::Graphics& g,
 
         lastBounds = bounds;
         lastAudioLength = audioLength;
-        lastQuality = static_cast<int>(quality);
-        lastChannelMode = static_cast<int>(channelMode);
+        lastQuality = static_cast<int>(currentQuality);
+        lastChannelMode = static_cast<int>(currentChannelMode);
         lastScale = scale;
     }
 
     g.drawImage(waveformCache, bounds.toFloat());
 }
 
-void WaveformRenderer::drawReducedQualityWaveform(juce::Graphics& g,
-                                                  juce::AudioThumbnail& thumbnail,
-                                                  const juce::Rectangle<int>& bounds,
-                                                  int channel,
-                                                  int pixelsPerSample) const
+void WaveformView::drawReducedQualityWaveform(juce::Graphics& g,
+                                              juce::AudioThumbnail& thumbnail,
+                                              const juce::Rectangle<int>& bounds,
+                                              int channel,
+                                              int pixelsPerSample) const
 {
     const auto audioLength = thumbnail.getTotalLength();
     if (audioLength <= 0.0)

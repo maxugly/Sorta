@@ -67,14 +67,18 @@ if (NOT BUILD_TESTS_ONLY)
             Source/ControlPanel.h
             Source/ControlPanel.cpp
             Source/AppEnums.h
+            Source/CutLayerView.h
+            Source/CutLayerView.cpp
+            Source/CutPresenter.h
+            Source/CutPresenter.cpp
             Source/SilenceDetector.h
             Source/SilenceDetector.cpp
             Source/LayoutManager.h
             Source/LayoutManager.cpp
             Source/WaveformManager.h
             Source/WaveformManager.cpp
-            Source/WaveformRenderer.h
-            Source/WaveformRenderer.cpp
+            Source/WaveformView.h
+            Source/WaveformView.cpp
             Source/KeybindHandler.h
             Source/KeybindHandler.cpp
             Source/LoopPresenter.h

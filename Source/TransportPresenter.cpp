@@ -31,6 +31,7 @@ void TransportPresenter::handleAutoplayToggle(bool shouldAutoplay)
 void TransportPresenter::handleCutModeToggle(bool enableCutMode)
 {
     owner.m_isCutModeActive = enableCutMode;
+    owner.getSessionState().setCutActive(enableCutMode);
     owner.updateComponentStates();
     if (owner.m_isCutModeActive && owner.getAudioPlayer().isPlaying())
         enforceCutLoopBounds();

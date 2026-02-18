@@ -18,7 +18,9 @@ class FocusManager;
 
 class MainComponent; // Forward declaration
 class LayoutManager;
-class WaveformRenderer;
+class WaveformView;
+class CutLayerView;
+class CutPresenter;
 class StatsPresenter;
 class LoopPresenter;
 class ControlStatePresenter;
@@ -144,7 +146,6 @@ public:
   void renderOverlays(juce::Graphics &g);
   void drawMouseCursorOverlays(juce::Graphics &g);
   void drawZoomPopup(juce::Graphics &g);
-  void drawCutModeOverlays(juce::Graphics &g);
   /** @brief Updates only the cursor/overlay part of the UI. */
   void updateCursorPosition();
 
@@ -275,7 +276,6 @@ public:
    * cut-out boundary. */
   void resetOut();
 
-  void forceInvalidateWaveformCache();
 
   /** @} */
   //==============================================================================
@@ -394,7 +394,8 @@ public:
    * @brief Provides read-only access to the mouse handler for rendering.
    * @return Reference to the owned `MouseHandler`.
    */
-  const MouseHandler &getMouseHandler() const { return *mouseHandler; }
+  const MouseHandler &getMouseHandler() const;
+  MouseHandler &getMouseHandler();
 
   /**
    * @brief Provides access to the silence detector for threshold rendering.
@@ -556,12 +557,14 @@ private:
   ModernLookAndFeel modernLF; ///< Custom look and feel instance for UI styling.
   std::unique_ptr<SilenceDetector>
       silenceDetector; ///< Manages silence detection logic and its UI.
-  std::unique_ptr<MouseHandler>
-      mouseHandler; ///< Manages all mouse interaction logic.
+  std::unique_ptr<CutPresenter>
+      cutPresenter; ///< Owns cut interaction logic and mouse handling.
   std::unique_ptr<LayoutManager>
       layoutManager; ///< Extracted helper that owns layout calculations.
-  std::unique_ptr<WaveformRenderer>
-      waveformRenderer; ///< Handles waveform and overlay painting.
+  std::unique_ptr<WaveformView>
+      waveformView; ///< Draws the waveform thumbnail.
+  std::unique_ptr<CutLayerView>
+      cutLayerView; ///< Draws the cut markers and overlays.
   std::unique_ptr<PlaybackTextPresenter>
       playbackTextPresenter; ///< Draws playback time labels under the waveform.
   std::unique_ptr<StatsPresenter>
