@@ -3,6 +3,7 @@
 #include "AudioPlayer.h"
 #include "SilenceDetectionLogger.h"
 #include "SessionState.h"
+#include "FileMetadata.h"
 
 #include <algorithm>
 #include <cmath>
@@ -99,12 +100,13 @@ void SilenceAnalysisWorker::run()
             {
                  client.logStatusMessage(juce::String("Reading ") + (detectingIn.load() ? "start" : "end") + " of sample...");
 
+                 FileMetadata metadata = sessionState.getCurrentMetadata();
                  if (result != -1)
                  {
                      const double resultSeconds = (double)result / (double)sampleRate;
                      if (detectingIn.load())
                      {
-                         sessionState.setCutIn(resultSeconds);
+                         metadata.cutIn = resultSeconds;
                          client.logStatusMessage(juce::String("Cut start set to sample ") + juce::String(result));
 
                          if (client.isCutModeActive())
@@ -117,7 +119,7 @@ void SilenceAnalysisWorker::run()
                          const juce::int64 finalEndPoint = std::min(endPoint64, lengthInSamples);
                          const double endSeconds = (double)finalEndPoint / (double)sampleRate;
 
-                         sessionState.setCutOut(endSeconds);
+                         metadata.cutOut = endSeconds;
                          client.logStatusMessage(juce::String("Cut end set to sample ") + juce::String(finalEndPoint));
                      }
                  }
@@ -125,6 +127,9 @@ void SilenceAnalysisWorker::run()
                  {
                      client.logStatusMessage("No silence found.");
                  }
+
+                 metadata.isAnalyzed = true;
+                 sessionState.updateCurrentMetadata(metadata);
             }
 
             // Resume playback if it was playing

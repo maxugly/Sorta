@@ -246,7 +246,11 @@ public:
      * @param source A pointer to the `juce::ChangeBroadcaster` that initiated the change.
      */
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
-    void cutPreferenceChanged(const MainDomain::CutPreferences& prefs) override;    double getCutIn() const { return sessionState.getCutPrefs().cutIn; }    double getCutOut() const { return sessionState.getCutPrefs().cutOut; }    void setCutIn(double positionSeconds) { sessionState.setCutIn(positionSeconds); }    void setCutOut(double positionSeconds) { sessionState.setCutOut(positionSeconds); }
+    void cutPreferenceChanged(const MainDomain::CutPreferences& prefs) override;
+    double getCutIn() const { return sessionState.getCutIn(); }
+    double getCutOut() const { return sessionState.getCutOut(); }
+    void setCutIn(double positionSeconds) { sessionState.setCutIn(positionSeconds); }
+    void setCutOut(double positionSeconds) { sessionState.setCutOut(positionSeconds); }
     std::mutex& getReaderMutex() { return readerMutex; }
     bool getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamplesOut) const;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MainDomain.h"
+#include "FileMetadata.h"
 #include <juce_core/juce_core.h>
 
 class SessionState {
@@ -27,11 +28,16 @@ public:
     void setThresholdOut(float threshold);
     void setCutIn(double value);
     void setCutOut(double value);
+    double getCutIn() const { return currentFileMetadata.cutIn; }
+    double getCutOut() const { return currentFileMetadata.cutOut; }
+    const FileMetadata& getCurrentMetadata() const { return currentFileMetadata; }
+    void updateCurrentMetadata(const FileMetadata& data);
 
     bool isLooping;
     bool autoplay;
 
 private:
     MainDomain::CutPreferences cutPrefs;
+    FileMetadata currentFileMetadata;
     juce::ListenerList<Listener> listeners;
 };

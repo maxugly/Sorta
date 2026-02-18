@@ -1,7 +1,7 @@
 #include "AudioPlayer.h"
 #include "PlaybackHelpers.h"
 #include "SessionState.h"
-#include "SilenceAnalysisAlgorithms.h"
+#include "FileMetadata.h"
 #include <algorithm>
 
 /**
@@ -77,27 +77,8 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
 
     if (reader != nullptr)
     {
-        sessionState.setCutIn(0.0);
-        sessionState.setCutOut(reader->sampleRate > 0.0 ? reader->lengthInSamples / reader->sampleRate : 0.0);
-
-        if (sessionState.getCutPrefs().autoCut.inActive)
-        {
-            const auto sampleIndex = SilenceAnalysisAlgorithms::findSilenceIn(
-                *reader, sessionState.getCutPrefs().autoCut.thresholdIn);
-            if (sampleIndex >= 0 && reader->sampleRate > 0.0)
-                sessionState.setCutIn(static_cast<double>(sampleIndex) / reader->sampleRate);
-        }
-        if (sessionState.getCutPrefs().autoCut.outActive)
-        {
-            const auto sampleIndex = SilenceAnalysisAlgorithms::findSilenceOut(
-                *reader, sessionState.getCutPrefs().autoCut.thresholdOut);
-            if (sampleIndex >= 0 && reader->sampleRate > 0.0)
-            {
-                const auto tailSamples = static_cast<juce::int64>(reader->sampleRate * 0.05);
-                const auto endPoint = std::min(sampleIndex + tailSamples, reader->lengthInSamples);
-                sessionState.setCutOut(static_cast<double>(endPoint) / reader->sampleRate);
-            }
-        }
+        FileMetadata metadata;
+        sessionState.updateCurrentMetadata(metadata);
 
         lastAutoCutThresholdIn = sessionState.getCutPrefs().autoCut.thresholdIn;
         lastAutoCutThresholdOut = sessionState.getCutPrefs().autoCut.thresholdOut;
@@ -116,6 +97,11 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
             readerSource.reset(newSource.release()); // Transfer ownership to unique_ptr
         }
         setPlayheadPosition(sessionState.getCutPrefs().cutIn);
+
+        if (sessionState.getCutPrefs().autoCut.inActive)
+            startSilenceAnalysis(sessionState.getCutPrefs().autoCut.thresholdIn, true);
+        if (sessionState.getCutPrefs().autoCut.outActive)
+            startSilenceAnalysis(sessionState.getCutPrefs().autoCut.thresholdOut, false);
         return juce::Result::ok();
     }
 

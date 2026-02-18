@@ -200,11 +200,11 @@ void ControlPanel::performDelayedJumpIfNeeded() {
 }
 
 double ControlPanel::getCutInPosition() const {
-  return sessionState.getCutPrefs().cutIn;
+  return sessionState.getCutIn();
 }
 
 double ControlPanel::getCutOutPosition() const {
-  return sessionState.getCutPrefs().cutOut;
+  return sessionState.getCutOut();
 }
 
 void ControlPanel::setCutInPosition(double pos) {

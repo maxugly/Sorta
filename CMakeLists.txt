@@ -63,6 +63,7 @@ if (NOT BUILD_TESTS_ONLY)
             Source/MainDomain.h
             Source/SessionState.h
             Source/SessionState.cpp
+            Source/FileMetadata.h
             Source/ControlPanel.h
             Source/ControlPanel.cpp
             Source/AppEnums.h
