@@ -51,6 +51,7 @@ class PlaybackOverlay;
  */
 class ControlPanel final : public juce::Component,
                            public juce::ChangeListener,
+                           public juce::Timer,
                            public SilenceWorkerClient {
 public:
   //==============================================================================
