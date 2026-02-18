@@ -3,6 +3,7 @@
 #include "MainDomain.h"
 #include "FileMetadata.h"
 #include <juce_core/juce_core.h>
+#include <map>
 
 class SessionState {
 public:
@@ -28,16 +29,21 @@ public:
     void setThresholdOut(float threshold);
     void setCutIn(double value);
     void setCutOut(double value);
-    double getCutIn() const { return currentFileMetadata.cutIn; }
-    double getCutOut() const { return currentFileMetadata.cutOut; }
-    const FileMetadata& getCurrentMetadata() const { return currentFileMetadata; }
-    void updateCurrentMetadata(const FileMetadata& data);
+    double getCutIn() const { return getMetadataForFile(currentFilePath).cutIn; }
+    double getCutOut() const { return getMetadataForFile(currentFilePath).cutOut; }
+    FileMetadata getMetadataForFile(const juce::String& filePath) const;
+    FileMetadata getCurrentMetadata() const { return getMetadataForFile(currentFilePath); }
+    void setMetadataForFile(const juce::String& filePath, const FileMetadata& newMetadata);
+    bool hasMetadataForFile(const juce::String& filePath) const;
+    void setCurrentFilePath(const juce::String& filePath) { currentFilePath = filePath; }
+    const juce::String& getCurrentFilePath() const { return currentFilePath; }
 
     bool isLooping;
     bool autoplay;
 
 private:
     MainDomain::CutPreferences cutPrefs;
-    FileMetadata currentFileMetadata;
+    juce::String currentFilePath;
+    std::map<juce::String, FileMetadata> metadataCache;
     juce::ListenerList<Listener> listeners;
 };

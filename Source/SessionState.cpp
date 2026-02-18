@@ -5,9 +5,6 @@ SessionState::SessionState()
     // Initialize cutIn and cutOut to 0.0
     cutPrefs.cutIn = 0.0;
     cutPrefs.cutOut = 0.0;
-    currentFileMetadata.cutIn = 0.0;
-    currentFileMetadata.cutOut = 0.0;
-    currentFileMetadata.isAnalyzed = false;
 }
 
 void SessionState::addListener(Listener* listener)
@@ -70,7 +67,8 @@ void SessionState::setCutIn(double value)
     if (cutPrefs.cutIn != value)
     {
         cutPrefs.cutIn = value;
-        currentFileMetadata.cutIn = value;
+        if (!currentFilePath.isEmpty())
+            metadataCache[currentFilePath].cutIn = value;
         listeners.call([this](Listener& l) { l.cutPreferenceChanged(cutPrefs); });
     }
 }
@@ -80,20 +78,33 @@ void SessionState::setCutOut(double value)
     if (cutPrefs.cutOut != value)
     {
         cutPrefs.cutOut = value;
-        currentFileMetadata.cutOut = value;
+        if (!currentFilePath.isEmpty())
+            metadataCache[currentFilePath].cutOut = value;
         listeners.call([this](Listener& l) { l.cutPreferenceChanged(cutPrefs); });
     }
 }
 
-void SessionState::updateCurrentMetadata(const FileMetadata& data)
+FileMetadata SessionState::getMetadataForFile(const juce::String& filePath) const
 {
-    const bool cutInChanged = cutPrefs.cutIn != data.cutIn;
-    const bool cutOutChanged = cutPrefs.cutOut != data.cutOut;
+    const auto it = metadataCache.find(filePath);
+    if (it != metadataCache.end())
+        return it->second;
+    return FileMetadata{};
+}
 
-    currentFileMetadata = data;
-    cutPrefs.cutIn = data.cutIn;
-    cutPrefs.cutOut = data.cutOut;
+bool SessionState::hasMetadataForFile(const juce::String& filePath) const
+{
+    return metadataCache.find(filePath) != metadataCache.end();
+}
 
-    if (cutInChanged || cutOutChanged)
+void SessionState::setMetadataForFile(const juce::String& filePath, const FileMetadata& newMetadata)
+{
+    metadataCache[filePath] = newMetadata;
+
+    if (filePath == currentFilePath)
+    {
+        cutPrefs.cutIn = newMetadata.cutIn;
+        cutPrefs.cutOut = newMetadata.cutOut;
         listeners.call([this](Listener& l) { l.cutPreferenceChanged(cutPrefs); });
+    }
 }

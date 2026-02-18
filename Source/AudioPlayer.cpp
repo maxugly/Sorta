@@ -77,10 +77,24 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
 
     if (reader != nullptr)
     {
-        FileMetadata metadata;
-        if (reader->sampleRate > 0.0)
-            metadata.cutOut = reader->lengthInSamples / reader->sampleRate;
-        sessionState.updateCurrentMetadata(metadata);
+        const juce::String filePath = file.getFullPathName();
+        sessionState.setCurrentFilePath(filePath);
+
+        if (sessionState.hasMetadataForFile(filePath))
+        {
+            const FileMetadata cached = sessionState.getMetadataForFile(filePath);
+            if (cached.isAnalyzed)
+                sessionState.setMetadataForFile(filePath, cached);
+            else
+                sessionState.setMetadataForFile(filePath, cached);
+        }
+        else
+        {
+            FileMetadata metadata;
+            if (reader->sampleRate > 0.0)
+                metadata.cutOut = reader->lengthInSamples / reader->sampleRate;
+            sessionState.setMetadataForFile(filePath, metadata);
+        }
 
         lastAutoCutThresholdIn = sessionState.getCutPrefs().autoCut.thresholdIn;
         lastAutoCutThresholdOut = sessionState.getCutPrefs().autoCut.thresholdOut;
@@ -100,10 +114,14 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
         }
         setPlayheadPosition(sessionState.getCutPrefs().cutIn);
 
-        if (sessionState.getCutPrefs().autoCut.inActive)
-            startSilenceAnalysis(sessionState.getCutPrefs().autoCut.thresholdIn, true);
-        if (sessionState.getCutPrefs().autoCut.outActive)
-            startSilenceAnalysis(sessionState.getCutPrefs().autoCut.thresholdOut, false);
+        const FileMetadata activeMetadata = sessionState.getMetadataForFile(filePath);
+        if (!activeMetadata.isAnalyzed)
+        {
+            if (sessionState.getCutPrefs().autoCut.inActive)
+                startSilenceAnalysis(sessionState.getCutPrefs().autoCut.thresholdIn, true);
+            if (sessionState.getCutPrefs().autoCut.outActive)
+                startSilenceAnalysis(sessionState.getCutPrefs().autoCut.thresholdOut, false);
+        }
         return juce::Result::ok();
     }
 

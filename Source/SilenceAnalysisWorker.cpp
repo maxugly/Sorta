@@ -35,6 +35,7 @@ void SilenceAnalysisWorker::startAnalysis(float thresholdVal, bool isIn)
 
     // Pause audio on the main thread before starting background work
     AudioPlayer& audioPlayer = client.getAudioPlayer();
+    assignedFilePath = audioPlayer.getLoadedFile().getFullPathName();
     wasPlayingBeforeScan = audioPlayer.isPlaying();
 
     
@@ -50,7 +51,8 @@ void SilenceAnalysisWorker::run()
 
     // Capture necessary state
     AudioPlayer& audioPlayer = client.getAudioPlayer();
-    juce::File fileToAnalyze = audioPlayer.getLoadedFile();
+    const juce::String filePath = assignedFilePath;
+    juce::File fileToAnalyze(filePath);
     
     // Independent Reader: Create a local, temporary reader for the file
     std::unique_ptr<juce::AudioFormatReader> localReader(audioPlayer.getFormatManager().createReaderFor(fileToAnalyze));
@@ -81,7 +83,7 @@ void SilenceAnalysisWorker::run()
     std::weak_ptr<bool> weakToken = lifeToken;
 
     // Report back to the UI thread
-    juce::MessageManager::callAsync([this, weakToken, result, success, sampleRate, lengthInSamples]()
+    juce::MessageManager::callAsync([this, weakToken, result, success, sampleRate, lengthInSamples, filePath]()
     {
         // Check if the worker is still alive
         if (auto token = weakToken.lock())
@@ -100,7 +102,7 @@ void SilenceAnalysisWorker::run()
             {
                  client.logStatusMessage(juce::String("Reading ") + (detectingIn.load() ? "start" : "end") + " of sample...");
 
-                 FileMetadata metadata = sessionState.getCurrentMetadata();
+                 FileMetadata metadata = sessionState.getMetadataForFile(filePath);
                  if (result != -1)
                  {
                      const double resultSeconds = (double)result / (double)sampleRate;
@@ -129,7 +131,7 @@ void SilenceAnalysisWorker::run()
                  }
 
                  metadata.isAnalyzed = true;
-                 sessionState.updateCurrentMetadata(metadata);
+                 sessionState.setMetadataForFile(filePath, metadata);
             }
 
             // Resume playback if it was playing

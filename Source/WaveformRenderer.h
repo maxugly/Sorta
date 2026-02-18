@@ -6,6 +6,8 @@
 
 class ControlPanel;
 class AudioPlayer;
+class SessionState;
+class WaveformManager;
 
 /**
  * @class WaveformRenderer
@@ -22,7 +24,7 @@ public:
      * @brief Constructs a renderer bound to a ControlPanel.
      * @param controlPanel Reference to the owning ControlPanel for accessing state and helpers.
      */
-    explicit WaveformRenderer(ControlPanel& controlPanel);
+    explicit WaveformRenderer(ControlPanel& controlPanel, SessionState& sessionState, WaveformManager& waveformManager);
     ~WaveformRenderer() override;
 
     /**
@@ -58,6 +60,8 @@ private:
     void drawZoomPopup(juce::Graphics& g) const;
 
     ControlPanel& controlPanel;
+    SessionState& sessionState;
+    WaveformManager& waveformManager;
 };
 
 #endif // AUDIOFILER_WAVEFORMRENDERER_H

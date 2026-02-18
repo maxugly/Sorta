@@ -68,6 +68,7 @@ private:
     std::atomic<bool> detectingIn { true };
     std::atomic<bool> busy { false };
     bool wasPlayingBeforeScan = false;
+    juce::String assignedFilePath;
 
     // Token to ensure safe async callbacks
     std::shared_ptr<bool> lifeToken;
