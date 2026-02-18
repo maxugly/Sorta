@@ -101,11 +101,11 @@ void SilenceAnalysisWorker::run()
                  {
                      if (detectingIn.load())
                      {
-                         client.setLoopInPosition((double)result / (double)sampleRate);
-                         client.logStatusMessage(juce::String("Loop start set to sample ") + juce::String(result));
+                         client.setCutInPosition((double)result / (double)sampleRate);
+                         client.logStatusMessage(juce::String("Cut start set to sample ") + juce::String(result));
 
                          if (client.isCutModeActive())
-                             player.setPlayheadPosition(client.getLoopInPosition());
+                             player.setPlayheadPosition(client.getCutInPosition());
                      }
                      else
                      {
@@ -113,8 +113,8 @@ void SilenceAnalysisWorker::run()
                          const juce::int64 endPoint64 = result + tailSamples;
                          const juce::int64 finalEndPoint = std::min(endPoint64, lengthInSamples);
 
-                         client.setLoopOutPosition((double)finalEndPoint / (double)sampleRate);
-                         client.logStatusMessage(juce::String("Loop end set to sample ") + juce::String(finalEndPoint));
+                         client.setCutOutPosition((double)finalEndPoint / (double)sampleRate);
+                         client.logStatusMessage(juce::String("Cut end set to sample ") + juce::String(finalEndPoint));
                      }
                  }
                  else
