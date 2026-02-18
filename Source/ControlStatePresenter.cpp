@@ -10,30 +10,19 @@ ControlStatePresenter::ControlStatePresenter(ControlPanel& ownerPanel)
 {
 }
 
-/**
- * @brief Refreshes the enabled/visible state of all controls based on current app state.
- *
- * Checks if a file is loaded and if cut mode is active, then delegates to specific helpers.
- */
 void ControlStatePresenter::refreshStates()
 {
     const bool enabled = owner.getAudioPlayer().getThumbnail().getTotalLength() > 0.0;
 
     updateGeneralButtonStates(enabled);
-    updateCutModeControlStates(owner.m_isCutModeActive, enabled);
+    updateCutModeControlStates(owner.isCutModeActive(), enabled);
 }
 
-
-
-/**
- * @brief Updates the state of general transport and mode buttons.
- * @param enabled True if an audio file is loaded.
- */
 void ControlStatePresenter::updateGeneralButtonStates(bool enabled)
 {
     owner.openButton.setEnabled(true);
     owner.exitButton.setEnabled(true);
-    owner.loopButton.setEnabled(true);
+    owner.repeatButton.setEnabled(true);
     owner.autoplayButton.setEnabled(true);
     owner.cutButton.setEnabled(true);
 
@@ -54,43 +43,36 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled)
     }
 }
 
-
-
-/**
- * @brief Updates the state of cut-mode specific controls (looping, silence detection).
- * @param isCutModeActive True if the UI is in Cut Mode.
- * @param enabled True if an audio file is loaded.
- */
 void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, bool enabled)
 {
-    owner.loopInButton.setEnabled(enabled && isCutModeActive);
+    owner.cutInButton.setEnabled(enabled && isCutModeActive);
     owner.cutInEditor.setEnabled(enabled && isCutModeActive);
     owner.resetInButton.setEnabled(enabled && isCutModeActive);
 
-    owner.loopOutButton.setEnabled(enabled && isCutModeActive);
+    owner.cutOutButton.setEnabled(enabled && isCutModeActive);
     owner.cutOutEditor.setEnabled(enabled && isCutModeActive);
     owner.resetOutButton.setEnabled(enabled && isCutModeActive);
 
-    owner.loopLengthEditor.setEnabled(enabled && isCutModeActive);
-    owner.loopLengthEditor.setVisible(isCutModeActive);
+    owner.cutLengthEditor.setEnabled(enabled && isCutModeActive);
+    owner.cutLengthEditor.setVisible(isCutModeActive);
 
     owner.autoCutInButton.setEnabled(isCutModeActive);
     owner.autoCutOutButton.setEnabled(isCutModeActive);
 
-    owner.autoCutInButton.setToggleState(owner.silenceDetector->getIsAutoCutInActive(), juce::dontSendNotification);
-    owner.autoCutOutButton.setToggleState(owner.silenceDetector->getIsAutoCutOutActive(), juce::dontSendNotification);
+    owner.autoCutInButton.setToggleState(owner.getSilenceDetector().getIsAutoCutInActive(), juce::dontSendNotification);
+    owner.autoCutOutButton.setToggleState(owner.getSilenceDetector().getIsAutoCutOutActive(), juce::dontSendNotification);
 
-    owner.silenceDetector->getInSilenceThresholdEditor().setEnabled(enabled && isCutModeActive);
-    owner.silenceDetector->getOutSilenceThresholdEditor().setEnabled(enabled && isCutModeActive);
+    owner.getSilenceDetector().getInSilenceThresholdEditor().setEnabled(enabled && isCutModeActive);
+    owner.getSilenceDetector().getOutSilenceThresholdEditor().setEnabled(enabled && isCutModeActive);
 
-    owner.loopInButton.setVisible(isCutModeActive);
-    owner.loopOutButton.setVisible(isCutModeActive);
+    owner.cutInButton.setVisible(isCutModeActive);
+    owner.cutOutButton.setVisible(isCutModeActive);
     owner.cutInEditor.setVisible(isCutModeActive);
     owner.cutOutEditor.setVisible(isCutModeActive);
     owner.resetInButton.setVisible(isCutModeActive);
     owner.resetOutButton.setVisible(isCutModeActive);
-    owner.silenceDetector->getInSilenceThresholdEditor().setVisible(isCutModeActive);
-    owner.silenceDetector->getOutSilenceThresholdEditor().setVisible(isCutModeActive);
+    owner.getSilenceDetector().getInSilenceThresholdEditor().setVisible(isCutModeActive);
+    owner.getSilenceDetector().getOutSilenceThresholdEditor().setVisible(isCutModeActive);
     owner.autoCutInButton.setVisible(isCutModeActive);
     owner.autoCutOutButton.setVisible(isCutModeActive);
 }

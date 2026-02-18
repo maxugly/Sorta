@@ -18,7 +18,7 @@ void LayoutManager::performLayout()
     const int rowHeight = Config::Layout::buttonHeight + margin * 2;
 
     layoutTopRowButtons(bounds, rowHeight);
-    layoutLoopAndCutControls(bounds, rowHeight);
+    layoutCutControls(bounds, rowHeight);
     layoutBottomRowAndTextDisplay(bounds, rowHeight);
     layoutWaveformAndStats(bounds);
 }
@@ -39,7 +39,7 @@ void LayoutManager::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHei
     controlPanel.autoplayButton.setBounds(topRow.removeFromLeft(buttonWidth));
     topRow.removeFromLeft(margin);
 
-    controlPanel.loopButton.setBounds(topRow.removeFromLeft(buttonWidth));
+    controlPanel.repeatButton.setBounds(topRow.removeFromLeft(buttonWidth));
     topRow.removeFromLeft(margin);
 
     controlPanel.cutButton.setBounds(topRow.removeFromLeft(buttonWidth));
@@ -49,40 +49,40 @@ void LayoutManager::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHei
     topRow.removeFromRight(margin);
 }
 
-void LayoutManager::layoutLoopAndCutControls(juce::Rectangle<int>& bounds, int rowHeight)
+void LayoutManager::layoutCutControls(juce::Rectangle<int>& bounds, int rowHeight)
 {
     const int margin = Config::Layout::windowBorderMargins;
     const int buttonWidth = Config::Layout::buttonWidth;
-    const int loopTextWidth = Config::Layout::loopTextWidth;
+    const int cutTextWidth = Config::Layout::cutTextWidth;
     const int clearButtonWidth = Config::Layout::clearButtonWidth;
     const int thresholdEditorWidth = Config::Layout::thresholdEditorWidth;
 
-    auto loopRow = bounds.removeFromTop(rowHeight).reduced(margin);
+    auto cutRow = bounds.removeFromTop(rowHeight).reduced(margin);
     
     // Group "In" controls
-    controlPanel.loopInButton.setBounds(loopRow.removeFromLeft(buttonWidth));
-    loopRow.removeFromLeft(margin);
-    controlPanel.cutInEditor.setBounds(loopRow.removeFromLeft(loopTextWidth));
-    loopRow.removeFromLeft(margin / 2);
-    controlPanel.resetInButton.setBounds(loopRow.removeFromLeft(clearButtonWidth));
-    loopRow.removeFromLeft(margin);
-    controlPanel.silenceDetector->getInSilenceThresholdEditor().setBounds(loopRow.removeFromLeft(thresholdEditorWidth));
-    loopRow.removeFromLeft(margin / 2);
-    controlPanel.autoCutInButton.setBounds(loopRow.removeFromLeft(buttonWidth));
+    controlPanel.cutInButton.setBounds(cutRow.removeFromLeft(buttonWidth));
+    cutRow.removeFromLeft(margin);
+    controlPanel.cutInEditor.setBounds(cutRow.removeFromLeft(cutTextWidth));
+    cutRow.removeFromLeft(margin / 2);
+    controlPanel.resetInButton.setBounds(cutRow.removeFromLeft(clearButtonWidth));
+    cutRow.removeFromLeft(margin);
+    controlPanel.getSilenceDetector().getInSilenceThresholdEditor().setBounds(cutRow.removeFromLeft(thresholdEditorWidth));
+    cutRow.removeFromLeft(margin / 2);
+    controlPanel.autoCutInButton.setBounds(cutRow.removeFromLeft(buttonWidth));
     
     // Space between groups
-    loopRow.removeFromLeft(margin * 3);
+    cutRow.removeFromLeft(margin * 3);
     
     // Group "Out" controls
-    controlPanel.loopOutButton.setBounds(loopRow.removeFromLeft(buttonWidth));
-    loopRow.removeFromLeft(margin);
-    controlPanel.cutOutEditor.setBounds(loopRow.removeFromLeft(loopTextWidth));
-    loopRow.removeFromLeft(margin / 2);
-    controlPanel.resetOutButton.setBounds(loopRow.removeFromLeft(clearButtonWidth));
-    loopRow.removeFromLeft(margin);
-    controlPanel.silenceDetector->getOutSilenceThresholdEditor().setBounds(loopRow.removeFromLeft(thresholdEditorWidth));
-    loopRow.removeFromLeft(margin / 2);
-    controlPanel.autoCutOutButton.setBounds(loopRow.removeFromLeft(buttonWidth));
+    controlPanel.cutOutButton.setBounds(cutRow.removeFromLeft(buttonWidth));
+    cutRow.removeFromLeft(margin);
+    controlPanel.cutOutEditor.setBounds(cutRow.removeFromLeft(cutTextWidth));
+    cutRow.removeFromLeft(margin / 2);
+    controlPanel.resetOutButton.setBounds(cutRow.removeFromLeft(clearButtonWidth));
+    cutRow.removeFromLeft(margin);
+    controlPanel.getSilenceDetector().getOutSilenceThresholdEditor().setBounds(cutRow.removeFromLeft(thresholdEditorWidth));
+    cutRow.removeFromLeft(margin / 2);
+    controlPanel.autoCutOutButton.setBounds(cutRow.removeFromLeft(buttonWidth));
 }
 
 void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, int rowHeight)

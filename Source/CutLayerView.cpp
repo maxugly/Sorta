@@ -71,8 +71,8 @@ void CutLayerView::paint(juce::Graphics& g)
     const double actualOut = juce::jmax(cutIn, cutOut);
     const float inX = (float)bounds.getX() + (float)bounds.getWidth() * (float)(actualIn / audioLength);
     const float outX = (float)bounds.getX() + (float)bounds.getWidth() * (float)(actualOut / audioLength);
-    const float fadeLength = bounds.getWidth() * Config::Layout::Waveform::loopRegionFadeProportion;
-    const float boxHeight = (float)Config::Layout::Glow::loopMarkerBoxHeight;
+    const float fadeLength = bounds.getWidth() * Config::Layout::Waveform::cutRegionFadeProportion;
+    const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;
 
     const juce::Rectangle<float> leftRegion((float)bounds.getX(), (float)bounds.getY(), inX - (float)bounds.getX(), (float)bounds.getHeight());
     if (leftRegion.getWidth() > 0.0f)
@@ -84,7 +84,7 @@ void CutLayerView::paint(juce::Graphics& g)
         g.fillRect(solidBlackLeft);
 
         juce::Rectangle<float> fadeAreaLeft(inX - actualFade, (float)bounds.getY(), actualFade, (float)bounds.getHeight());
-        juce::ColourGradient leftFadeGradient(Config::Colors::loopRegion, inX, leftRegion.getCentreY(),
+        juce::ColourGradient leftFadeGradient(Config::Colors::cutRegion, inX, leftRegion.getCentreY(),
                                               juce::Colours::black, inX - actualFade, leftRegion.getCentreY(), false);
         g.setGradientFill(leftFadeGradient);
         g.fillRect(fadeAreaLeft);
@@ -101,40 +101,40 @@ void CutLayerView::paint(juce::Graphics& g)
         g.fillRect(solidBlackRight);
 
         juce::Rectangle<float> fadeAreaRight(outX, (float)bounds.getY(), actualFade, (float)bounds.getHeight());
-        juce::ColourGradient rightFadeGradient(Config::Colors::loopRegion, outX, rightRegion.getCentreY(),
+        juce::ColourGradient rightFadeGradient(Config::Colors::cutRegion, outX, rightRegion.getCentreY(),
                                                juce::Colours::black, outX + actualFade, rightRegion.getCentreY(), false);
         g.setGradientFill(rightFadeGradient);
         g.fillRect(fadeAreaRight);
     }
 
-    const juce::Colour glowColor = Config::Colors::loopLine.withAlpha(Config::Colors::loopLine.getFloatAlpha() * (1.0f - glowAlphaProvider()));
+    const juce::Colour glowColor = Config::Colors::cutLine.withAlpha(Config::Colors::cutLine.getFloatAlpha() * (1.0f - glowAlphaProvider()));
     g.setColour(glowColor);
-    g.fillRect(inX - (Config::Layout::Glow::loopLineGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), (float)bounds.getY() + boxHeight, Config::Layout::Glow::loopLineGlowThickness, (float)bounds.getHeight() - (2.0f * boxHeight));
-    g.fillRect(outX - (Config::Layout::Glow::loopLineGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), (float)bounds.getY() + boxHeight, Config::Layout::Glow::loopLineGlowThickness, (float)bounds.getHeight() - (2.0f * boxHeight));
+    g.fillRect(inX - (Config::Layout::Glow::cutLineGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), (float)bounds.getY() + boxHeight, Config::Layout::Glow::cutLineGlowThickness, (float)bounds.getHeight() - (2.0f * boxHeight));
+    g.fillRect(outX - (Config::Layout::Glow::cutLineGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), (float)bounds.getY() + boxHeight, Config::Layout::Glow::cutLineGlowThickness, (float)bounds.getHeight() - (2.0f * boxHeight));
 
-    g.setColour(Config::Colors::loopLine);
+    g.setColour(Config::Colors::cutLine);
     auto drawCutMarker = [&](float x, MouseHandler::CutMarkerHandle handleType) {
-        juce::Colour markerColor = Config::Colors::loopLine;
+        juce::Colour markerColor = Config::Colors::cutLine;
 
         if (handleType == MouseHandler::CutMarkerHandle::In && silenceDetector.getIsAutoCutInActive())
-            markerColor = Config::Colors::loopMarkerAuto;
+            markerColor = Config::Colors::cutMarkerAuto;
         else if (handleType == MouseHandler::CutMarkerHandle::Out && silenceDetector.getIsAutoCutOutActive())
-            markerColor = Config::Colors::loopMarkerAuto;
+            markerColor = Config::Colors::cutMarkerAuto;
 
-        float thickness = Config::Layout::Glow::loopBoxOutlineThickness;
+        float thickness = Config::Layout::Glow::cutBoxOutlineThickness;
 
         if (mouseHandler != nullptr && mouseHandler->getDraggedHandle() == handleType)
         {
-            markerColor = Config::Colors::loopMarkerDrag;
-            thickness = Config::Layout::Glow::loopBoxOutlineThicknessInteracting;
+            markerColor = Config::Colors::cutMarkerDrag;
+            thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
         }
         else if (mouseHandler != nullptr && mouseHandler->getHoveredHandle() == handleType)
         {
-            markerColor = Config::Colors::loopMarkerHover;
-            thickness = Config::Layout::Glow::loopBoxOutlineThicknessInteracting;
+            markerColor = Config::Colors::cutMarkerHover;
+            thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
         }
 
-        const float boxWidth = Config::Layout::Glow::loopMarkerBoxWidth;
+        const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
         const float halfBoxWidth = boxWidth / 2.0f;
 
         g.setColour(markerColor);
@@ -142,31 +142,31 @@ void CutLayerView::paint(juce::Graphics& g)
         g.drawRect(x - halfBoxWidth, (float)bounds.getBottom() - boxHeight, boxWidth, boxHeight, thickness);
 
         g.setColour(markerColor);
-        g.fillRect(x - Config::Layout::Glow::loopMarkerWidthThin / Config::Layout::Glow::loopMarkerCenterDivisor,
+        g.fillRect(x - Config::Layout::Glow::cutMarkerWidthThin / Config::Layout::Glow::cutMarkerCenterDivisor,
                    (float)bounds.getY() + boxHeight,
-                   Config::Layout::Glow::loopMarkerWidthThin,
+                   Config::Layout::Glow::cutMarkerWidthThin,
                    (float)bounds.getHeight() - (2.0f * boxHeight));
     };
 
     drawCutMarker(inX, MouseHandler::CutMarkerHandle::In);
     drawCutMarker(outX, MouseHandler::CutMarkerHandle::Out);
 
-    juce::Colour hollowColor = Config::Colors::loopLine;
-    float thickness = Config::Layout::Glow::loopBoxOutlineThickness;
+    juce::Colour hollowColor = Config::Colors::cutLine;
+    float thickness = Config::Layout::Glow::cutBoxOutlineThickness;
 
     if (mouseHandler != nullptr && mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full)
     {
-        hollowColor = Config::Colors::loopMarkerDrag;
-        thickness = Config::Layout::Glow::loopBoxOutlineThicknessInteracting;
+        hollowColor = Config::Colors::cutMarkerDrag;
+        thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
     }
     else if (mouseHandler != nullptr && mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full)
     {
-        hollowColor = Config::Colors::loopMarkerHover;
-        thickness = Config::Layout::Glow::loopBoxOutlineThicknessInteracting;
+        hollowColor = Config::Colors::cutMarkerHover;
+        thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
     }
 
     g.setColour(hollowColor);
-    const float halfBoxWidth = Config::Layout::Glow::loopMarkerBoxWidth / 2.0f;
+    const float halfBoxWidth = Config::Layout::Glow::cutMarkerBoxWidth / 2.0f;
 
     const float startX = inX + halfBoxWidth;
     const float endX = outX - halfBoxWidth;

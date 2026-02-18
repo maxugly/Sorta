@@ -4,10 +4,7 @@ namespace Config {
 
     namespace Colors {
         #if !defined(JUCE_HEADLESS)
-        // Window
         const juce::Colour Window::background { juce::Colours::black };
-
-        // Button
         const juce::Colour Button::base { 0xff5a5a5a };
         const juce::Colour Button::on { 0xff00bfff };
         const juce::Colour Button::text { 0xFFFFFFFF };
@@ -16,51 +13,33 @@ namespace Config {
         const juce::Colour Button::disabledText { 0xff4a4a4a };
         const juce::Colour Button::exit { juce::Colours::darkred };
         const juce::Colour Button::clear { juce::Colours::red };
-        const juce::Colour Button::loopPlacement { 0xffff1493 };
-        const juce::Colour Button::loopActive { 0xff0066cc };
+        const juce::Colour Button::cutPlacement { 0xffff1493 };
+        const juce::Colour Button::cutActive { 0xff0066cc };
 
-        // General
-        const juce::Colour playbackText = juce::Colour(0xFF34FA11); // Bright green
-
-        // Text Editors
+        const juce::Colour playbackText = juce::Colour(0xFF34FA11);
         const juce::Colour textEditorBackground = juce::Colours::grey.withAlpha(Config::Layout::Text::backgroundAlpha);
         const juce::Colour textEditorError = juce::Colours::red;
         const juce::Colour textEditorWarning = juce::Colours::orange;
         const juce::Colour textEditorOutOfRange = juce::Colours::orange;
-
-        // Waveform & Visuals
         const juce::Colour waveform = juce::Colours::deeppink;
         const juce::Colour playbackCursor = juce::Colours::lime;
-        const juce::Colour loopRegion = juce::Colour(0xff0066cc).withAlpha(0.3f);
-        const juce::Colour loopLine = juce::Colours::blue;
-        const juce::Colour loopMarkerAuto = juce::Colour(0xff00bfff);
-        const juce::Colour loopMarkerHover = juce::Colours::teal;
-        const juce::Colour loopMarkerDrag = juce::Colours::green;
-
-        // Mouse Cursor
+        const juce::Colour cutRegion = juce::Colour(0xff0066cc).withAlpha(0.3f);
+        const juce::Colour cutLine = juce::Colours::blue;
+        const juce::Colour cutMarkerAuto = juce::Colour(0xff00bfff);
+        const juce::Colour cutMarkerHover = juce::Colours::teal;
+        const juce::Colour cutMarkerDrag = juce::Colours::green;
         const juce::Colour mouseCursorLine = juce::Colours::yellow;
         const juce::Colour mouseCursorHighlight = juce::Colours::darkorange.withAlpha(0.4f);
         const juce::Colour mouseAmplitudeLine = juce::Colours::orange.brighter(0.5f);
         const juce::Colour mousePlacementMode = juce::Colours::deeppink;
-
-        // Silence Threshold
         const juce::Colour thresholdLine = juce::Colour(0xffe600e6);
         const juce::Colour thresholdRegion = juce::Colours::red.withAlpha(0.15f);
-
-        // Stats Display
         const juce::Colour statsBackground = juce::Colours::black.withAlpha(0.5f);
         const juce::Colour statsText = juce::Colours::white;
         const juce::Colour statsErrorText = juce::Colours::red;
-
-        // Animation/Glow
         const juce::Colour mouseAmplitudeGlow = juce::Colours::yellow;
         const juce::Colour placementModeGlow = juce::Colours::red.withAlpha(0.7f);
-
-        // Zoom Popup
         const juce::Colour zoomPopupBorder = juce::Colours::blue;
-
-
-        // Additional colors for UI elements found in code
         const juce::Colour zoomPopupTrackingLine = juce::Colours::dodgerblue;
         const juce::Colour zoomPopupPlaybackLine = juce::Colours::lime;
         const juce::Colour zoomPopupZeroLine = juce::Colours::grey.withAlpha(0.3f);
@@ -81,9 +60,9 @@ namespace Config {
         const juce::String qualityLow = "[Q]ual L";
         const juce::String exitButton = "[E]xit";
         const juce::String statsButton = "[S]tats";
-        const juce::String loopButton = "[L]oop";
-        const juce::String loopInButton = "[I]n";
-        const juce::String loopOutButton = "[O]ut";
+        const juce::String repeatButton = "[L]oop";
+        const juce::String cutInButton = "[I]n";
+        const juce::String cutOutButton = "[O]ut";
         const juce::String clearButton = "X";
         const juce::String autoplayButton = "[A]utoPlay";
         const juce::String autoCutInButton = "[AC In]";

@@ -1,10 +1,10 @@
-#include "LoopButton.h"
+#include "RepeatButton.h"
 
-LoopButton::LoopButton (const juce::String& name) : juce::TextButton (name)
+RepeatButton::RepeatButton (const juce::String& name) : juce::TextButton (name)
 {
 }
 
-void LoopButton::mouseUp (const juce::MouseEvent& event)
+void RepeatButton::mouseUp (const juce::MouseEvent& event)
 {
     if (isEnabled()) {
         if (event.mods.isRightButtonDown()) {

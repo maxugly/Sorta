@@ -8,10 +8,10 @@ TransportPresenter::TransportPresenter(ControlPanel& ownerPanel)
 {
 }
 
-void TransportPresenter::handleLoopToggle(bool shouldLoop)
+void TransportPresenter::handleRepeatToggle(bool shouldRepeat)
 {
-    owner.setShouldLoop(shouldLoop);
-    owner.getAudioPlayer().setRepeating(owner.getShouldLoop());
+    owner.setShouldRepeat(shouldRepeat);
+    owner.getAudioPlayer().setRepeating(owner.getShouldRepeat());
 }
 
 void TransportPresenter::handleAutoplayToggle(bool shouldAutoplay)
@@ -34,20 +34,20 @@ void TransportPresenter::handleCutModeToggle(bool enableCutMode)
     owner.getSessionState().setCutActive(enableCutMode);
     owner.updateComponentStates();
     if (owner.m_isCutModeActive && owner.getAudioPlayer().isPlaying())
-        enforceCutLoopBounds();
+        enforceCutBounds();
 }
 
-void TransportPresenter::enforceCutLoopBounds() const
+void TransportPresenter::enforceCutBounds() const
 {
     auto& audioPlayer = owner.getAudioPlayer();
     auto& transport = audioPlayer.getTransportSource();
     const double currentPosition = transport.getCurrentPosition();
-    const double loopIn = owner.getCutInPosition();
-    const double loopOut = owner.getCutOutPosition();
+    const double cutIn = owner.getCutInPosition();
+    const double cutOut = owner.getCutOutPosition();
 
-    if (loopOut > loopIn
-        && (currentPosition < loopIn || currentPosition >= loopOut))
+    if (cutOut > cutIn
+        && (currentPosition < cutIn || currentPosition >= cutOut))
     {
-        audioPlayer.setPlayheadPosition(loopIn);
+        audioPlayer.setPlayheadPosition(cutIn);
     }
 }

@@ -64,6 +64,7 @@ if (NOT BUILD_TESTS_ONLY)
             Source/SessionState.h
             Source/SessionState.cpp
             Source/FileMetadata.h
+            Source/SilenceWorkerClient.h
             Source/ControlPanel.h
             Source/ControlPanel.cpp
             Source/AppEnums.h
@@ -73,6 +74,7 @@ if (NOT BUILD_TESTS_ONLY)
             Source/CutPresenter.cpp
             Source/SilenceDetector.h
             Source/SilenceDetector.cpp
+            Source/ModernLookAndFeel.h
             Source/LayoutManager.h
             Source/LayoutManager.cpp
             Source/WaveformManager.h
@@ -81,8 +83,6 @@ if (NOT BUILD_TESTS_ONLY)
             Source/WaveformView.cpp
             Source/KeybindHandler.h
             Source/KeybindHandler.cpp
-            Source/LoopPresenter.h
-            Source/LoopPresenter.cpp
             Source/ControlStatePresenter.h
             Source/ControlStatePresenter.cpp
             Source/TransportPresenter.h
@@ -100,15 +100,17 @@ if (NOT BUILD_TESTS_ONLY)
             Source/ControlButtonsPresenter.cpp
             Source/SilenceThresholdPresenter.h
             Source/SilenceThresholdPresenter.cpp
+            Source/CutResetPresenter.h
+            Source/CutResetPresenter.cpp
 
             Source/CutButtonPresenter.h
             Source/CutButtonPresenter.cpp
-            Source/CutResetPresenter.h
-            Source/CutResetPresenter.cpp
-            Source/LoopButton.h
-            Source/LoopButton.cpp
-            Source/PlaybackLoopController.h
-            Source/PlaybackLoopController.cpp
+            Source/RepeatPresenter.h
+            Source/RepeatPresenter.cpp
+            Source/RepeatButton.h
+            Source/RepeatButton.cpp
+            Source/PlaybackRepeatController.h
+            Source/PlaybackRepeatController.cpp
             Source/PlaybackTextPresenter.h
             Source/PlaybackTextPresenter.cpp
             Source/TimeEntryHelpers.h
@@ -123,8 +125,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/PlaybackHelpers.cpp
             Source/PlaybackCursorGlow.h
             Source/PlaybackCursorGlow.cpp
-            Source/PlaybackOverlay.h
-            Source/PlaybackOverlay.cpp
+            Source/PlaybackCursorView.h
+            Source/PlaybackCursorView.cpp
     )
 
     target_link_libraries(audiofiler PRIVATE

@@ -20,12 +20,11 @@ bool KeybindHandler::handleKeyPress(const juce::KeyPress& key)
     if (handleGlobalKeybinds(key))
         return true;
 
-    // Why: Playback/UI/loop shortcuts only make sense when audio is loaded.
     if (audioPlayer.getThumbnail().getTotalLength() > 0.0)
     {
         if (handlePlaybackKeybinds(key)) return true;
         if (handleUIToggleKeybinds(key)) return true;
-        if (handleLoopKeybinds(key)) return true;
+        if (handleCutKeybinds(key)) return true;
     }
     return false;
 }
@@ -35,14 +34,12 @@ bool KeybindHandler::handleGlobalKeybinds(const juce::KeyPress& key)
     const juce::juce_wchar keyChar = key.getTextCharacter();
     if (keyChar == 'e' || keyChar == 'E')
     {
-        // Why: Provide a keyboard-only exit without reaching for the window controls.
         if (auto* app = juce::JUCEApplication::getInstance())
             app->systemRequestedQuit();
         return true;
     }
     if (keyChar == 'd' || keyChar == 'D')
     {
-        // Why: Quick access to the file picker keeps audition workflows fast.
         mainComponent.openButtonClicked();
         return true;
     }
@@ -53,21 +50,18 @@ bool KeybindHandler::handlePlaybackKeybinds(const juce::KeyPress& key)
 {
     if (key == juce::KeyPress::spaceKey)
     {
-        // Why: Space bar acts as the universal transport toggle in most DAWs.
         audioPlayer.togglePlayStop();
         return true;
     }
     constexpr double seekStepSeconds = Config::Audio::keyboardSkipSeconds;
     if (key.getKeyCode() == juce::KeyPress::leftKey)
     {
-        // Why: Provide quick, predictable scrubbing in fixed steps, constrained by loop points.
         const double current = audioPlayer.getTransportSource().getCurrentPosition();
         audioPlayer.setPlayheadPosition(current - seekStepSeconds);
         return true;
     }
     if (key.getKeyCode() == juce::KeyPress::rightKey)
     {
-        // Why: Provide quick, predictable scrubbing in fixed steps, constrained by loop points.
         const double current = audioPlayer.getTransportSource().getCurrentPosition();
         audioPlayer.setPlayheadPosition(current + seekStepSeconds);
         return true;
@@ -82,18 +76,17 @@ bool KeybindHandler::handleUIToggleKeybinds(const juce::KeyPress& key)
     if (keyChar == 'v' || keyChar == 'V') { controlPanel.triggerModeButton(); return true; }
     if (keyChar == 'c' || keyChar == 'C') { controlPanel.triggerChannelViewButton(); return true; }
     if (keyChar == 'q' || keyChar == 'Q') { controlPanel.triggerQualityButton(); return true; }
-    if (keyChar == 'l' || keyChar == 'L') { controlPanel.triggerLoopButton(); return true; }
+    if (keyChar == 'l' || keyChar == 'L') { controlPanel.triggerRepeatButton(); return true; }
     return false;
 }
 
-bool KeybindHandler::handleLoopKeybinds(const juce::KeyPress& key)
+bool KeybindHandler::handleCutKeybinds(const juce::KeyPress& key)
 {
     const auto keyChar = key.getTextCharacter();
     if (controlPanel.getPlacementMode() == AppEnums::PlacementMode::None)
     {
         if (keyChar == 'i' || keyChar == 'I')
         {
-            // Why: Snapshot the current playhead as cut-in when no placement mode is active.
             controlPanel.setCutInPosition(audioPlayer.getTransportSource().getCurrentPosition());
             controlPanel.setAutoCutInActive(false);
             controlPanel.jumpToCutIn();
@@ -102,7 +95,6 @@ bool KeybindHandler::handleLoopKeybinds(const juce::KeyPress& key)
         }
         if (keyChar == 'o' || keyChar == 'O')
         {
-            // Why: Snapshot the current playhead as cut-out when no placement mode is active.
             controlPanel.setCutOutPosition(audioPlayer.getTransportSource().getCurrentPosition());
             controlPanel.setAutoCutOutActive(false);
             controlPanel.jumpToCutIn();
@@ -112,7 +104,6 @@ bool KeybindHandler::handleLoopKeybinds(const juce::KeyPress& key)
     }
     if (keyChar == 'u' || keyChar == 'U')
     {
-        // Why: Clearing loop-in must remain possible even while placing loop points.
         controlPanel.resetIn();
         return true;
     }

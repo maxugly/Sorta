@@ -1,30 +1,12 @@
 #include "MouseHandler.h"
 #include "FocusManager.h"
-#include "ControlPanel.h" // Full header required for ControlPanel access
-#include "AudioPlayer.h"    // Required for AudioPlayer types
+#include "ControlPanel.h"
+#include "AudioPlayer.h"
 
-/**
- * @file MouseHandler.cpp
- * @brief Implements the MouseHandler class, abstracting mouse interaction logic from ControlPanel.
- */
-
-/**
- * @brief Constructs a MouseHandler.
- * @param controlPanel The `ControlPanel` instance that owns this `MouseHandler`.
- *                     This reference is used to access shared state and trigger UI updates.
- */
 MouseHandler::MouseHandler(ControlPanel& controlPanel) : owner(controlPanel)
 {
 }
 
-/**
- * @brief Handles mouse movement events.
- *
- * Updates the internal mouse cursor position and corresponding time, and
- * triggers a repaint on the owning `ControlPanel` to provide visual feedback
- * (e.g., drawing the mouse line and time display).
- * @param event The mouse event details, including position and modifiers.
- */
 void MouseHandler::mouseMove(const juce::MouseEvent& event)
 {
     const auto waveformBounds = owner.getWaveformBounds();
@@ -35,7 +17,6 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
         
         hoveredHandle = getHandleAtPosition(event.getPosition());
 
-        // Lock handles if autocut is active and locking is enabled in Config
         if (Config::Audio::lockHandlesWhenAutoCutActive)
         {
             const auto& silenceDetector = owner.getSilenceDetector();
@@ -57,7 +38,7 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
         else
         {
             mouseCursorTime = 0.0;
-    isScrubbingState = false;
+            isScrubbingState = false;
         }
     }
     else
@@ -65,26 +46,16 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
         mouseCursorX = -1;
         mouseCursorY = -1;
         mouseCursorTime = 0.0;
-    isScrubbingState = false;
+        isScrubbingState = false;
         hoveredHandle = CutMarkerHandle::None;
     }
-    owner.repaint(); // Trigger repaint on owner
+    owner.repaint();
 }
 
-/**
- * @brief Handles mouse down events.
- *
- * Initiates dragging for seeking playback if the left button is pressed,
- * or handles right-click events for entering loop point placement mode.
- * It also manages keyboard focus for text editors.
- * @param event The mouse event details, including position and modifiers.
- */
 void MouseHandler::mouseDown(const juce::MouseEvent& event)
 {
-    // Why: Clicking on the waveform should defocus text fields so transport shortcuts keep working.
     clearTextEditorFocusIfNeeded(event);
 
-    // --- ZOOM POPUP INTERACTION ---
     if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None)
     {
         auto zoomBounds = owner.getZoomPopupBounds();
@@ -98,27 +69,25 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
             if (event.mods.isLeftButtonDown())
             {
                 owner.setNeedsJumpToCutIn(true);
-                if (currentPlacementMode == AppEnums::PlacementMode::LoopIn)
+                if (currentPlacementMode == AppEnums::PlacementMode::CutIn)
                 {
                     owner.setCutInPosition(zoomedTime);
                     owner.setAutoCutInActive(false);
                 }
-                else if (currentPlacementMode == AppEnums::PlacementMode::LoopOut)
+                else if (currentPlacementMode == AppEnums::PlacementMode::CutOut)
                 {
                     owner.setCutOutPosition(zoomedTime);
                     owner.setAutoCutOutActive(false);
                 }
                 else
                 {
-                    // NOT ARMED: Drag or Seek like the main waveform
-                    double loopPointTime = (owner.getActiveZoomPoint() == ControlPanel::ActiveZoomPoint::In)
+                    double cutPointTime = (owner.getActiveZoomPoint() == ControlPanel::ActiveZoomPoint::In)
                                            ? owner.getCutInPosition() : owner.getCutOutPosition();
                     
-                    // Check if click is near the indicator (within 20 pixels)
                     float indicatorX = (float)zoomBounds.getX();
                     if (timeRange.second > timeRange.first)
                     {
-                        float proportionIndicator = (float)((loopPointTime - timeRange.first) / (timeRange.second - timeRange.first));
+                        float proportionIndicator = (float)((cutPointTime - timeRange.first) / (timeRange.second - timeRange.first));
                         indicatorX += proportionIndicator * (float)zoomBounds.getWidth();
                     }
 
@@ -126,7 +95,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                     {
                         draggedHandle = (owner.getActiveZoomPoint() == ControlPanel::ActiveZoomPoint::In) 
                                          ? CutMarkerHandle::In : CutMarkerHandle::Out;
-                        dragStartMouseOffset = zoomedTime - loopPointTime; // Prevent jump
+                        dragStartMouseOffset = zoomedTime - cutPointTime;
                         
                         if (draggedHandle == CutMarkerHandle::In)
                             owner.setAutoCutInActive(false);
@@ -135,14 +104,13 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                     }
                     else
                     {
-                        // Seek playback in zoom popup - CONSTRAINED TO LOOP
-                        double effectiveLoopIn = juce::jmax(0.0, owner.getCutInPosition());
-                        double effectiveLoopOut = owner.getCutOutPosition();
-                        double constrainedTime = juce::jlimit(effectiveLoopIn, effectiveLoopOut, zoomedTime);
+                        double effectiveCutIn = juce::jmax(0.0, owner.getCutInPosition());
+                        double effectiveCutOut = owner.getCutOutPosition();
+                        double constrainedTime = juce::jlimit(effectiveCutIn, effectiveCutOut, zoomedTime);
 
                         owner.getAudioPlayer().setPlayheadPosition(constrainedTime);
                         isDragging = true;
-            isScrubbingState = true;
+                        isScrubbingState = true;
                         mouseDragStartX = event.x;
                     }
                 }
@@ -162,7 +130,6 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
         draggedHandle = getHandleAtPosition(event.getPosition());
         auto& silenceDetector = owner.getSilenceDetector();
         
-        // Handle Locking logic
         if (Config::Audio::lockHandlesWhenAutoCutActive)
         {
             if ((draggedHandle == CutMarkerHandle::In && silenceDetector.getIsAutoCutInActive()) ||
@@ -173,7 +140,6 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
             }
         }
         
-        // Auto-disable logic (if not locked)
         if (draggedHandle != CutMarkerHandle::None)
         {
             if (draggedHandle == CutMarkerHandle::In || draggedHandle == CutMarkerHandle::Full)
@@ -186,7 +152,6 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
             }
         }
 
-        // Initialize drag operations
         if (draggedHandle == CutMarkerHandle::Full)
         {
             dragStartCutLength = std::abs(owner.getCutOutPosition() - owner.getCutInPosition());
@@ -215,24 +180,16 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
     }
     else if (event.mods.isRightButtonDown())
     {
-        handleRightClickForLoopPlacement(event.x);
+        handleRightClickForCutPlacement(event.x);
     }
 }
 
-/**
- * @brief Handles mouse drag events.
- *
- * Continuously updates the audio playback position if a seeking drag
- * operation is active and within the waveform bounds.
- * @param event The mouse event details, including position, delta, and modifiers.
- */
 void MouseHandler::mouseDrag(const juce::MouseEvent& event)
 {
     const auto waveformBounds = owner.getWaveformBounds();
     if (!event.mods.isLeftButtonDown())
         return;
 
-    // Update cursor position even during drag
     if (waveformBounds.contains(event.getPosition()))
     {
         mouseCursorX = event.x;
@@ -246,7 +203,6 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
         }
     }
 
-    // --- ZOOM POPUP DRAG ---
     if (interactionStartedInZoom && owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None && (draggedHandle != CutMarkerHandle::None || isDragging))
     {
         auto zoomBounds = owner.getZoomPopupBounds();
@@ -259,20 +215,19 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
 
             if (draggedHandle != CutMarkerHandle::None)
             {
-                // Use offset if not in placement mode to prevent jumping
                 double offset = (currentPlacementMode == AppEnums::PlacementMode::None) ? dragStartMouseOffset : 0.0;
                 
                 if (draggedHandle == CutMarkerHandle::In)
                     owner.getAudioPlayer().setCutIn(zoomedTime - offset);
                 else if (draggedHandle == CutMarkerHandle::Out)
                     owner.getAudioPlayer().setCutOut(zoomedTime - offset);
-                owner.ensureLoopOrder();
+                owner.ensureCutOrder();
             }
             else if (isDragging)
             {
-                double effectiveLoopIn = juce::jmax(0.0, owner.getCutInPosition());
-                double effectiveLoopOut = owner.getCutOutPosition();
-                double constrainedTime = juce::jlimit(effectiveLoopIn, effectiveLoopOut, zoomedTime);
+                double effectiveCutIn = juce::jmax(0.0, owner.getCutInPosition());
+                double effectiveCutOut = owner.getCutOutPosition();
+                double constrainedTime = juce::jlimit(effectiveCutIn, effectiveCutOut, zoomedTime);
                 
                 owner.getAudioPlayer().setPlayheadPosition(constrainedTime);
             }
@@ -306,7 +261,6 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
                 double newIn = mouseTime - dragStartMouseOffset;
                 double newOut = newIn + dragStartCutLength;
                 
-                // Clamp to bounds while preserving length
                 if (newIn < 0.0)
                 {
                     newIn = 0.0;
@@ -321,11 +275,10 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
                 owner.getAudioPlayer().setCutIn(newIn);
                 owner.getAudioPlayer().setCutOut(newOut);
 
-                // Ensure cursor stays in the moving loop
                 audioPlayer.setPlayheadPosition(audioPlayer.getTransportSource().getCurrentPosition());
             }
 
-            owner.ensureLoopOrder();
+            owner.ensureCutOrder();
             owner.updateCutLabels();
             owner.repaint();
         }
@@ -337,38 +290,26 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
     }
 }
 
-/**
- * @brief Handles mouse up events.
- *
- * Stops any active dragging operation. Finalizes a seek operation or, if
- * in loop placement mode, sets the corresponding loop point based on the
- * mouse position. Resets the placement mode after interaction.
- * @param event The mouse event details, including position and modifiers.
- */
 void MouseHandler::mouseUp(const juce::MouseEvent& event)
 {
-    // --- ZOOM POPUP UP ---
     if (owner.getActiveZoomPoint() != ControlPanel::ActiveZoomPoint::None && (isDragging || draggedHandle != CutMarkerHandle::None || currentPlacementMode != AppEnums::PlacementMode::None))
     {
         if (currentPlacementMode != AppEnums::PlacementMode::None)
         {
             currentPlacementMode = AppEnums::PlacementMode::None;
-            owner.updateLoopButtonColors();
+            owner.updateCutButtonColors();
         }
         isDragging = false;
-    isScrubbingState = false;
+        isScrubbingState = false;
         draggedHandle = CutMarkerHandle::None;
         owner.repaint();
-        // We don't return here yet because we might want to let the regular logic run too, 
-        // but for zoom popup interaction, it's usually enough.
-        // Actually, if we were interacting with zoom, we should consume this.
         return;
     }
 
     isDragging = false;
     isScrubbingState = false;
     draggedHandle = CutMarkerHandle::None;
-    owner.jumpToCutIn(); // Jump after regular drag
+    owner.jumpToCutIn();
     
     const auto waveformBounds = owner.getWaveformBounds();
     if (waveformBounds.contains(event.getPosition()) && event.mods.isLeftButtonDown())
@@ -382,26 +323,24 @@ void MouseHandler::mouseUp(const juce::MouseEvent& event)
                 float proportion = (float)(event.x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
                 double time = proportion * audioLength;
 
-                if (currentPlacementMode == AppEnums::PlacementMode::LoopIn)
+                if (currentPlacementMode == AppEnums::PlacementMode::CutIn)
                 {
                     owner.setCutInPosition(time);
                     owner.setAutoCutInActive(false);
                 }
-                else if (currentPlacementMode == AppEnums::PlacementMode::LoopOut)
+                else if (currentPlacementMode == AppEnums::PlacementMode::CutOut)
                 {
                     owner.setCutOutPosition(time);
                     owner.setAutoCutOutActive(false);
                 }
-                owner.ensureLoopOrder();
+                owner.ensureCutOrder();
                 owner.updateCutLabels();
-                owner.jumpToCutIn(); // Immediate jump on waveform placement
+                owner.jumpToCutIn();
             }
-            currentPlacementMode = AppEnums::PlacementMode::None; // Reset placement mode
-            owner.updateLoopButtonColors(); // Update button colours
+            currentPlacementMode = AppEnums::PlacementMode::None;
+            owner.updateCutButtonColors();
             owner.repaint();
         }
-        // If it was a click (not a drag) then seek to position.
-        // If it was a drag, seekToMousePosition would have already been called.
         else if (mouseDragStartX == event.x)
         {
             seekToMousePosition(event.x);
@@ -409,14 +348,6 @@ void MouseHandler::mouseUp(const juce::MouseEvent& event)
     }
 }
 
-/**
- * @brief Handles mouse exit events from the component's bounds.
- *
- * Resets the internal mouse cursor position state (`mouseCursorX`, `mouseCursorY`)
- * to indicate the mouse is no longer over the component, which typically
- * hides any visual feedback like cursor lines.
- * @param event The mouse event details.
- */
 void MouseHandler::mouseExit(const juce::MouseEvent& event)
 {
     juce::ignoreUnused(event);
@@ -434,7 +365,6 @@ void MouseHandler::mouseWheelMove(const juce::MouseEvent& event, const juce::Mou
     if (!waveformBounds.contains(event.getPosition()))
         return;
 
-    // CTRL + Mouse Wheel (without Shift) ALWAYS controls zoom
     if (event.mods.isCtrlDown() && !event.mods.isShiftDown())
     {
         float currentZoom = owner.getZoomFactor();
@@ -450,35 +380,20 @@ void MouseHandler::mouseWheelMove(const juce::MouseEvent& event, const juce::Mou
     
     if (audioLength <= 0.0)
         return;
-    // Use fixed time steps (0.01s base) scaled by FocusManager
     double multiplier = FocusManager::getStepMultiplier(event.mods.isShiftDown(), event.mods.isCtrlDown());
     double step = 0.01 * multiplier;
     
-    // Alt is a x10 multiplier
     if (event.mods.isAltDown())
         step *= 10.0;
 
     double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
     double newPos = currentPos + (direction * step);
 
-    // Constrain to loop
-    double effectiveLoopIn = juce::jmax(0.0, owner.getCutInPosition());
-    double effectiveLoopOut = owner.getCutOutPosition();
-    if (effectiveLoopOut <= 0.0) effectiveLoopOut = audioLength;
-
     audioPlayer.setPlayheadPosition(newPos);
     owner.repaint();
 }
 
-/**
- * @brief Handles right-click events specifically for entering loop point placement modes.
- *
- * This method translates the mouse's X-coordinate into a time, and if
- * in an appropriate placement mode, sets the corresponding loop point
- * in the `ControlPanel`. It also triggers UI updates.
- * @param x The x-coordinate of the mouse click relative to the component.
- */
-void MouseHandler::handleRightClickForLoopPlacement(int x)
+void MouseHandler::handleRightClickForCutPlacement(int x)
 {
     AudioPlayer& audioPlayer = owner.getAudioPlayer();
     auto audioLength = audioPlayer.getThumbnail().getTotalLength();
@@ -488,30 +403,22 @@ void MouseHandler::handleRightClickForLoopPlacement(int x)
     float proportion = (float)(x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
     double time = proportion * audioLength;
 
-    if (currentPlacementMode == AppEnums::PlacementMode::LoopIn)
+    if (currentPlacementMode == AppEnums::PlacementMode::CutIn)
     {
         owner.setCutInPosition(time);
         owner.setAutoCutInActive(false);
     }
-    else if (currentPlacementMode == AppEnums::PlacementMode::LoopOut)
+    else if (currentPlacementMode == AppEnums::PlacementMode::CutOut)
     {
         owner.setCutOutPosition(time);
         owner.setAutoCutOutActive(false);
     }
-    owner.ensureLoopOrder();
-    owner.updateLoopButtonColors();
+    owner.ensureCutOrder();
+    owner.updateCutButtonColors();
     owner.updateCutLabels();
     owner.repaint();
 }
 
-/**
- * @brief Seeks the audio player to the position corresponding to the given x-coordinate.
- *
- * This method translates a UI pixel coordinate within the waveform display area
- * into a time in seconds and instructs the `AudioPlayer` (accessed via `ControlPanel`)
- * to seek to that position.
- * @param x The x-coordinate of the mouse position relative to the component.
- */
 void MouseHandler::seekToMousePosition(int x)
 {
     AudioPlayer& audioPlayer = owner.getAudioPlayer();
@@ -527,7 +434,6 @@ void MouseHandler::seekToMousePosition(int x)
 
 void MouseHandler::clearTextEditorFocusIfNeeded(const juce::MouseEvent& event)
 {
-    // Robust "inside" check using Screen coordinates to avoid coordinate-space errors.
     const auto screenPos = event.getScreenPosition();
     
     for (int i = 0; i < owner.getNumChildComponents(); ++i)
@@ -536,11 +442,10 @@ void MouseHandler::clearTextEditorFocusIfNeeded(const juce::MouseEvent& event)
         if (auto* editorChild = dynamic_cast<juce::TextEditor*>(child))
         {
             if (editorChild->getScreenBounds().contains(screenPos))
-                return; // STOP: We clicked inside an editor. Do not clear focus.
+                return;
         }
     }
 
-    // If we didn't return, clear focus from all editors (we clicked the waveform/background).
     for (int i = 0; i < owner.getNumChildComponents(); ++i)
     {
         if (auto* editorChild = dynamic_cast<juce::TextEditor*>(owner.getChildComponent(i)))
@@ -561,10 +466,9 @@ MouseHandler::CutMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int>
     auto checkHandle = [&](double time) -> bool {
         float x = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(time / audioLength);
         
-        // Define handle hitboxes: Full height vertical strip (30px wide)
-        juce::Rectangle<int> hitStrip((int)(x - Config::Layout::Glow::loopMarkerBoxWidth / 2.0f),
+        juce::Rectangle<int> hitStrip((int)(x - Config::Layout::Glow::cutMarkerBoxWidth / 2.0f),
                                       waveformBounds.getY(), 
-                                      (int)Config::Layout::Glow::loopMarkerBoxWidth,
+                                      (int)Config::Layout::Glow::cutMarkerBoxWidth,
                                       waveformBounds.getHeight());
                                        
         return hitStrip.contains(pos);
@@ -573,7 +477,6 @@ MouseHandler::CutMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int>
     if (checkHandle(owner.getCutInPosition())) return CutMarkerHandle::In;
     if (checkHandle(owner.getCutOutPosition())) return CutMarkerHandle::Out;
 
-    // Check for Full cut handle (top/bottom box areas between markers)
     const double cutIn = owner.getCutInPosition();
     const double cutOut = owner.getCutOutPosition();
     const double actualIn = juce::jmin(cutIn, cutOut);
@@ -582,7 +485,7 @@ MouseHandler::CutMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int>
     float inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(actualIn / audioLength);
     float outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(actualOut / audioLength);
     
-    int hollowHeight = Config::Layout::Glow::loopMarkerBoxHeight;
+    int hollowHeight = Config::Layout::Glow::cutMarkerBoxHeight;
     
     juce::Rectangle<int> topHollow((int)inX, waveformBounds.getY(), (int)(outX - inX), hollowHeight);
     juce::Rectangle<int> bottomHollow((int)inX, waveformBounds.getBottom() - hollowHeight, (int)(outX - inX), hollowHeight);

@@ -1,5 +1,5 @@
 #include "ControlPanel.h"
-#include "AudioPlayer.h" // Required for AudioPlayer types in public methods
+#include "AudioPlayer.h"
 #include "Config.h"
 #include "ControlButtonsPresenter.h"
 #include "ControlPanelCopy.h"
@@ -7,11 +7,10 @@
 #include "FocusManager.h"
 #include "LayoutManager.h"
 #include "CutButtonPresenter.h"
-
-#include "LoopPresenter.h"
+#include "RepeatPresenter.h"
 #include "CutResetPresenter.h"
-#include "MainComponent.h" // Full header required for MainComponent access (e.g., getAudioPlayer)
-#include "PlaybackOverlay.h"
+#include "MainComponent.h"
+#include "PlaybackCursorView.h"
 #include "PlaybackCursorGlow.h"
 #include "PlaybackTextPresenter.h"
 #include "SilenceDetectionPresenter.h"
@@ -21,29 +20,8 @@
 #include "WaveformView.h"
 #include "CutLayerView.h"
 #include "CutPresenter.h"
-#include <cmath> // For std::abs
+#include <cmath>
 
-/**
- * @file ControlPanel.cpp
- * @brief Implements the ControlPanel class, which manages the application's UI
- * controls and interactions.
- */
-
-/**
- * @brief Constructs the ControlPanel.
- * @param ownerComponent A reference to the `MainComponent` that owns this
- * panel. This reference is vital for inter-component communication, allowing
- * the `ControlPanel` to delegate core application logic (like file opening or
- * audio playback) to its owner.
- *
- * This constructor initializes member variables, including the
- * `ModernLookAndFeel` for custom styling and a `SilenceDetector` for automatic
- * loop point finding. It then calls various `initialise` methods to set up all
- * UI buttons, editors, and their respective callbacks, and finally performs any
- * necessary post-initialization setup with `finaliseSetup()`. The mouse cursor
- * is set to `CrosshairCursor` to provide immediate visual feedback for
- * interactive elements.
- */
 ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionStateIn)
     : owner(ownerComponent),
       sessionState(sessionStateIn),
@@ -56,11 +34,7 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   waveformView->setQuality(currentQuality);
   waveformView->setChannelMode(currentChannelViewMode);
   addAndMakeVisible(waveformView.get());
-  statsPresenter = std::make_unique<StatsPresenter>(*this);
-  silenceDetectionPresenter =
-      std::make_unique<SilenceDetectionPresenter>(*this);
-  playbackTextPresenter = std::make_unique<PlaybackTextPresenter>(*this);
-  playbackOverlay = std::make_unique<PlaybackOverlay>(*this);
+
   cutLayerView = std::make_unique<CutLayerView>(sessionState,
                                                 *silenceDetector,
                                                 owner.getAudioPlayer()->getWaveformManager(),
@@ -68,18 +42,24 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   cutPresenter = std::make_unique<CutPresenter>(*this, sessionState, *cutLayerView);
   cutLayerView->setMouseHandler(cutPresenter->getMouseHandler());
   addAndMakeVisible(cutLayerView.get());
-  addAndMakeVisible(playbackOverlay.get());
-  playbackOverlay->setInterceptsMouseClicks(false, false);
+
+  playbackCursorView = std::make_unique<PlaybackCursorView>(*this);
+  addAndMakeVisible(playbackCursorView.get());
+  playbackCursorView->setInterceptsMouseClicks(false, false);
+
+  statsPresenter = std::make_unique<StatsPresenter>(*this);
+  silenceDetectionPresenter = std::make_unique<SilenceDetectionPresenter>(*this);
+  playbackTextPresenter = std::make_unique<PlaybackTextPresenter>(*this);
+
   buttonPresenter = std::make_unique<ControlButtonsPresenter>(*this);
   buttonPresenter->initialiseAllButtons();
 
   cutButtonPresenter = std::make_unique<CutButtonPresenter>(*this);
-  loopPresenter = std::make_unique<LoopPresenter>(*this, *silenceDetector,
+  repeatPresenter = std::make_unique<RepeatPresenter>(*this, *silenceDetector,
                                                   cutInEditor, cutOutEditor);
-  loopPresenter->initialiseEditors();
+  repeatPresenter->initialiseEditors();
 
-  initialiseCutEditors(); // Contains remaining init logic (reset presenter,
-                           // thresholds)
+  initialiseCutEditors();
 
   controlStatePresenter = std::make_unique<ControlStatePresenter>(*this);
   transportPresenter = std::make_unique<TransportPresenter>(*this);
@@ -90,26 +70,11 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   setMouseCursor(juce::MouseCursor::CrosshairCursor);
 }
 
-/**
- * @brief Destructor for the ControlPanel.
- *
- * Ensures that the custom `ModernLookAndFeel` instance is properly dereferenced
- * by setting the LookAndFeel to `nullptr`. This prevents potential issues if
- * the custom LookAndFeel outlives components that were using it.
- */
 ControlPanel::~ControlPanel() {
   stopTimer();
   setLookAndFeel(nullptr);
 }
 
-/**
- * @brief Initializes and applies the custom `ModernLookAndFeel`.
- *
- * This method sets the `ModernLookAndFeel` instance as the active look and feel
- * for this component and its children. It also configures the base and active
- * colors for buttons, as well as text colors, using values from `Config.h`
- * to ensure a consistent visual theme across the application.
- */
 void ControlPanel::initialiseLookAndFeel() {
   setLookAndFeel(&modernLF);
   modernLF.setBaseOffColor(Config::Colors::Button::base);
@@ -117,24 +82,12 @@ void ControlPanel::initialiseLookAndFeel() {
   modernLF.setTextColor(Config::Colors::Button::text);
 }
 
-/**
- * @brief Initializes the cut editors (`cutInEditor`, `cutOutEditor`) and
- * threshold editors.
- */
 void ControlPanel::initialiseCutEditors() {
-
   cutResetPresenter = std::make_unique<CutResetPresenter>(*this);
-
   addAndMakeVisible(silenceDetector->getInSilenceThresholdEditor());
   addAndMakeVisible(silenceDetector->getOutSilenceThresholdEditor());
 }
-/**
- * @brief Performs final setup steps after all components are initialized.
- *
- * This method ensures that the loop time labels are correctly displayed
- * and that the enabled/disabled and visible states of all UI components
- * are updated to reflect the initial application state (e.g., no audio loaded).
- */
+
 void ControlPanel::invokeOwnerOpenDialog() { owner.openButtonClicked(); }
 
 void ControlPanel::finaliseSetup() {
@@ -144,15 +97,6 @@ void ControlPanel::finaliseSetup() {
   updateComponentStates();
 }
 
-/**
- * @brief Recalculates the layout of all child components when the ControlPanel
- * is resized.
- *
- * This method is central to the responsive design of the UI. It divides the
- * available area into logical sections (top row, loop/cut controls, bottom row,
- * and the main waveform/stats area) and calls specialized layout helper methods
- * to position buttons, editors, and display areas dynamically.
- */
 void ControlPanel::resized() {
   if (layoutManager != nullptr)
     layoutManager->performLayout();
@@ -166,8 +110,8 @@ void ControlPanel::resized() {
   if (cutLayerView != nullptr)
     cutLayerView->setBounds(layoutCache.waveformBounds);
 
-  if (playbackOverlay != nullptr)
-    playbackOverlay->setBounds(layoutCache.waveformBounds);
+  if (playbackCursorView != nullptr)
+    playbackCursorView->setBounds(layoutCache.waveformBounds);
 }
 
 void ControlPanel::paint(juce::Graphics &g) {
@@ -188,17 +132,12 @@ void ControlPanel::setZKeyDown(bool isDown) {
   m_isZKeyDown = isDown;
 
   if (m_isZKeyDown) {
-    // If we are dragging a handle, zoom to that handle
     auto dragged = getMouseHandler().getDraggedHandle();
     if (dragged == MouseHandler::CutMarkerHandle::In)
       m_activeZoomPoint = ActiveZoomPoint::In;
     else if (dragged == MouseHandler::CutMarkerHandle::Out)
       m_activeZoomPoint = ActiveZoomPoint::Out;
   } else {
-    // On release, we only stop zooming if we aren't hovering/focusing a loop
-    // editor But for now, let's keep it simple: release 'z' -> no zoom unless
-    // we want to keep it on hover. The user said 'z' is a momentary switch, so
-    // let's prioritise that.
     m_activeZoomPoint = ActiveZoomPoint::None;
     performDelayedJumpIfNeeded();
   }
@@ -225,19 +164,19 @@ double ControlPanel::getCutOutPosition() const {
 
 void ControlPanel::setCutInPosition(double pos) {
   sessionState.setCutIn(pos);
-  if (loopPresenter != nullptr)
-    loopPresenter->updateCutLabels();
+  if (repeatPresenter != nullptr)
+    repeatPresenter->updateCutLabels();
 }
 
 void ControlPanel::setCutOutPosition(double pos) {
   sessionState.setCutOut(pos);
-  if (loopPresenter != nullptr)
-    loopPresenter->updateCutLabels();
+  if (repeatPresenter != nullptr)
+    repeatPresenter->updateCutLabels();
 }
 
 void ControlPanel::updateCutLabels() {
-  if (loopPresenter != nullptr)
-    loopPresenter->updateCutLabels();
+  if (repeatPresenter != nullptr)
+    repeatPresenter->updateCutLabels();
 
   if (playbackTextPresenter != nullptr)
     playbackTextPresenter->updateEditors();
@@ -281,12 +220,6 @@ void ControlPanel::setAutoCutOutActive(bool isActive) {
     silenceDetector->detectOutSilence();
 }
 
-/**
- * @brief Lays out the buttons for the top row of the control panel.
- * @param bounds The current bounds of the control panel.
- * @param rowHeight The calculated height for each button row.
- */
-
 void ControlPanel::updateQualityButtonText() {
   if (currentQuality == AppEnums::ThumbnailQuality::High)
     qualityButton.setButtonText(ControlPanelCopy::qualityHighText());
@@ -296,9 +229,6 @@ void ControlPanel::updateQualityButtonText() {
     qualityButton.setButtonText(ControlPanelCopy::qualityLowText());
 }
 
-/**
- * @brief Toggles the visibility of the statistics display.
- */
 void ControlPanel::toggleStats() {
   if (statsPresenter == nullptr)
     return;
@@ -309,52 +239,14 @@ void ControlPanel::toggleStats() {
   updateComponentStates();
 }
 
-/**
- * @brief Triggers the quality button's action, cycling through quality
- * settings.
- */
 void ControlPanel::triggerQualityButton() { qualityButton.triggerClick(); }
-
-/**
- * @brief Triggers the mode button's action, cycling through view modes.
- */
 void ControlPanel::triggerModeButton() { modeButton.triggerClick(); }
+void ControlPanel::triggerChannelViewButton() { channelViewButton.triggerClick(); }
+void ControlPanel::triggerRepeatButton() { repeatButton.triggerClick(); }
 
-/**
- * @brief Triggers the channel view button's action, cycling through channel
- * view modes.
- */
-void ControlPanel::triggerChannelViewButton() {
-  channelViewButton.triggerClick();
-}
-
-/**
- * @brief Triggers the loop button's action, toggling looping on/off.
- */
-void ControlPanel::triggerLoopButton() { loopButton.triggerClick(); }
-
-/**
- * @brief Triggers the reset-in button's action, resetting the cut-in boundary.
- */
 void ControlPanel::resetIn() { resetInButton.triggerClick(); }
-
-/**
- * @brief Triggers the reset-out button's action, resetting the cut-out boundary.
- */
 void ControlPanel::resetOut() { resetOutButton.triggerClick(); }
 
-
-/**
- * @brief Parses a time string (HH:MM:SS:mmm) into a double representing
- * seconds.
- * @param timeString The time string to parse.
- * @return The time in seconds, or -1.0 if parsing fails.
- */
-/**
- * @brief Sets the text in the stats display box.
- * @param text The text to display.
- * @param color The color of the text.
- */
 void ControlPanel::setStatsDisplayText(const juce::String &text,
                                        juce::Colour color) {
   if (statsPresenter != nullptr)
@@ -362,8 +254,7 @@ void ControlPanel::setStatsDisplayText(const juce::String &text,
 }
 
 void ControlPanel::logStatusMessage(const juce::String &message, bool isError) {
-  const auto color =
-      isError ? Config::Colors::statsErrorText : Config::Colors::statsText;
+  const auto color = isError ? Config::Colors::statsErrorText : Config::Colors::statsText;
   setStatsDisplayText(message, color);
 }
 
@@ -371,9 +262,10 @@ void ControlPanel::updateStatsFromAudio() {
   if (statsPresenter != nullptr)
     statsPresenter->updateStats();
 }
-void ControlPanel::ensureLoopOrder() {
-  if (loopPresenter != nullptr)
-    loopPresenter->ensureLoopOrder();
+
+void ControlPanel::ensureCutOrder() {
+  if (repeatPresenter != nullptr)
+    repeatPresenter->ensureCutOrder();
 }
 
 void ControlPanel::setShouldShowStats(bool shouldShowStatsParam) {
@@ -386,16 +278,15 @@ void ControlPanel::setTotalTimeStaticString(const juce::String &timeString) {
     playbackTextPresenter->setTotalTimeStaticString(timeString);
 }
 
-void ControlPanel::setShouldLoop(bool shouldLoopParam) {
-  shouldLoop = shouldLoopParam;
+void ControlPanel::setShouldRepeat(bool shouldRepeatParam) {
+  shouldRepeat = shouldRepeatParam;
 }
-void ControlPanel::updateLoopButtonColors() {
+
+void ControlPanel::updateCutButtonColors() {
   if (cutButtonPresenter != nullptr)
     cutButtonPresenter->updateColours();
 }
 
-// Public accessors for SilenceDetector and other classes to interact with
-// ControlPanel
 AudioPlayer &ControlPanel::getAudioPlayer() const {
   return *owner.getAudioPlayer();
 }
@@ -416,13 +307,13 @@ juce::TextEditor &ControlPanel::getStatsDisplay() {
 }
 
 void ControlPanel::setCutStart(int sampleIndex) {
-  if (loopPresenter != nullptr)
-    loopPresenter->setCutStartFromSample(sampleIndex);
+  if (repeatPresenter != nullptr)
+    repeatPresenter->setCutStartFromSample(sampleIndex);
 }
 
 void ControlPanel::setCutEnd(int sampleIndex) {
-  if (loopPresenter != nullptr)
-    loopPresenter->setCutEndFromSample(sampleIndex);
+  if (repeatPresenter != nullptr)
+    repeatPresenter->setCutEndFromSample(sampleIndex);
 }
 
 juce::String ControlPanel::formatTime(double seconds) const {
@@ -478,8 +369,8 @@ void ControlPanel::drawMouseCursorOverlays(juce::Graphics& g) {
   juce::Colour currentGlowColor;
   float currentGlowThickness = 0.0f;
 
-  if (mouse.getCurrentPlacementMode() == AppEnums::PlacementMode::LoopIn
-      || mouse.getCurrentPlacementMode() == AppEnums::PlacementMode::LoopOut)
+  if (mouse.getCurrentPlacementMode() == AppEnums::PlacementMode::CutIn
+      || mouse.getCurrentPlacementMode() == AppEnums::PlacementMode::CutOut)
   {
     currentLineColor = Config::Colors::mousePlacementMode;
     currentHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
@@ -663,8 +554,8 @@ void ControlPanel::drawZoomPopup(juce::Graphics& g)
   bool isDraggingCutIn = mouse.getDraggedHandle() == MouseHandler::CutMarkerHandle::In;
   bool isDraggingCutOut = mouse.getDraggedHandle() == MouseHandler::CutMarkerHandle::Out;
 
-  drawFineLine(cutIn, Config::Colors::loopLine, 1.0f);
-  drawFineLine(cutOut, Config::Colors::loopLine, 1.0f);
+  drawFineLine(cutIn, Config::Colors::cutLine, 1.0f);
+  drawFineLine(cutOut, Config::Colors::cutLine, 1.0f);
   drawFineLine(audioPlayer.getTransportSource().getCurrentPosition(), Config::Colors::playbackCursor, 1.0f);
 
   if (isDraggingCutIn || isDraggingCutOut)
@@ -677,12 +568,11 @@ void ControlPanel::drawZoomPopup(juce::Graphics& g)
 }
 
 void ControlPanel::updateCursorPosition() {
-  if (playbackOverlay != nullptr)
-    playbackOverlay->repaint();
+  if (playbackCursorView != nullptr)
+    playbackCursorView->repaint();
 }
 
 void ControlPanel::timerCallback() {
-  // Handle momentary 'z' zoom key
   const bool isZDown = juce::KeyPress::isKeyCurrentlyDown('z') || juce::KeyPress::isKeyCurrentlyDown('Z');
   setZKeyDown(isZDown);
 

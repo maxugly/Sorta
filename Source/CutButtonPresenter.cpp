@@ -12,14 +12,13 @@ CutButtonPresenter::CutButtonPresenter(ControlPanel& ownerPanel)
 void CutButtonPresenter::updateColours()
 {
     const auto placementMode = owner.getMouseHandler().getCurrentPlacementMode();
-    owner.loopInButton.setColour(juce::TextButton::buttonColourId,
-        placementMode == AppEnums::PlacementMode::LoopIn
-            ? Config::Colors::Button::loopPlacement
-            : Config::Colors::Button::loopActive);
-    owner.loopOutButton.setColour(juce::TextButton::buttonColourId,
-        placementMode == AppEnums::PlacementMode::LoopOut
-            ? Config::Colors::Button::loopPlacement
-            : Config::Colors::Button::loopActive);
+    owner.cutInButton.setColour(juce::TextButton::buttonColourId,
+        placementMode == AppEnums::PlacementMode::CutIn
+            ? Config::Colors::Button::cutPlacement
+            : Config::Colors::Button::cutActive);
+    owner.cutOutButton.setColour(juce::TextButton::buttonColourId,
+        placementMode == AppEnums::PlacementMode::CutOut
+            ? Config::Colors::Button::cutPlacement
+            : Config::Colors::Button::cutActive);
     owner.updateCutLabels();
 }
-

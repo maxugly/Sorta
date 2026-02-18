@@ -1,28 +1,23 @@
-#ifndef AUDIOFILER_LOOPBUTTON_H
-#define AUDIOFILER_LOOPBUTTON_H
+#ifndef AUDIOFILER_REPEATBUTTON_H
+#define AUDIOFILER_REPEATBUTTON_H
 
 #include <JuceHeader.h>
 #include <functional>
 
 /**
- * @class LoopButton
+ * @class RepeatButton
  * @brief A custom button class designed to differentiate between left and right mouse clicks.
- *
- * This button is specifically used for the "Loop In" and "Loop Out" functionalities,
- * allowing a left-click to directly set a point and a right-click to enter a
- * placement mode for more precise interaction. It exposes `onLeftClick` and
- * `onRightClick` function objects for flexible callback assignment.
  */
-class LoopButton final : public juce::TextButton {
+class RepeatButton final : public juce::TextButton {
 public:
     std::function<void()> onLeftClick;  ///< Function to call when the left mouse button is released over the button.
     std::function<void()> onRightClick; ///< Function to call when the right mouse button is released over the button.
 
     /**
-     * @brief Constructs a LoopButton.
+     * @brief Constructs a RepeatButton.
      * @param name The text to display on the button.
      */
-    LoopButton (const juce::String& name = {});
+    RepeatButton (const juce::String& name = {});
 
 private:
     /**
@@ -31,7 +26,7 @@ private:
      */
     void mouseUp (const juce::MouseEvent& event) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LoopButton)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RepeatButton)
 };
 
-#endif // AUDIOFILER_LOOPBUTTON_H
+#endif // AUDIOFILER_REPEATBUTTON_H

@@ -29,13 +29,11 @@ public:
   }
 
 private:
-  // juce::TextEditor::Listener overrides
   void textEditorTextChanged(juce::TextEditor &editor) override;
   void textEditorReturnKeyPressed(juce::TextEditor &editor) override;
   void textEditorEscapeKeyPressed(juce::TextEditor &editor) override;
   void textEditorFocusLost(juce::TextEditor &editor) override;
 
-  // juce::MouseListener overrides
   void mouseWheelMove(const juce::MouseEvent &event,
                       const juce::MouseWheelDetails &wheel) override;
   void mouseUp(const juce::MouseEvent &event) override;
@@ -44,14 +42,12 @@ private:
   void syncEditorToPosition(juce::TextEditor &editor, double positionSeconds,
                             bool isRemaining = false);
 
-  juce::String buildCutLengthText() const;
-
   ControlPanel &owner;
   juce::String totalTimeStaticStr;
 
   bool isEditingElapsed{false};
   bool isEditingRemaining{false};
-  bool isEditingLoopLength{false};
+  bool isEditingCutLength{false};
 
   void mouseDown(const juce::MouseEvent &event) override;
 };

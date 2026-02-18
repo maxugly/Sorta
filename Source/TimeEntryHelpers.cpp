@@ -24,16 +24,16 @@ namespace TimeEntryHelpers
 
     double calculateStepSize(int charIndex, const juce::ModifierKeys& mods, double sampleRate)
     {
-        double step = Config::Audio::loopStepMilliseconds;
+        double step = Config::Audio::cutStepMilliseconds;
         bool isMillis = false;
 
         // Determine base step from cursor position
         if (charIndex >= 0 && charIndex <= 1)      // HH
-            step = Config::Audio::loopStepHours;
+            step = Config::Audio::cutStepHours;
         else if (charIndex >= 3 && charIndex <= 4) // MM
-            step = Config::Audio::loopStepMinutes;
+            step = Config::Audio::cutStepMinutes;
         else if (charIndex >= 6 && charIndex <= 7) // SS
-            step = Config::Audio::loopStepSeconds;
+            step = Config::Audio::cutStepSeconds;
         else if (charIndex >= 9)                   // mmm
             isMillis = true;
 
@@ -45,13 +45,11 @@ namespace TimeEntryHelpers
             }
             else if (mods.isShiftDown())
             {
-                step = Config::Audio::loopStepMillisecondsFine;
+                step = Config::Audio::cutStepMillisecondsFine;
             }
-            // else Normal -> step remains Config::Audio::loopStepMilliseconds
         }
         else
         {
-            // Generic multiplier for other units
             double multiplier = 1.0;
             if (mods.isShiftDown() && mods.isCtrlDown())
                 multiplier = 0.01;
@@ -61,7 +59,6 @@ namespace TimeEntryHelpers
             step *= multiplier;
         }
 
-        // Alt applies to everything
         if (mods.isAltDown())
             step *= 10.0;
 

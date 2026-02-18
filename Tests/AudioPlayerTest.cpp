@@ -66,7 +66,7 @@ public:
             player.setPlayheadPosition(9.0);
             expectEquals(player.getTransportSource().getCurrentPosition(), 8.0);
 
-            // Test case 4: Swapped loop points
+            // Test case 4: Swapped cut points
             player.setCutIn(8.0);
             player.setCutOut(2.0);
             player.setPlayheadPosition(5.0);

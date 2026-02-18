@@ -38,9 +38,6 @@ public:
     void setCurrentFilePath(const juce::String& filePath) { currentFilePath = filePath; }
     const juce::String& getCurrentFilePath() const { return currentFilePath; }
 
-    bool isLooping;
-    bool autoplay;
-
 private:
     MainDomain::CutPreferences cutPrefs;
     juce::String currentFilePath;

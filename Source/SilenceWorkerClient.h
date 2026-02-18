@@ -11,33 +11,26 @@ class AudioPlayer;
 
 /**
  * @class SilenceWorkerClient
- * @brief Interface for any component that wishes to use the SilenceAnalysisWorker.
- *
- * This abstraction allows the worker to be unit tested without instantiating the full ControlPanel,
- * and decouples the worker from the UI implementation.
+ * @brief Interface for receiving callbacks from the silence analysis worker.
  */
-class SilenceWorkerClient
-{
+class SilenceWorkerClient {
 public:
     virtual ~SilenceWorkerClient() = default;
 
-    /** @brief Provides access to the audio player for scanning. */
+    /** @brief Provides access to the audio player for sample rate/length info. */
     virtual AudioPlayer& getAudioPlayer() = 0;
 
-    /** @brief Updates the loop start position. */
-    virtual void setCutInPosition(double seconds) = 0;
+    /** @brief Logs a status message to the UI. */
+    virtual void logStatusMessage(const juce::String& message, bool isError = false) = 0;
 
-    /** @brief Updates the loop end position. */
-    virtual void setCutOutPosition(double seconds) = 0;
-
-    /** @brief Gets the current loop start position (needed for safe checks). */
-    virtual double getCutInPosition() const = 0;
-
-    /** @brief Checks if cut mode is active. */
+    /** @brief Checks if cut mode is currently active. */
     virtual bool isCutModeActive() const = 0;
 
-    /** @brief Logs a status message (e.g., to the stats display). */
-    virtual void logStatusMessage(const juce::String& message, bool isError = false) = 0;
+    /** @brief Updates the cut start position. */
+    virtual void setCutStart(int sampleIndex) = 0;
+
+    /** @brief Updates the cut end position. */
+    virtual void setCutEnd(int sampleIndex) = 0;
 };
 
 #endif // AUDIOFILER_SILENCEWORKERCLIENT_H

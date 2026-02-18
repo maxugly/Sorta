@@ -3,7 +3,7 @@
 #include "ControlPanel.h"
 #include "Config.h"
 #include "KeybindHandler.h"
-#include "PlaybackLoopController.h"
+#include "PlaybackRepeatController.h"
 
 MainComponent::MainComponent()
 {
@@ -17,7 +17,7 @@ MainComponent::MainComponent()
     
     // 3. Initialize controllers that bridge UI and Logic
     keybindHandler = std::make_unique<KeybindHandler>(*this, *audioPlayer, *controlPanel);
-    playbackLoopController = std::make_unique<PlaybackLoopController>(*audioPlayer, *controlPanel);
+    playbackRepeatController = std::make_unique<PlaybackRepeatController>(*audioPlayer, *controlPanel);
 
     // 4. Set Audio Channels (Important to do before some UI sizing if they depend on audio state)
     setAudioChannels(0, 2);
