@@ -14,7 +14,7 @@ Enables extensibility: New features plug in like Lego (e.g., add a PluginManager
 LLM-friendly: Short files (<500 lines) with clear comments make AI tools (like Gemini or Jules) more effective for generation/refactoring.
 
 How we apply SoC in audiofiler:
-Single Responsibility Principle (SRP): Each class does one job (e.g., WaveformRenderer only renders visuals, KeybindHandler only handles keys).
+Single Responsibility Principle (SRP): Each class does one job (e.g., WaveformView only renders visuals, KeybindHandler only handles keys).
 Ownership & Delegation: Parent classes (e.g., ControlPanel) own child classes via std::unique_ptr and delegate (e.g., controlPanel->mouseHandler->mouseDown(event)).
 Interfaces/Refs: Use references for access (e.g., MouseHandler takes ControlPanel& ref to get bounds, avoiding tight coupling).
 Granularity: We went "super granular" (e.g., PlaybackCursorGlow for one visual effect) to make pieces like Lego — easy for a noob to see/rewire.
@@ -31,7 +31,7 @@ Use existing hooks: Delegate via owners (e.g., add method to ControlPanel that c
 
 One Small Addition Per Session:
 Similar to refactoring: Add one class/method at a time.
-Prompt LLM (e.g., Jules): "Add export feature to AudioPlayer as new method exportLoopToFile(File outFile). Preserve modularity, use Config for formats."
+Prompt LLM (e.g., Jules): "Add export feature to AudioPlayer as new method exportCutToFile(File outFile). Preserve modularity, use Config for formats."
 No big bangs — avoid touching multiple files unless necessary.
 
 Integrate with Existing Practices:
@@ -49,10 +49,10 @@ If bugs: Use Git reset; fix iteratively.
 
 Edge Cases & Errors:
 Handle failures (e.g., export fails → log to statsDisplay with errorColor).
-Preserve states (e.g., new feature doesn't reset loop positions).
+Preserve states (e.g., new feature doesn't reset cut positions).
 
 
-Example: Adding "undo loop changes" — Create LoopHistory.h/cpp (stores position stacks), owned by LoopPresenter. Add methods like pushState(), undo(); wire to new button in ButtonManager.
+Example: Adding "undo cut changes" — Create CutHistory.h/cpp (stores position stacks), owned by RepeatPresenter. Add methods like pushState(), undo(); wire to new button in ButtonManager.
 
 All Our Specific Practices
 1. Configuration & Theming (The "Config.h" Standard)
