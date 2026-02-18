@@ -96,7 +96,7 @@ bool KeybindHandler::handleLoopKeybinds(const juce::KeyPress& key)
             // Why: Snapshot the current playhead as loop-in when no placement mode is active.
             controlPanel.setCutInPosition(audioPlayer.getTransportSource().getCurrentPosition());
             controlPanel.setAutoCutInActive(false);
-            controlPanel.jumpToLoopIn();
+            controlPanel.jumpToCutIn();
             controlPanel.repaint();
             return true;
         }
@@ -105,7 +105,7 @@ bool KeybindHandler::handleLoopKeybinds(const juce::KeyPress& key)
             // Why: Snapshot the current playhead as loop-out when no placement mode is active.
             controlPanel.setCutOutPosition(audioPlayer.getTransportSource().getCurrentPosition());
             controlPanel.setAutoCutOutActive(false);
-            controlPanel.jumpToLoopIn();
+            controlPanel.jumpToCutIn();
             controlPanel.repaint();
             return true;
         }
