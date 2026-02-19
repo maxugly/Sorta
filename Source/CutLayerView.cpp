@@ -24,10 +24,15 @@ CutLayerView::CutLayerView(ControlPanel& ownerIn,
 
 void CutLayerView::paint(juce::Graphics& g)
 {
-    owner.renderOverlays(g);
-
     if (!markersVisible)
+    {
+        // Even if markers are hidden, we might want mouse overlays (e.g. scrubbing)
+        // However, if the component is shrunken to waveform bounds, we must translate.
+        juce::Graphics::ScopedSaveState save(g);
+        g.addTransform(juce::AffineTransform::translation((float)-getX(), (float)-getY()));
+        owner.renderOverlays(g);
         return;
+    }
 
     const auto bounds = getLocalBounds();
     const float audioLength = (float)waveformManager.getThumbnail().getTotalLength();
@@ -186,4 +191,9 @@ void CutLayerView::paint(juce::Graphics& g)
         g.drawLine(startX, (float)bounds.getBottom() - 1.0f, endX, (float)bounds.getBottom() - 1.0f, thickness);
         g.drawLine(startX, (float)bounds.getBottom() - boxHeight, endX, (float)bounds.getBottom() - boxHeight, thickness);
     }
+
+    // Draw dynamic overlays last so they appear on top of markers/shadows
+    juce::Graphics::ScopedSaveState save(g);
+    g.addTransform(juce::AffineTransform::translation((float)-getX(), (float)-getY()));
+    owner.renderOverlays(g);
 }
