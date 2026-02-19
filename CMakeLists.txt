@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(audiofiler VERSION 0.0.0006)
+project(audiofiler VERSION 0.0.0007)
 
 # Enable testing infrastructure
 enable_testing()
