@@ -1,3 +1,9 @@
+/**
+ * @file AudioPlayer.cpp
+ * @brief Defines the AudioPlayer class.
+ * @ingroup Engine
+ */
+
 #include "AudioPlayer.h"
 #include "PlaybackHelpers.h"
 #include "SessionState.h"
@@ -66,6 +72,11 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
 
         loadedFile = file;
         {
+            /**
+             * @brief Undocumented method.
+             * @param readerMutex [in] Description for readerMutex.
+             * @return std::lock_guard<std::mutex>
+             */
             std::lock_guard<std::mutex> lock(readerMutex);
             auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
             transportSource.setSource(newSource.get(), Config::Audio::readAheadBufferSize, &readAheadThread, reader->sampleRate);
@@ -84,6 +95,10 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
             if (sessionState.getCutPrefs().autoCut.outActive)
                 startSilenceAnalysis(sessionState.getCutPrefs().autoCut.thresholdOut, false);
         }
+        /**
+         * @brief Undocumented method.
+         * @return return
+         */
         return juce::Result::ok();
     }
 
@@ -104,6 +119,11 @@ void AudioPlayer::startSilenceAnalysis(float threshold, bool detectingIn)
             presenter->startSilenceAnalysis(threshold, detectingIn);
     }
 #else
+    /**
+     * @brief Undocumented method.
+     * @param threshold [in] Description for threshold.
+     * @param detectingIn [in] Description for detectingIn.
+     */
     juce::ignoreUnused(threshold, detectingIn);
 #endif
 }
@@ -204,6 +224,10 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
     {
         if (repeating)
         {
+            /**
+             * @brief Sets the PlayheadPosition.
+             * @param cutIn [in] Description for cutIn.
+             */
             setPlayheadPosition(cutIn);
             transportSource.getNextAudioBlock(bufferToFill);
         }
@@ -232,10 +256,18 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
         }
 
         if (repeating)
+            /**
+             * @brief Sets the PlayheadPosition.
+             * @param cutIn [in] Description for cutIn.
+             */
             setPlayheadPosition(cutIn);
         else
         {
             transportSource.stop();
+            /**
+             * @brief Sets the PlayheadPosition.
+             * @param cutOut [in] Description for cutOut.
+             */
             setPlayheadPosition(cutOut);
         }
     }
@@ -250,6 +282,9 @@ void AudioPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     if (source == &transportSource)
     {
+        /**
+         * @brief Undocumented method.
+         */
         sendChangeMessage();
     }
 }
@@ -266,8 +301,18 @@ void AudioPlayer::cutPreferenceChanged(const MainDomain::CutPreferences& prefs)
     const bool shouldAnalyzeOut = (outThresholdChanged || outActiveChanged) && autoCut.outActive;
 
     if (shouldAnalyzeIn)
+        /**
+         * @brief Undocumented method.
+         * @param autoCut.thresholdIn [in] Description for autoCut.thresholdIn.
+         * @param true [in] Description for true.
+         */
         startSilenceAnalysis(autoCut.thresholdIn, true);
     else if (shouldAnalyzeOut)
+        /**
+         * @brief Undocumented method.
+         * @param autoCut.thresholdOut [in] Description for autoCut.thresholdOut.
+         * @param false [in] Description for false.
+         */
         startSilenceAnalysis(autoCut.thresholdOut, false);
 
     lastAutoCutThresholdIn = autoCut.thresholdIn;
@@ -285,6 +330,11 @@ juce::AudioFormatReader* AudioPlayer::getAudioFormatReader() const
 
 bool AudioPlayer::getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamplesOut) const
 {
+    /**
+     * @brief Undocumented method.
+     * @param readerMutex [in] Description for readerMutex.
+     * @return std::lock_guard<std::mutex>
+     */
     std::lock_guard<std::mutex> lock(readerMutex);
     if (readerSource == nullptr)
         return false;
