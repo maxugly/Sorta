@@ -1,6 +1,8 @@
 #ifndef AUDIOFILER_CONTROLPANEL_H
 #define AUDIOFILER_CONTROLPANEL_H
 
+#include "PlaybackTimerManager.h"
+
 class FocusManager;
 #include "AppEnums.h"
 #include "AudioPlayer.h" 
@@ -27,21 +29,34 @@ class FocusManager;
 class MainComponent; 
 
 class LayoutManager;
+
 class WaveformView;
+
 class CutLayerView;
+
 class CutPresenter;
+
 class StatsPresenter;
+
 class RepeatPresenter;
+
 class ControlStatePresenter;
+
 class TransportPresenter;
+
 class SilenceDetectionPresenter;
+
 class ControlButtonsPresenter;
+
 class CutResetPresenter;
+
 class CutButtonPresenter;
+
 class PlaybackTextPresenter;
+
 class PlaybackCursorView;
+
 class ZoomView;
-class PlaybackTimerManager;
 
 /**
  * @ingroup UI
@@ -56,7 +71,8 @@ class PlaybackTimerManager;
  * @see MainComponent
  * @see SessionState
  */
-class ControlPanel final : public juce::Component {
+class ControlPanel final : public juce::Component,
+                           public PlaybackTimerManager::Listener {
 public:
 
   explicit ControlPanel(MainComponent &owner, SessionState &sessionStateIn);
@@ -75,9 +91,9 @@ public:
     repaint();
   }
 
-  bool isZKeyDown() const { return m_isZKeyDown; }
+  bool isZKeyDown() const;
 
-  void setZKeyDown(bool isDown);
+  void playbackTimerTick() override;
 
   juce::Rectangle<int> getZoomPopupBounds() const { return m_zoomPopupBounds; }
 
@@ -311,7 +327,6 @@ private:
   bool m_isCutModeActive = false;
   AppEnums::ActiveZoomPoint m_activeZoomPoint = AppEnums::ActiveZoomPoint::None;
   float m_zoomFactor = 10.0f;
-  bool m_isZKeyDown = false;
   bool m_needsJumpToCutIn = false;
   juce::Rectangle<int> m_zoomPopupBounds;
   std::pair<double, double> m_zoomTimeRange;

@@ -10,19 +10,17 @@
 
 #include "AppEnums.h"
 
+class SessionState;
 class AudioPlayer;
-struct ControlPanelLayoutCache;
-class PlaybackCursorView;
-class ZoomView;
-class ControlPanel;
 
 /**
  * @class PlaybackTimerManager
- * @brief Manages high-frequency (60Hz) updates for playback-related UI elements.
+ * @brief A domain-level utility that manages high-frequency (60Hz) UI heartbeats.
  * 
- * This manager handles the logic for updating the playback cursor position,
- * managing the zoom state based on keyboard input, and notifying listeners
- * of timer ticks.
+ * This manager evacuates high-frequency polling from the UI layer. It monitors 
+ * playback progress and keyboard state, notifying registered listeners at 60Hz.
+ * 
+ * @ingroup Logic
  */
 class PlaybackTimerManager final : public juce::Timer
 {
@@ -35,42 +33,40 @@ public:
     {
     public:
         virtual ~Listener() = default;
+
+        /** @brief Called at a 60Hz frequency to trigger UI updates. */
         virtual void playbackTimerTick() = 0;
     };
 
-    PlaybackTimerManager(ControlPanel& ownerIn, 
-                         AudioPlayer& audioPlayerIn, 
-                         const ControlPanelLayoutCache& layoutCacheIn);
+    /**
+     * @brief Constructor.
+     * @param sessionStateIn Reference to the central application state.
+     * @param audioPlayerIn Reference to the audio engine.
+     */
+    PlaybackTimerManager(SessionState& sessionStateIn, AudioPlayer& audioPlayerIn);
     
+    /** @brief Destructor. stops the timer. */
     ~PlaybackTimerManager() override;
 
+    /** @brief Registers a listener for timer ticks. */
     void addListener(Listener* l);
+
+    /** @brief Unregisters a listener. */
     void removeListener(Listener* l);
 
-    void setViews(PlaybackCursorView* cursorViewIn, ZoomView* zoomViewIn);
-
-    void timerCallback() override;
-
+    /** @brief Returns true if the 'z' key is currently held down. */
     bool isZKeyDown() const { return m_isZKeyDown; }
 
-    void updateCursorPosition();
-    void updateZoomState();
+    /** @brief Internal timer callback. */
+    void timerCallback() override;
 
 private:
-    ControlPanel& owner;
+    SessionState& sessionState;
     AudioPlayer& audioPlayer;
-    const ControlPanelLayoutCache& layoutCache;
-    
-    PlaybackCursorView* playbackCursorView = nullptr;
-    ZoomView* zoomView = nullptr;
     
     juce::ListenerList<Listener> listeners;
     
     bool m_isZKeyDown = false;
-    int lastCursorX = -1;
-    int lastMouseX = -1;
-    int lastMouseY = -1;
-    juce::Rectangle<int> lastPopupBounds;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaybackTimerManager)
 };

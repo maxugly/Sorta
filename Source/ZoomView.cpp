@@ -18,6 +18,65 @@ ZoomView::ZoomView(ControlPanel& ownerIn)
     setOpaque(false);
 }
 
+void ZoomView::playbackTimerTick()
+{
+    const auto& mouse = owner.getMouseHandler();
+    const int currentMouseX = mouse.getMouseCursorX();
+    const int currentMouseY = mouse.getMouseCursorY();
+
+    const auto& timerManager = owner.getPlaybackTimerManager();
+    const bool zDown = timerManager.isZKeyDown();
+    const auto activePoint = owner.getActiveZoomPoint();
+    const bool isZooming = zDown || activePoint != AppEnums::ActiveZoomPoint::None;
+
+    if (currentMouseX != lastMouseX || currentMouseY != lastMouseY)
+    {
+        if (lastMouseX != -1)
+        {
+            repaint(lastMouseX - 1, 0, 3, getHeight());
+            repaint(0, lastMouseY - 1, getWidth(), 3);
+        }
+
+        if (currentMouseX != -1)
+        {
+            repaint(currentMouseX - 1, 0, 3, getHeight());
+            repaint(0, currentMouseY - 1, getWidth(), 3);
+        }
+
+        lastMouseX = currentMouseX;
+        lastMouseY = currentMouseY;
+    }
+
+    if (isZooming)
+    {
+        const auto waveformBounds = getLocalBounds();
+        const int popupWidth = juce::roundToInt((float)waveformBounds.getWidth() * Config::Layout::Zoom::popupScale);
+        const int popupHeight = juce::roundToInt((float)waveformBounds.getHeight() * Config::Layout::Zoom::popupScale);
+        const juce::Rectangle<int> currentPopupBounds(
+            waveformBounds.getCentreX() - popupWidth / 2,
+            waveformBounds.getCentreY() - popupHeight / 2,
+            popupWidth,
+            popupHeight
+        );
+
+        if (currentPopupBounds != lastPopupBounds)
+        {
+            repaint(lastPopupBounds.expanded(5));
+            repaint(currentPopupBounds.expanded(5));
+            lastPopupBounds = currentPopupBounds;
+        }
+        else
+        {
+            repaint(currentPopupBounds.expanded(5));
+        }
+    }
+    else if (!lastPopupBounds.isEmpty())
+    {
+        repaint(lastPopupBounds.expanded(5));
+        lastPopupBounds = juce::Rectangle<int>();
+    }
+}
+
 void ZoomView::paint(juce::Graphics& g)
 {
     auto& audioPlayer = owner.getAudioPlayer();

@@ -9,9 +9,12 @@
     #include <JuceHeader.h>
 #endif
 
+#include "PlaybackTimerManager.h"
+
 class ControlPanel;
 
-class PlaybackCursorView : public juce::Component
+class PlaybackCursorView : public juce::Component,
+                           public PlaybackTimerManager::Listener
 {
 public:
 
@@ -20,8 +23,11 @@ public:
 
     void paint(juce::Graphics& g) override;
 
+    void playbackTimerTick() override;
+
 private:
     ControlPanel& owner;
+    int lastCursorX = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaybackCursorView)
 };

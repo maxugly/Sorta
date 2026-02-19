@@ -75,10 +75,10 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   controlStatePresenter = std::make_unique<ControlStatePresenter>(*this);
   transportPresenter = std::make_unique<TransportPresenter>(*this);
 
-  playbackTimerManager = std::make_unique<PlaybackTimerManager>(*this, 
-                                                                getAudioPlayer(), 
-                                                                layoutCache);
-  playbackTimerManager->setViews(playbackCursorView.get(), zoomView.get());
+  playbackTimerManager = std::make_unique<PlaybackTimerManager>(sessionState, getAudioPlayer());
+  playbackTimerManager->addListener(playbackCursorView.get());
+  playbackTimerManager->addListener(zoomView.get());
+  playbackTimerManager->addListener(this);
 
   updateUIFromState();
 
@@ -149,29 +149,36 @@ void ControlPanel::updatePlayButtonText(bool isPlaying) {
                                          : ControlPanelCopy::playButtonText());
 }
 
-void ControlPanel::setZKeyDown(bool isDown) {
-  if (m_isZKeyDown == isDown)
-    return;
+bool ControlPanel::isZKeyDown() const {
+  if (playbackTimerManager != nullptr)
+    return playbackTimerManager->isZKeyDown();
+  return false;
+}
 
-  m_isZKeyDown = isDown;
+void ControlPanel::playbackTimerTick() {
+  static bool wasZDown = false;
+  const bool isZDown = isZKeyDown();
 
-  if (m_isZKeyDown) {
-    auto dragged = getMouseHandler().getDraggedHandle();
-    if (dragged == MouseHandler::CutMarkerHandle::In)
-      m_activeZoomPoint = AppEnums::ActiveZoomPoint::In;
-    else if (dragged == MouseHandler::CutMarkerHandle::Out)
-      m_activeZoomPoint = AppEnums::ActiveZoomPoint::Out;
-  } else {
-    m_activeZoomPoint = AppEnums::ActiveZoomPoint::None;
-
-    performDelayedJumpIfNeeded();
+  if (isZDown != wasZDown) {
+    if (isZDown) {
+      auto dragged = getMouseHandler().getDraggedHandle();
+      if (dragged == MouseHandler::CutMarkerHandle::In)
+        m_activeZoomPoint = AppEnums::ActiveZoomPoint::In;
+      else if (dragged == MouseHandler::CutMarkerHandle::Out)
+        m_activeZoomPoint = AppEnums::ActiveZoomPoint::Out;
+    } else {
+      m_activeZoomPoint = AppEnums::ActiveZoomPoint::None;
+      performDelayedJumpIfNeeded();
+    }
+    
+    if (zoomView != nullptr)
+      zoomView->repaint();
+    
+    repaint();
+    wasZDown = isZDown;
   }
 
-  if (zoomView != nullptr) {
-    zoomView->repaint();
-  }
-
-  repaint();
+  updateCutLabels();
 }
 
 void ControlPanel::setActiveZoomPoint(AppEnums::ActiveZoomPoint point) {
@@ -180,8 +187,6 @@ void ControlPanel::setActiveZoomPoint(AppEnums::ActiveZoomPoint point) {
     if (zoomView != nullptr)
       zoomView->repaint();
     repaint();
-  }
-}
   }
 }
 
@@ -247,7 +252,7 @@ void ControlPanel::updateUIFromState() {
 
   updateCutLabels();
   if (zoomView != nullptr)
-    zoomView->updateZoomState();
+    zoomView->repaint();
 
   repaint();
 }
