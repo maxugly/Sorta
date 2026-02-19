@@ -1,74 +1,63 @@
-Audiofiler Architectural Map (v2.0)
-
+Audiofiler Architectural Map (v2.1)
 1. The Core Hierarchy (Ownership)
-
 The application follows a strict top-down ownership model to prevent memory leaks and dangling references.
 
 MainComponent: The Root Shell.
 
-SessionState: The "Brain" (Holds all settings/preferences).
+SessionState: The "Brain" (Holds all settings and cross-file metadata).
 
-AudioPlayer: The "Audio Engine" (Handles file reading and playback).
+AudioPlayer: The "Audio Engine" (Strictly handles file reading and playback).
 
-ControlPanel: The "Face" (All buttons, sliders, and visual feedback).
+ControlPanel: The "Visual Container" (Acts only as a parent for sub-views and presenters).
 
-Presenters: Logic sub-modules (e.g., CutResetPresenter, StatsPresenter) that keep the ControlPanel code lean.
+Presenters: Logic sub-modules (e.g., CutResetPresenter, StatsPresenter) that manage specific UI behavior.
 
-SilenceDetector: The logic bridge for automation.
+2. Peer-to-Peer MVP Architecture (Strict Rules)
+To make the code "study-able," we are moving away from the ControlPanel as a "God Object".
 
-SilenceAnalysisWorker: A background thread for heavy math.
+The Model: SessionState and FileMetadata. They do not know the UI exists.
 
-2. The State Handshake (Push Model)
+The View: Components like WaveformView and ZoomView. They only handle paint() and do not contain business logic.
 
+The Presenter: Objects like TransportPresenter.
+
+Rule: Presenters are the "glue".
+
+Rule: Presenters should be peer-to-peer. One presenter should not own another; they should communicate via the SessionState or shared listeners.
+
+Refactor Goal: Strip all juce::TextButton and juce::TextEditor members out of ControlPanel.h and move them into specialized "View" groups managed by their respective Presenters.
+
+3. The State Handshake (Broadcast Model)
 We use a Broadcasting Pattern to keep the UI and Engine in sync without circular dependencies.
 
 The Radio Station: SessionState acts as the single source of truth.
 
-The Tune-In: AudioPlayer and ControlPanel inherit from SessionState::Listener.
+The Tune-In: AudioPlayer and ControlPanel (via its presenters) inherit from SessionState::Listener.
 
 The Workflow:
 
-User clicks a button (UI).
+User interacts with a View (UI).
 
-Presenter updates SessionState.
+The Presenter handles the event and updates SessionState.
 
-SessionState broadcasts a "Change" message.
+SessionState broadcasts a cutPreferenceChanged message.
 
-AudioPlayer hears it and updates the playback engine instantly.
+The AudioPlayer receives the broadcast and updates the playback engine instantly.
 
-ControlPanel hears it and refreshes the display on its next 60Hz heartbeat.
+4. Background Safety (Private Reader Strategy)
+To prevent UI freezing during heavy analysis, the SilenceAnalysisWorker follows these threading rules:
 
-3. The "Silence" Background Workflow (Anti-Freeze)
+Private Reader: The worker must create its own independent AudioFormatReader for the file.
 
-The SilenceAnalysisWorker is designed to process massive files without locking the UI.
+Lock Avoidance: It must not touch the AudioPlayer mutex.
 
-The Problem (The Deadlock): Previously, the worker held a "Master Lock" on the audio reader, forcing the UI to freeze while it scanned.
+Asynchronous Return: Use juce::MessageManager::callAsync to push results back to SessionState once the background thread finishes.
 
-The Solution (Private Reader):
+5. Critical "Don't Do" Rules (The Student/Agent Guardrails)
+Rule 1: No God Objects. If a header file has more than 10 std::unique_ptr sub-components, it needs to be broken down into smaller, peer-to-peer groups.
 
-The SilenceAnalysisWorker creates its own independent reader for the file.
+Rule 2: No Logic in Views. If you see a math calculation in a paint() or resized() method, move it to a CoordinateMapper or a Presenter.
 
-It crunches math on its own thread without touching the AudioPlayer mutex.
+Rule 3: Listener Authority. Never poll variables in a timerCallback. If you need to know a value changed, implement a Listener interface.
 
-When finished, it uses callAsync to push results back to SessionState.
-
-4. Critical "Don't Do" Rules for New Eyes
-
-Rule 1: No Polling. Never add logic to MainComponent::timerCallback to check if a variable has changed. Use a Listener instead.
-
-Rule 2: Boundary Authority. The AudioPlayer::getNextAudioBlock is the only place where playback boundaries (In/Out) are enforced for sample-accuracy.
-
-Rule 3: Private State. Never access cutPrefs directly. Use the getters and setters in SessionState to ensure every change is broadcasted to the engine.
-
-Status Registry (Where we are right now)
-
-Audio Engine: Sample-accurate, decoupled from the UI, and listens for state changes.
-
-UI Foundation: ControlPanel is decentralized with its own timer and uses Presenters for all button logic.
-
-Background Worker: Currently being refactored to use the "Private Reader" strategy to kill the permanent lockup.
-
-Next Architectural Goal: Finalize the 0-9 keyboard sorting logic using this clean "SessionState $\rightarrow$ Broadcast" pipeline.
-
-Would you like me to generate a specific "Agent Summary" file that you can keep in the repository for future AI assistance? It can act as a permanent memory for any fresh agent you bring in.
-
+Rule 4: Doxygen Documentation. Every new class must include @ingroup and @see tags to maintain the interactive study map.
