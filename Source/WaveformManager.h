@@ -23,6 +23,7 @@ public:
     void loadFile(const juce::File& file);
 
     juce::AudioThumbnail& getThumbnail();
+    const juce::AudioThumbnail& getThumbnail() const;
 
     void addChangeListener(juce::ChangeListener* listener);
     void removeChangeListener(juce::ChangeListener* listener);

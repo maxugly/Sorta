@@ -15,6 +15,11 @@ juce::AudioThumbnail& WaveformManager::getThumbnail()
     return thumbnail;
 }
 
+const juce::AudioThumbnail& WaveformManager::getThumbnail() const
+{
+    return thumbnail;
+}
+
 void WaveformManager::addChangeListener(juce::ChangeListener* listener)
 {
     thumbnail.addChangeListener(listener);

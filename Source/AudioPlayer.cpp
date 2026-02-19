@@ -147,6 +147,11 @@ WaveformManager& AudioPlayer::getWaveformManager()
 {
     return waveformManager;
 }
+
+const WaveformManager& AudioPlayer::getWaveformManager() const
+{
+    return waveformManager;
+}
 #endif
 
 void AudioPlayer::startPlayback()

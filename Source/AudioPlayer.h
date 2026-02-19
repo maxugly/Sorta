@@ -57,6 +57,7 @@ public:
     #if !defined(JUCE_HEADLESS)
     juce::AudioThumbnail& getThumbnail();
     WaveformManager& getWaveformManager();
+    const WaveformManager& getWaveformManager() const;
     #endif
 
     void startPlayback();

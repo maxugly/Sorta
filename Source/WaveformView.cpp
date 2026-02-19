@@ -9,7 +9,8 @@ WaveformView::WaveformView(WaveformManager& waveformManagerIn)
 {
     waveformManager.addChangeListener(this);
     setInterceptsMouseClicks(false, false);
-    setOpaque(false);
+    setOpaque(true);
+    setBufferedToImage(true);
 }
 
 WaveformView::~WaveformView()
@@ -52,6 +53,7 @@ void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode)
 
 void WaveformView::paint(juce::Graphics& g)
 {
+    g.fillAll(juce::Colours::black);
     drawWaveform(g, getLocalBounds());
 }
 

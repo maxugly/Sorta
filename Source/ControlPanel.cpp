@@ -113,7 +113,7 @@ void ControlPanel::resized() {
     cutLayerView->setBounds(layoutCache.waveformBounds);
 
   if (playbackCursorView != nullptr)
-    playbackCursorView->setBounds(layoutCache.waveformBounds);
+    playbackCursorView->setSize(2, layoutCache.waveformBounds.getHeight());
 }
 
 void ControlPanel::paint(juce::Graphics &g) {
@@ -570,7 +570,19 @@ void ControlPanel::drawZoomPopup(juce::Graphics& g)
 
 void ControlPanel::updateCursorPosition() {
   if (playbackCursorView != nullptr)
+  {
+    const auto& audioPlayer = getAudioPlayer();
+    const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
+    if (audioLength > 0.0)
+    {
+      const float x = (float)layoutCache.waveformBounds.getX() + 
+                      CoordinateMapper::secondsToPixels(audioPlayer.getCurrentPosition(), 
+                                                        (float)layoutCache.waveformBounds.getWidth(), 
+                                                        audioLength);
+      playbackCursorView->setTopLeftPosition(juce::roundToInt(x) - 1, layoutCache.waveformBounds.getY());
+    }
     playbackCursorView->repaint();
+  }
 }
 
 void ControlPanel::timerCallback() {

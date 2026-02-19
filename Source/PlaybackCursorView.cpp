@@ -7,28 +7,12 @@
 PlaybackCursorView::PlaybackCursorView(ControlPanel& ownerPanel)
     : owner(ownerPanel)
 {
+    setInterceptsMouseClicks(false, false);
+    setOpaque(false);
 }
 
 void PlaybackCursorView::paint(juce::Graphics& g)
 {
-    // Translate the coordinate system so that (0,0) in logic (ControlPanel coordinates)
-    // maps to (0,0) in this component, relative to its position.
-    // Since PlaybackCursorView is positioned at (waveformBounds.x, waveformBounds.y),
-    // and WaveformView draws at (waveformBounds.x, waveformBounds.y),
-    // we need to translate by -x, -y.
-
-    g.setOrigin(-getX(), -getY());
-
-    owner.renderOverlays(g);
-
-    auto& audioPlayer = owner.getAudioPlayer();
-    const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
-    if (audioLength <= 0.0)
-        return;
-
-    const auto waveformBounds = owner.getWaveformBounds();
-    const double drawPosition = audioPlayer.getCurrentPosition();
-    const float x = (float)waveformBounds.getX() + CoordinateMapper::secondsToPixels(drawPosition, (float)waveformBounds.getWidth(), audioLength);
-
-    PlaybackCursorGlow::renderGlow(g, (int)x, waveformBounds.getY(), waveformBounds.getBottom(), Config::Colors::playbackText);
+    g.setColour(Config::Colors::playbackText);
+    g.drawVerticalLine(1, 0.0f, (float)getHeight());
 }
