@@ -43,8 +43,8 @@ class AudioPlayer : public juce::AudioSource,
 {
 public:
     /**
-     * @brief Undocumented method.
-     * @param state [in] Description for state.
+     * @brief Constructs an AudioPlayer.
+     * @param state The session state manager to use for playback information.
      */
     explicit AudioPlayer(SessionState& state);
     /**
