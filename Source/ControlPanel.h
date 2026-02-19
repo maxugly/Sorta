@@ -305,6 +305,8 @@ private:
   std::unique_ptr<PlaybackCursorView> playbackCursorView;
   std::unique_ptr<ZoomView> zoomView;
 
+  int lastCursorX{-1};
+
   // --- UI Components ---
   juce::TextButton openButton, playStopButton, modeButton, exitButton,
       statsButton, repeatButton, channelViewButton,

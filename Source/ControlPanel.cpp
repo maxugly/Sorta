@@ -119,7 +119,7 @@ void ControlPanel::resized() {
     cutLayerView->setBounds(layoutCache.waveformBounds);
 
   if (playbackCursorView != nullptr)
-    playbackCursorView->setSize(2, layoutCache.waveformBounds.getHeight());
+    playbackCursorView->setBounds(layoutCache.waveformBounds);
 
   if (zoomView != nullptr)
     zoomView->setBounds(layoutCache.waveformBounds);
@@ -385,23 +385,34 @@ void ControlPanel::updateCursorPosition() {
     const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
     if (audioLength > 0.0)
     {
-      const float x = (float)layoutCache.waveformBounds.getX() + 
-                      CoordinateMapper::secondsToPixels(audioPlayer.getCurrentPosition(), 
+      const float x = CoordinateMapper::secondsToPixels(audioPlayer.getCurrentPosition(), 
                                                         (float)layoutCache.waveformBounds.getWidth(), 
                                                         audioLength);
-      // Center the 2px component on the exact X coordinate
-      playbackCursorView->setTopLeftPosition(juce::roundToInt(x) - 1, layoutCache.waveformBounds.getY());
+      const int currentX = juce::roundToInt(x);
+
+      if (currentX != lastCursorX)
+      {
+          // Repaint old area
+          if (lastCursorX >= 0)
+              playbackCursorView->repaint(lastCursorX - 1, 0, 3, playbackCursorView->getHeight());
+          
+          // Repaint new area
+          playbackCursorView->repaint(currentX - 1, 0, 3, playbackCursorView->getHeight());
+          
+          lastCursorX = currentX;
+      }
 
       const bool zDown = isZKeyDown();
       const auto activePoint = getActiveZoomPoint();
       const bool isZooming = zDown || activePoint != ControlPanel::ActiveZoomPoint::None;
       
-      if (isZooming && m_zoomPopupBounds.contains(playbackCursorView->getBounds()))
+      // If zooming, we might want to hide the cursor if it intersects the popup area
+      // popupBounds is in ControlPanel coords, PlaybackCursorView is at waveformBounds
+      if (isZooming && m_zoomPopupBounds.translated(-layoutCache.waveformBounds.getX(), -layoutCache.waveformBounds.getY()).contains(currentX, 10))
           playbackCursorView->setVisible(false);
       else
           playbackCursorView->setVisible(true);
     }
-    playbackCursorView->repaint();
   }
 }
 
