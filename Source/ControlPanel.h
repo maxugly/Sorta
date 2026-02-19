@@ -72,7 +72,8 @@ class ZoomView;
  * @see SessionState
  */
 class ControlPanel final : public juce::Component,
-                           public PlaybackTimerManager::Listener {
+                           public PlaybackTimerManager::Listener,
+                           public SessionState::Listener {
 public:
 
   explicit ControlPanel(MainComponent &owner, SessionState &sessionStateIn);
@@ -94,6 +95,11 @@ public:
   bool isZKeyDown() const;
 
   void playbackTimerTick() override;
+
+  // SessionState::Listener
+  void cutPreferenceChanged(const MainDomain::CutPreferences& prefs) override;
+  void cutInChanged(double value) override;
+  void cutOutChanged(double value) override;
 
   juce::Rectangle<int> getZoomPopupBounds() const { return m_zoomPopupBounds; }
 

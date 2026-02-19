@@ -84,6 +84,7 @@ void SessionState::setCutIn(double value)
         if (!currentFilePath.isEmpty())
             metadataCache[currentFilePath].cutIn = value;
         listeners.call([this](Listener& l) { l.cutPreferenceChanged(cutPrefs); });
+        listeners.call([value](Listener& l) { l.cutInChanged(value); });
     }
 }
 
@@ -96,6 +97,7 @@ void SessionState::setCutOut(double value)
         if (!currentFilePath.isEmpty())
             metadataCache[currentFilePath].cutOut = value;
         listeners.call([this](Listener& l) { l.cutPreferenceChanged(cutPrefs); });
+        listeners.call([value](Listener& l) { l.cutOutChanged(value); });
     }
 }
 

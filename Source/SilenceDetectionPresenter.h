@@ -11,18 +11,19 @@
 
 #include "SilenceWorkerClient.h"
 #include "SilenceAnalysisWorker.h"
+#include "SessionState.h"
 
 class ControlPanel;
 
-class SessionState;
-
 class AudioPlayer;
 
-class SilenceDetectionPresenter final : public SilenceWorkerClient
+class SilenceDetectionPresenter final : public SilenceWorkerClient,
+                                         public SessionState::Listener
 {
 public:
 
     SilenceDetectionPresenter(ControlPanel& ownerPanel, SessionState& sessionState, AudioPlayer& audioPlayer);
+    ~SilenceDetectionPresenter() override;
 
     void handleAutoCutInToggle(bool isActive);
 

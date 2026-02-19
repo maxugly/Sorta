@@ -80,6 +80,8 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   playbackTimerManager->addListener(zoomView.get());
   playbackTimerManager->addListener(this);
 
+  sessionState.addListener(this);
+
   updateUIFromState();
 
   finaliseSetup();
@@ -88,6 +90,7 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
 }
 
 ControlPanel::~ControlPanel() {
+  sessionState.removeListener(this);
   playbackTimerManager.reset();
 
   setLookAndFeel(nullptr);
@@ -181,6 +184,37 @@ void ControlPanel::playbackTimerTick() {
   updateCutLabels();
 }
 
+void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences& prefs) {
+  autoCutInButton.setToggleState(prefs.autoCut.inActive, juce::dontSendNotification);
+  autoCutOutButton.setToggleState(prefs.autoCut.outActive, juce::dontSendNotification);
+  
+  if (silenceDetector != nullptr) {
+    silenceDetector->setIsAutoCutInActive(prefs.autoCut.inActive);
+    silenceDetector->setIsAutoCutOutActive(prefs.autoCut.outActive);
+    
+    if (prefs.autoCut.inActive && getAudioPlayer().getThumbnail().getTotalLength() > 0.0)
+      silenceDetector->detectInSilence();
+      
+    if (prefs.autoCut.outActive && getAudioPlayer().getThumbnail().getTotalLength() > 0.0)
+      silenceDetector->detectOutSilence();
+  }
+
+  updateComponentStates();
+  repaint();
+}
+
+void ControlPanel::cutInChanged(double value) {
+  juce::ignoreUnused(value);
+  updateCutLabels();
+  repaint();
+}
+
+void ControlPanel::cutOutChanged(double value) {
+  juce::ignoreUnused(value);
+  updateCutLabels();
+  repaint();
+}
+
 void ControlPanel::setActiveZoomPoint(AppEnums::ActiveZoomPoint point) {
   if (m_activeZoomPoint != point) {
     m_activeZoomPoint = point;
@@ -211,14 +245,10 @@ double ControlPanel::getCutOutPosition() const {
 
 void ControlPanel::setCutInPosition(double pos) {
   sessionState.setCutIn(pos);
-  if (repeatPresenter != nullptr)
-    repeatPresenter->updateCutLabels();
 }
 
 void ControlPanel::setCutOutPosition(double pos) {
   sessionState.setCutOut(pos);
-  if (repeatPresenter != nullptr)
-    repeatPresenter->updateCutLabels();
 }
 
 void ControlPanel::updateCutLabels() {
@@ -259,22 +289,10 @@ void ControlPanel::updateUIFromState() {
 
 void ControlPanel::setAutoCutInActive(bool isActive) {
   sessionState.setAutoCutInActive(isActive);
-  autoCutInButton.setToggleState(isActive, juce::dontSendNotification);
-  silenceDetector->setIsAutoCutInActive(isActive);
-
-  updateComponentStates();
-  if (isActive && getAudioPlayer().getThumbnail().getTotalLength() > 0.0)
-    silenceDetector->detectInSilence();
 }
 
 void ControlPanel::setAutoCutOutActive(bool isActive) {
   sessionState.setAutoCutOutActive(isActive);
-  autoCutOutButton.setToggleState(isActive, juce::dontSendNotification);
-  silenceDetector->setIsAutoCutOutActive(isActive);
-
-  updateComponentStates();
-  if (isActive && getAudioPlayer().getThumbnail().getTotalLength() > 0.0)
-    silenceDetector->detectOutSilence();
 }
 
 void ControlPanel::updateQualityButtonText() {

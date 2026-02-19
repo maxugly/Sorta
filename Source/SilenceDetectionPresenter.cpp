@@ -14,16 +14,22 @@ SilenceDetectionPresenter::SilenceDetectionPresenter(ControlPanel& ownerPanel, S
       audioPlayer(audioPlayerIn),
       silenceWorker(*this, sessionStateIn)
 {
+    sessionState.addListener(this);
+}
+
+SilenceDetectionPresenter::~SilenceDetectionPresenter()
+{
+    sessionState.removeListener(this);
 }
 
 void SilenceDetectionPresenter::handleAutoCutInToggle(bool isActive)
 {
-    owner.setAutoCutInActive(isActive);
+    sessionState.setAutoCutInActive(isActive);
 }
 
 void SilenceDetectionPresenter::handleAutoCutOutToggle(bool isActive)
 {
-    owner.setAutoCutOutActive(isActive);
+    sessionState.setAutoCutOutActive(isActive);
 }
 
 void SilenceDetectionPresenter::startSilenceAnalysis(float threshold, bool detectingIn)
@@ -43,8 +49,6 @@ void SilenceDetectionPresenter::setCutStart(int sampleIndex)
     if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0)
     {
         sessionState.setCutIn((double)sampleIndex / sampleRate);
-        owner.updateCutLabels();
-        owner.repaint();
     }
 }
 
@@ -55,8 +59,6 @@ void SilenceDetectionPresenter::setCutEnd(int sampleIndex)
     if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0)
     {
         sessionState.setCutOut((double)sampleIndex / sampleRate);
-        owner.updateCutLabels();
-        owner.repaint();
     }
 }
 

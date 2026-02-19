@@ -25,7 +25,9 @@ public:
     public:
         virtual ~Listener() = default;
 
-        virtual void cutPreferenceChanged(const MainDomain::CutPreferences& prefs) = 0;
+        virtual void cutPreferenceChanged(const MainDomain::CutPreferences& prefs) { juce::ignoreUnused(prefs); }
+        virtual void cutInChanged(double value) { juce::ignoreUnused(value); }
+        virtual void cutOutChanged(double value) { juce::ignoreUnused(value); }
     };
 
     SessionState();
