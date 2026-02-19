@@ -62,7 +62,7 @@ double RepeatPresenter::getCutOutPosition() const noexcept {
 
 void RepeatPresenter::setCutInPosition(double positionSeconds) {
   const double totalLength = getAudioTotalLength();
-  const double newPos = juce::jlimit(0.0, totalLength, positionSeconds);
+  const double newPos = positionSeconds;
   auto &audioPlayer = owner.getAudioPlayer();
   const double currentOut = audioPlayer.getCutOut();
 
@@ -86,8 +86,7 @@ void RepeatPresenter::setCutInPosition(double positionSeconds) {
 }
 
 void RepeatPresenter::setCutOutPosition(double positionSeconds) {
-  const double totalLength = getAudioTotalLength();
-  const double newPos = juce::jlimit(0.0, totalLength, positionSeconds);
+  const double newPos = positionSeconds;
   auto &audioPlayer = owner.getAudioPlayer();
   const double currentIn = audioPlayer.getCutIn();
 
@@ -375,9 +374,6 @@ void RepeatPresenter::mouseWheelMove(const juce::MouseEvent &event,
   if (editor == nullptr)
     return;
 
-  const double totalLength = getAudioTotalLength();
-  if (totalLength <= 0.0)
-    return;
   int charIndex = editor->getTextIndexAt(event.getPosition());
 
   double sampleRate = 0.0;
@@ -392,7 +388,7 @@ void RepeatPresenter::mouseWheelMove(const juce::MouseEvent &event,
 
   if (editor == &cutInEditor) {
     const double currentIn = owner.getAudioPlayer().getCutIn();
-    double newPos = juce::jlimit(0.0, totalLength, currentIn + delta);
+    double newPos = currentIn + delta;
     if (newPos != currentIn) {
       setCutInPosition(newPos);
       owner.setAutoCutInActive(false);
@@ -403,7 +399,7 @@ void RepeatPresenter::mouseWheelMove(const juce::MouseEvent &event,
     }
   } else if (editor == &cutOutEditor) {
     const double currentOut = owner.getAudioPlayer().getCutOut();
-    double newPos = juce::jlimit(0.0, totalLength, currentOut + delta);
+    double newPos = currentOut + delta;
     if (newPos != currentOut) {
       setCutOutPosition(newPos);
       owner.setAutoCutOutActive(false);

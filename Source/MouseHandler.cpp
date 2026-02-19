@@ -205,8 +205,7 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
         if (zoomBounds.contains(event.getPosition()) || draggedHandle != CutMarkerHandle::None || isDragging)
         {
             auto timeRange = owner.getZoomTimeRange();
-            int clampedX = juce::jlimit(zoomBounds.getX(), zoomBounds.getRight(), event.x);
-            float proportion = (float)(clampedX - zoomBounds.getX()) / (float)zoomBounds.getWidth();
+            float proportion = (float)(event.x - zoomBounds.getX()) / (float)zoomBounds.getWidth();
             double zoomedTime = timeRange.first + (proportion * (timeRange.second - timeRange.first));
 
             if (draggedHandle != CutMarkerHandle::None)
@@ -236,8 +235,7 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
         auto audioLength = audioPlayer.getThumbnail().getTotalLength();
         if (audioLength > 0.0)
         {
-            int clampedX = juce::jlimit(waveformBounds.getX(), waveformBounds.getRight(), event.x);
-            float proportion = (float)(clampedX - waveformBounds.getX()) / (float)waveformBounds.getWidth();
+            float proportion = (float)(event.x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
             double mouseTime = proportion * audioLength;
 
             if (draggedHandle == CutMarkerHandle::In)
@@ -367,10 +365,6 @@ void MouseHandler::mouseWheelMove(const juce::MouseEvent& event, const juce::Mou
 
     AudioPlayer& audioPlayer = owner.getAudioPlayer();
     double currentPos = audioPlayer.getCurrentPosition();
-    double audioLength = audioPlayer.getThumbnail().getTotalLength();
-    
-    if (audioLength <= 0.0)
-        return;
     double multiplier = FocusManager::getStepMultiplier(event.mods.isShiftDown(), event.mods.isCtrlDown());
     double step = 0.01 * multiplier;
     
@@ -414,7 +408,6 @@ void MouseHandler::seekToMousePosition(int x)
 {
     AudioPlayer& audioPlayer = owner.getAudioPlayer();
     auto audioLength = audioPlayer.getThumbnail().getTotalLength();
-    if (audioLength <= 0.0) return;
 
     const auto waveformBounds = owner.getWaveformBounds();
     float proportion = (float)(x - waveformBounds.getX()) / (float)waveformBounds.getWidth();

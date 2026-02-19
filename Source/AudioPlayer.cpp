@@ -302,29 +302,22 @@ void AudioPlayer::setSourceForTesting(juce::PositionableAudioSource* source, dou
 
 void AudioPlayer::setPlayheadPosition(double seconds)
 {
-    if (readerSource == nullptr)
-        return;
-
     double sampleRate = 0.0;
     juce::int64 lengthInSamples = 0;
     if (!getReaderInfo(sampleRate, lengthInSamples) || sampleRate <= 0.0)
         return;
 
     const double totalDuration = (double)lengthInSamples / sampleRate;
-    double targetSeconds = seconds;
-    if (lengthInSamples > 0 && sampleRate > 0.0 && targetSeconds >= totalDuration)
-    {
-        const double lastSampleTime = totalDuration - (1.0 / sampleRate);
-        targetSeconds = juce::jmax(0.0, lastSampleTime);
-    }
+
+    double cutIn = 0.0;
+    double cutOut = totalDuration;
 
     if (sessionState.getCutPrefs().active)
     {
-        const double cutIn = sessionState.getCutPrefs().cutIn;
-        const double cutOut = sessionState.getCutPrefs().cutOut;
-        transportSource.setPosition(juce::jlimit(cutIn, cutOut, targetSeconds));
-        return;
+        cutIn = sessionState.getCutPrefs().cutIn;
+        cutOut = sessionState.getCutPrefs().cutOut;
     }
 
-    transportSource.setPosition(juce::jlimit(0.0, totalDuration, targetSeconds));
+    double clampedPos = juce::jlimit(cutIn, cutOut, seconds);
+    transportSource.setPosition(clampedPos);
 }
