@@ -84,6 +84,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/WaveformView.cpp
             Source/KeybindHandler.h
             Source/KeybindHandler.cpp
+            Source/ZoomView.h
+            Source/ZoomView.cpp
             Source/ControlStatePresenter.h
             Source/ControlStatePresenter.cpp
             Source/TransportPresenter.h

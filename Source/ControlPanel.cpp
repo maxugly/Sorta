@@ -21,6 +21,7 @@
 #include "CutLayerView.h"
 #include "CutPresenter.h"
 #include "CoordinateMapper.h"
+#include "ZoomView.h"
 #include <cmath>
 
 ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionStateIn)
@@ -48,6 +49,10 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   playbackCursorView = std::make_unique<PlaybackCursorView>(*this);
   addAndMakeVisible(playbackCursorView.get());
   playbackCursorView->setInterceptsMouseClicks(false, false);
+
+  zoomView = std::make_unique<ZoomView>(*this);
+  addAndMakeVisible(zoomView.get());
+  zoomView->setVisible(false);
 
   statsPresenter = std::make_unique<StatsPresenter>(*this);
   silenceDetectionPresenter = std::make_unique<SilenceDetectionPresenter>(*this, sessionState, *owner.getAudioPlayer());
@@ -115,6 +120,9 @@ void ControlPanel::resized() {
 
   if (playbackCursorView != nullptr)
     playbackCursorView->setSize(2, layoutCache.waveformBounds.getHeight());
+
+  if (zoomView != nullptr)
+    zoomView->setBounds(layoutCache.waveformBounds);
 }
 
 void ControlPanel::paint(juce::Graphics &g) {
@@ -144,7 +152,23 @@ void ControlPanel::setZKeyDown(bool isDown) {
     m_activeZoomPoint = ActiveZoomPoint::None;
     performDelayedJumpIfNeeded();
   }
+
+  if (zoomView != nullptr) {
+    zoomView->setVisible(m_isZKeyDown || m_activeZoomPoint != ActiveZoomPoint::None);
+    zoomView->repaint();
+  }
   repaint();
+}
+
+void ControlPanel::setActiveZoomPoint(ActiveZoomPoint point) {
+  if (m_activeZoomPoint != point) {
+    m_activeZoomPoint = point;
+    if (zoomView != nullptr) {
+      zoomView->setVisible(m_isZKeyDown || m_activeZoomPoint != ActiveZoomPoint::None);
+      zoomView->repaint();
+    }
+    repaint();
+  }
 }
 
 void ControlPanel::jumpToCutIn() {
@@ -356,219 +380,6 @@ void ControlPanel::mouseWheelMove(const juce::MouseEvent &event,
   getMouseHandler().mouseWheelMove(event, wheel);
 }
 
-void ControlPanel::renderOverlays(juce::Graphics &g) {
-  drawMouseCursorOverlays(g);
-  drawZoomPopup(g);
-}
-
-void ControlPanel::drawMouseCursorOverlays(juce::Graphics& g) {
-  const auto waveformBounds = getWaveformBounds();
-  const auto& mouse = getMouseHandler();
-  if (mouse.getMouseCursorX() == -1)
-    return;
-
-  juce::Colour currentLineColor;
-  juce::Colour currentHighlightColor;
-  juce::Colour currentGlowColor;
-  float currentGlowThickness = 0.0f;
-
-  if (mouse.getCurrentPlacementMode() == AppEnums::PlacementMode::CutIn
-      || mouse.getCurrentPlacementMode() == AppEnums::PlacementMode::CutOut)
-  {
-    currentLineColor = Config::Colors::mousePlacementMode;
-    currentHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
-    currentGlowColor = Config::Colors::placementModeGlow;
-    currentGlowThickness = Config::Layout::Glow::placementModeGlowThickness;
-
-    g.setColour(currentGlowColor.withAlpha(Config::Layout::Glow::mouseAlpha));
-    g.fillRect(mouse.getMouseCursorX() - (int)(currentGlowThickness * Config::Layout::Glow::offsetFactor) - 1, waveformBounds.getY(),
-               (int)currentGlowThickness + Config::Layout::Glow::mousePadding, waveformBounds.getHeight());
-    g.fillRect(waveformBounds.getX(), mouse.getMouseCursorY() - (int)(currentGlowThickness * Config::Layout::Glow::offsetFactor) - 1,
-               waveformBounds.getWidth(), (int)currentGlowThickness + Config::Layout::Glow::mousePadding);
-  }
-  else
-  {
-    if (isZKeyDown())
-    {
-      currentLineColor = Config::Colors::mousePlacementMode;
-      currentHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
-    }
-    else
-    {
-      currentLineColor = Config::Colors::mouseCursorLine;
-      currentHighlightColor = Config::Colors::mouseCursorHighlight;
-    }
-    currentGlowColor = Config::Colors::mouseAmplitudeGlow;
-  }
-
-  g.setColour(currentHighlightColor);
-  g.fillRect(mouse.getMouseCursorX() - Config::Layout::Glow::mouseHighlightOffset, waveformBounds.getY(), Config::Layout::Glow::mouseHighlightSize, waveformBounds.getHeight());
-  g.fillRect(waveformBounds.getX(), mouse.getMouseCursorY() - Config::Layout::Glow::mouseHighlightOffset, waveformBounds.getWidth(), Config::Layout::Glow::mouseHighlightSize);
-
-  auto& audioPlayer = getAudioPlayer();
-  const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
-  if (audioLength > 0.0f)
-  {
-    float amplitude = 0.0f;
-    if (audioPlayer.getWaveformManager().getThumbnail().getNumChannels() > 0)
-    {
-      double sampleRate = 0.0;
-      juce::int64 length = 0;
-      if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0)
-      {
-        float minVal = 0.0f, maxVal = 0.0f;
-        audioPlayer.getWaveformManager().getThumbnail().getApproximateMinMax(mouse.getMouseCursorTime(),
-                                                                             mouse.getMouseCursorTime() + (1.0 / sampleRate),
-                                                                             0, minVal, maxVal);
-        amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
-      }
-    }
-
-    const float centerY = (float)waveformBounds.getCentreY();
-    const float amplitudeY = centerY - (amplitude * waveformBounds.getHeight() * Config::Layout::Waveform::heightScale);
-    const float bottomAmplitudeY = centerY + (amplitude * waveformBounds.getHeight() * Config::Layout::Waveform::heightScale);
-
-    juce::ColourGradient amplitudeGlowGradient(currentGlowColor.withAlpha(0.0f), (float)mouse.getMouseCursorX(), amplitudeY,
-                                               currentGlowColor.withAlpha(Config::Layout::Glow::mouseAmplitudeAlpha), (float)mouse.getMouseCursorX(), centerY, true);
-    g.setGradientFill(amplitudeGlowGradient);
-    g.fillRect(juce::Rectangle<float>((float)mouse.getMouseCursorX() - Config::Layout::Glow::mouseAmplitudeGlowThickness * Config::Layout::Glow::offsetFactor, amplitudeY,
-                                      Config::Layout::Glow::mouseAmplitudeGlowThickness, centerY - amplitudeY));
-    g.fillRect(juce::Rectangle<float>((float)mouse.getMouseCursorX() - Config::Layout::Glow::mouseAmplitudeGlowThickness * Config::Layout::Glow::offsetFactor, centerY,
-                                      Config::Layout::Glow::mouseAmplitudeGlowThickness, centerY - amplitudeY));
-
-    g.setColour(Config::Colors::mouseAmplitudeLine);
-    g.drawVerticalLine(mouse.getMouseCursorX(), amplitudeY, bottomAmplitudeY);
-
-    const float halfLineLength = Config::Animation::mouseAmplitudeLineLength * Config::Layout::Glow::offsetFactor;
-    const float leftExtent = (float)mouse.getMouseCursorX() - halfLineLength;
-    const float rightExtent = (float)mouse.getMouseCursorX() + halfLineLength;
-    g.drawHorizontalLine(juce::roundToInt(amplitudeY), leftExtent, rightExtent);
-    g.drawHorizontalLine(juce::roundToInt(bottomAmplitudeY), leftExtent, rightExtent);
-
-    g.setColour(Config::Colors::playbackText);
-    g.setFont(Config::Layout::Text::mouseCursorSize);
-    g.drawText(juce::String(amplitude, 2), mouse.getMouseCursorX() + Config::Layout::Glow::mouseTextOffset, (int)amplitudeY - Config::Layout::Text::mouseCursorSize,
-               100, Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
-    g.drawText(juce::String(-amplitude, 2), mouse.getMouseCursorX() + Config::Layout::Glow::mouseTextOffset, (int)bottomAmplitudeY,
-               100, Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
-
-    const juce::String timeText = formatTime(mouse.getMouseCursorTime());
-    g.drawText(timeText, mouse.getMouseCursorX() + Config::Layout::Glow::mouseTextOffset, mouse.getMouseCursorY() + Config::Layout::Glow::mouseTextOffset, 100,
-               Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
-  }
-
-  PlaybackCursorGlow::renderGlow(g, mouse.getMouseCursorX(), waveformBounds.getY(), waveformBounds.getBottom(), currentLineColor);
-  g.setColour(currentLineColor);
-  g.drawHorizontalLine(mouse.getMouseCursorY(), (float)waveformBounds.getX(), (float)waveformBounds.getRight());
-}
-
-void ControlPanel::drawZoomPopup(juce::Graphics& g)
-{
-  const bool zDown = isZKeyDown();
-  const auto activePoint = getActiveZoomPoint();
-
-  if (!zDown && activePoint == ControlPanel::ActiveZoomPoint::None)
-    return;
-
-  auto& audioPlayer = getAudioPlayer();
-  const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
-  if (audioLength <= 0.0)
-    return;
-
-  const auto waveformBounds = getWaveformBounds();
-
-  const int popupWidth = juce::roundToInt((float)waveformBounds.getWidth() * Config::Layout::Zoom::popupScale);
-  const int popupHeight = juce::roundToInt((float)waveformBounds.getHeight() * Config::Layout::Zoom::popupScale);
-  const juce::Rectangle<int> popupBounds(
-      waveformBounds.getCentreX() - popupWidth / 2,
-      waveformBounds.getCentreY() - popupHeight / 2,
-      popupWidth,
-      popupHeight
-  );
-
-  const auto& mouse = getMouseHandler();
-
-  double zoomCenterTime = getFocusManager().getFocusedTime();
-  double timeRange = audioLength / (double)getZoomFactor();
-  timeRange = juce::jlimit(0.00005, audioLength, timeRange);
-
-  const double startTime = zoomCenterTime - (timeRange / 2.0);
-  const double endTime = startTime + timeRange;
-
-  setZoomPopupBounds(popupBounds);
-  setZoomTimeRange(startTime, endTime);
-
-  g.setColour(juce::Colours::black);
-  g.fillRect(popupBounds);
-
-  g.setColour(Config::Colors::waveform);
-  const auto channelMode = getChannelViewMode();
-  const int numChannels = audioPlayer.getWaveformManager().getThumbnail().getNumChannels();
-
-  if (channelMode == AppEnums::ChannelViewMode::Mono || numChannels == 1)
-  {
-    audioPlayer.getWaveformManager().getThumbnail().drawChannel(g, popupBounds, startTime, endTime, 0, 1.0f);
-    g.setColour(Config::Colors::zoomPopupZeroLine);
-    g.drawHorizontalLine(popupBounds.getCentreY(), (float)popupBounds.getX(), (float)popupBounds.getRight());
-  }
-  else
-  {
-    auto topBounds = popupBounds.withHeight(popupBounds.getHeight() / 2);
-    auto bottomBounds = popupBounds.withTop(topBounds.getBottom()).withHeight(popupBounds.getHeight() / 2);
-
-    audioPlayer.getWaveformManager().getThumbnail().drawChannel(g, topBounds, startTime, endTime, 0, 1.0f);
-    audioPlayer.getWaveformManager().getThumbnail().drawChannel(g, bottomBounds, startTime, endTime, 1, 1.0f);
-
-    g.setColour(Config::Colors::zoomPopupZeroLine);
-    g.drawHorizontalLine(topBounds.getCentreY(), (float)topBounds.getX(), (float)topBounds.getRight());
-    g.drawHorizontalLine(bottomBounds.getCentreY(), (float)bottomBounds.getX(), (float)bottomBounds.getRight());
-  }
-
-  auto drawShadow = [&](double startT, double endT, juce::Colour color) {
-    if (endT <= startTime || startT >= endTime) return;
-    double vStart = juce::jmax(startT, startTime);
-    double vEnd = juce::jmin(endT, endTime);
-    float x1 = (float)popupBounds.getX() + CoordinateMapper::secondsToPixels(vStart - startTime, (float)popupBounds.getWidth(), timeRange);
-    float x2 = (float)popupBounds.getX() + CoordinateMapper::secondsToPixels(vEnd - startTime, (float)popupBounds.getWidth(), timeRange);
-    g.setColour(color);
-    g.fillRect(x1, (float)popupBounds.getY(), x2 - x1, (float)popupBounds.getHeight());
-  };
-
-  const double cutIn = getCutInPosition();
-  const double cutOut = getCutOutPosition();
-
-  drawShadow(startTime, cutIn, juce::Colours::black.withAlpha(0.5f));
-  drawShadow(cutOut, endTime, juce::Colours::black.withAlpha(0.5f));
-
-  if (startTime < 0.0)
-    drawShadow(startTime, 0.0, juce::Colours::black);
-  if (endTime > audioLength)
-    drawShadow(audioLength, endTime, juce::Colours::black);
-
-  auto drawFineLine = [&](double time, juce::Colour color, float thickness) {
-    if (time >= startTime && time <= endTime) {
-      float x = (float)popupBounds.getX() + CoordinateMapper::secondsToPixels(time - startTime, (float)popupBounds.getWidth(), timeRange);
-      g.setColour(color);
-      g.drawLine(x, (float)popupBounds.getY(), x, (float)popupBounds.getBottom(), thickness);
-    }
-  };
-
-  bool isDraggingCutIn = mouse.getDraggedHandle() == MouseHandler::CutMarkerHandle::In;
-  bool isDraggingCutOut = mouse.getDraggedHandle() == MouseHandler::CutMarkerHandle::Out;
-
-  drawFineLine(cutIn, Config::Colors::cutLine, 1.0f);
-  drawFineLine(cutOut, Config::Colors::cutLine, 1.0f);
-  drawFineLine(audioPlayer.getCurrentPosition(), Config::Colors::playbackCursor, 1.0f);
-
-  if (isDraggingCutIn || isDraggingCutOut)
-    drawFineLine(isDraggingCutIn ? cutIn : cutOut, Config::Colors::zoomPopupTrackingLine, 2.0f);
-  else
-    drawFineLine(audioPlayer.getCurrentPosition(), Config::Colors::zoomPopupPlaybackLine, 2.0f);
-
-  g.setColour(Config::Colors::zoomPopupBorder);
-  g.drawRect(popupBounds.toFloat(), Config::Layout::Zoom::borderThickness);
-}
-
 void ControlPanel::updateCursorPosition() {
   if (playbackCursorView != nullptr)
   {
@@ -580,7 +391,17 @@ void ControlPanel::updateCursorPosition() {
                       CoordinateMapper::secondsToPixels(audioPlayer.getCurrentPosition(), 
                                                         (float)layoutCache.waveformBounds.getWidth(), 
                                                         audioLength);
+      // Center the 2px component on the exact X coordinate
       playbackCursorView->setTopLeftPosition(juce::roundToInt(x) - 1, layoutCache.waveformBounds.getY());
+
+      const bool zDown = isZKeyDown();
+      const auto activePoint = getActiveZoomPoint();
+      const bool isZooming = zDown || activePoint != ControlPanel::ActiveZoomPoint::None;
+      
+      if (isZooming && m_zoomPopupBounds.contains(playbackCursorView->getBounds()))
+          playbackCursorView->setVisible(false);
+      else
+          playbackCursorView->setVisible(true);
     }
     playbackCursorView->repaint();
   }
@@ -594,4 +415,6 @@ void ControlPanel::timerCallback() {
   updateCursorPosition();
   if (cutLayerView != nullptr)
     cutLayerView->repaint();
+  if (zoomView != nullptr)
+    zoomView->repaint();
 }

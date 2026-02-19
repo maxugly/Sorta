@@ -39,6 +39,7 @@ class CutResetPresenter;
 class CutButtonPresenter;
 class PlaybackTextPresenter;
 class PlaybackCursorView;
+class ZoomView;
 
 /**
  * @file ControlPanel.h
@@ -77,10 +78,7 @@ public:
    */
   enum class ActiveZoomPoint { None, In, Out };
   ActiveZoomPoint getActiveZoomPoint() const { return m_activeZoomPoint; }
-  void setActiveZoomPoint(ActiveZoomPoint point) {
-    m_activeZoomPoint = point;
-    repaint();
-  }
+  void setActiveZoomPoint(ActiveZoomPoint point);
 
   float getZoomFactor() const { return m_zoomFactor; }
   void setZoomFactor(float factor) {
@@ -114,11 +112,6 @@ public:
   void paint(juce::Graphics &g) override;
   void resized() override;
 
-  /** @brief Renders the dynamic overlays (cursors, etc.). Called by
-   * PlaybackCursorView. */
-  void renderOverlays(juce::Graphics &g);
-  void drawMouseCursorOverlays(juce::Graphics &g);
-  void drawZoomPopup(juce::Graphics &g);
   /** @brief Updates only the cursor/overlay part of the UI. */
   void updateCursorPosition();
 
@@ -310,6 +303,7 @@ private:
   std::unique_ptr<CutResetPresenter> cutResetPresenter;
   std::unique_ptr<FocusManager> focusManager;
   std::unique_ptr<PlaybackCursorView> playbackCursorView;
+  std::unique_ptr<ZoomView> zoomView;
 
   // --- UI Components ---
   juce::TextButton openButton, playStopButton, modeButton, exitButton,
