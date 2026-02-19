@@ -2,6 +2,7 @@
 #include "FocusManager.h"
 #include "ControlPanel.h"
 #include "AudioPlayer.h"
+#include "CoordinateMapper.h"
 
 MouseHandler::MouseHandler(ControlPanel& controlPanel) : owner(controlPanel)
 {
@@ -32,8 +33,9 @@ void MouseHandler::mouseMove(const juce::MouseEvent& event)
         auto audioLength = audioPlayer.getThumbnail().getTotalLength();
         if (audioLength > 0.0)
         {
-            float proportion = (float)(mouseCursorX - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-            mouseCursorTime = proportion * audioLength;
+            mouseCursorTime = CoordinateMapper::pixelsToSeconds((float)(mouseCursorX - waveformBounds.getX()), 
+                                                                (float)waveformBounds.getWidth(), 
+                                                                audioLength);
         }
         else
         {
@@ -63,8 +65,9 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
         {
             interactionStartedInZoom = true;
             auto timeRange = owner.getZoomTimeRange();
-            float proportion = (float)(event.x - zoomBounds.getX()) / (float)zoomBounds.getWidth();
-            double zoomedTime = timeRange.first + (proportion * (timeRange.second - timeRange.first));
+            double zoomedTime = CoordinateMapper::pixelsToSeconds((float)(event.x - zoomBounds.getX()), 
+                                                                  (float)zoomBounds.getWidth(), 
+                                                                  timeRange.second - timeRange.first) + timeRange.first;
             
             if (event.mods.isLeftButtonDown())
             {
@@ -84,12 +87,10 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                     double cutPointTime = (owner.getActiveZoomPoint() == ControlPanel::ActiveZoomPoint::In)
                                            ? owner.getCutInPosition() : owner.getCutOutPosition();
                     
-                    float indicatorX = (float)zoomBounds.getX();
-                    if (timeRange.second > timeRange.first)
-                    {
-                        float proportionIndicator = (float)((cutPointTime - timeRange.first) / (timeRange.second - timeRange.first));
-                        indicatorX += proportionIndicator * (float)zoomBounds.getWidth();
-                    }
+                    float indicatorX = (float)zoomBounds.getX() + 
+                                       CoordinateMapper::secondsToPixels(cutPointTime - timeRange.first, 
+                                                                         (float)zoomBounds.getWidth(), 
+                                                                         timeRange.second - timeRange.first);
 
                     if (std::abs(event.x - (int)indicatorX) < 20)
                     {
@@ -155,8 +156,9 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
             const auto waveformBounds = owner.getWaveformBounds();
             AudioPlayer& audioPlayer = owner.getAudioPlayer();
             auto audioLength = audioPlayer.getThumbnail().getTotalLength();
-            float proportion = (float)(event.x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-            double mouseTime = proportion * audioLength;
+            double mouseTime = CoordinateMapper::pixelsToSeconds((float)(event.x - waveformBounds.getX()), 
+                                                                 (float)waveformBounds.getWidth(), 
+                                                                 audioLength);
             
             dragStartMouseOffset = mouseTime - owner.getCutInPosition();
             owner.repaint();
@@ -186,16 +188,18 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
     if (!event.mods.isLeftButtonDown())
         return;
 
+    AudioPlayer& audioPlayer = owner.getAudioPlayer();
+    auto audioLength = audioPlayer.getThumbnail().getTotalLength();
+
     if (waveformBounds.contains(event.getPosition()))
     {
         mouseCursorX = event.x;
         mouseCursorY = event.y;
-        AudioPlayer& audioPlayer = owner.getAudioPlayer();
-        auto audioLength = audioPlayer.getThumbnail().getTotalLength();
         if (audioLength > 0.0)
         {
-            float proportion = (float)(mouseCursorX - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-            mouseCursorTime = proportion * audioLength;
+            mouseCursorTime = CoordinateMapper::pixelsToSeconds((float)(mouseCursorX - waveformBounds.getX()), 
+                                                                (float)waveformBounds.getWidth(), 
+                                                                audioLength);
         }
     }
 
@@ -205,8 +209,10 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
         if (zoomBounds.contains(event.getPosition()) || draggedHandle != CutMarkerHandle::None || isDragging)
         {
             auto timeRange = owner.getZoomTimeRange();
-            float proportion = (float)(event.x - zoomBounds.getX()) / (float)zoomBounds.getWidth();
-            double zoomedTime = timeRange.first + (proportion * (timeRange.second - timeRange.first));
+            int clampedX = juce::jlimit(zoomBounds.getX(), zoomBounds.getRight(), event.x);
+            double zoomedTime = CoordinateMapper::pixelsToSeconds((float)(clampedX - zoomBounds.getX()), 
+                                                                  (float)zoomBounds.getWidth(), 
+                                                                  timeRange.second - timeRange.first) + timeRange.first;
 
             if (draggedHandle != CutMarkerHandle::None)
             {
@@ -231,12 +237,12 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
 
     if (draggedHandle != CutMarkerHandle::None)
     {
-        AudioPlayer& audioPlayer = owner.getAudioPlayer();
-        auto audioLength = audioPlayer.getThumbnail().getTotalLength();
         if (audioLength > 0.0)
         {
-            float proportion = (float)(event.x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-            double mouseTime = proportion * audioLength;
+            int clampedX = juce::jlimit(waveformBounds.getX(), waveformBounds.getRight(), event.x);
+            double mouseTime = CoordinateMapper::pixelsToSeconds((float)(clampedX - waveformBounds.getX()), 
+                                                                 (float)waveformBounds.getWidth(), 
+                                                                 audioLength);
 
             if (draggedHandle == CutMarkerHandle::In)
             {
@@ -310,8 +316,9 @@ void MouseHandler::mouseUp(const juce::MouseEvent& event)
             auto audioLength = audioPlayer.getThumbnail().getTotalLength();
             if (audioLength > 0.0)
             {
-                float proportion = (float)(event.x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-                double time = proportion * audioLength;
+                double time = CoordinateMapper::pixelsToSeconds((float)(event.x - waveformBounds.getX()), 
+                                                                (float)waveformBounds.getWidth(), 
+                                                                audioLength);
 
                 if (currentPlacementMode == AppEnums::PlacementMode::CutIn)
                 {
@@ -385,8 +392,9 @@ void MouseHandler::handleRightClickForCutPlacement(int x)
     if (audioLength <= 0.0) return;
 
     const auto waveformBounds = owner.getWaveformBounds();
-    float proportion = (float)(x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-    double time = proportion * audioLength;
+    double time = CoordinateMapper::pixelsToSeconds((float)(x - waveformBounds.getX()), 
+                                                    (float)waveformBounds.getWidth(), 
+                                                    audioLength);
 
     if (currentPlacementMode == AppEnums::PlacementMode::CutIn)
     {
@@ -410,8 +418,9 @@ void MouseHandler::seekToMousePosition(int x)
     auto audioLength = audioPlayer.getThumbnail().getTotalLength();
 
     const auto waveformBounds = owner.getWaveformBounds();
-    float proportion = (float)(x - waveformBounds.getX()) / (float)waveformBounds.getWidth();
-    double time = proportion * audioLength;
+    double time = CoordinateMapper::pixelsToSeconds((float)(x - waveformBounds.getX()), 
+                                                    (float)waveformBounds.getWidth(), 
+                                                    audioLength);
 
     audioPlayer.setPlayheadPosition(time);
 }
@@ -448,7 +457,8 @@ MouseHandler::CutMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int>
     if (audioLength <= 0.0) return CutMarkerHandle::None;
 
     auto checkHandle = [&](double time) -> bool {
-        float x = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(time / audioLength);
+        float x = (float)waveformBounds.getX() + 
+                  CoordinateMapper::secondsToPixels(time, (float)waveformBounds.getWidth(), audioLength);
         
         juce::Rectangle<int> hitStrip((int)(x - Config::Layout::Glow::cutMarkerBoxWidth / 2.0f),
                                       waveformBounds.getY(), 
@@ -466,8 +476,10 @@ MouseHandler::CutMarkerHandle MouseHandler::getHandleAtPosition(juce::Point<int>
     const double actualIn = juce::jmin(cutIn, cutOut);
     const double actualOut = juce::jmax(cutIn, cutOut);
     
-    float inX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(actualIn / audioLength);
-    float outX = (float)waveformBounds.getX() + (float)waveformBounds.getWidth() * (float)(actualOut / audioLength);
+    float inX = (float)waveformBounds.getX() + 
+                CoordinateMapper::secondsToPixels(actualIn, (float)waveformBounds.getWidth(), audioLength);
+    float outX = (float)waveformBounds.getX() + 
+                 CoordinateMapper::secondsToPixels(actualOut, (float)waveformBounds.getWidth(), audioLength);
     
     int hollowHeight = Config::Layout::Glow::cutMarkerBoxHeight;
     

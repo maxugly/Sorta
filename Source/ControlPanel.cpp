@@ -20,6 +20,7 @@
 #include "WaveformView.h"
 #include "CutLayerView.h"
 #include "CutPresenter.h"
+#include "CoordinateMapper.h"
 #include <cmath>
 
 ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionStateIn)
@@ -526,8 +527,8 @@ void ControlPanel::drawZoomPopup(juce::Graphics& g)
     if (endT <= startTime || startT >= endTime) return;
     double vStart = juce::jmax(startT, startTime);
     double vEnd = juce::jmin(endT, endTime);
-    float x1 = (float)popupBounds.getX() + (float)popupBounds.getWidth() * (float)((vStart - startTime) / timeRange);
-    float x2 = (float)popupBounds.getX() + (float)popupBounds.getWidth() * (float)((vEnd - startTime) / timeRange);
+    float x1 = (float)popupBounds.getX() + CoordinateMapper::secondsToPixels(vStart - startTime, (float)popupBounds.getWidth(), timeRange);
+    float x2 = (float)popupBounds.getX() + CoordinateMapper::secondsToPixels(vEnd - startTime, (float)popupBounds.getWidth(), timeRange);
     g.setColour(color);
     g.fillRect(x1, (float)popupBounds.getY(), x2 - x1, (float)popupBounds.getHeight());
   };
@@ -545,8 +546,7 @@ void ControlPanel::drawZoomPopup(juce::Graphics& g)
 
   auto drawFineLine = [&](double time, juce::Colour color, float thickness) {
     if (time >= startTime && time <= endTime) {
-      float proportion = (float)((time - startTime) / timeRange);
-      float x = (float)popupBounds.getX() + proportion * (float)popupBounds.getWidth();
+      float x = (float)popupBounds.getX() + CoordinateMapper::secondsToPixels(time - startTime, (float)popupBounds.getWidth(), timeRange);
       g.setColour(color);
       g.drawLine(x, (float)popupBounds.getY(), x, (float)popupBounds.getBottom(), thickness);
     }

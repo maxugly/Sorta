@@ -2,6 +2,7 @@
 #include "ControlPanel.h"
 #include "PlaybackCursorGlow.h"
 #include "Config.h"
+#include "CoordinateMapper.h"
 
 PlaybackCursorView::PlaybackCursorView(ControlPanel& ownerPanel)
     : owner(ownerPanel)
@@ -26,8 +27,8 @@ void PlaybackCursorView::paint(juce::Graphics& g)
         return;
 
     const auto waveformBounds = owner.getWaveformBounds();
-    const float drawPosition = (float)audioPlayer.getCurrentPosition();
-    const float x = (drawPosition / (float)audioLength) * (float)waveformBounds.getWidth() + (float)waveformBounds.getX();
+    const double drawPosition = audioPlayer.getCurrentPosition();
+    const float x = (float)waveformBounds.getX() + CoordinateMapper::secondsToPixels(drawPosition, (float)waveformBounds.getWidth(), audioLength);
 
     PlaybackCursorGlow::renderGlow(g, (int)x, waveformBounds.getY(), waveformBounds.getBottom(), Config::Colors::playbackText);
 }

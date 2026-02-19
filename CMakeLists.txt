@@ -64,6 +64,7 @@ if (NOT BUILD_TESTS_ONLY)
             Source/SessionState.h
             Source/SessionState.cpp
             Source/FileMetadata.h
+            Source/CoordinateMapper.h
             Source/SilenceWorkerClient.h
             Source/ControlPanel.h
             Source/ControlPanel.cpp

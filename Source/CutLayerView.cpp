@@ -4,6 +4,7 @@
 #include "SilenceDetector.h"
 #include "MouseHandler.h"
 #include "WaveformManager.h"
+#include "CoordinateMapper.h"
 
 CutLayerView::CutLayerView(SessionState& sessionStateIn,
                            SilenceDetector& silenceDetectorIn,
@@ -40,7 +41,7 @@ void CutLayerView::paint(juce::Graphics& g)
         topThresholdY = juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), topThresholdY);
         bottomThresholdY = juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), bottomThresholdY);
 
-        const float xPos = (float)bounds.getX() + (float)bounds.getWidth() * (float)(cutPos / audioLength);
+        const float xPos = (float)bounds.getX() + CoordinateMapper::secondsToPixels(cutPos, (float)bounds.getWidth(), (double)audioLength);
         const float halfThresholdLineWidth = Config::Animation::thresholdLineWidth / 2.0f;
         float lineStartX = xPos - halfThresholdLineWidth;
         float lineEndX = xPos + halfThresholdLineWidth;
@@ -70,8 +71,8 @@ void CutLayerView::paint(juce::Graphics& g)
     const double actualIn = juce::jmin(cutIn, cutOut);
     const double actualOut = juce::jmax(cutIn, cutOut);
     
-    const float inX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), (float)bounds.getX() + (float)bounds.getWidth() * (float)(actualIn / audioLength));
-    const float outX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), (float)bounds.getX() + (float)bounds.getWidth() * (float)(actualOut / audioLength));
+    const float inX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), (float)bounds.getX() + CoordinateMapper::secondsToPixels(actualIn, (float)bounds.getWidth(), (double)audioLength));
+    const float outX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), (float)bounds.getX() + CoordinateMapper::secondsToPixels(actualOut, (float)bounds.getWidth(), (double)audioLength));
     
     const float fadeLength = bounds.getWidth() * Config::Layout::Waveform::cutRegionFadeProportion;
     const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;

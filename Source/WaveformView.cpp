@@ -1,6 +1,7 @@
 #include "WaveformView.h"
 
 #include "WaveformManager.h"
+#include "CoordinateMapper.h"
 #include <cmath>
 
 WaveformView::WaveformView(WaveformManager& waveformManagerIn)
@@ -140,7 +141,7 @@ void WaveformView::drawReducedQualityWaveform(juce::Graphics& g,
     const float halfHeightScale = height * Config::Layout::Waveform::heightScale;
     if (pixelsPerSample <= 0)
         return;
-    const double timePerPixel = audioLength / (double)width;
+    const double timePerPixel = CoordinateMapper::pixelsToSeconds(1.0f, (float)width, audioLength);
     const double timeDelta = timePerPixel * pixelsPerSample;
     const int offsetX = bounds.getX();
 
@@ -148,7 +149,7 @@ void WaveformView::drawReducedQualityWaveform(juce::Graphics& g,
 
     for (int x = 0; x < width; x += pixelsPerSample)
     {
-        const double time = (double)x * timePerPixel;
+        const double time = CoordinateMapper::pixelsToSeconds((float)x, (float)width, audioLength);
         float minVal = 0.0f, maxVal = 0.0f;
         thumbnail.getApproximateMinMax(time, time + timeDelta, channel, minVal, maxVal);
 
