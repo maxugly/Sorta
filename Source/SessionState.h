@@ -7,9 +7,20 @@
 #include <juce_core/juce_core.h>
 #include <map>
 
+/**
+ * @ingroup State
+ * @class SessionState
+ * @brief The central data model and event broadcaster.
+ * @details Stores the current file path, cut preferences (in/out points), and file metadata.
+ * Components can register as listeners to be notified of state changes.
+ */
 class SessionState {
 public:
 
+    /**
+     * @brief Interface for receiving state change notifications.
+     * @details Implement this interface to react to changes in cut preferences or file metadata.
+     */
     class Listener {
     public:
         virtual ~Listener() = default;
@@ -49,8 +60,10 @@ public:
     juce::String getCurrentFilePath() const;
 
 private:
+    /** @brief Stores the current cut in/out points and enabled states. */
     MainDomain::CutPreferences cutPrefs;
     juce::String currentFilePath;
+    /** @brief Caches metadata (e.g., previous cut points) for previously loaded files. */
     std::map<juce::String, FileMetadata> metadataCache;
     juce::ListenerList<Listener> listeners;
 
