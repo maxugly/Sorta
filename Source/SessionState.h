@@ -19,7 +19,7 @@ public:
     void removeListener(Listener* listener);
 
     // Getters
-    const MainDomain::CutPreferences& getCutPrefs() const { return cutPrefs; }
+    MainDomain::CutPreferences getCutPrefs() const;
 
     // Setters
     void setCutActive(bool active);
@@ -29,18 +29,20 @@ public:
     void setThresholdOut(float threshold);
     void setCutIn(double value);
     void setCutOut(double value);
-    double getCutIn() const { return getMetadataForFile(currentFilePath).cutIn; }
-    double getCutOut() const { return getMetadataForFile(currentFilePath).cutOut; }
+    double getCutIn() const;
+    double getCutOut() const;
     FileMetadata getMetadataForFile(const juce::String& filePath) const;
-    FileMetadata getCurrentMetadata() const { return getMetadataForFile(currentFilePath); }
+    FileMetadata getCurrentMetadata() const;
     void setMetadataForFile(const juce::String& filePath, const FileMetadata& newMetadata);
     bool hasMetadataForFile(const juce::String& filePath) const;
-    void setCurrentFilePath(const juce::String& filePath) { currentFilePath = filePath; }
-    const juce::String& getCurrentFilePath() const { return currentFilePath; }
+    void setCurrentFilePath(const juce::String& filePath);
+    juce::String getCurrentFilePath() const;
 
 private:
     MainDomain::CutPreferences cutPrefs;
     juce::String currentFilePath;
     std::map<juce::String, FileMetadata> metadataCache;
     juce::ListenerList<Listener> listeners;
+
+    mutable juce::CriticalSection stateLock;
 };
