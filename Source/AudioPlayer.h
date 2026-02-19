@@ -23,6 +23,16 @@
 
 class ControlPanel;
 
+/**
+ * @ingroup Audio
+ * @class AudioPlayer
+ * @brief The main engine for real-time playback and file buffering.
+ * @details This class manages the audio device callback, file loading via
+ * `juce::AudioTransportSource`, and background buffering. It synchronizes
+ * playback state with `SessionState` and updates the UI via `ControlPanel`.
+ * @see SessionState
+ * @see ControlPanel
+ */
 class AudioPlayer : public juce::AudioSource,
                     public juce::ChangeListener,
                     public juce::ChangeBroadcaster,
@@ -73,6 +83,12 @@ public:
 
     void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
 
+    /**
+     * @brief Processes the next block of audio samples.
+     * @details Fetches audio from the `transportSource`, applies gain/processing,
+     * and writes to the output buffer. This runs on the high-priority audio thread.
+     * @param bufferToFill The buffer structure to populate with audio data.
+     */
     void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
 
     void releaseResources() override;
@@ -99,9 +115,12 @@ public:
 #endif
 
 private:
+    /** @brief Handles decoding of supported audio file formats (WAV, MP3, etc.). */
     juce::AudioFormatManager formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
+    /** @brief Background thread used by the transport source to buffer audio data. */
     juce::TimeSliceThread readAheadThread;
+    /** @brief High-level source that handles resampling, buffering, and playback control. */
     juce::AudioTransportSource transportSource;
 
     #if !defined(JUCE_HEADLESS)
@@ -109,6 +128,7 @@ private:
     #endif
 
     juce::File loadedFile;
+    /** @brief Reference to the shared application state. */
     SessionState& sessionState;
     ControlPanel* controlPanel{nullptr};
     float lastAutoCutThresholdIn{-1.0f};

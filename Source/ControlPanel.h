@@ -56,6 +56,16 @@ class PlaybackCursorView;
 
 class ZoomView;
 
+/**
+ * @ingroup UI
+ * @class ControlPanel
+ * @brief The main container for the UI, hosting playback controls, waveforms, and overlays.
+ * @details Acts as the primary 'View' in the application. It delegates logic to various
+ * Presenters (e.g., `TransportPresenter`, `ControlStatePresenter`) while managing the
+ * component hierarchy and layout. It observes `SessionState` for updates.
+ * @see SessionState
+ * @see AudioPlayer
+ */
 class ControlPanel final : public juce::Component,
                            public juce::Timer {
 public:
@@ -100,6 +110,11 @@ public:
 
   void performDelayedJumpIfNeeded();
 
+  /**
+   * @brief Renders the background and static UI elements.
+   * @details Note: The waveform is rendered by `WaveformView`, and cursors by `PlaybackCursorView`.
+   * This method handles the container's own background and debug overlays if enabled.
+   */
   void paint(juce::Graphics &g) override;
 
   void resized() override;
@@ -223,6 +238,7 @@ public:
   void timerCallback() override;
 
 private:
+  // Presenters and Helpers granted access to private UI state for logic separation
   friend class LayoutManager;
   friend class ControlStatePresenter;
   friend class TransportPresenter;
@@ -233,6 +249,7 @@ private:
   friend class PlaybackTextPresenter;
 
   MainComponent &owner;
+  /** @brief Reference to the shared application state, used for data binding. */
   SessionState &sessionState;
   ModernLookAndFeel modernLF;
   std::unique_ptr<SilenceDetector> silenceDetector;
