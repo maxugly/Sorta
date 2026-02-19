@@ -40,8 +40,7 @@ void TransportPresenter::handleCutModeToggle(bool enableCutMode)
 void TransportPresenter::enforceCutBounds() const
 {
     auto& audioPlayer = owner.getAudioPlayer();
-    auto& transport = audioPlayer.getTransportSource();
-    const double currentPosition = transport.getCurrentPosition();
+    const double currentPosition = audioPlayer.getCurrentPosition();
     const double cutIn = owner.getCutInPosition();
     const double cutOut = owner.getCutOutPosition();
 

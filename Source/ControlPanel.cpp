@@ -557,12 +557,12 @@ void ControlPanel::drawZoomPopup(juce::Graphics& g)
 
   drawFineLine(cutIn, Config::Colors::cutLine, 1.0f);
   drawFineLine(cutOut, Config::Colors::cutLine, 1.0f);
-  drawFineLine(audioPlayer.getTransportSource().getCurrentPosition(), Config::Colors::playbackCursor, 1.0f);
+  drawFineLine(audioPlayer.getCurrentPosition(), Config::Colors::playbackCursor, 1.0f);
 
   if (isDraggingCutIn || isDraggingCutOut)
     drawFineLine(isDraggingCutIn ? cutIn : cutOut, Config::Colors::zoomPopupTrackingLine, 2.0f);
   else
-    drawFineLine(audioPlayer.getTransportSource().getCurrentPosition(), Config::Colors::zoomPopupPlaybackLine, 2.0f);
+    drawFineLine(audioPlayer.getCurrentPosition(), Config::Colors::zoomPopupPlaybackLine, 2.0f);
 
   g.setColour(Config::Colors::zoomPopupBorder);
   g.drawRect(popupBounds.toFloat(), Config::Layout::Zoom::borderThickness);

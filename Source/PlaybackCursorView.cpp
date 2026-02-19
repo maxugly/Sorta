@@ -26,7 +26,7 @@ void PlaybackCursorView::paint(juce::Graphics& g)
         return;
 
     const auto waveformBounds = owner.getWaveformBounds();
-    const float drawPosition = (float)audioPlayer.getTransportSource().getCurrentPosition();
+    const float drawPosition = (float)audioPlayer.getCurrentPosition();
     const float x = (drawPosition / (float)audioLength) * (float)waveformBounds.getWidth() + (float)waveformBounds.getX();
 
     PlaybackCursorGlow::renderGlow(g, (int)x, waveformBounds.getY(), waveformBounds.getBottom(), Config::Colors::playbackText);

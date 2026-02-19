@@ -40,6 +40,7 @@ public:
     juce::Result loadFile(const juce::File& file);
     void togglePlayStop();
     bool isPlaying() const;
+    double getCurrentPosition() const;
 
     /** @brief Sets the ControlPanel reference for silence detection delegation. */
     void setControlPanel(ControlPanel* panel) { controlPanel = panel; }
@@ -58,7 +59,8 @@ public:
     WaveformManager& getWaveformManager();
     #endif
 
-    juce::AudioTransportSource& getTransportSource();
+    void startPlayback();
+    void stopPlayback();
     juce::AudioFormatManager& getFormatManager();
     juce::AudioFormatReader* getAudioFormatReader() const;
     juce::File getLoadedFile() const;
@@ -77,6 +79,10 @@ public:
     
     std::mutex& getReaderMutex() { return readerMutex; }
     bool getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamplesOut) const;
+
+#if JUCE_UNIT_TESTS
+    void setSourceForTesting(juce::PositionableAudioSource* source, double sampleRate);
+#endif
 
 private:
     juce::AudioFormatManager formatManager;

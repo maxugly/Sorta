@@ -183,7 +183,7 @@ void ControlButtonsPresenter::initialiseCutBoundaryButtons()
     owner.addAndMakeVisible(owner.cutInButton);
     owner.cutInButton.setButtonText(ControlPanelCopy::cutInButtonText());
     owner.cutInButton.onLeftClick = [this] {
-        owner.setCutInPosition(owner.getAudioPlayer().getTransportSource().getCurrentPosition());
+        owner.setCutInPosition(owner.getAudioPlayer().getCurrentPosition());
         owner.ensureCutOrder();
         owner.updateCutButtonColors();
         owner.setAutoCutInActive(false);
@@ -198,7 +198,7 @@ void ControlButtonsPresenter::initialiseCutBoundaryButtons()
     owner.addAndMakeVisible(owner.cutOutButton);
     owner.cutOutButton.setButtonText(ControlPanelCopy::cutOutButtonText());
     owner.cutOutButton.onLeftClick = [this] {
-        owner.setCutOutPosition(owner.getAudioPlayer().getTransportSource().getCurrentPosition());
+        owner.setCutOutPosition(owner.getAudioPlayer().getCurrentPosition());
         owner.ensureCutOrder();
         owner.updateCutButtonColors();
         owner.setAutoCutOutActive(false);

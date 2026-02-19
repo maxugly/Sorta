@@ -40,7 +40,7 @@ void SilenceAnalysisWorker::startAnalysis(float thresholdVal, bool isIn)
 
     
     if (wasPlayingBeforeScan)
-        audioPlayer.getTransportSource().stop();
+        audioPlayer.stopPlayback();
 
     startThread();
 }
@@ -138,7 +138,7 @@ void SilenceAnalysisWorker::run()
 
             // Resume playback if it was playing
             if (wasPlayingBeforeScan)
-                player.getTransportSource().start();
+                player.startPlayback();
 
             busy.store(false);
         }

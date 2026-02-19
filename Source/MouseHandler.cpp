@@ -104,11 +104,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                     }
                     else
                     {
-                        double effectiveCutIn = juce::jmax(0.0, owner.getCutInPosition());
-                        double effectiveCutOut = owner.getCutOutPosition();
-                        double constrainedTime = juce::jlimit(effectiveCutIn, effectiveCutOut, zoomedTime);
-
-                        owner.getAudioPlayer().setPlayheadPosition(constrainedTime);
+                        owner.getAudioPlayer().setPlayheadPosition(zoomedTime);
                         isDragging = true;
                         isScrubbingState = true;
                         mouseDragStartX = event.x;
@@ -170,7 +166,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
             isDragging = true;
             isScrubbingState = true;
             mouseDragStartX = event.x;
-            currentPlaybackPosOnDragStart = owner.getAudioPlayer().getTransportSource().getCurrentPosition();
+            currentPlaybackPosOnDragStart = owner.getAudioPlayer().getCurrentPosition();
             seekToMousePosition(event.x);
         }
         else
@@ -225,11 +221,7 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
             }
             else if (isDragging)
             {
-                double effectiveCutIn = juce::jmax(0.0, owner.getCutInPosition());
-                double effectiveCutOut = owner.getCutOutPosition();
-                double constrainedTime = juce::jlimit(effectiveCutIn, effectiveCutOut, zoomedTime);
-                
-                owner.getAudioPlayer().setPlayheadPosition(constrainedTime);
+                owner.getAudioPlayer().setPlayheadPosition(zoomedTime);
             }
 
             owner.updateCutLabels();
@@ -271,11 +263,11 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
                     newOut = audioLength;
                     newIn = audioLength - dragStartCutLength;
                 }
-                
+
                 owner.getAudioPlayer().setCutIn(newIn);
                 owner.getAudioPlayer().setCutOut(newOut);
 
-                audioPlayer.setPlayheadPosition(audioPlayer.getTransportSource().getCurrentPosition());
+                audioPlayer.setPlayheadPosition(audioPlayer.getCurrentPosition());
             }
 
             owner.ensureCutOrder();
@@ -374,8 +366,7 @@ void MouseHandler::mouseWheelMove(const juce::MouseEvent& event, const juce::Mou
     }
 
     AudioPlayer& audioPlayer = owner.getAudioPlayer();
-    auto& transport = audioPlayer.getTransportSource();
-    double currentPos = transport.getCurrentPosition();
+    double currentPos = audioPlayer.getCurrentPosition();
     double audioLength = audioPlayer.getThumbnail().getTotalLength();
     
     if (audioLength <= 0.0)

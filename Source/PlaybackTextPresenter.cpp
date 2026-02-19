@@ -46,7 +46,7 @@ void PlaybackTextPresenter::updateEditors() {
   if (!isEditingElapsed && !owner.elapsedTimeEditor.hasKeyboardFocus(true))
     syncEditorToPosition(
         owner.elapsedTimeEditor,
-        owner.getAudioPlayer().getTransportSource().getCurrentPosition());
+        owner.getAudioPlayer().getCurrentPosition());
 
   if (!isEditingRemaining &&
       !owner.remainingTimeEditor.hasKeyboardFocus(true)) {
@@ -55,7 +55,7 @@ void PlaybackTextPresenter::updateEditors() {
     const auto remaining = juce::jmax(
         0.0,
         (session.getCutPrefs().active ? cutOut : owner.getAudioPlayer().getThumbnail().getTotalLength()) -
-            owner.getAudioPlayer().getTransportSource().getCurrentPosition());
+            owner.getAudioPlayer().getCurrentPosition());
     syncEditorToPosition(owner.remainingTimeEditor, remaining, true);
   }
 

@@ -56,13 +56,13 @@ bool KeybindHandler::handlePlaybackKeybinds(const juce::KeyPress& key)
     constexpr double seekStepSeconds = Config::Audio::keyboardSkipSeconds;
     if (key.getKeyCode() == juce::KeyPress::leftKey)
     {
-        const double current = audioPlayer.getTransportSource().getCurrentPosition();
+        const double current = audioPlayer.getCurrentPosition();
         audioPlayer.setPlayheadPosition(current - seekStepSeconds);
         return true;
     }
     if (key.getKeyCode() == juce::KeyPress::rightKey)
     {
-        const double current = audioPlayer.getTransportSource().getCurrentPosition();
+        const double current = audioPlayer.getCurrentPosition();
         audioPlayer.setPlayheadPosition(current + seekStepSeconds);
         return true;
     }
@@ -87,7 +87,7 @@ bool KeybindHandler::handleCutKeybinds(const juce::KeyPress& key)
     {
         if (keyChar == 'i' || keyChar == 'I')
         {
-            controlPanel.setCutInPosition(audioPlayer.getTransportSource().getCurrentPosition());
+            controlPanel.setCutInPosition(audioPlayer.getCurrentPosition());
             controlPanel.setAutoCutInActive(false);
             controlPanel.jumpToCutIn();
             controlPanel.repaint();
@@ -95,7 +95,7 @@ bool KeybindHandler::handleCutKeybinds(const juce::KeyPress& key)
         }
         if (keyChar == 'o' || keyChar == 'O')
         {
-            controlPanel.setCutOutPosition(audioPlayer.getTransportSource().getCurrentPosition());
+            controlPanel.setCutOutPosition(audioPlayer.getCurrentPosition());
             controlPanel.setAutoCutOutActive(false);
             controlPanel.jumpToCutIn();
             controlPanel.repaint();

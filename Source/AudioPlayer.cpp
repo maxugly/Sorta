@@ -7,6 +7,7 @@
 #include "SilenceDetectionPresenter.h"
 #endif
 #include <algorithm>
+#include <cmath>
 
 AudioPlayer::AudioPlayer(SessionState& state)
     #if !defined(JUCE_HEADLESS)
@@ -121,6 +122,11 @@ bool AudioPlayer::isPlaying() const
     return transportSource.isPlaying();
 }
 
+double AudioPlayer::getCurrentPosition() const
+{
+    return transportSource.getCurrentPosition();
+}
+
 bool AudioPlayer::isRepeating() const
 {
     return repeating;
@@ -143,9 +149,14 @@ WaveformManager& AudioPlayer::getWaveformManager()
 }
 #endif
 
-juce::AudioTransportSource& AudioPlayer::getTransportSource()
+void AudioPlayer::startPlayback()
 {
-    return transportSource;
+    transportSource.start();
+}
+
+void AudioPlayer::stopPlayback()
+{
+    transportSource.stop();
 }
 
 juce::AudioFormatManager& AudioPlayer::getFormatManager()
@@ -166,17 +177,61 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
         return;
     }
 
+    if (!sessionState.getCutPrefs().active)
+    {
+        transportSource.getNextAudioBlock(bufferToFill);
+        return;
+    }
+
+    double sampleRate = 0.0;
+    juce::int64 lengthInSamples = 0;
+    if (!getReaderInfo(sampleRate, lengthInSamples) || sampleRate <= 0.0)
+    {
+        transportSource.getNextAudioBlock(bufferToFill);
+        return;
+    }
+
+    const double cutIn = sessionState.getCutPrefs().cutIn;
+    const double cutOut = sessionState.getCutPrefs().cutOut;
+    const double startPos = transportSource.getCurrentPosition();
+
+    if (startPos >= cutOut)
+    {
+        if (repeating)
+        {
+            setPlayheadPosition(cutIn);
+            transportSource.getNextAudioBlock(bufferToFill);
+        }
+        else
+        {
+            transportSource.stop();
+            bufferToFill.clearActiveBufferRegion();
+        }
+        return;
+    }
+
     transportSource.getNextAudioBlock(bufferToFill);
 
-    if (sessionState.getCutPrefs().active)
+    const double endPos = startPos + ((double)bufferToFill.numSamples / sampleRate);
+    if (endPos >= cutOut)
     {
-        const double currentPos = transportSource.getCurrentPosition();
-        if (currentPos >= sessionState.getCutPrefs().cutOut)
+        const int samplesToKeep = juce::jlimit(
+            0,
+            bufferToFill.numSamples,
+            (int)std::floor((cutOut - startPos) * sampleRate));
+
+        if (samplesToKeep < bufferToFill.numSamples)
         {
-            if (repeating)
-                setPlayheadPosition(sessionState.getCutPrefs().cutIn);
-            else
-                transportSource.stop();
+            bufferToFill.buffer->clear(bufferToFill.startSample + samplesToKeep,
+                                       bufferToFill.numSamples - samplesToKeep);
+        }
+
+        if (repeating)
+            setPlayheadPosition(cutIn);
+        else
+        {
+            transportSource.stop();
+            setPlayheadPosition(cutOut);
         }
     }
 }
@@ -238,6 +293,13 @@ bool AudioPlayer::getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamp
     return true;
 }
 
+#if JUCE_UNIT_TESTS
+void AudioPlayer::setSourceForTesting(juce::PositionableAudioSource* source, double sampleRate)
+{
+    transportSource.setSource(source, 0, nullptr, sampleRate);
+}
+#endif
+
 void AudioPlayer::setPlayheadPosition(double seconds)
 {
     if (readerSource == nullptr)
@@ -249,16 +311,20 @@ void AudioPlayer::setPlayheadPosition(double seconds)
         return;
 
     const double totalDuration = (double)lengthInSamples / sampleRate;
-
-    double effectiveIn = 0.0;
-    double effectiveOut = totalDuration;
-    if (sessionState.getCutPrefs().active)
+    double targetSeconds = seconds;
+    if (lengthInSamples > 0 && sampleRate > 0.0 && targetSeconds >= totalDuration)
     {
-        effectiveIn = juce::jmin(sessionState.getCutPrefs().cutIn, sessionState.getCutPrefs().cutOut);
-        effectiveOut = juce::jmax(sessionState.getCutPrefs().cutIn, sessionState.getCutPrefs().cutOut);
+        const double lastSampleTime = totalDuration - (1.0 / sampleRate);
+        targetSeconds = juce::jmax(0.0, lastSampleTime);
     }
 
-    transportSource.setPosition(juce::jlimit(effectiveIn, effectiveOut, seconds));
+    if (sessionState.getCutPrefs().active)
+    {
+        const double cutIn = sessionState.getCutPrefs().cutIn;
+        const double cutOut = sessionState.getCutPrefs().cutOut;
+        transportSource.setPosition(juce::jlimit(cutIn, cutOut, targetSeconds));
+        return;
+    }
+
+    transportSource.setPosition(juce::jlimit(0.0, totalDuration, targetSeconds));
 }
-
-

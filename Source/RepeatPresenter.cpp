@@ -81,7 +81,7 @@ void RepeatPresenter::setCutInPosition(double positionSeconds) {
   }
 
   audioPlayer.setPlayheadPosition(
-      audioPlayer.getTransportSource().getCurrentPosition());
+      audioPlayer.getCurrentPosition());
   ensureCutOrder();
 }
 
@@ -106,7 +106,7 @@ void RepeatPresenter::setCutOutPosition(double positionSeconds) {
   }
 
   audioPlayer.setPlayheadPosition(
-      audioPlayer.getTransportSource().getCurrentPosition());
+      audioPlayer.getCurrentPosition());
   ensureCutOrder();
 }
 
@@ -266,9 +266,8 @@ bool RepeatPresenter::applyCutOutFromEditor(double newPosition,
   const double totalLength = getAudioTotalLength();
   if (newPosition >= 0.0 && newPosition <= totalLength) {
     AudioPlayer &audioPlayer = owner.getAudioPlayer();
-    auto &transport = audioPlayer.getTransportSource();
     if (owner.getShouldRepeat() &&
-        transport.getCurrentPosition() >= owner.getAudioPlayer().getCutOut())
+        audioPlayer.getCurrentPosition() >= owner.getAudioPlayer().getCutOut())
       owner.getAudioPlayer().setPlayheadPosition(owner.getAudioPlayer().getCutIn());
 
     setCutOutPosition(newPosition);

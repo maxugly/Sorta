@@ -43,7 +43,7 @@ double FocusManager::getFocusedTime() const
         case FocusTarget::MouseManual:
         case FocusTarget::Playback:
         default:
-            return owner.getAudioPlayer().getTransportSource().getCurrentPosition();
+            return owner.getAudioPlayer().getCurrentPosition();
     }
 }
 
