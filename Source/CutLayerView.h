@@ -13,11 +13,13 @@ class SessionState;
 class SilenceDetector;
 class MouseHandler;
 class WaveformManager;
+class ControlPanel;
 
 class CutLayerView : public juce::Component
 {
 public:
-    CutLayerView(SessionState& sessionState,
+    CutLayerView(ControlPanel& owner,
+                 SessionState& sessionState,
                  SilenceDetector& silenceDetector,
                  WaveformManager& waveformManager,
                  std::function<float()> glowAlphaProvider);
@@ -28,6 +30,7 @@ public:
     void paint(juce::Graphics& g) override;
 
 private:
+    ControlPanel& owner;
     SessionState& sessionState;
     SilenceDetector& silenceDetector;
     MouseHandler* mouseHandler = nullptr;

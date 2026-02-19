@@ -5,12 +5,15 @@
 #include "MouseHandler.h"
 #include "WaveformManager.h"
 #include "CoordinateMapper.h"
+#include "ControlPanel.h"
 
-CutLayerView::CutLayerView(SessionState& sessionStateIn,
+CutLayerView::CutLayerView(ControlPanel& ownerIn,
+                           SessionState& sessionStateIn,
                            SilenceDetector& silenceDetectorIn,
                            WaveformManager& waveformManagerIn,
                            std::function<float()> glowAlphaProviderIn)
-    : sessionState(sessionStateIn),
+    : owner(ownerIn),
+      sessionState(sessionStateIn),
       silenceDetector(silenceDetectorIn),
       waveformManager(waveformManagerIn),
       glowAlphaProvider(std::move(glowAlphaProviderIn))
@@ -21,6 +24,8 @@ CutLayerView::CutLayerView(SessionState& sessionStateIn,
 
 void CutLayerView::paint(juce::Graphics& g)
 {
+    owner.renderOverlays(g);
+
     if (!markersVisible)
         return;
 

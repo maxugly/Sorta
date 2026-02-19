@@ -36,7 +36,8 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   waveformView->setChannelMode(currentChannelViewMode);
   addAndMakeVisible(waveformView.get());
 
-  cutLayerView = std::make_unique<CutLayerView>(sessionState,
+  cutLayerView = std::make_unique<CutLayerView>(*this,
+                                                sessionState,
                                                 *silenceDetector,
                                                 owner.getAudioPlayer()->getWaveformManager(),
                                                 [this]() { return getGlowAlpha(); });
