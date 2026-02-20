@@ -56,10 +56,6 @@ namespace Config {
         const juce::String viewModeOverlay = "[V]iew02";
         const juce::String channelViewMono = "[C]han 1";
         const juce::String channelViewStereo = "[C]han 2";
-        const juce::String qualityButton = "[Q]ual";
-        const juce::String qualityHigh = "[Q]ual H";
-        const juce::String qualityMedium = "[Q]ual M";
-        const juce::String qualityLow = "[Q]ual L";
         const juce::String exitButton = "[E]xit";
         const juce::String statsButton = "[S]tats";
         const juce::String repeatButton = "[R]epeat";

@@ -20,12 +20,6 @@ namespace AppEnums
         Stereo
     };
 
-    enum class ThumbnailQuality {
-        Low,
-        Medium,
-        High
-    };
-
     enum class ActiveZoomPoint {
         None,
         In,

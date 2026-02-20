@@ -22,8 +22,6 @@ public:
 
     ~WaveformView() override;
 
-    void setQuality(AppEnums::ThumbnailQuality quality);
-
     void setChannelMode(AppEnums::ChannelViewMode channelMode);
 
     void paint(juce::Graphics& g) override;
@@ -35,7 +33,6 @@ private:
     void drawWaveform(juce::Graphics& g, const juce::Rectangle<int>& bounds) const;
 
     WaveformManager& waveformManager;
-    AppEnums::ThumbnailQuality currentQuality = AppEnums::ThumbnailQuality::Low;
     AppEnums::ChannelViewMode currentChannelMode = AppEnums::ChannelViewMode::Mono;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveformView)

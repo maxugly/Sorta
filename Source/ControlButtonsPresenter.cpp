@@ -29,8 +29,6 @@ void ControlButtonsPresenter::initialiseAllButtons()
 
     initialiseChannelViewButton();
 
-    initialiseQualityButton();
-
     initialiseExitButton();
 
     initialiseStatsButton();
@@ -71,6 +69,7 @@ void ControlButtonsPresenter::initialiseModeButton()
 {
     owner.addAndMakeVisible(owner.modeButton);
     owner.modeButton.setButtonText(ControlPanelCopy::viewModeClassicText());
+    owner.modeButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
     owner.modeButton.setClickingTogglesState(true);
     owner.modeButton.onClick = [this] {
         owner.currentMode = owner.modeButton.getToggleState() ? AppEnums::ViewMode::Overlay : AppEnums::ViewMode::Classic;
@@ -86,6 +85,7 @@ void ControlButtonsPresenter::initialiseChannelViewButton()
 {
     owner.addAndMakeVisible(owner.channelViewButton);
     owner.channelViewButton.setButtonText(ControlPanelCopy::channelViewMonoText());
+    owner.channelViewButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
     owner.channelViewButton.setClickingTogglesState(true);
     owner.channelViewButton.onClick = [this] {
         owner.currentChannelViewMode = owner.channelViewButton.getToggleState()
@@ -98,25 +98,6 @@ void ControlButtonsPresenter::initialiseChannelViewButton()
             owner.waveformView->setChannelMode(owner.currentChannelViewMode);
         owner.repaint();
     };
-}
-
-void ControlButtonsPresenter::initialiseQualityButton()
-{
-    owner.addAndMakeVisible(owner.qualityButton);
-    owner.qualityButton.setButtonText(ControlPanelCopy::qualityButtonText());
-    owner.qualityButton.onClick = [this] {
-        if (owner.currentQuality == AppEnums::ThumbnailQuality::High)
-            owner.currentQuality = AppEnums::ThumbnailQuality::Medium;
-        else if (owner.currentQuality == AppEnums::ThumbnailQuality::Medium)
-            owner.currentQuality = AppEnums::ThumbnailQuality::Low;
-        else
-            owner.currentQuality = AppEnums::ThumbnailQuality::High;
-        owner.updateQualityButtonText();
-        if (owner.waveformView != nullptr)
-            owner.waveformView->setQuality(owner.currentQuality);
-        owner.repaint();
-    };
-    owner.updateQualityButtonText();
 }
 
 void ControlButtonsPresenter::initialiseExitButton()
@@ -133,6 +114,7 @@ void ControlButtonsPresenter::initialiseStatsButton()
 {
     owner.addAndMakeVisible(owner.statsButton);
     owner.statsButton.setButtonText(ControlPanelCopy::statsButtonText());
+    owner.statsButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     owner.statsButton.setClickingTogglesState(true);
     owner.statsButton.onClick = [this] {
         owner.setShouldShowStats(owner.statsButton.getToggleState());
@@ -169,6 +151,7 @@ void ControlButtonsPresenter::initialiseAutoCutInButton()
 {
     owner.addAndMakeVisible(owner.autoCutInButton);
     owner.autoCutInButton.setButtonText(ControlPanelCopy::autoCutInButtonText());
+    owner.autoCutInButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
     owner.autoCutInButton.setClickingTogglesState(true);
     owner.autoCutInButton.onClick = [this] {
         if (owner.silenceDetectionPresenter != nullptr)
@@ -180,6 +163,7 @@ void ControlButtonsPresenter::initialiseAutoCutOutButton()
 {
     owner.addAndMakeVisible(owner.autoCutOutButton);
     owner.autoCutOutButton.setButtonText(ControlPanelCopy::autoCutOutButtonText());
+    owner.autoCutOutButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
     owner.autoCutOutButton.setClickingTogglesState(true);
     owner.autoCutOutButton.onClick = [this] {
         if (owner.silenceDetectionPresenter != nullptr)
@@ -204,6 +188,7 @@ void ControlButtonsPresenter::initialiseCutBoundaryButtons()
 {
     owner.addAndMakeVisible(owner.cutInButton);
     owner.cutInButton.setButtonText(ControlPanelCopy::cutInButtonText());
+    owner.cutInButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
     owner.cutInButton.onLeftClick = [this] {
         owner.setCutInPosition(owner.getAudioPlayer().getCurrentPosition());
         owner.ensureCutOrder();
@@ -219,6 +204,7 @@ void ControlButtonsPresenter::initialiseCutBoundaryButtons()
 
     owner.addAndMakeVisible(owner.cutOutButton);
     owner.cutOutButton.setButtonText(ControlPanelCopy::cutOutButtonText());
+    owner.cutOutButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
     owner.cutOutButton.onLeftClick = [this] {
         owner.setCutOutPosition(owner.getAudioPlayer().getCurrentPosition());
         owner.ensureCutOrder();
@@ -237,6 +223,7 @@ void ControlButtonsPresenter::initialiseClearButtons()
 {
     owner.addAndMakeVisible(owner.resetInButton);
     owner.resetInButton.setButtonText(ControlPanelCopy::clearButtonText());
+    owner.resetInButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     owner.resetInButton.setColour(juce::TextButton::buttonColourId, Config::Colors::Button::clear);
     owner.resetInButton.onClick = [this] {
         if (owner.cutResetPresenter != nullptr)
@@ -245,6 +232,7 @@ void ControlButtonsPresenter::initialiseClearButtons()
 
     owner.addAndMakeVisible(owner.resetOutButton);
     owner.resetOutButton.setButtonText(ControlPanelCopy::clearButtonText());
+    owner.resetOutButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     owner.resetOutButton.setColour(juce::TextButton::buttonColourId, Config::Colors::Button::clear);
     owner.resetOutButton.onClick = [this] {
         if (owner.cutResetPresenter != nullptr)

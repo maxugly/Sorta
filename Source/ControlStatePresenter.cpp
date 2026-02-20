@@ -32,7 +32,6 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled)
     owner.modeButton.setEnabled(enabled);
     owner.statsButton.setEnabled(enabled);
     owner.channelViewButton.setEnabled(enabled);
-    owner.qualityButton.setEnabled(enabled);
 
     owner.elapsedTimeEditor.setEnabled(enabled);
     owner.remainingTimeEditor.setEnabled(enabled);

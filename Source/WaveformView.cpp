@@ -28,14 +28,6 @@ void WaveformView::changeListenerCallback(juce::ChangeBroadcaster* source)
         repaint();
 }
 
-void WaveformView::setQuality(AppEnums::ThumbnailQuality quality)
-{
-    if (currentQuality == quality) return;
-    currentQuality = quality;
-
-    repaint();
-}
-
 void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode)
 {
     if (currentChannelMode == channelMode) return;

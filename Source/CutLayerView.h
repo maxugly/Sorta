@@ -42,8 +42,6 @@ public:
 
     void setChannelMode(AppEnums::ChannelViewMode mode);
 
-    void setQuality(AppEnums::ThumbnailQuality quality);
-
     void paint(juce::Graphics& g) override;
 
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
@@ -61,7 +59,6 @@ private:
     bool markersVisible = false;
 
     AppEnums::ChannelViewMode currentChannelMode = AppEnums::ChannelViewMode::Mono;
-    AppEnums::ThumbnailQuality currentQuality = AppEnums::ThumbnailQuality::Low;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CutLayerView)
 };

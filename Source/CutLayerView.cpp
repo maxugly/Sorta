@@ -55,14 +55,6 @@ void CutLayerView::setChannelMode(AppEnums::ChannelViewMode mode)
     repaint();
 }
 
-void CutLayerView::setQuality(AppEnums::ThumbnailQuality quality)
-{
-    if (currentQuality == quality) return;
-    currentQuality = quality;
-
-    repaint();
-}
-
 void CutLayerView::paint(juce::Graphics& g)
 {
     if (!markersVisible)

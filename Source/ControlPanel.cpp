@@ -109,6 +109,11 @@ void ControlPanel::initialiseCutEditors() {
   cutResetPresenter = std::make_unique<CutResetPresenter>(*this);
   addAndMakeVisible(silenceDetector->getInSilenceThresholdEditor());
   addAndMakeVisible(silenceDetector->getOutSilenceThresholdEditor());
+
+  cutInEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
+  cutOutEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
+  silenceDetector->getInSilenceThresholdEditor().getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
+  silenceDetector->getOutSilenceThresholdEditor().getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
 }
 
 void ControlPanel::invokeOwnerOpenDialog() { owner.openButtonClicked(); }
@@ -309,15 +314,6 @@ void ControlPanel::setAutoCutOutActive(bool isActive) {
   sessionState.setAutoCutOutActive(isActive);
 }
 
-void ControlPanel::updateQualityButtonText() {
-  if (currentQuality == AppEnums::ThumbnailQuality::High)
-    qualityButton.setButtonText(ControlPanelCopy::qualityHighText());
-  else if (currentQuality == AppEnums::ThumbnailQuality::Medium)
-    qualityButton.setButtonText(ControlPanelCopy::qualityMediumText());
-  else
-    qualityButton.setButtonText(ControlPanelCopy::qualityLowText());
-}
-
 void ControlPanel::toggleStats() {
   if (statsPresenter == nullptr)
     return;
@@ -328,8 +324,6 @@ void ControlPanel::toggleStats() {
 
   updateComponentStates();
 }
-
-void ControlPanel::triggerQualityButton() { qualityButton.triggerClick(); }
 
 void ControlPanel::triggerModeButton() { modeButton.triggerClick(); }
 

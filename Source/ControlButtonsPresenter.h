@@ -23,8 +23,6 @@ private:
 
     void initialiseChannelViewButton();
 
-    void initialiseQualityButton();
-
     void initialiseExitButton();
 
     void initialiseStatsButton();

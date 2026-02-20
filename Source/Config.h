@@ -186,10 +186,6 @@ namespace Config {
         extern const juce::String viewModeOverlay;
         extern const juce::String channelViewMono;
         extern const juce::String channelViewStereo;
-        extern const juce::String qualityButton;
-        extern const juce::String qualityHigh;
-        extern const juce::String qualityMedium;
-        extern const juce::String qualityLow;
         extern const juce::String exitButton;
         extern const juce::String statsButton;
         extern const juce::String repeatButton;

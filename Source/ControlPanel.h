@@ -154,8 +154,6 @@ public:
 
   void toggleStats();
 
-  void triggerQualityButton();
-
   void triggerModeButton();
 
   void triggerChannelViewButton();
@@ -193,10 +191,6 @@ public:
   AudioPlayer &getAudioPlayer() const;
   SessionState &getSessionState() { return sessionState; }
   const SessionState &getSessionState() const { return sessionState; }
-
-  AppEnums::ThumbnailQuality getCurrentQualitySetting() const {
-    return currentQuality;
-  }
 
   AppEnums::ChannelViewMode getChannelViewMode() const {
     return currentChannelViewMode;
@@ -313,8 +307,7 @@ private:
   std::unique_ptr<PlaybackTimerManager> playbackTimerManager;
 
   juce::TextButton openButton, playStopButton, modeButton, exitButton,
-      statsButton, repeatButton, channelViewButton,
-      qualityButton;
+      statsButton, repeatButton, channelViewButton;
   juce::TextButton resetInButton, resetOutButton;
   juce::TextEditor cutInEditor, cutOutEditor;
   juce::TextEditor elapsedTimeEditor, remainingTimeEditor, cutLengthEditor;
@@ -325,7 +318,6 @@ private:
 
   AppEnums::ViewMode currentMode = AppEnums::ViewMode::Classic;
   AppEnums::ChannelViewMode currentChannelViewMode = AppEnums::ChannelViewMode::Mono;
-  AppEnums::ThumbnailQuality currentQuality = AppEnums::ThumbnailQuality::Low;
 
   bool shouldRepeat = false;
 
@@ -348,8 +340,6 @@ private:
   void invokeOwnerOpenDialog();
 
   void finaliseSetup();
-
-  void updateQualityButtonText();
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPanel)
 };

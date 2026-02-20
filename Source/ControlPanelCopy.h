@@ -28,14 +28,6 @@ inline const juce::String& channelViewMonoText() { return Config::Labels::channe
 
 inline const juce::String& channelViewStereoText() { return Config::Labels::channelViewStereo; }
 
-inline const juce::String& qualityButtonText() { return Config::Labels::qualityButton; }
-
-inline const juce::String& qualityHighText() { return Config::Labels::qualityHigh; }
-
-inline const juce::String& qualityMediumText() { return Config::Labels::qualityMedium; }
-
-inline const juce::String& qualityLowText() { return Config::Labels::qualityLow; }
-
 inline const juce::String& exitButtonText() { return Config::Labels::exitButton; }
 
 inline const juce::String& statsButtonText() { return Config::Labels::statsButton; }
