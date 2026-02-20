@@ -54,6 +54,7 @@ void ControlButtonsPresenter::initialiseOpenButton()
 {
     owner.addAndMakeVisible(owner.openButton);
     owner.openButton.setButtonText(ControlPanelCopy::openButtonText());
+    owner.openButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Alone);
     owner.openButton.onClick = [this] { owner.invokeOwnerOpenDialog(); };
 }
 
@@ -61,6 +62,7 @@ void ControlButtonsPresenter::initialisePlayStopButton()
 {
     owner.addAndMakeVisible(owner.playStopButton);
     owner.playStopButton.setButtonText(ControlPanelCopy::playButtonText());
+    owner.playStopButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
     owner.playStopButton.onClick = [this] { owner.getAudioPlayer().togglePlayStop(); };
     owner.playStopButton.setEnabled(false);
 }
@@ -142,6 +144,7 @@ void ControlButtonsPresenter::initialiseRepeatButton()
 {
     owner.addAndMakeVisible(owner.repeatButton);
     owner.repeatButton.setButtonText(ControlPanelCopy::repeatButtonText());
+    owner.repeatButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     owner.repeatButton.setClickingTogglesState(true);
     owner.repeatButton.onClick = [this] {
         if (owner.transportPresenter != nullptr)
@@ -153,6 +156,7 @@ void ControlButtonsPresenter::initialiseAutoplayButton()
 {
     owner.addAndMakeVisible(owner.autoplayButton);
     owner.autoplayButton.setButtonText(ControlPanelCopy::autoplayButtonText());
+    owner.autoplayButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     owner.autoplayButton.setClickingTogglesState(true);
     owner.autoplayButton.setToggleState(owner.shouldAutoplay(), juce::dontSendNotification);
     owner.autoplayButton.onClick = [this] {
@@ -187,6 +191,7 @@ void ControlButtonsPresenter::initialiseCutButton()
 {
     owner.addAndMakeVisible(owner.cutButton);
     owner.cutButton.setButtonText(ControlPanelCopy::cutButtonText());
+    owner.cutButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
     owner.cutButton.setClickingTogglesState(true);
     owner.cutButton.setToggleState(owner.isCutModeActive(), juce::dontSendNotification);
     owner.cutButton.onClick = [this] {

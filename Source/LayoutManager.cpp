@@ -17,7 +17,7 @@ void LayoutManager::performLayout()
 {
     auto bounds = controlPanel.getLocalBounds();
     const int margin = Config::Layout::windowBorderMargins;
-    const int rowHeight = Config::Layout::buttonHeight + margin * 2;
+    const int rowHeight = (int)Config::UI::WidgetHeight + margin * 2;
 
     layoutTopRowButtons(bounds, rowHeight);
 
@@ -30,28 +30,33 @@ void LayoutManager::performLayout()
 
 void LayoutManager::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHeight)
 {
+    juce::ignoreUnused(rowHeight);
     const int margin = Config::Layout::windowBorderMargins;
     const int buttonWidth = Config::Layout::buttonWidth;
+    const int height = (int)Config::UI::WidgetHeight;
+    const int spacing = (int)Config::UI::GroupSpacing;
 
-    auto topRow = bounds.removeFromTop(rowHeight).reduced(margin);
+    auto topRow = bounds.removeFromTop(height + margin * 2).reduced(margin);
+    topRow.setHeight(height);
 
+    // Open button (Alone)
     controlPanel.openButton.setBounds(topRow.removeFromLeft(buttonWidth));
     topRow.removeFromLeft(margin);
 
+    // Transport Group (Left, Middle, Middle, Right)
     controlPanel.playStopButton.setBounds(topRow.removeFromLeft(buttonWidth));
-    topRow.removeFromLeft(margin);
+    topRow.removeFromLeft(spacing);
 
     controlPanel.autoplayButton.setBounds(topRow.removeFromLeft(buttonWidth));
-    topRow.removeFromLeft(margin);
+    topRow.removeFromLeft(spacing);
 
     controlPanel.repeatButton.setBounds(topRow.removeFromLeft(buttonWidth));
-    topRow.removeFromLeft(margin);
+    topRow.removeFromLeft(spacing);
 
     controlPanel.cutButton.setBounds(topRow.removeFromLeft(buttonWidth));
     topRow.removeFromLeft(margin);
 
     controlPanel.exitButton.setBounds(topRow.removeFromRight(buttonWidth));
-    topRow.removeFromRight(margin);
 }
 
 void LayoutManager::layoutCutControls(juce::Rectangle<int>& bounds, int rowHeight)
