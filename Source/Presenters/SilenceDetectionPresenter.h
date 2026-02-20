@@ -66,6 +66,12 @@ public:
     /** @brief Returns true if cut mode is currently active. */
     bool isCutModeActive() const override;
 
+    /** @brief Returns true if auto-cut-in is active. */
+    bool isAutoCutInActive() const override;
+
+    /** @brief Returns true if auto-cut-out is active. */
+    bool isAutoCutOutActive() const override;
+
 private:
 
     bool hasLoadedAudio() const;

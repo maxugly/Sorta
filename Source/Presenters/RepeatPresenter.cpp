@@ -258,8 +258,9 @@ bool RepeatPresenter::applyCutInFromEditor(double newPosition,
     owner.updateCutButtonColors();
     owner.setAutoCutInActive(false);
 
-    if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
-      owner.setNeedsJumpToCutIn(true);
+    auto& coordinator = owner.getInteractionCoordinator();
+    if (coordinator.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
+      coordinator.setNeedsJumpToCutIn(true);
 
     editor.setColour(juce::TextEditor::textColourId,
                      Config::Colors::playbackText);
@@ -289,8 +290,9 @@ bool RepeatPresenter::applyCutOutFromEditor(double newPosition,
     owner.updateCutButtonColors();
     owner.setAutoCutOutActive(false);
 
-    if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
-      owner.setNeedsJumpToCutIn(true);
+    auto& coordinator = owner.getInteractionCoordinator();
+    if (coordinator.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
+      coordinator.setNeedsJumpToCutIn(true);
 
     editor.setColour(juce::TextEditor::textColourId,
                      Config::Colors::playbackText);
@@ -410,7 +412,7 @@ void RepeatPresenter::mouseWheelMove(const juce::MouseEvent &event,
 
       setCutInPosition(newPos);
       owner.setAutoCutInActive(false);
-      owner.setNeedsJumpToCutIn(true);
+      owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
 
       ensureCutOrder();
 
@@ -424,7 +426,7 @@ void RepeatPresenter::mouseWheelMove(const juce::MouseEvent &event,
 
       setCutOutPosition(newPos);
       owner.setAutoCutOutActive(false);
-      owner.setNeedsJumpToCutIn(true);
+      owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
 
       ensureCutOrder();
 

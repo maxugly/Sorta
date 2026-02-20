@@ -90,6 +90,7 @@ bool KeybindHandler::handleCutKeybinds(const juce::KeyPress& key)
         {
             controlPanel.setCutInPosition(audioPlayer.getCurrentPosition());
             controlPanel.setAutoCutInActive(false);
+            controlPanel.getInteractionCoordinator().setNeedsJumpToCutIn(true);
             controlPanel.jumpToCutIn();
             controlPanel.repaint();
             return true;
@@ -98,6 +99,7 @@ bool KeybindHandler::handleCutKeybinds(const juce::KeyPress& key)
         {
             controlPanel.setCutOutPosition(audioPlayer.getCurrentPosition());
             controlPanel.setAutoCutOutActive(false);
+            controlPanel.getInteractionCoordinator().setNeedsJumpToCutIn(true);
             controlPanel.jumpToCutIn();
             controlPanel.repaint();
             return true;

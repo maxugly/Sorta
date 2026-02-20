@@ -36,20 +36,22 @@ void PlaybackCursorView::playbackTimerTick()
 
         if (currentX != lastCursorX)
         {
+            const int glowWidth = juce::roundToInt(Config::Layout::Glow::thickness) + 1;
             if (lastCursorX >= 0)
-                repaint(lastCursorX - 1, 0, 3, getHeight());
+                repaint(lastCursorX - glowWidth, 0, glowWidth * 2, getHeight());
 
-            repaint(currentX - 1, 0, 3, getHeight());
+            repaint(currentX - glowWidth, 0, glowWidth * 2, getHeight());
 
             lastCursorX = currentX;
         }
 
         const auto& timerManager = owner.getPlaybackTimerManager();
+        const auto& coordinator = owner.getInteractionCoordinator();
         const bool zDown = timerManager.isZKeyDown();
-        const auto activePoint = owner.getInteractionCoordinator().getActiveZoomPoint();
+        const auto activePoint = coordinator.getActiveZoomPoint();
         const bool isZooming = zDown || activePoint != AppEnums::ActiveZoomPoint::None;
 
-        if (isZooming && owner.getZoomPopupBounds().translated(-layout.getX(), -layout.getY()).contains(currentX, 10))
+        if (isZooming && coordinator.getZoomPopupBounds().translated(-layout.getX(), -layout.getY()).contains(currentX, 10))
             setVisible(false);
         else
             setVisible(true);
@@ -74,7 +76,7 @@ void PlaybackCursorView::paint(juce::Graphics& g)
     const double drawPosition = audioPlayer.getCurrentPosition();
     const float x = CoordinateMapper::secondsToPixels(drawPosition, (float)waveformBounds.getWidth(), audioLength);
 
-    const float pulse = owner.getShowEyeCandy() ? owner.getGlowAlpha() : 0.0f;
+    const float pulse = owner.getInteractionCoordinator().shouldShowEyeCandy() ? owner.getPlaybackTimerManager().getBreathingPulse() : 0.0f;
     const juce::Colour cursorColor = Config::Colors::playbackCursor.withAlpha(0.7f + 0.3f * pulse);
     
     PlaybackCursorGlow::renderGlow(g, juce::roundToInt(x), 0, getHeight(), cursorColor);

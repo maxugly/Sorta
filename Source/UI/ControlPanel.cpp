@@ -24,6 +24,7 @@
 #include "Presenters/CutPresenter.h"
 #include "Utils/CoordinateMapper.h"
 #include "UI/Views/ZoomView.h"
+#include "UI/Views/OverlayView.h"
 #include "Presenters/PlaybackTimerManager.h"
 #include "Presenters/PlaybackRepeatController.h"
 #include <cmath>
@@ -38,14 +39,17 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
 
   initialiseLookAndFeel();
 
-  waveformView = std::make_unique<WaveformView>(owner.getAudioPlayer()->getWaveformManager());
+  interactionCoordinator = std::make_unique<InteractionCoordinator>();
+
+  waveformView = std::make_unique<WaveformView>(getAudioPlayer().getWaveformManager());
   addAndMakeVisible(waveformView.get());
 
   cutLayerView = std::make_unique<CutLayerView>(*this,
                                                 sessionState,
                                                 *silenceDetector,
-                                                owner.getAudioPlayer()->getWaveformManager(),
-                                                [this]() { return getGlowAlpha(); });
+                                                getAudioPlayer().getWaveformManager(),
+                                                *interactionCoordinator,
+                                                [this]() { return playbackTimerManager->getBreathingPulse(); });
   cutPresenter = std::make_unique<CutPresenter>(*this, sessionState, *cutLayerView);
   cutLayerView->setMouseHandler(cutPresenter->getMouseHandler());
   addAndMakeVisible(cutLayerView.get());
@@ -58,12 +62,14 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   addAndMakeVisible(zoomView.get());
   zoomView->setVisible(true);
 
-  interactionCoordinator = std::make_unique<InteractionCoordinator>();
+  overlayView = std::make_unique<OverlayView>(*this);
+  addAndMakeVisible(overlayView.get());
 
   playbackTimerManager = std::make_unique<PlaybackTimerManager>(sessionState, getAudioPlayer(), *interactionCoordinator);
   playbackTimerManager->addListener(playbackCursorView.get());
   playbackTimerManager->addListener(zoomView.get());
   playbackTimerManager->addListener(cutLayerView.get());
+  playbackTimerManager->addListener(overlayView.get());
 
   playbackRepeatController = std::make_unique<PlaybackRepeatController>(getAudioPlayer(), *this);
 
@@ -173,83 +179,15 @@ void ControlPanel::resized() {
 
   if (zoomView != nullptr)
     zoomView->setBounds(layoutCache.waveformBounds);
+
+  if (overlayView != nullptr)
+    overlayView->setBounds(getLocalBounds());
 }
 
 void ControlPanel::paint(juce::Graphics &g) {
   g.fillAll(Config::Colors::Window::background);
   if (playbackTextPresenter != nullptr)
     playbackTextPresenter->render(g);
-}
-
-void ControlPanel::paintOverChildren(juce::Graphics &g) {
-  if (!m_showEyeCandy)
-    return;
-
-  g.setOpacity(1.0f);
-
-  auto audioLength = getAudioPlayer().getThumbnail().getTotalLength();
-  if (audioLength <= 0.0)
-    return;
-
-  const auto bounds = layoutCache.waveformBounds;
-  const double cutIn = getCutInPosition();
-  const double cutOut = getCutOutPosition();
-
-  float inX = (float)bounds.getX() +
-               CoordinateMapper::secondsToPixels(cutIn, (float)bounds.getWidth(),
-                                                 audioLength);
-  float outX = (float)bounds.getX() +
-                CoordinateMapper::secondsToPixels(cutOut, (float)bounds.getWidth(),
-                                                  audioLength);
-
-  const float pulse = getGlowAlpha();
-  const juce::Colour blueColor = Config::Colors::cutLine.withAlpha(0.5f + 0.3f * pulse);
-
-  // Helper to map a rectangle from a nested child component to ControlPanel space
-  auto mapToLocal = [&](juce::Component* c, juce::Rectangle<int> r) {
-      return getLocalArea(c, r);
-  };
-
-  // 1. Draw connecting lines
-  auto drawConnector = [&](float x, juce::Component &btn, bool toTop) {
-    auto btnBounds = mapToLocal(&btn, btn.getLocalBounds());
-    float btnCenterX = (float)btnBounds.getCentreX();
-    float btnBottomY = (float)btnBounds.getBottom();
-
-    g.setColour(blueColor);
-    g.drawLine(btnCenterX, btnBottomY, x, toTop ? (float)bounds.getY() : (float)bounds.getBottom(), 2.0f);
-  };
-
-  // In Strip Connectors
-  drawConnector(inX, inStrip->getMarkerButton(), false);    // In Button -> Bottom of Marker
-  drawConnector(inX, inStrip->getAutoCutButton(), true); // AutoCut In -> Top of Marker
-
-  // Out Strip Connectors
-  drawConnector(outX, outStrip->getMarkerButton(), false);    // Out Button -> Bottom of Marker
-  drawConnector(outX, outStrip->getAutoCutButton(), true); // AutoCut Out -> Top of Marker
-
-  // 2. Draw group outlines
-  auto drawGroupOutline = [&](const std::vector<juce::Component*>& comps) {
-      if (comps.empty()) return;
-      juce::Rectangle<int> groupBounds = mapToLocal(comps[0], comps[0]->getLocalBounds());
-      for (size_t i = 1; i < comps.size(); ++i)
-          groupBounds = groupBounds.getUnion(mapToLocal(comps[i], comps[i]->getLocalBounds()));
-      
-      g.setColour(blueColor);
-      g.drawRect(groupBounds.expanded(3).toFloat(), 2.0f);
-  };
-
-  std::vector<juce::Component*> inGroup = { 
-      &inStrip->getMarkerButton(), &inStrip->getTimerEditor(), &inStrip->getResetButton(), 
-      &getSilenceDetector().getInSilenceThresholdEditor(), &inStrip->getAutoCutButton() 
-  };
-  std::vector<juce::Component*> outGroup = { 
-      &outStrip->getMarkerButton(), &outStrip->getTimerEditor(), &outStrip->getResetButton(), 
-      &getSilenceDetector().getOutSilenceThresholdEditor(), &outStrip->getAutoCutButton() 
-  };
-
-  drawGroupOutline(inGroup);
-  drawGroupOutline(outGroup);
 }
 
 void ControlPanel::updatePlayButtonText(bool isPlaying) {
@@ -304,27 +242,7 @@ void ControlPanel::cutOutChanged(double value) {
 
 void ControlPanel::jumpToCutIn() {
   getAudioPlayer().setPlayheadPosition(getCutInPosition());
-  setNeedsJumpToCutIn(false);
-}
-
-juce::Rectangle<int> ControlPanel::getZoomPopupBounds() const {
-  return interactionCoordinator->getZoomPopupBounds();
-}
-
-void ControlPanel::setZoomPopupBounds(juce::Rectangle<int> bounds) {
-  interactionCoordinator->setZoomPopupBounds(bounds);
-}
-
-std::pair<double, double> ControlPanel::getZoomTimeRange() const {
-  return interactionCoordinator->getZoomTimeRange();
-}
-
-void ControlPanel::setZoomTimeRange(double start, double end) {
-  interactionCoordinator->setZoomTimeRange(start, end);
-}
-
-void ControlPanel::setNeedsJumpToCutIn(bool needs) {
-  interactionCoordinator->setNeedsJumpToCutIn(needs);
+  interactionCoordinator->setNeedsJumpToCutIn(false);
 }
 
 double ControlPanel::getCutInPosition() const {

@@ -64,6 +64,10 @@ class PlaybackRepeatController;
 
 class TransportStrip;
 
+class MarkerStrip;
+
+class OverlayView;
+
 /**
  * @ingroup UI
  * @class ControlPanel
@@ -106,21 +110,9 @@ public:
   void cutInChanged(double value) override;
   void cutOutChanged(double value) override;
 
-  juce::Rectangle<int> getZoomPopupBounds() const;
-
-  void setZoomPopupBounds(juce::Rectangle<int> bounds);
-
-  std::pair<double, double> getZoomTimeRange() const;
-
-  void setZoomTimeRange(double start, double end);
-
   void jumpToCutIn();
 
-  void setNeedsJumpToCutIn(bool needs);
-
   void paint(juce::Graphics &g) override;
-
-  void paintOverChildren(juce::Graphics &g) override;
 
   void resized() override;
 
@@ -198,12 +190,6 @@ public:
     return currentChannelViewMode;
   }
 
-  bool getShowEyeCandy() const { return m_showEyeCandy; }
-
-  void setShouldShowEyeCandy(bool shouldShow) { m_showEyeCandy = shouldShow; repaint(); }
-
-  float getGlowAlpha() const { return playbackTimerManager->getBreathingPulse(); }
-
   const MouseHandler &getMouseHandler() const;
   MouseHandler &getMouseHandler();
 
@@ -211,6 +197,8 @@ public:
   const SilenceDetector &getSilenceDetector() const { return *silenceDetector; }
 
   TransportStrip* getTransportStrip() { return transportStrip.get(); }
+  MarkerStrip* getInStrip() { return inStrip.get(); }
+  MarkerStrip* getOutStrip() { return outStrip.get(); }
   SilenceDetectionPresenter* getSilenceDetectionPresenter() { return silenceDetectionPresenter.get(); }
 
   int getBottomRowTopY() const { return layoutCache.bottomRowTopY; }
@@ -315,6 +303,9 @@ private:
   /** @brief Renders the zoom window. */
   std::unique_ptr<ZoomView> zoomView;
 
+  /** @brief Renders eye-candy overlays. */
+  std::unique_ptr<OverlayView> overlayView;
+
   /** @brief Manages transient UI interaction states. */
   std::unique_ptr<InteractionCoordinator> interactionCoordinator;
 
@@ -333,7 +324,6 @@ private:
   AppEnums::ChannelViewMode currentChannelViewMode = AppEnums::ChannelViewMode::Mono;
 
   bool shouldRepeat = false;
-  bool m_showEyeCandy = false;
 
   juce::String cutInDisplayString, cutOutDisplayString;
   int cutInTextX = 0, cutOutTextX = 0, cutTextY = 0;

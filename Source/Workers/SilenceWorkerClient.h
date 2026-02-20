@@ -21,6 +21,10 @@ public:
 
     virtual bool isCutModeActive() const = 0;
 
+    virtual bool isAutoCutInActive() const = 0;
+
+    virtual bool isAutoCutOutActive() const = 0;
+
     virtual void setCutStart(int sampleIndex) = 0;
 
     virtual void setCutEnd(int sampleIndex) = 0;

@@ -195,7 +195,7 @@ void ZoomView::paint(juce::Graphics& g)
         g.drawText(timeText, localMouseX + Config::Layout::Glow::mouseTextOffset, localMouseY + Config::Layout::Glow::mouseTextOffset, 100,
                    Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
 
-        const juce::Colour glowColor = owner.getShowEyeCandy() ? currentLineColor : currentLineColor.withAlpha(0.0f);
+        const juce::Colour glowColor = owner.getInteractionCoordinator().shouldShowEyeCandy() ? currentLineColor : currentLineColor.withAlpha(0.0f);
         PlaybackCursorGlow::renderGlow(g, localMouseX, waveformBounds.getY(), waveformBounds.getBottom(), glowColor);
         g.setColour(currentLineColor);
         g.drawHorizontalLine(localMouseY, (float)waveformBounds.getX(), (float)waveformBounds.getRight());
@@ -222,8 +222,9 @@ void ZoomView::paint(juce::Graphics& g)
         const double startTime = zoomCenterTime - (timeRange / 2.0);
         const double endTime = startTime + timeRange;
 
-        owner.setZoomPopupBounds(popupBounds.translated(getX(), getY()));
-        owner.setZoomTimeRange(startTime, endTime);
+        auto& coordinator = owner.getInteractionCoordinator();
+        coordinator.setZoomPopupBounds(popupBounds.translated(getX(), getY()));
+        coordinator.setZoomTimeRange(startTime, endTime);
 
         g.setColour(juce::Colours::black);
         g.fillRect(popupBounds);
@@ -274,7 +275,7 @@ void ZoomView::paint(juce::Graphics& g)
 
             drawShadow(audioLength, endTime, juce::Colours::black);
 
-        const float pulse = owner.getShowEyeCandy() ? owner.getGlowAlpha() : 0.0f;
+        const float pulse = owner.getInteractionCoordinator().shouldShowEyeCandy() ? owner.getPlaybackTimerManager().getBreathingPulse() : 0.0f;
 
         auto drawFineLine = [&](double time, juce::Colour color, float thickness) {
             if (time >= startTime && time <= endTime) {

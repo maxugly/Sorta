@@ -95,18 +95,23 @@ void SilenceAnalysisWorker::run()
             {
                  client.logStatusMessage(juce::String("Scanning for Cut Points..."));
 
+                 const bool stillActive = detectingIn.load() ? client.isAutoCutInActive() : client.isAutoCutOutActive();
+
                  FileMetadata metadata = sessionState.getMetadataForFile(filePath);
                  if (result != -1)
                  {
                      const double resultSeconds = (double)result / (double)sampleRate;
                      if (detectingIn.load())
                      {
-                         metadata.cutIn = resultSeconds;
-                         client.setCutStart((int)result);
-                         client.logStatusMessage(juce::String("Silence Boundary (Start) set to sample ") + juce::String(result));
+                         if (stillActive)
+                         {
+                             metadata.cutIn = resultSeconds;
+                             client.setCutStart((int)result);
+                             client.logStatusMessage(juce::String("Silence Boundary (Start) set to sample ") + juce::String(result));
 
-                         if (client.isCutModeActive())
-                             player.setPlayheadPosition(resultSeconds);
+                             if (client.isCutModeActive())
+                                 player.setPlayheadPosition(resultSeconds);
+                         }
                      }
                      else
                      {
@@ -115,9 +120,12 @@ void SilenceAnalysisWorker::run()
                          const juce::int64 finalEndPoint = std::min(endPoint64, lengthInSamples);
                          const double endSeconds = (double)finalEndPoint / (double)sampleRate;
 
-                         metadata.cutOut = endSeconds;
-                         client.setCutEnd((int)finalEndPoint);
-                         client.logStatusMessage(juce::String("Silence Boundary (End) set to sample ") + juce::String(finalEndPoint));
+                         if (stillActive)
+                         {
+                             metadata.cutOut = endSeconds;
+                             client.setCutEnd((int)finalEndPoint);
+                             client.logStatusMessage(juce::String("Silence Boundary (End) set to sample ") + juce::String(finalEndPoint));
+                         }
                      }
                  }
                  else
@@ -125,8 +133,11 @@ void SilenceAnalysisWorker::run()
                      client.logStatusMessage("No Silence Boundaries detected.");
                  }
 
-                 metadata.isAnalyzed = true;
-                 sessionState.setMetadataForFile(filePath, metadata);
+                 if (stillActive)
+                 {
+                     metadata.isAnalyzed = true;
+                     sessionState.setMetadataForFile(filePath, metadata);
+                 }
             }
 
             busy.store(false);

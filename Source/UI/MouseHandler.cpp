@@ -61,20 +61,21 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
 
     clearTextEditorFocusIfNeeded(event);
 
-    if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
+    auto& coordinator = owner.getInteractionCoordinator();
+    if (coordinator.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
     {
-        auto zoomBounds = owner.getZoomPopupBounds();
+        auto zoomBounds = coordinator.getZoomPopupBounds();
         if (zoomBounds.contains(event.getPosition()))
         {
             interactionStartedInZoom = true;
-            auto timeRange = owner.getZoomTimeRange();
+            auto timeRange = coordinator.getZoomTimeRange();
             double zoomedTime = CoordinateMapper::pixelsToSeconds((float)(event.x - zoomBounds.getX()), 
                                                                   (float)zoomBounds.getWidth(), 
                                                                   timeRange.second - timeRange.first) + timeRange.first;
 
             if (event.mods.isLeftButtonDown())
             {
-                owner.setNeedsJumpToCutIn(true);
+                coordinator.setNeedsJumpToCutIn(true);
                 if (currentPlacementMode == AppEnums::PlacementMode::CutIn)
                 {
                     owner.setCutInPosition(zoomedTime);
@@ -87,7 +88,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                 }
                 else
                 {
-                    double cutPointTime = (owner.getInteractionCoordinator().getActiveZoomPoint() == AppEnums::ActiveZoomPoint::In)
+                    double cutPointTime = (coordinator.getActiveZoomPoint() == AppEnums::ActiveZoomPoint::In)
                                            ? owner.getCutInPosition() : owner.getCutOutPosition();
 
                     float indicatorX = (float)zoomBounds.getX() + 
@@ -97,7 +98,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
 
                     if (std::abs(event.x - (int)indicatorX) < 20)
                     {
-                        draggedHandle = (owner.getInteractionCoordinator().getActiveZoomPoint() == AppEnums::ActiveZoomPoint::In) 
+                        draggedHandle = (coordinator.getActiveZoomPoint() == AppEnums::ActiveZoomPoint::In) 
                                          ? CutMarkerHandle::In : CutMarkerHandle::Out;
                         dragStartMouseOffset = zoomedTime - cutPointTime;
 
@@ -208,12 +209,13 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
         }
     }
 
-    if (interactionStartedInZoom && owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None && (draggedHandle != CutMarkerHandle::None || isDragging))
+    auto& coordinator = owner.getInteractionCoordinator();
+    if (interactionStartedInZoom && coordinator.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None && (draggedHandle != CutMarkerHandle::None || isDragging))
     {
-        auto zoomBounds = owner.getZoomPopupBounds();
+        auto zoomBounds = coordinator.getZoomPopupBounds();
         if (zoomBounds.contains(event.getPosition()) || draggedHandle != CutMarkerHandle::None || isDragging)
         {
-            auto timeRange = owner.getZoomTimeRange();
+            auto timeRange = coordinator.getZoomTimeRange();
             int clampedX = juce::jlimit(zoomBounds.getX(), zoomBounds.getRight(), event.x);
             double zoomedTime = CoordinateMapper::pixelsToSeconds((float)(clampedX - zoomBounds.getX()), 
                                                                   (float)zoomBounds.getWidth(), 

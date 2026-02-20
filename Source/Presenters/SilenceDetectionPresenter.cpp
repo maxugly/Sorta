@@ -47,15 +47,16 @@ void SilenceDetectionPresenter::animationUpdate(float breathingPulse)
         }
         else
         {
-            btn.getProperties().set("isProcessing", false);
-            btn.repaint();
+            if (btn.getProperties().contains("isProcessing") && (bool)btn.getProperties()["isProcessing"])
+            {
+                btn.getProperties().set("isProcessing", false);
+                btn.repaint();
+            }
         }
     };
 
     updateButton(owner.getAutoCutInButton(), autoCut.inActive, silenceWorker.isBusy() && silenceWorker.isDetectingIn());
     updateButton(owner.getAutoCutOutButton(), autoCut.outActive, silenceWorker.isBusy() && !silenceWorker.isDetectingIn());
-
-    owner.repaint();
 }
 
 void SilenceDetectionPresenter::fileChanged(const juce::String& filePath)
@@ -69,7 +70,8 @@ void SilenceDetectionPresenter::fileChanged(const juce::String& filePath)
         auto prefs = sessionState.getCutPrefs();
         if (prefs.autoCut.inActive)
             startSilenceAnalysis(prefs.autoCut.thresholdIn, true);
-        else if (prefs.autoCut.outActive)
+        
+        if (prefs.autoCut.outActive)
             startSilenceAnalysis(prefs.autoCut.thresholdOut, false);
     }
 }
@@ -87,7 +89,8 @@ void SilenceDetectionPresenter::cutPreferenceChanged(const MainDomain::CutPrefer
 
     if (shouldAnalyzeIn)
         startSilenceAnalysis(autoCut.thresholdIn, true);
-    else if (shouldAnalyzeOut)
+    
+    if (shouldAnalyzeOut)
         startSilenceAnalysis(autoCut.thresholdOut, false);
 
     lastAutoCutThresholdIn = autoCut.thresholdIn;
@@ -108,6 +111,16 @@ void SilenceDetectionPresenter::handleAutoCutOutToggle(bool isActive)
 
 void SilenceDetectionPresenter::startSilenceAnalysis(float threshold, bool detectingIn)
 {
+    if (silenceWorker.isBusy())
+    {
+        // If it's busy with the same thing, ignore.
+        if (silenceWorker.isDetectingIn() == detectingIn)
+            return;
+        
+        // If it's busy with the OTHER thing, we might want to queue it or just wait.
+        // For now, let's at least log it.
+        return;
+    }
     silenceWorker.startAnalysis(threshold, detectingIn);
 }
 
@@ -118,6 +131,9 @@ AudioPlayer& SilenceDetectionPresenter::getAudioPlayer()
 
 void SilenceDetectionPresenter::setCutStart(int sampleIndex)
 {
+    if (!sessionState.getCutPrefs().autoCut.inActive)
+        return;
+
     double sampleRate = 0.0;
     juce::int64 length = 0;
     if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0)
@@ -128,6 +144,9 @@ void SilenceDetectionPresenter::setCutStart(int sampleIndex)
 
 void SilenceDetectionPresenter::setCutEnd(int sampleIndex)
 {
+    if (!sessionState.getCutPrefs().autoCut.outActive)
+        return;
+
     double sampleRate = 0.0;
     juce::int64 length = 0;
     if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0)
@@ -144,6 +163,16 @@ void SilenceDetectionPresenter::logStatusMessage(const juce::String& message, bo
 bool SilenceDetectionPresenter::isCutModeActive() const
 {
     return owner.isCutModeActive();
+}
+
+bool SilenceDetectionPresenter::isAutoCutInActive() const
+{
+    return sessionState.getCutPrefs().autoCut.inActive;
+}
+
+bool SilenceDetectionPresenter::isAutoCutOutActive() const
+{
+    return sessionState.getCutPrefs().autoCut.outActive;
 }
 
 bool SilenceDetectionPresenter::hasLoadedAudio() const

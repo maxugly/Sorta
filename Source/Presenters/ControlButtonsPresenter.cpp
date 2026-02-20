@@ -97,8 +97,14 @@ void ControlButtonsPresenter::initialiseEyeCandyButton()
     owner.eyeCandyButton.setButtonText("*");
     owner.eyeCandyButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Alone);
     owner.eyeCandyButton.setClickingTogglesState(true);
-    owner.eyeCandyButton.setToggleState(owner.getShowEyeCandy(), juce::dontSendNotification);
+    owner.eyeCandyButton.setToggleState(owner.getInteractionCoordinator().shouldShowEyeCandy(), juce::dontSendNotification);
     owner.eyeCandyButton.onClick = [this] {
-        owner.setShouldShowEyeCandy(owner.eyeCandyButton.getToggleState());
+        owner.getInteractionCoordinator().setShouldShowEyeCandy(owner.eyeCandyButton.getToggleState());
+        owner.repaint();
     };
+}
+
+void ControlButtonsPresenter::refreshStates()
+{
+    owner.eyeCandyButton.setToggleState(owner.getInteractionCoordinator().shouldShowEyeCandy(), juce::dontSendNotification);
 }

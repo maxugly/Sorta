@@ -13,11 +13,13 @@ CutLayerView::CutLayerView(ControlPanel& ownerIn,
                            SessionState& sessionStateIn,
                            SilenceDetector& silenceDetectorIn,
                            WaveformManager& waveformManagerIn,
+                           InteractionCoordinator& coordinatorIn,
                            std::function<float()> glowAlphaProviderIn)
     : owner(ownerIn),
       sessionState(sessionStateIn),
       silenceDetector(silenceDetectorIn),
       waveformManager(waveformManagerIn),
+      interactionCoordinator(coordinatorIn),
       glowAlphaProvider(std::move(glowAlphaProviderIn))
 {
 
@@ -90,7 +92,7 @@ void CutLayerView::paint(juce::Graphics& g)
         g.setColour(Config::Colors::thresholdRegion);
         g.fillRect(lineStartX, topThresholdY, currentLineWidth, bottomThresholdY - topThresholdY);
 
-        if (owner.getShowEyeCandy())
+        if (interactionCoordinator.shouldShowEyeCandy())
         {
             const float pulse = glowAlphaProvider();
             const juce::Colour glowColor = Config::Colors::thresholdLine.withAlpha(0.2f + 0.6f * pulse);
@@ -185,7 +187,7 @@ void CutLayerView::paint(juce::Graphics& g)
         }
 
         // Draw Glow if active
-        if (shouldPulse && owner.getShowEyeCandy())
+        if (shouldPulse && interactionCoordinator.shouldShowEyeCandy())
         {
             const float pulse = glowAlphaProvider();
             const juce::Colour glowColor = Config::Colors::cutLine.withAlpha(Config::Colors::cutLine.getFloatAlpha() * (0.2f + 0.8f * pulse));
@@ -239,7 +241,7 @@ void CutLayerView::paint(juce::Graphics& g)
         }
     }
 
-    if (regionActive && owner.getShowEyeCandy())
+    if (regionActive && interactionCoordinator.shouldShowEyeCandy())
         g.setColour(hollowColor.withAlpha(0.5f + 0.5f * glowAlphaProvider()));
     else
         g.setColour(hollowColor.withAlpha(0.4f));

@@ -53,12 +53,19 @@ public:
     /** @brief Returns the current zoom time range. */
     std::pair<double, double> getZoomTimeRange() const { return m_zoomTimeRange; }
 
+    /** @brief Returns true if eye candy (connecting lines, etc.) should be shown. */
+    bool shouldShowEyeCandy() const { return m_showEyeCandy; }
+
+    /** @brief Sets whether eye candy should be shown. */
+    void setShouldShowEyeCandy(bool shouldShow) { m_showEyeCandy = shouldShow; }
+
 private:
     AppEnums::ActiveZoomPoint m_activeZoomPoint = AppEnums::ActiveZoomPoint::None;
     AppEnums::ActiveZoomPoint m_manualZoomPoint = AppEnums::ActiveZoomPoint::None;
     bool m_needsJumpToCutIn = false;
     juce::Rectangle<int> m_zoomPopupBounds;
     std::pair<double, double> m_zoomTimeRange;
+    bool m_showEyeCandy = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InteractionCoordinator)
 };

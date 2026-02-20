@@ -13,6 +13,8 @@
 #include "Core/AppEnums.h"
 #include "Presenters/PlaybackTimerManager.h"
 
+#include "UI/InteractionCoordinator.h"
+
 class SessionState;
 
 class SilenceDetector;
@@ -32,6 +34,7 @@ public:
                  SessionState& sessionState,
                  SilenceDetector& silenceDetector,
                  WaveformManager& waveformManager,
+                 InteractionCoordinator& coordinator,
                  std::function<float()> glowAlphaProvider);
 
     ~CutLayerView() override;
@@ -53,6 +56,7 @@ private:
     ControlPanel& owner;
     SessionState& sessionState;
     SilenceDetector& silenceDetector;
+    InteractionCoordinator& interactionCoordinator;
     MouseHandler* mouseHandler = nullptr;
     WaveformManager& waveformManager;
     std::function<float()> glowAlphaProvider;

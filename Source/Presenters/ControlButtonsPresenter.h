@@ -13,6 +13,8 @@ public:
 
     void initialiseAllButtons();
 
+  void refreshStates();
+
 private:
 
     void initialiseOpenButton();
