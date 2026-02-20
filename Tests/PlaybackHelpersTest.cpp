@@ -1,5 +1,5 @@
 #include <juce_core/juce_core.h>
-#include "../Source/PlaybackHelpers.h"
+#include "PlaybackHelpers.h"
 
 class PlaybackHelpersTest : public juce::UnitTest
 {

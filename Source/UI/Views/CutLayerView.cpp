@@ -1,8 +1,8 @@
 
 
-#include "CutLayerView.h"
+#include "UI/Views/CutLayerView.h"
 
-#include "SessionState.h"
+#include "Core/SessionState.h"
 #include "SilenceDetector.h"
 #include "MouseHandler.h"
 #include "WaveformManager.h"

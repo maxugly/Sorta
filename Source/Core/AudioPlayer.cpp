@@ -1,12 +1,12 @@
 
 
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "PlaybackHelpers.h"
-#include "SessionState.h"
+#include "Core/SessionState.h"
 #include "FileMetadata.h"
 #if !defined(JUCE_HEADLESS)
 #include "ControlPanel.h"
-#include "SilenceDetectionPresenter.h"
+#include "Presenters/SilenceDetectionPresenter.h"
 #endif
 #include <algorithm>
 #include <cmath>

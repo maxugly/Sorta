@@ -3,7 +3,7 @@
 #include "TransportPresenter.h"
 
 #include "ControlPanel.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 
 TransportPresenter::TransportPresenter(ControlPanel& ownerPanel)
     : owner(ownerPanel)

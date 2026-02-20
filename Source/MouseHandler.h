@@ -10,7 +10,7 @@
 #endif
 
 #include "Config.h"
-#include "AppEnums.h"
+#include "Core/AppEnums.h"
 
 class ControlPanel;
 

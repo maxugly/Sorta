@@ -8,10 +8,10 @@
     #include <JuceHeader.h>
 #endif
 
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "ControlPanel.h" 
-#include "AppEnums.h"
-#include "SessionState.h"
+#include "Core/AppEnums.h"
+#include "Core/SessionState.h"
 
 class KeybindHandler;
 

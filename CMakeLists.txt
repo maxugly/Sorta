@@ -58,42 +58,42 @@ if (NOT BUILD_TESTS_ONLY)
             Source/MainComponent.cpp
             Source/TimeUtils.h
             Source/TimeUtils.cpp
-            Source/AudioPlayer.h
-            Source/AudioPlayer.cpp
+            Source/Core/AudioPlayer.h
+            Source/Core/AudioPlayer.cpp
             Source/MainDomain.h
-            Source/SessionState.h
-            Source/SessionState.cpp
+            Source/Core/SessionState.h
+            Source/Core/SessionState.cpp
             Source/FileMetadata.h
             Source/CoordinateMapper.h
             Source/SilenceWorkerClient.h
             Source/ControlPanel.h
             Source/ControlPanel.cpp
-            Source/AppEnums.h
-            Source/CutLayerView.h
-            Source/CutLayerView.cpp
+            Source/Core/AppEnums.h
+            Source/UI/Views/CutLayerView.h
+            Source/UI/Views/CutLayerView.cpp
             Source/CutPresenter.h
             Source/CutPresenter.cpp
             Source/SilenceDetector.h
             Source/SilenceDetector.cpp
-            Source/ModernLookAndFeel.h
+            Source/UI/Components/ModernLookAndFeel.h
             Source/LayoutManager.h
             Source/LayoutManager.cpp
             Source/WaveformManager.h
             Source/WaveformManager.cpp
-            Source/WaveformView.h
-            Source/WaveformView.cpp
+            Source/UI/Views/WaveformView.h
+            Source/UI/Views/WaveformView.cpp
             Source/KeybindHandler.h
             Source/KeybindHandler.cpp
-            Source/ZoomView.h
-            Source/ZoomView.cpp
+            Source/UI/Views/ZoomView.h
+            Source/UI/Views/ZoomView.cpp
             Source/ControlStatePresenter.h
             Source/ControlStatePresenter.cpp
             Source/TransportPresenter.h
             Source/TransportPresenter.cpp
-            Source/SilenceDetectionPresenter.h
-            Source/SilenceDetectionPresenter.cpp
-            Source/SilenceAnalysisWorker.h
-            Source/SilenceAnalysisWorker.cpp
+            Source/Presenters/SilenceDetectionPresenter.h
+            Source/Presenters/SilenceDetectionPresenter.cpp
+            Source/Core/SilenceAnalysisWorker.h
+            Source/Core/SilenceAnalysisWorker.cpp
             Source/SilenceAnalysisAlgorithms.h
             Source/SilenceAnalysisAlgorithms.cpp
             Source/SilenceDetectionLogger.h
@@ -108,10 +108,10 @@ if (NOT BUILD_TESTS_ONLY)
 
             Source/CutButtonPresenter.h
             Source/CutButtonPresenter.cpp
-            Source/RepeatPresenter.h
-            Source/RepeatPresenter.cpp
-            Source/RepeatButton.h
-            Source/RepeatButton.cpp
+            Source/Presenters/RepeatPresenter.h
+            Source/Presenters/RepeatPresenter.cpp
+            Source/UI/Components/TransportButton.h
+            Source/UI/Components/TransportButton.cpp
             Source/PlaybackRepeatController.h
             Source/PlaybackRepeatController.cpp
             Source/PlaybackTextPresenter.h
@@ -128,10 +128,10 @@ if (NOT BUILD_TESTS_ONLY)
             Source/PlaybackHelpers.cpp
             Source/PlaybackCursorGlow.h
             Source/PlaybackCursorGlow.cpp
-            Source/PlaybackCursorView.h
-            Source/PlaybackCursorView.cpp
-            Source/PlaybackTimerManager.h
-            Source/PlaybackTimerManager.cpp
+            Source/UI/Views/PlaybackCursorView.h
+            Source/UI/Views/PlaybackCursorView.cpp
+            Source/Presenters/PlaybackTimerManager.h
+            Source/Presenters/PlaybackTimerManager.cpp
             Source/UIAnimationHelper.h
     )
 
@@ -147,6 +147,7 @@ if (NOT BUILD_TESTS_ONLY)
     )
 
     juce_generate_juce_header(audiofiler)
+    target_include_directories(audiofiler PRIVATE Source)
 endif()
 
 # Tests
@@ -157,15 +158,17 @@ add_executable(tests
     Source/PlaybackHelpers.cpp
     Tests/PlaybackHelpersTest.cpp
     Tests/SecurityFixTest.cpp
-    Source/AudioPlayer.cpp
+    Source/Core/AudioPlayer.cpp
     Tests/AudioPlayerTest.cpp
     Source/Config.cpp
-    Source/SessionState.cpp
+    Source/Core/SessionState.cpp
     Source/SilenceAnalysisAlgorithms.cpp
-    Source/SilenceAnalysisWorker.cpp
+    Source/Core/SilenceAnalysisWorker.cpp
     Source/SilenceDetectionLogger.cpp
     Tests/SilenceAnalysisTest.cpp
 )
+
+target_include_directories(tests PRIVATE Source)
 
 target_compile_definitions(tests PRIVATE
     JUCE_USE_CURL=0

@@ -1,12 +1,12 @@
 
 
-#include "RepeatButton.h"
+#include "TransportButton.h"
 
-RepeatButton::RepeatButton (const juce::String& name) : juce::TextButton (name)
+TransportButton::TransportButton (const juce::String& name) : juce::TextButton (name)
 {
 }
 
-void RepeatButton::mouseUp (const juce::MouseEvent& event)
+void TransportButton::mouseUp (const juce::MouseEvent& event)
 {
     if (isEnabled()) {
         if (event.mods.isRightButtonDown()) {

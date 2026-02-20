@@ -3,9 +3,9 @@
 #include "KeybindHandler.h"
 
 #include "MainComponent.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "ControlPanel.h"
-#include "AppEnums.h"
+#include "Core/AppEnums.h"
 #include "Config.h"
 
 KeybindHandler::KeybindHandler(MainComponent& mainComponentIn,

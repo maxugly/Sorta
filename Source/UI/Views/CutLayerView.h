@@ -10,8 +10,8 @@
 #endif
 
 #include "Config.h"
-#include "AppEnums.h"
-#include "PlaybackTimerManager.h"
+#include "Core/AppEnums.h"
+#include "Presenters/PlaybackTimerManager.h"
 
 class SessionState;
 

@@ -2,7 +2,7 @@
 
 #include "PlaybackRepeatController.h"
 
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "ControlPanel.h"
 
 PlaybackRepeatController::PlaybackRepeatController(AudioPlayer& audioPlayerIn, ControlPanel& controlPanelIn)

@@ -8,7 +8,7 @@
 #endif
 
 #include "Config.h"
-#include "AppEnums.h"
+#include "Core/AppEnums.h"
 
 class ModernLookAndFeel : public juce::LookAndFeel_V4 {
 public:

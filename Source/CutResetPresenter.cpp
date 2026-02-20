@@ -6,7 +6,7 @@
 #include "ControlPanelCopy.h"
 #include "Config.h"
 #include "SilenceDetector.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 
 CutResetPresenter::CutResetPresenter(ControlPanel& ownerPanel)
     : owner(ownerPanel)

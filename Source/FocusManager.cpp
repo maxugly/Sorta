@@ -3,7 +3,7 @@
 #include "FocusManager.h"
 #include "ControlPanel.h"
 #include "MouseHandler.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 
 FocusManager::FocusManager(ControlPanel& owner) : owner(owner) {}
 

@@ -1,7 +1,7 @@
 
 
-#ifndef AUDIOFILER_REPEATBUTTON_H
-#define AUDIOFILER_REPEATBUTTON_H
+#ifndef AUDIOFILER_TRANSPORTBUTTON_H
+#define AUDIOFILER_TRANSPORTBUTTON_H
 
 #if defined(JUCE_HEADLESS)
     #include <juce_gui_basics/juce_gui_basics.h>
@@ -11,18 +11,18 @@
 
 #include <functional>
 
-class RepeatButton final : public juce::TextButton {
+class TransportButton final : public juce::TextButton {
 public:
     std::function<void()> onLeftClick;  
     std::function<void()> onRightClick; 
 
-    RepeatButton (const juce::String& name = {});
+    TransportButton (const juce::String& name = {});
 
 private:
 
     void mouseUp (const juce::MouseEvent& event) override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RepeatButton)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransportButton)
 };
 
 #endif 

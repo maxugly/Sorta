@@ -1,11 +1,11 @@
 
 
-#include "PlaybackCursorView.h"
+#include "UI/Views/PlaybackCursorView.h"
 #include "ControlPanel.h"
 #include "PlaybackCursorGlow.h"
 #include "Config.h"
 #include "CoordinateMapper.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "WaveformManager.h"
 
 PlaybackCursorView::PlaybackCursorView(ControlPanel& ownerPanel)

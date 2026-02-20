@@ -1,6 +1,6 @@
 
 
-#include "SessionState.h"
+#include "Core/SessionState.h"
 
 SessionState::SessionState()
 {

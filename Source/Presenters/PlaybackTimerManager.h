@@ -8,7 +8,7 @@
     #include <JuceHeader.h>
 #endif
 
-#include "AppEnums.h"
+#include "Core/AppEnums.h"
 
 class SessionState;
 class AudioPlayer;

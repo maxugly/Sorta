@@ -3,7 +3,7 @@
 #ifndef AUDIOFILER_CUTPRESENTER_H
 #define AUDIOFILER_CUTPRESENTER_H
 
-#include "SessionState.h"
+#include "Core/SessionState.h"
 #include "MouseHandler.h"
 
 class CutLayerView;

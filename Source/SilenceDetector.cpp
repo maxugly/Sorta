@@ -2,9 +2,9 @@
 
 #include "SilenceDetector.h"
 #include "ControlPanel.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "SilenceThresholdPresenter.h"
-#include "SilenceDetectionPresenter.h"
+#include "Presenters/SilenceDetectionPresenter.h"
 
 SilenceDetector::SilenceDetector(ControlPanel& ownerPanel)
     : owner(ownerPanel),

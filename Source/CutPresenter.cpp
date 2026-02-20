@@ -1,7 +1,7 @@
 
 
 #include "CutPresenter.h"
-#include "CutLayerView.h"
+#include "UI/Views/CutLayerView.h"
 #include "ControlPanel.h"
 
 CutPresenter::CutPresenter(ControlPanel& controlPanel, SessionState& sessionStateIn, CutLayerView& cutLayerViewIn)

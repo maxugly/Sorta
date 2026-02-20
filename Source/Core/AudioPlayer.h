@@ -12,7 +12,7 @@
 #endif
 
 #include "Config.h"
-#include "SessionState.h"
+#include "Core/SessionState.h"
 #include "MainDomain.h"
 #if !defined(JUCE_HEADLESS)
 #include "WaveformManager.h"

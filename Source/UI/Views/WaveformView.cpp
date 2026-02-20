@@ -1,6 +1,6 @@
 
 
-#include "WaveformView.h"
+#include "UI/Views/WaveformView.h"
 #include "WaveformManager.h"
 #include "Config.h"
 

@@ -1,8 +1,8 @@
 
 
-#include "ZoomView.h"
+#include "UI/Views/ZoomView.h"
 #include "ControlPanel.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "CoordinateMapper.h"
 #include "FocusManager.h"
 #include "MouseHandler.h"

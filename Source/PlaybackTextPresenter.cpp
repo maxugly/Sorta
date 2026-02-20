@@ -3,7 +3,7 @@
 #include "PlaybackTextPresenter.h"
 #include "TimeUtils.h"
 
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "Config.h"
 #include "ControlPanel.h"
 #include "TimeEntryHelpers.h"

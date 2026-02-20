@@ -1,10 +1,10 @@
 
 
-#include "RepeatPresenter.h"
+#include "Presenters/RepeatPresenter.h"
 #include "FocusManager.h"
 #include "TimeUtils.h"
 
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "Config.h"
 #include "ControlPanel.h"
 #include "SilenceDetector.h"

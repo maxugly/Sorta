@@ -1,12 +1,12 @@
 
 
-#include "SilenceDetectionPresenter.h"
+#include "Presenters/SilenceDetectionPresenter.h"
 
 #include "ControlPanel.h"
 #include "SilenceDetector.h"
-#include "AudioPlayer.h"
-#include "SessionState.h"
-#include "SilenceAnalysisWorker.h"
+#include "Core/AudioPlayer.h"
+#include "Core/SessionState.h"
+#include "Core/SilenceAnalysisWorker.h"
 
 SilenceDetectionPresenter::SilenceDetectionPresenter(ControlPanel& ownerPanel, SessionState& sessionStateIn, AudioPlayer& audioPlayerIn)
     : owner(ownerPanel),

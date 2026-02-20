@@ -9,9 +9,9 @@
     #include <JuceHeader.h>
 #endif
 
-#include "AppEnums.h"
+#include "Core/AppEnums.h"
 
-#include "PlaybackTimerManager.h"
+#include "Presenters/PlaybackTimerManager.h"
 
 class ControlPanel;
 

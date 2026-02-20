@@ -9,7 +9,7 @@
     #include <JuceHeader.h>
 #endif
 
-#include "PlaybackTimerManager.h"
+#include "Presenters/PlaybackTimerManager.h"
 
 class ControlPanel;
 

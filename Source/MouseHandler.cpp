@@ -3,7 +3,7 @@
 #include "MouseHandler.h"
 #include "FocusManager.h"
 #include "ControlPanel.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "CoordinateMapper.h"
 
 MouseHandler::MouseHandler(ControlPanel& controlPanel) : owner(controlPanel)

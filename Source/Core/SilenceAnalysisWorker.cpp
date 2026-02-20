@@ -1,10 +1,10 @@
 
 
-#include "SilenceAnalysisWorker.h"
+#include "Core/SilenceAnalysisWorker.h"
 #include "SilenceAnalysisAlgorithms.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include "SilenceDetectionLogger.h"
-#include "SessionState.h"
+#include "Core/SessionState.h"
 #include "FileMetadata.h"
 
 #include <algorithm>

@@ -1,17 +1,17 @@
 #ifndef AUDIOFILER_CONTROLPANEL_H
 #define AUDIOFILER_CONTROLPANEL_H
 
-#include "PlaybackTimerManager.h"
+#include "Presenters/PlaybackTimerManager.h"
 
 class FocusManager;
-#include "AppEnums.h"
-#include "AudioPlayer.h" 
+#include "Core/AppEnums.h"
+#include "Core/AudioPlayer.h" 
 #include "Config.h"
 #include "ControlPanelLayoutCache.h"
-#include "RepeatButton.h"
-#include "ModernLookAndFeel.h" 
+#include "UI/Components/TransportButton.h"
+#include "UI/Components/ModernLookAndFeel.h" 
 #include "MouseHandler.h"      
-#include "SessionState.h"
+#include "Core/SessionState.h"
 #include "SilenceDetector.h"   
 #include "SilenceWorkerClient.h"
 
@@ -320,7 +320,7 @@ private:
   juce::TextButton resetInButton, resetOutButton;
   juce::TextEditor cutInEditor, cutOutEditor;
   juce::TextEditor elapsedTimeEditor, remainingTimeEditor, cutLengthEditor;
-  RepeatButton cutInButton, cutOutButton;
+  TransportButton cutInButton, cutOutButton;
   juce::TextButton autoplayButton, autoCutInButton, autoCutOutButton, cutButton;
 
   ControlPanelLayoutCache layoutCache;
@@ -329,7 +329,7 @@ private:
   AppEnums::ChannelViewMode currentChannelViewMode = AppEnums::ChannelViewMode::Mono;
 
   bool shouldRepeat = false;
-  bool m_showEyeCandy = true;
+  bool m_showEyeCandy = false;
 
   juce::String cutInDisplayString, cutOutDisplayString;
   int cutInTextX = 0, cutOutTextX = 0, cutTextY = 0;

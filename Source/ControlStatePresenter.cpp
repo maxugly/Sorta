@@ -5,7 +5,7 @@
 #include "ControlPanel.h"
 #include "StatsPresenter.h"
 #include "SilenceDetector.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 
 ControlStatePresenter::ControlStatePresenter(ControlPanel& ownerPanel)
     : owner(ownerPanel)

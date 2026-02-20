@@ -10,9 +10,9 @@
 #endif
 
 #include "SilenceWorkerClient.h"
-#include "SilenceAnalysisWorker.h"
-#include "SessionState.h"
-#include "PlaybackTimerManager.h"
+#include "Core/SilenceAnalysisWorker.h"
+#include "Core/SessionState.h"
+#include "Presenters/PlaybackTimerManager.h"
 
 class ControlPanel;
 

@@ -1,6 +1,6 @@
-#include "PlaybackTimerManager.h"
-#include "SessionState.h"
-#include "AudioPlayer.h"
+#include "Presenters/PlaybackTimerManager.h"
+#include "Core/SessionState.h"
+#include "Core/AudioPlayer.h"
 #include "UIAnimationHelper.h"
 #include "Config.h"
 

@@ -3,7 +3,7 @@
 #include "StatsPresenter.h"
 
 #include "ControlPanel.h"
-#include "AudioPlayer.h"
+#include "Core/AudioPlayer.h"
 #include <cmath>
 
 StatsPresenter::StatsPresenter(ControlPanel& ownerIn)

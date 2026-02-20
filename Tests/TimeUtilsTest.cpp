@@ -1,5 +1,5 @@
 #include <juce_core/juce_core.h>
-#include "../Source/TimeUtils.h"
+#include "TimeUtils.h"
 
 class TimeUtilsTest : public juce::UnitTest
 {
