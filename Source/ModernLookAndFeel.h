@@ -30,8 +30,8 @@ public:
 
   void drawButtonBackground (juce::Graphics& g, juce::Button& button, const juce::Colour& backgroundColour,
                             bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override {
-    auto cornerSize = Config::Layout::buttonCornerRadius;
-    auto outlineThickness = Config::Layout::buttonOutlineThickness;
+    auto cornerSize = Config::UI::ButtonCornerSize;
+    auto outlineThickness = Config::UI::ButtonOutlineThickness;
     auto bounds = button.getLocalBounds().toFloat().reduced (outlineThickness / 2.0f);
 
     juce::Colour currentBackgroundColour;
@@ -51,11 +51,18 @@ public:
     if (button.getProperties().getWithDefault("isProcessing", false))
     {
         float pulseAlpha = button.getProperties().getWithDefault("pulseAlpha", 0.0f);
-        g.setColour (Config::Colors::Button::outline.withAlpha (pulseAlpha));
-        g.drawRoundedRectangle (bounds, cornerSize, outlineThickness * 2.5f);
+        
+        // Map pulseAlpha [0, 1] to [MinOpacity, MaxOpacity]
+        float mappedAlpha = Config::UI::ButtonGlowMinOpacity + 
+                            (Config::UI::ButtonGlowMaxOpacity - Config::UI::ButtonGlowMinOpacity) * pulseAlpha;
+                            
+        g.setOpacity (mappedAlpha);
+        g.setColour (Config::Colors::Button::outline);
+        g.drawRoundedRectangle (bounds, cornerSize, outlineThickness);
     }
     else
     {
+        g.setOpacity (1.0f);
         g.setColour (Config::Colors::Button::outline);
         g.drawRoundedRectangle (bounds, cornerSize, outlineThickness);
     }
