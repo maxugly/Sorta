@@ -5,7 +5,6 @@
 #include "ControlPanel.h"
 #include "Config.h"
 #include "KeybindHandler.h"
-#include "PlaybackRepeatController.h"
 
 MainComponent::MainComponent()
 {
@@ -17,7 +16,6 @@ MainComponent::MainComponent()
     addAndMakeVisible(controlPanel.get());
 
     keybindHandler = std::make_unique<KeybindHandler>(*this, *audioPlayer, *controlPanel);
-    playbackRepeatController = std::make_unique<PlaybackRepeatController>(*audioPlayer, *controlPanel);
 
     setAudioChannels(0, 2);
 
@@ -95,9 +93,6 @@ void MainComponent::openButtonClicked()
                 controlPanel->updateCutLabels();
                 controlPanel->updateComponentStates();
                 controlPanel->updateStatsFromAudio();
-
-                if (controlPanel->shouldAutoplay())
-                   audioPlayer->togglePlayStop();
             }
             else
             {

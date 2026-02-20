@@ -24,6 +24,8 @@ public:
 private:
     AudioPlayer& audioPlayer;
     ControlPanel& controlPanel;
+    bool lastIsPlaying = false;
+    bool lastAutoPlayPreference = false;
 };
 
 #endif 

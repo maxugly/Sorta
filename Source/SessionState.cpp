@@ -35,6 +35,16 @@ void SessionState::setCutActive(bool active)
     }
 }
 
+void SessionState::setAutoPlay(bool active)
+{
+    const juce::ScopedLock lock(stateLock);
+    if (cutPrefs.autoplay != active)
+    {
+        cutPrefs.autoplay = active;
+        listeners.call([this](Listener& l) { l.cutPreferenceChanged(cutPrefs); });
+    }
+}
+
 void SessionState::setAutoCutInActive(bool active)
 {
     const juce::ScopedLock lock(stateLock);

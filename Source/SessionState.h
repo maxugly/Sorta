@@ -40,6 +40,8 @@ public:
 
     void setCutActive(bool active);
 
+    void setAutoPlay(bool active);
+
     void setAutoCutInActive(bool active);
 
     void setAutoCutOutActive(bool active);

@@ -212,13 +212,14 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
     {
         if (repeating)
         {
-
-            setPlayheadPosition(cutIn);
+            transportSource.setPosition(cutIn);
+            transportSource.start();
             transportSource.getNextAudioBlock(bufferToFill);
         }
         else
         {
             transportSource.stop();
+            transportSource.setPosition(cutOut);
             bufferToFill.clearActiveBufferRegion();
         }
         return;
@@ -241,13 +242,14 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
         }
 
         if (repeating)
-
-            setPlayheadPosition(cutIn);
+        {
+            transportSource.setPosition(cutIn);
+            transportSource.start();
+        }
         else
         {
             transportSource.stop();
-
-            setPlayheadPosition(cutOut);
+            transportSource.setPosition(cutOut);
         }
     }
 }

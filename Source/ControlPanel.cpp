@@ -25,6 +25,7 @@
 #include "CoordinateMapper.h"
 #include "ZoomView.h"
 #include "PlaybackTimerManager.h"
+#include "PlaybackRepeatController.h"
 #include <cmath>
 
 ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionStateIn)
@@ -62,6 +63,8 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   playbackTimerManager->addListener(zoomView.get());
   playbackTimerManager->addListener(cutLayerView.get());
   playbackTimerManager->addListener(this);
+
+  playbackRepeatController = std::make_unique<PlaybackRepeatController>(getAudioPlayer(), *this);
 
   statsPresenter = std::make_unique<StatsPresenter>(*this);
   silenceDetectionPresenter = std::make_unique<SilenceDetectionPresenter>(*this, sessionState, *owner.getAudioPlayer());
@@ -186,6 +189,9 @@ void ControlPanel::playbackTimerTick() {
     repaint();
     wasZDown = isZDown;
   }
+
+  if (playbackRepeatController != nullptr)
+    playbackRepeatController->tick();
 
   updateCutLabels();
 }

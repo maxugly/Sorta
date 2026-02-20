@@ -15,8 +15,6 @@
 
 class KeybindHandler;
 
-class PlaybackRepeatController;
-
 /**
  * @defgroup UI UI Components
  * @brief User interface classes, including custom components, views, and presenters.
@@ -86,7 +84,6 @@ private:
     std::unique_ptr<juce::FileChooser> chooser;     
     std::unique_ptr<ControlPanel> controlPanel;     
     std::unique_ptr<KeybindHandler> keybindHandler; 
-    std::unique_ptr<PlaybackRepeatController> playbackRepeatController; 
     juce::OpenGLContext openGLContext; 
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

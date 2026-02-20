@@ -18,16 +18,7 @@ void TransportPresenter::handleRepeatToggle(bool shouldRepeat)
 
 void TransportPresenter::handleAutoplayToggle(bool shouldAutoplay)
 {
-    owner.m_shouldAutoplay = shouldAutoplay;
-
-    if (shouldAutoplay)
-    {
-        auto& audioPlayer = owner.getAudioPlayer();
-        if (audioPlayer.getThumbnail().getTotalLength() > 0.0 && !audioPlayer.isPlaying())
-        {
-            audioPlayer.togglePlayStop();
-        }
-    }
+    owner.getSessionState().setAutoPlay(shouldAutoplay);
 }
 
 void TransportPresenter::handleCutModeToggle(bool enableCutMode)

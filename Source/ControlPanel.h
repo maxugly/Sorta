@@ -58,6 +58,8 @@ class PlaybackCursorView;
 
 class ZoomView;
 
+class PlaybackRepeatController;
+
 /**
  * @ingroup UI
  * @class ControlPanel
@@ -179,7 +181,7 @@ public:
 
   AppEnums::PlacementMode getPlacementMode() const;
 
-  bool shouldAutoplay() const { return m_shouldAutoplay; }
+  bool shouldAutoplay() const { return sessionState.getCutPrefs().autoplay; }
 
   bool isCutModeActive() const { return m_isCutModeActive; }
 
@@ -306,6 +308,9 @@ private:
   /** @brief Manages high-frequency updates. */
   std::unique_ptr<PlaybackTimerManager> playbackTimerManager;
 
+  /** @brief Manages repeat and autoplay logic. */
+  std::unique_ptr<PlaybackRepeatController> playbackRepeatController;
+
   juce::TextButton openButton, playStopButton, modeButton, exitButton,
       statsButton, repeatButton, channelViewButton;
   juce::TextButton resetInButton, resetOutButton;
@@ -324,7 +329,6 @@ private:
   juce::String cutInDisplayString, cutOutDisplayString;
   int cutInTextX = 0, cutOutTextX = 0, cutTextY = 0;
 
-  bool m_shouldAutoplay = false;
   bool m_isCutModeActive = false;
   AppEnums::ActiveZoomPoint m_activeZoomPoint = AppEnums::ActiveZoomPoint::None;
   float m_zoomFactor = 10.0f;
