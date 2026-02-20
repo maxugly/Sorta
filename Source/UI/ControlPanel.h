@@ -1,5 +1,8 @@
 #ifndef AUDIOFILER_CONTROLPANEL_H
 #define AUDIOFILER_CONTROLPANEL_H
+/**
+ * @file Source/UI/ControlPanel.h
+ */
 
 #include "Presenters/PlaybackTimerManager.h"
 #include "UI/InteractionCoordinator.h"
@@ -214,7 +217,6 @@ public:
 
   void setCutEnd(int sampleIndex);
 
-  juce::String formatTime(double seconds) const;
   const juce::LookAndFeel &getLookAndFeel() const;
   FocusManager &getFocusManager() const { return *focusManager; }
 

@@ -4,7 +4,6 @@
 #include "Core/AudioPlayer.h"
 #include "Utils/Config.h"
 #include "Presenters/ControlButtonsPresenter.h"
-#include "Utils/Config.h"
 #include "Presenters/ControlStatePresenter.h"
 #include "UI/FocusManager.h"
 #include "UI/LayoutManager.h"
@@ -420,10 +419,6 @@ void ControlPanel::setCutEnd(int sampleIndex) {
     boundaryLogicPresenter->setCutEndFromSample(sampleIndex);
 }
 
-juce::String ControlPanel::formatTime(double seconds) const {
-
-  return TimeUtils::formatTime(seconds);
-}
 
 const juce::LookAndFeel &ControlPanel::getLookAndFeel() const {
   return modernLF;

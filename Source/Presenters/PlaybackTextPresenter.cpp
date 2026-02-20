@@ -7,7 +7,7 @@
 #include "Utils/Config.h"
 #include "UI/ControlPanel.h"
 #include "Utils/TimeEntryHelpers.h"
-#include "Utils/TimeUtils.h"
+
 #include <cmath>
 
 PlaybackTextPresenter::PlaybackTextPresenter(ControlPanel &ownerPanel)
@@ -69,7 +69,7 @@ void PlaybackTextPresenter::updateEditors() {
   if (!isEditingCutLength && !owner.cutLengthEditor.hasKeyboardFocus(true)) {
     double length =
         std::abs(owner.getCutOutPosition() - owner.getCutInPosition());
-    juce::String newText = owner.formatTime(length);
+    juce::String newText = TimeUtils::formatTime(length);
     if (owner.cutLengthEditor.getText() != newText)
       owner.cutLengthEditor.setText(newText, juce::dontSendNotification);
   }
@@ -207,7 +207,7 @@ void PlaybackTextPresenter::syncEditorToPosition(juce::TextEditor &editor,
     return;
   }
 
-  juce::String text = owner.formatTime(positionSeconds);
+  juce::String text = TimeUtils::formatTime(positionSeconds);
   if (isRemaining)
     text = "-" + text;
 

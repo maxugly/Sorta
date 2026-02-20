@@ -245,7 +245,7 @@ void BoundaryLogicPresenter::syncEditorToPosition(juce::TextEditor& editor, doub
     if (editor.hasKeyboardFocus(true) || (&editor == &cutInEditor && isEditingIn) || (&editor == &cutOutEditor && isEditingOut))
         return;
 
-    juce::String newText = owner.formatTime(positionSeconds);
+    juce::String newText = TimeUtils::formatTime(positionSeconds);
     if (editor.getText() != newText)
         editor.setText(newText, juce::dontSendNotification);
 }

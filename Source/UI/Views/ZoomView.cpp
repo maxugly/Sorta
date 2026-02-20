@@ -7,6 +7,7 @@
 #include "UI/FocusManager.h"
 #include "UI/MouseHandler.h"
 #include "Utils/Config.h"
+#include "Utils/TimeUtils.h"
 #include "UI/Views/PlaybackCursorGlow.h"
 
 ZoomView::ZoomView(ControlPanel& ownerIn)
@@ -183,7 +184,7 @@ void ZoomView::paint(juce::Graphics& g)
         g.drawText(juce::String(-amplitude, 2), localMouseX + Config::Layout::Glow::mouseTextOffset, (int)bottomAmplitudeY,
                    100, Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
 
-        const juce::String timeText = owner.formatTime(mouse.getMouseCursorTime());
+        const juce::String timeText = TimeUtils::formatTime(mouse.getMouseCursorTime());
         g.drawText(timeText, localMouseX + Config::Layout::Glow::mouseTextOffset, localMouseY + Config::Layout::Glow::mouseTextOffset, 100,
                    Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
 
@@ -254,8 +255,8 @@ void ZoomView::paint(juce::Graphics& g)
             g.fillRect(x1, (float)popupBounds.getY(), x2 - x1, (float)popupBounds.getHeight());
         };
 
-        const double cutIn = owner.getCutInPosition();
-        const double cutOut = owner.getCutOutPosition();
+        const double cutIn = owner.getSessionState().getCutIn();
+        const double cutOut = owner.getSessionState().getCutOut();
 
         drawShadow(startTime, cutIn, juce::Colours::black.withAlpha(0.5f));
         drawShadow(cutOut, endTime, juce::Colours::black.withAlpha(0.5f));
