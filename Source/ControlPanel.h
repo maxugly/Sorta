@@ -124,6 +124,8 @@ public:
 
   void paint(juce::Graphics &g) override;
 
+  void paintOverChildren(juce::Graphics &g) override;
+
   void resized() override;
 
   void updatePlayButtonText(bool isPlaying);
@@ -197,6 +199,8 @@ public:
   AppEnums::ChannelViewMode getChannelViewMode() const {
     return currentChannelViewMode;
   }
+
+  bool getShowEyeCandy() const { return m_showEyeCandy; }
 
   float getGlowAlpha() const { return m_currentPulseAlpha; }
 
@@ -312,7 +316,7 @@ private:
   std::unique_ptr<PlaybackRepeatController> playbackRepeatController;
 
   juce::TextButton openButton, playStopButton, stopButton, modeButton, exitButton,
-      statsButton, repeatButton, channelViewButton;
+      statsButton, repeatButton, channelViewButton, eyeCandyButton;
   juce::TextButton resetInButton, resetOutButton;
   juce::TextEditor cutInEditor, cutOutEditor;
   juce::TextEditor elapsedTimeEditor, remainingTimeEditor, cutLengthEditor;
@@ -325,6 +329,7 @@ private:
   AppEnums::ChannelViewMode currentChannelViewMode = AppEnums::ChannelViewMode::Mono;
 
   bool shouldRepeat = false;
+  bool m_showEyeCandy = true;
 
   juce::String cutInDisplayString, cutOutDisplayString;
   int cutInTextX = 0, cutOutTextX = 0, cutTextY = 0;

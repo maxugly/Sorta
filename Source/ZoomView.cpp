@@ -85,6 +85,7 @@ void ZoomView::playbackTimerTick()
 void ZoomView::animationUpdate(float breathingPulse)
 {
     juce::ignoreUnused(breathingPulse);
+    repaint();
 }
 
 void ZoomView::paint(juce::Graphics& g)
@@ -188,7 +189,8 @@ void ZoomView::paint(juce::Graphics& g)
         g.drawText(timeText, localMouseX + Config::Layout::Glow::mouseTextOffset, localMouseY + Config::Layout::Glow::mouseTextOffset, 100,
                    Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
 
-        PlaybackCursorGlow::renderGlow(g, localMouseX, waveformBounds.getY(), waveformBounds.getBottom(), currentLineColor);
+        const juce::Colour glowColor = owner.getShowEyeCandy() ? currentLineColor : currentLineColor.withAlpha(0.0f);
+        PlaybackCursorGlow::renderGlow(g, localMouseX, waveformBounds.getY(), waveformBounds.getBottom(), glowColor);
         g.setColour(currentLineColor);
         g.drawHorizontalLine(localMouseY, (float)waveformBounds.getX(), (float)waveformBounds.getRight());
     }
@@ -266,6 +268,8 @@ void ZoomView::paint(juce::Graphics& g)
 
             drawShadow(audioLength, endTime, juce::Colours::black);
 
+        const float pulse = owner.getShowEyeCandy() ? owner.getGlowAlpha() : 0.0f;
+
         auto drawFineLine = [&](double time, juce::Colour color, float thickness) {
             if (time >= startTime && time <= endTime) {
                 float x = (float)popupBounds.getX() + CoordinateMapper::secondsToPixels(time - startTime, (float)popupBounds.getWidth(), timeRange);
@@ -277,16 +281,20 @@ void ZoomView::paint(juce::Graphics& g)
         bool isDraggingCutIn = mouse.getDraggedHandle() == MouseHandler::CutMarkerHandle::In;
         bool isDraggingCutOut = mouse.getDraggedHandle() == MouseHandler::CutMarkerHandle::Out;
 
-        drawFineLine(cutIn, Config::Colors::cutLine, 1.0f);
+        drawFineLine(cutIn, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse), 2.0f);
 
-        drawFineLine(cutOut, Config::Colors::cutLine, 1.0f);
-        drawFineLine(audioPlayer.getCurrentPosition(), Config::Colors::playbackCursor, 1.0f);
+        drawFineLine(cutOut, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse), 2.0f);
+        drawFineLine(audioPlayer.getCurrentPosition(), Config::Colors::playbackCursor.withAlpha(0.6f + 0.4f * pulse), 1.0f);
 
         if (isDraggingCutIn || isDraggingCutOut)
-
-            drawFineLine(isDraggingCutIn ? cutIn : cutOut, Config::Colors::zoomPopupTrackingLine, 2.0f);
+        {
+            const juce::Colour trackingColor = Config::Colors::zoomPopupTrackingLine.withAlpha(0.8f + 0.2f * pulse);
+            drawFineLine(isDraggingCutIn ? cutIn : cutOut, trackingColor, 2.0f + 0.5f * pulse);
+        }
         else
-            drawFineLine(audioPlayer.getCurrentPosition(), Config::Colors::zoomPopupPlaybackLine, 2.0f);
+        {
+            drawFineLine(audioPlayer.getCurrentPosition(), Config::Colors::zoomPopupPlaybackLine.withAlpha(0.7f + 0.3f * pulse), 2.0f);
+        }
 
         g.setColour(Config::Colors::zoomPopupBorder);
         g.drawRect(popupBounds.toFloat(), Config::Layout::Zoom::borderThickness);

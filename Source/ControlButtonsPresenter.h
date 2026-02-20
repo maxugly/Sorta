@@ -38,7 +38,7 @@ private:
     void initialiseAutoCutOutButton();
 
     void initialiseCutButton();
-
+    void initialiseEyeCandyButton();
     void initialiseCutBoundaryButtons();
 
     void initialiseClearButtons();

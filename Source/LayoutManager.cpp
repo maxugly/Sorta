@@ -68,6 +68,10 @@ void LayoutManager::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHei
     controlPanel.statsButton.setBounds(topRow.removeFromRight(buttonWidth));
     topRow.removeFromRight(spacing);
     controlPanel.modeButton.setBounds(topRow.removeFromRight(buttonWidth));
+
+    // Eye Candy Toggle (Alone) - Left of View Group
+    topRow.removeFromRight(margin);
+    controlPanel.eyeCandyButton.setBounds(topRow.removeFromRight((int)Config::UI::WidgetUnit));
 }
 
 void LayoutManager::layoutCutControls(juce::Rectangle<int>& bounds, int rowHeight)
@@ -82,26 +86,26 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int>& bounds, int rowHeigh
     cutRow.setHeight(height);
 
     // In Strip: [In(L)] [Timer] [Reset] [Threshold] [AutoCut(R)]
-    controlPanel.cutInButton.setBounds(cutRow.removeFromLeft((int)(2.0f * unit)));
+    controlPanel.cutInButton.setBounds(cutRow.removeFromLeft((int)(Config::UI::CutButtonWidthUnits * unit)));
     cutRow.removeFromLeft(spacing);
-    controlPanel.cutInEditor.setBounds(cutRow.removeFromLeft((int)(5.5f * unit)));
+    controlPanel.cutInEditor.setBounds(cutRow.removeFromLeft((int)(Config::UI::TimerWidthUnits * unit)));
     cutRow.removeFromLeft(spacing);
-    controlPanel.resetInButton.setBounds(cutRow.removeFromLeft((int)(1.0f * unit)));
+    controlPanel.resetInButton.setBounds(cutRow.removeFromLeft((int)(Config::UI::ResetButtonWidthUnits * unit)));
     cutRow.removeFromLeft(spacing);
-    controlPanel.getSilenceDetector().getInSilenceThresholdEditor().setBounds(cutRow.removeFromLeft((int)(1.5f * unit)));
+    controlPanel.getSilenceDetector().getInSilenceThresholdEditor().setBounds(cutRow.removeFromLeft((int)(Config::UI::ThresholdWidthUnits * unit)));
     cutRow.removeFromLeft(spacing);
-    controlPanel.autoCutInButton.setBounds(cutRow.removeFromLeft((int)(2.0f * unit)));
+    controlPanel.autoCutInButton.setBounds(cutRow.removeFromLeft((int)(Config::UI::CutButtonWidthUnits * unit)));
 
     // Out Strip (Right-Aligned & Mirrored): [AutoCut(L)] [Threshold] [Reset] [Timer] [Out(R)]
-    controlPanel.cutOutButton.setBounds(cutRow.removeFromRight((int)(2.0f * unit)));
+    controlPanel.cutOutButton.setBounds(cutRow.removeFromRight((int)(Config::UI::CutButtonWidthUnits * unit)));
     cutRow.removeFromRight(spacing);
-    controlPanel.cutOutEditor.setBounds(cutRow.removeFromRight((int)(5.5f * unit)));
+    controlPanel.cutOutEditor.setBounds(cutRow.removeFromRight((int)(Config::UI::TimerWidthUnits * unit)));
     cutRow.removeFromRight(spacing);
-    controlPanel.resetOutButton.setBounds(cutRow.removeFromRight((int)(1.0f * unit)));
+    controlPanel.resetOutButton.setBounds(cutRow.removeFromRight((int)(Config::UI::ResetButtonWidthUnits * unit)));
     cutRow.removeFromRight(spacing);
-    controlPanel.getSilenceDetector().getOutSilenceThresholdEditor().setBounds(cutRow.removeFromRight((int)(1.5f * unit)));
+    controlPanel.getSilenceDetector().getOutSilenceThresholdEditor().setBounds(cutRow.removeFromRight((int)(Config::UI::ThresholdWidthUnits * unit)));
     cutRow.removeFromRight(spacing);
-    controlPanel.autoCutOutButton.setBounds(cutRow.removeFromRight((int)(2.0f * unit)));
+    controlPanel.autoCutOutButton.setBounds(cutRow.removeFromRight((int)(Config::UI::CutButtonWidthUnits * unit)));
 }
 
 void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, int rowHeight)

@@ -45,6 +45,8 @@ void ControlButtonsPresenter::initialiseAllButtons()
 
     initialiseCutButton();
 
+    initialiseEyeCandyButton();
+
     initialiseCutBoundaryButtons();
 
     initialiseClearButtons();
@@ -251,5 +253,18 @@ void ControlButtonsPresenter::initialiseClearButtons()
     owner.resetOutButton.onClick = [this] {
         if (owner.cutResetPresenter != nullptr)
             owner.cutResetPresenter->resetOut();
+    };
+}
+
+void ControlButtonsPresenter::initialiseEyeCandyButton()
+{
+    owner.addAndMakeVisible(owner.eyeCandyButton);
+    owner.eyeCandyButton.setButtonText("*");
+    owner.eyeCandyButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Alone);
+    owner.eyeCandyButton.setClickingTogglesState(true);
+    owner.eyeCandyButton.setToggleState(owner.m_showEyeCandy, juce::dontSendNotification);
+    owner.eyeCandyButton.onClick = [this] {
+        owner.m_showEyeCandy = owner.eyeCandyButton.getToggleState();
+        owner.repaint();
     };
 }

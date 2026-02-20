@@ -27,6 +27,14 @@ namespace Config {
         inline constexpr float ButtonGlowMinOpacity = 0.1f;
         /** @brief Standard corner rounding for all buttons. */
         inline constexpr float ButtonCornerSize = 6.0f;
+        /** @brief Width for Cut In/Out buttons in units. */
+        inline constexpr float CutButtonWidthUnits = 2.0f;
+        /** @brief Width for Time Editors (Timers) in units. */
+        inline constexpr float TimerWidthUnits = 5.5f;
+        /** @brief Width for Reset buttons in units. */
+        inline constexpr float ResetButtonWidthUnits = 1.0f;
+        /** @brief Width for Threshold editors in units. */
+        inline constexpr float ThresholdWidthUnits = 1.5f;
         /** @brief The base unit for widgets. */
         inline constexpr float WidgetUnit = 32.0f;
         /** @brief The standard height for widgets. */
@@ -136,14 +144,14 @@ namespace Config {
              static constexpr int mouseHighlightSize = 5;
              static constexpr float mouseAmplitudeAlpha = 0.7f;
              static constexpr int mouseTextOffset = 5;
-             static constexpr float thickness = 3.0f;
+             static constexpr float thickness = 4.0f;
              static constexpr float mouseAmplitudeGlowThickness = 3.0f;
              static constexpr float placementModeGlowThickness = 3.0f;
              static constexpr float thresholdGlowThickness = 3.0f;
-             static constexpr float cutLineGlowThickness = 3.0f;
-             static constexpr float cutMarkerWidthThin = 1.0f;
-             static constexpr float cutBoxOutlineThickness = 1.5f;
-             static constexpr float cutBoxOutlineThicknessInteracting = 3.0f;
+             static constexpr float cutLineGlowThickness = 4.0f;
+             static constexpr float cutMarkerWidthThin = 2.0f;
+             static constexpr float cutBoxOutlineThickness = 2.5f;
+             static constexpr float cutBoxOutlineThicknessInteracting = 4.0f;
              static constexpr float cutMarkerBoxWidth = 30.0f;
              static constexpr int cutMarkerBoxHeight = 30;
              static constexpr float cutMarkerCenterDivisor = 2.0f;
@@ -151,7 +159,7 @@ namespace Config {
 
         struct Zoom {
             static constexpr float popupScale = 0.8f;
-            static constexpr float borderThickness = 2.0f;
+            static constexpr float borderThickness = 3.0f;
         };
     };
 

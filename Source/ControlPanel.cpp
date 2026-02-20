@@ -160,6 +160,70 @@ void ControlPanel::paint(juce::Graphics &g) {
     playbackTextPresenter->render(g);
 }
 
+void ControlPanel::paintOverChildren(juce::Graphics &g) {
+  if (!m_showEyeCandy)
+    return;
+
+  auto audioLength = getAudioPlayer().getThumbnail().getTotalLength();
+  if (audioLength <= 0.0)
+    return;
+
+  const auto bounds = layoutCache.waveformBounds;
+  const double cutIn = getCutInPosition();
+  const double cutOut = getCutOutPosition();
+
+  float inX = (float)bounds.getX() +
+               CoordinateMapper::secondsToPixels(cutIn, (float)bounds.getWidth(),
+                                                 audioLength);
+  float outX = (float)bounds.getX() +
+                CoordinateMapper::secondsToPixels(cutOut, (float)bounds.getWidth(),
+                                                  audioLength);
+
+  const float pulse = getGlowAlpha();
+  const juce::Colour blueColor = Config::Colors::cutLine.withAlpha(0.5f + 0.3f * pulse);
+
+  // 1. Draw connecting lines
+  auto drawConnector = [&](float x, juce::Component &btn, bool toTop) {
+    auto btnBounds = btn.getBounds();
+    float btnCenterX = (float)btnBounds.getCentreX();
+    float btnBottomY = (float)btnBounds.getBottom();
+
+    g.setColour(blueColor);
+    g.drawLine(btnCenterX, btnBottomY, x, toTop ? (float)bounds.getY() : (float)bounds.getBottom(), 2.0f);
+  };
+
+  // In Strip Connectors
+  drawConnector(inX, cutInButton, false);    // In Button -> Bottom of Marker
+  drawConnector(inX, autoCutInButton, true); // AutoCut In -> Top of Marker
+
+  // Out Strip Connectors
+  drawConnector(outX, cutOutButton, false);    // Out Button -> Bottom of Marker
+  drawConnector(outX, autoCutOutButton, true); // AutoCut Out -> Top of Marker
+
+  // 2. Draw group outlines
+  auto drawGroupOutline = [&](const std::vector<juce::Component*>& comps) {
+      if (comps.empty()) return;
+      juce::Rectangle<int> groupBounds = comps[0]->getBounds();
+      for (auto* c : comps)
+          groupBounds = groupBounds.getUnion(c->getBounds());
+      
+      g.setColour(blueColor);
+      g.drawRect(groupBounds.expanded(3).toFloat(), 2.0f);
+  };
+
+  std::vector<juce::Component*> inGroup = { 
+      &cutInButton, &cutInEditor, &resetInButton, 
+      &getSilenceDetector().getInSilenceThresholdEditor(), &autoCutInButton 
+  };
+  std::vector<juce::Component*> outGroup = { 
+      &cutOutButton, &cutOutEditor, &resetOutButton, 
+      &getSilenceDetector().getOutSilenceThresholdEditor(), &autoCutOutButton 
+  };
+
+  drawGroupOutline(inGroup);
+  drawGroupOutline(outGroup);
+}
+
 void ControlPanel::updatePlayButtonText(bool isPlaying) {
   playStopButton.setButtonText(isPlaying ? ControlPanelCopy::stopButtonText()
                                          : ControlPanelCopy::playButtonText());
@@ -206,11 +270,13 @@ void ControlPanel::animationUpdate(float breathingPulse) {
   if (cutLayerView != nullptr)
     cutLayerView->repaint();
 
-  if (autoCutInButton.getProperties().getWithDefault("isProcessing", false))
-    autoCutInButton.repaint();
+  if (m_showEyeCandy) {
+    if (autoCutInButton.getProperties().getWithDefault("isProcessing", false))
+      autoCutInButton.repaint();
 
-  if (autoCutOutButton.getProperties().getWithDefault("isProcessing", false))
-    autoCutOutButton.repaint();
+    if (autoCutOutButton.getProperties().getWithDefault("isProcessing", false))
+      autoCutOutButton.repaint();
+  }
 }
 
 void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences& prefs) {

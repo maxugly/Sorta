@@ -90,10 +90,13 @@ void CutLayerView::paint(juce::Graphics& g)
         g.setColour(Config::Colors::thresholdRegion);
         g.fillRect(lineStartX, topThresholdY, currentLineWidth, bottomThresholdY - topThresholdY);
 
-        const juce::Colour glowColor = Config::Colors::thresholdLine.withAlpha(Config::Colors::thresholdLine.getFloatAlpha() * glowAlphaProvider());
-        g.setColour(glowColor);
-        g.fillRect(lineStartX, topThresholdY - (Config::Layout::Glow::thresholdGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), currentLineWidth, Config::Layout::Glow::thresholdGlowThickness);
-        g.fillRect(lineStartX, bottomThresholdY - (Config::Layout::Glow::thresholdGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), currentLineWidth, Config::Layout::Glow::thresholdGlowThickness);
+        if (owner.getShowEyeCandy())
+        {
+            const juce::Colour glowColor = Config::Colors::thresholdLine.withAlpha(Config::Colors::thresholdLine.getFloatAlpha() * glowAlphaProvider());
+            g.setColour(glowColor);
+            g.fillRect(lineStartX, topThresholdY - (Config::Layout::Glow::thresholdGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), currentLineWidth, Config::Layout::Glow::thresholdGlowThickness);
+            g.fillRect(lineStartX, bottomThresholdY - (Config::Layout::Glow::thresholdGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), currentLineWidth, Config::Layout::Glow::thresholdGlowThickness);
+        }
 
         g.setColour(Config::Colors::thresholdLine);
         g.drawHorizontalLine((int)topThresholdY, lineStartX, lineEndX);
@@ -179,7 +182,7 @@ void CutLayerView::paint(juce::Graphics& g)
         }
 
         // Draw Glow if active
-        if (shouldPulse)
+        if (shouldPulse && owner.getShowEyeCandy())
         {
             const float pulse = glowAlphaProvider();
             const juce::Colour glowColor = Config::Colors::cutLine.withAlpha(Config::Colors::cutLine.getFloatAlpha() * (0.2f + 0.8f * pulse));
@@ -233,7 +236,7 @@ void CutLayerView::paint(juce::Graphics& g)
         }
     }
 
-    if (regionActive)
+    if (regionActive && owner.getShowEyeCandy())
         g.setColour(hollowColor.withAlpha(0.5f + 0.5f * glowAlphaProvider()));
     else
         g.setColour(hollowColor.withAlpha(0.4f));

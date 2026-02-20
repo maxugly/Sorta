@@ -59,6 +59,7 @@ void PlaybackCursorView::playbackTimerTick()
 void PlaybackCursorView::animationUpdate(float breathingPulse)
 {
     juce::ignoreUnused(breathingPulse);
+    repaint();
 }
 
 void PlaybackCursorView::paint(juce::Graphics& g)
@@ -72,6 +73,8 @@ void PlaybackCursorView::paint(juce::Graphics& g)
     const double drawPosition = audioPlayer.getCurrentPosition();
     const float x = CoordinateMapper::secondsToPixels(drawPosition, (float)waveformBounds.getWidth(), audioLength);
 
-    g.setColour(Config::Colors::playbackText);
-    g.drawVerticalLine(juce::roundToInt(x), 0.0f, (float)getHeight());
+    const float pulse = owner.getShowEyeCandy() ? owner.getGlowAlpha() : 0.0f;
+    const juce::Colour cursorColor = Config::Colors::playbackCursor.withAlpha(0.7f + 0.3f * pulse);
+    
+    PlaybackCursorGlow::renderGlow(g, juce::roundToInt(x), 0, getHeight(), cursorColor);
 }
