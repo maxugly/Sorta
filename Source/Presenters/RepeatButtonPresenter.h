@@ -13,8 +13,17 @@ class ControlPanel;
 class AudioPlayer;
 
 /**
+ * @file Source/Presenters/RepeatButtonPresenter.h
+ * @ingroup UI
  * @class RepeatButtonPresenter
- * @brief Manages the "Repeat/Loop" toggle button logic and state.
+ * @brief Manages the Repeat toggle button logic and state.
+ * @details This presenter handles the interaction for the playback repeat/cycle button.
+ *          It listens to `SessionState` for changes and updates the button's toggle state
+ *          accordingly, and updates the `AudioPlayer` when the button is clicked.
+ *
+ * @see ControlPanel
+ * @see AudioPlayer
+ * @see SessionState
  */
 class RepeatButtonPresenter : public SessionState::Listener
 {

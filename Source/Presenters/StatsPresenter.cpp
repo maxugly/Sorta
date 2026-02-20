@@ -3,6 +3,7 @@
 #include "Presenters/StatsPresenter.h"
 
 #include "UI/ControlPanel.h"
+#include "Utils/TimeUtils.h"
 #include "Core/AudioPlayer.h"
 #include <cmath>
 
@@ -92,7 +93,7 @@ juce::String StatsPresenter::buildStatsString() const
         stats << "Samples Loaded: " << lengthInSamples << "\n";
         stats << "Sample Rate: " << sampleRate << " Hz\n";
         stats << "Channels: " << thumbnail.getNumChannels() << "\n";
-        stats << "Length: " << owner.formatTime(thumbnail.getTotalLength()) << "\n";
+        stats << "Length: " << TimeUtils::formatTime(thumbnail.getTotalLength()) << "\n";
 
         float minVal = 0.0f;
         float maxVal = 0.0f;
