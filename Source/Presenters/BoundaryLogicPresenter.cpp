@@ -279,7 +279,7 @@ bool BoundaryLogicPresenter::applyCutOutFromEditor(double newPosition, juce::Tex
     const double totalLength = getAudioTotalLength();
     if (newPosition >= 0.0 && newPosition <= totalLength)
     {
-        if (owner.getShouldRepeat() && owner.getAudioPlayer().getCurrentPosition() >= owner.getAudioPlayer().getCutOut())
+        if (owner.getAudioPlayer().isRepeating() && owner.getAudioPlayer().getCurrentPosition() >= owner.getAudioPlayer().getCutOut())
             owner.getAudioPlayer().setPlayheadPosition(owner.getAudioPlayer().getCutIn());
 
         setCutOutPosition(newPosition);

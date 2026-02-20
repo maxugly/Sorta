@@ -4,7 +4,6 @@
 #include "UI/Views/WaveformView.h"
 #include "UI/Views/CutLayerView.h"
 #include "Utils/Config.h"
-#include "Presenters/TransportPresenter.h"
 #include "Presenters/SilenceDetectionPresenter.h"
 #include "Presenters/RepeatButtonPresenter.h"
 #include "Presenters/BoundaryLogicPresenter.h"
@@ -25,7 +24,6 @@ void ControlButtonsPresenter::initialiseAllButtons()
     initialiseExitButton();
     initialiseStatsButton();
     initialiseEyeCandyButton();
-    initialiseRepeatButton();
 }
 
 void ControlButtonsPresenter::initialiseOpenButton()
@@ -104,11 +102,6 @@ void ControlButtonsPresenter::initialiseEyeCandyButton()
         owner.getInteractionCoordinator().setShouldShowEyeCandy(owner.eyeCandyButton.getToggleState());
         owner.repaint();
     };
-}
-
-void ControlButtonsPresenter::initialiseRepeatButton()
-{
-    owner.getRepeatButtonPresenter().initialiseButton(owner.eyeCandyButton);
 }
 
 void ControlButtonsPresenter::refreshStates()

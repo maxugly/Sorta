@@ -19,7 +19,6 @@
 #include "Presenters/SilenceDetectionPresenter.h"
 #include "Presenters/StatsPresenter.h"
 #include "Utils/TimeUtils.h"
-#include "Presenters/TransportPresenter.h"
 #include "UI/Views/WaveformView.h"
 #include "UI/Views/CutLayerView.h"
 #include "Presenters/CutPresenter.h"
@@ -133,7 +132,6 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   outStrip->setPresenter(boundaryLogicPresenter.get());
 
   controlStatePresenter = std::make_unique<ControlStatePresenter>(*this);
-  transportPresenter = std::make_unique<TransportPresenter>(*this);
 
   sessionState.addListener(this);
 
@@ -218,7 +216,6 @@ void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences& prefs)
   if (transportStrip != nullptr) {
     transportStrip->updateAutoplayState(prefs.autoplay);
     transportStrip->updateCutModeState(prefs.active);
-    transportStrip->updateRepeatState(getAudioPlayer().isRepeating());
   }
 
   if (inStrip != nullptr)
@@ -382,10 +379,6 @@ void ControlPanel::setShouldShowStats(bool shouldShowStatsParam) {
 void ControlPanel::setTotalTimeStaticString(const juce::String &timeString) {
   if (playbackTextPresenter != nullptr)
     playbackTextPresenter->setTotalTimeStaticString(timeString);
-}
-
-void ControlPanel::setShouldRepeat(bool shouldRepeatParam) {
-  shouldRepeat = shouldRepeatParam;
 }
 
 void ControlPanel::updateCutButtonColors() {

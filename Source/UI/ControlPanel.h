@@ -44,8 +44,6 @@ class RepeatPresenter;
 
 class ControlStatePresenter;
 
-class TransportPresenter;
-
 class SilenceDetectionPresenter;
 
 class RepeatButtonPresenter;
@@ -133,10 +131,6 @@ public:
   void setAutoCutOutActive(bool isActive);
 
   void updateCutButtonColors();
-
-  bool getShouldRepeat() const { return shouldRepeat; }
-
-  void setShouldRepeat(bool shouldRepeatParam);
 
   double getCutInPosition() const;
 
@@ -244,7 +238,6 @@ public:
 private:
   friend class LayoutManager;
   friend class ControlStatePresenter;
-  friend class TransportPresenter;
   friend class SilenceDetectionPresenter;
   friend class ControlButtonsPresenter;
   friend class CutButtonPresenter;
@@ -291,9 +284,6 @@ private:
   /** @brief Updates UI state based on SessionState changes. */
   std::unique_ptr<ControlStatePresenter> controlStatePresenter;
 
-  /** @brief Manages transport controls (Play/Stop). */
-  std::unique_ptr<TransportPresenter> transportPresenter;
-
   /** @brief Presenter for silence detection settings. */
   std::unique_ptr<SilenceDetectionPresenter> silenceDetectionPresenter;
 
@@ -334,8 +324,6 @@ private:
 
   AppEnums::ViewMode currentMode = AppEnums::ViewMode::Classic;
   AppEnums::ChannelViewMode currentChannelViewMode = AppEnums::ChannelViewMode::Mono;
-
-  bool shouldRepeat = false;
 
   juce::String cutInDisplayString, cutOutDisplayString;
   int cutInTextX = 0, cutOutTextX = 0, cutTextY = 0;

@@ -41,10 +41,6 @@ void TransportStrip::initialiseButtons()
     addAndMakeVisible(repeatButton);
     repeatButton.setButtonText(Config::Labels::repeatButton);
     repeatButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
-    repeatButton.setClickingTogglesState(true);
-    repeatButton.onClick = [this] {
-        audioPlayer.setRepeating(repeatButton.getToggleState());
-    };
 
     // Cut Button
     addAndMakeVisible(cutButton);

@@ -107,8 +107,6 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/SilenceThresholdPresenter.cpp
             Source/Presenters/StatsPresenter.h
             Source/Presenters/StatsPresenter.cpp
-            Source/Presenters/TransportPresenter.h
-            Source/Presenters/TransportPresenter.cpp
             Source/Presenters/SilenceDetectionPresenter.h
             Source/Presenters/SilenceDetectionPresenter.cpp
             Source/Presenters/RepeatButtonPresenter.h
