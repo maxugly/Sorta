@@ -66,22 +66,18 @@ public:
 
     if (button.getProperties().getWithDefault("isProcessing", false))
     {
-        float pulseAlpha = button.getProperties().getWithDefault("pulseAlpha", 0.0f);
-        
-        // Map pulseAlpha [0, 1] to [MinOpacity, MaxOpacity]
-        float mappedAlpha = Config::UI::ButtonGlowMinOpacity + 
-                            (Config::UI::ButtonGlowMaxOpacity - Config::UI::ButtonGlowMinOpacity) * pulseAlpha;
+        const float pulseAlpha = button.getProperties().getWithDefault("pulseAlpha", 0.0f);
+        const float mappedAlpha = Config::UI::ButtonGlowMinOpacity + 
+                                  (Config::UI::ButtonGlowMaxOpacity - Config::UI::ButtonGlowMinOpacity) * pulseAlpha;
                             
         g.setOpacity (mappedAlpha);
-        g.setColour (Config::Colors::Button::outline);
-        g.strokePath (p, juce::PathStrokeType (Config::UI::ButtonOutlineThickness));
+        g.setColour (button.findColour(juce::TextButton::buttonOnColourId));
+        g.strokePath (p, juce::PathStrokeType (Config::UI::ButtonOutlineThickness * 3.5f));
         g.setOpacity (1.0f);
     }
-    else
-    {
-        g.setColour (Config::Colors::Button::outline);
-        g.strokePath (p, juce::PathStrokeType (outlineThickness));
-    }
+    
+    g.setColour (Config::Colors::Button::outline);
+    g.strokePath (p, juce::PathStrokeType (outlineThickness));
   }
 
   juce::Font getTextButtonFont (juce::TextButton& button, int buttonHeight) override {

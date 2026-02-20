@@ -38,10 +38,6 @@ void SilenceAnalysisWorker::startAnalysis(float thresholdVal, bool isIn)
 
     AudioPlayer& audioPlayer = client.getAudioPlayer();
     assignedFilePath = audioPlayer.getLoadedFile().getFullPathName();
-    wasPlayingBeforeScan = audioPlayer.isPlaying();
-
-    if (wasPlayingBeforeScan)
-        audioPlayer.stopPlayback();
 
     startThread();
 }
@@ -132,9 +128,6 @@ void SilenceAnalysisWorker::run()
                  metadata.isAnalyzed = true;
                  sessionState.setMetadataForFile(filePath, metadata);
             }
-
-            if (wasPlayingBeforeScan)
-                player.startPlayback();
 
             busy.store(false);
         }

@@ -99,6 +99,6 @@ void ControlButtonsPresenter::initialiseEyeCandyButton()
     owner.eyeCandyButton.setClickingTogglesState(true);
     owner.eyeCandyButton.setToggleState(owner.getShowEyeCandy(), juce::dontSendNotification);
     owner.eyeCandyButton.onClick = [this] {
-        owner.repaint();
+        owner.setShouldShowEyeCandy(owner.eyeCandyButton.getToggleState());
     };
 }

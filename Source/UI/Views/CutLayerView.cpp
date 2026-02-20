@@ -92,10 +92,13 @@ void CutLayerView::paint(juce::Graphics& g)
 
         if (owner.getShowEyeCandy())
         {
-            const juce::Colour glowColor = Config::Colors::thresholdLine.withAlpha(Config::Colors::thresholdLine.getFloatAlpha() * glowAlphaProvider());
+            const float pulse = glowAlphaProvider();
+            const juce::Colour glowColor = Config::Colors::thresholdLine.withAlpha(0.2f + 0.6f * pulse);
             g.setColour(glowColor);
-            g.fillRect(lineStartX, topThresholdY - (Config::Layout::Glow::thresholdGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), currentLineWidth, Config::Layout::Glow::thresholdGlowThickness);
-            g.fillRect(lineStartX, bottomThresholdY - (Config::Layout::Glow::thresholdGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), currentLineWidth, Config::Layout::Glow::thresholdGlowThickness);
+            
+            // Draw a wider rectangle behind the line for a glow effect
+            g.fillRect(lineStartX, topThresholdY - 2.5f, currentLineWidth, 5.0f);
+            g.fillRect(lineStartX, bottomThresholdY - 2.5f, currentLineWidth, 5.0f);
         }
 
         g.setColour(Config::Colors::thresholdLine);

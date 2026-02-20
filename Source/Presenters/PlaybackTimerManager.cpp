@@ -55,13 +55,14 @@ void PlaybackTimerManager::timerCallback()
     if (m_repeatController != nullptr)
         m_repeatController->tick();
 
-    // Update master animation clock - 4 second cycle
-    m_masterPhase += (1.0f / (60.0f * 4.0f));
+    // Update master animation clock
+    const float duration = Config::Animation::masterPhaseDurationSeconds;
+    m_masterPhase += (1.0f / (60.0f * duration));
     if (m_masterPhase >= 1.0f)
         m_masterPhase = 0.0f;
 
-    // Calculate breathing pulse at 1Hz (multiplier = 4.0f since cycle is 4s)
-    m_breathingPulse = UIAnimationHelper::getSinePulse(m_masterPhase, 4.0f);
+    // Calculate breathing pulse at 1Hz (multiplier = duration since cycle is 'duration' seconds)
+    m_breathingPulse = UIAnimationHelper::getSinePulse(m_masterPhase, duration);
 
     // Notify all high-frequency listeners
     const juce::ScopedLock lock(listenerLock);

@@ -36,27 +36,26 @@ void SilenceDetectionPresenter::playbackTimerTick()
 
 void SilenceDetectionPresenter::animationUpdate(float breathingPulse)
 {
-    if (silenceWorker.isBusy())
-    {
-        auto& button = silenceWorker.isDetectingIn() ? owner.getAutoCutInButton() : owner.getAutoCutOutButton();
-        button.getProperties().set("isProcessing", true);
-        button.getProperties().set("pulseAlpha", breathingPulse);
-        button.repaint();
-    }
-    else
-    {
-        // Ensure both buttons have the property cleared when analysis is not running
-        if (owner.getAutoCutInButton().getProperties().getWithDefault("isProcessing", false))
+    const auto& autoCut = sessionState.getCutPrefs().autoCut;
+    
+    auto updateButton = [&](juce::TextButton& btn, bool isActive, bool isBusy) {
+        if (isActive || isBusy)
         {
-            owner.getAutoCutInButton().getProperties().set("isProcessing", false);
-            owner.getAutoCutInButton().repaint();
+            btn.getProperties().set("isProcessing", true);
+            btn.getProperties().set("pulseAlpha", breathingPulse);
+            btn.repaint();
         }
-        if (owner.getAutoCutOutButton().getProperties().getWithDefault("isProcessing", false))
+        else
         {
-            owner.getAutoCutOutButton().getProperties().set("isProcessing", false);
-            owner.getAutoCutOutButton().repaint();
+            btn.getProperties().set("isProcessing", false);
+            btn.repaint();
         }
-    }
+    };
+
+    updateButton(owner.getAutoCutInButton(), autoCut.inActive, silenceWorker.isBusy() && silenceWorker.isDetectingIn());
+    updateButton(owner.getAutoCutOutButton(), autoCut.outActive, silenceWorker.isBusy() && !silenceWorker.isDetectingIn());
+
+    owner.repaint();
 }
 
 void SilenceDetectionPresenter::fileChanged(const juce::String& filePath)

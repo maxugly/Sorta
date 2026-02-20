@@ -50,7 +50,6 @@ private:
     std::atomic<float> threshold { 0.0f };
     std::atomic<bool> detectingIn { true };
     std::atomic<bool> busy { false };
-    bool wasPlayingBeforeScan = false;
     juce::String assignedFilePath;
 
     std::shared_ptr<bool> lifeToken;

@@ -211,6 +211,8 @@ public:
 
   bool getShowEyeCandy() const { return m_showEyeCandy; }
 
+  void setShouldShowEyeCandy(bool shouldShow) { m_showEyeCandy = shouldShow; repaint(); }
+
   float getGlowAlpha() const { return m_currentPulseAlpha; }
 
   const MouseHandler &getMouseHandler() const;

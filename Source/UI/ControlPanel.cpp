@@ -185,6 +185,8 @@ void ControlPanel::paintOverChildren(juce::Graphics &g) {
   if (!m_showEyeCandy)
     return;
 
+  g.setOpacity(1.0f);
+
   auto audioLength = getAudioPlayer().getThumbnail().getTotalLength();
   if (audioLength <= 0.0)
     return;
@@ -203,9 +205,14 @@ void ControlPanel::paintOverChildren(juce::Graphics &g) {
   const float pulse = getGlowAlpha();
   const juce::Colour blueColor = Config::Colors::cutLine.withAlpha(0.5f + 0.3f * pulse);
 
+  // Helper to map a rectangle from a nested child component to ControlPanel space
+  auto mapToLocal = [&](juce::Component* c, juce::Rectangle<int> r) {
+      return getLocalArea(c, r);
+  };
+
   // 1. Draw connecting lines
   auto drawConnector = [&](float x, juce::Component &btn, bool toTop) {
-    auto btnBounds = btn.getBounds();
+    auto btnBounds = mapToLocal(&btn, btn.getLocalBounds());
     float btnCenterX = (float)btnBounds.getCentreX();
     float btnBottomY = (float)btnBounds.getBottom();
 
@@ -224,9 +231,9 @@ void ControlPanel::paintOverChildren(juce::Graphics &g) {
   // 2. Draw group outlines
   auto drawGroupOutline = [&](const std::vector<juce::Component*>& comps) {
       if (comps.empty()) return;
-      juce::Rectangle<int> groupBounds = comps[0]->getBounds();
-      for (auto* c : comps)
-          groupBounds = groupBounds.getUnion(c->getBounds());
+      juce::Rectangle<int> groupBounds = mapToLocal(comps[0], comps[0]->getLocalBounds());
+      for (size_t i = 1; i < comps.size(); ++i)
+          groupBounds = groupBounds.getUnion(mapToLocal(comps[i], comps[i]->getLocalBounds()));
       
       g.setColour(blueColor);
       g.drawRect(groupBounds.expanded(3).toFloat(), 2.0f);
