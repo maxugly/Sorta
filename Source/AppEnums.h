@@ -31,6 +31,13 @@ namespace AppEnums
         In,
         Out
     };
+
+    enum class GroupPosition {
+        Alone,
+        Left,
+        Middle,
+        Right
+    };
 }
 
 #endif 

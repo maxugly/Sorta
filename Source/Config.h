@@ -27,6 +27,12 @@ namespace Config {
         inline constexpr float ButtonGlowMinOpacity = 0.1f;
         /** @brief Standard corner rounding for all buttons. */
         inline constexpr float ButtonCornerSize = 6.0f;
+        /** @brief The base unit for widgets. */
+        inline constexpr float WidgetUnit = 32.0f;
+        /** @brief The standard height for widgets. */
+        inline constexpr float WidgetHeight = WidgetUnit;
+        /** @brief The spacing between grouped buttons. */
+        inline constexpr float GroupSpacing = 1.0f;
     }
 
     namespace Colors {

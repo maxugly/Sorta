@@ -7,7 +7,8 @@
     #include <JuceHeader.h>
 #endif
 
-#include "Config.h" 
+#include "Config.h"
+#include "AppEnums.h"
 
 class ModernLookAndFeel : public juce::LookAndFeel_V4 {
 public:
@@ -34,6 +35,21 @@ public:
     auto outlineThickness = Config::UI::ButtonOutlineThickness;
     auto bounds = button.getLocalBounds().toFloat().reduced (outlineThickness / 2.0f);
 
+    auto groupPos = (AppEnums::GroupPosition) (int) button.getProperties().getWithDefault ("GroupPosition", (int) AppEnums::GroupPosition::Alone);
+    
+    bool tl = false, tr = false, bl = false, br = false;
+    switch (groupPos)
+    {
+        case AppEnums::GroupPosition::Alone: tl = tr = bl = br = true; break;
+        case AppEnums::GroupPosition::Left: tl = bl = true; break;
+        case AppEnums::GroupPosition::Right: tr = br = true; break;
+        case AppEnums::GroupPosition::Middle: break;
+    }
+
+    juce::Path p;
+    p.addRoundedRectangle (bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), 
+                           cornerSize, cornerSize, tl, tr, bl, br);
+
     juce::Colour currentBackgroundColour;
     if (!button.isEnabled()) {
         currentBackgroundColour = Config::Colors::Button::disabledBackground;
@@ -46,7 +62,7 @@ public:
     }
 
     g.setColour (currentBackgroundColour);
-    g.fillRoundedRectangle (bounds, cornerSize);
+    g.fillPath (p);
 
     if (button.getProperties().getWithDefault("isProcessing", false))
     {
@@ -58,13 +74,13 @@ public:
                             
         g.setOpacity (mappedAlpha);
         g.setColour (Config::Colors::Button::outline);
-        g.drawRoundedRectangle (bounds, cornerSize, Config::UI::ButtonOutlineThickness);
+        g.strokePath (p, juce::PathStrokeType (Config::UI::ButtonOutlineThickness));
         g.setOpacity (1.0f);
     }
     else
     {
         g.setColour (Config::Colors::Button::outline);
-        g.drawRoundedRectangle (bounds, cornerSize, outlineThickness);
+        g.strokePath (p, juce::PathStrokeType (outlineThickness));
     }
   }
 
