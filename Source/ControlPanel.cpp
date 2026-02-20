@@ -66,6 +66,25 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
 
   playbackRepeatController = std::make_unique<PlaybackRepeatController>(getAudioPlayer(), *this);
 
+  transportStrip = std::make_unique<TransportStrip>(getAudioPlayer(), sessionState);
+  addAndMakeVisible(transportStrip.get());
+
+  inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In, getAudioPlayer(), sessionState, *silenceDetector);
+  inStrip->onMarkerRightClick = [this] {
+    getMouseHandler().setPlacementMode(AppEnums::PlacementMode::CutIn);
+    updateCutButtonColors();
+    repaint();
+  };
+  addAndMakeVisible(inStrip.get());
+
+  outStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::Out, getAudioPlayer(), sessionState, *silenceDetector);
+  outStrip->onMarkerRightClick = [this] {
+    getMouseHandler().setPlacementMode(AppEnums::PlacementMode::CutOut);
+    updateCutButtonColors();
+    repaint();
+  };
+  addAndMakeVisible(outStrip.get());
+
   statsPresenter = std::make_unique<StatsPresenter>(*this);
   silenceDetectionPresenter = std::make_unique<SilenceDetectionPresenter>(*this, sessionState, *owner.getAudioPlayer());
   owner.getAudioPlayer()->setControlPanel(this);
@@ -75,11 +94,10 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   buttonPresenter->initialiseAllButtons();
 
   cutButtonPresenter = std::make_unique<CutButtonPresenter>(*this);
+  cutResetPresenter = std::make_unique<CutResetPresenter>(*this);
   repeatPresenter = std::make_unique<RepeatPresenter>(*this, *silenceDetector,
-                                                  cutInEditor, cutOutEditor);
+                                                  inStrip->getTimerEditor(), outStrip->getTimerEditor());
   repeatPresenter->initialiseEditors();
-
-  initialiseCutEditors();
 
   controlStatePresenter = std::make_unique<ControlStatePresenter>(*this);
   transportPresenter = std::make_unique<TransportPresenter>(*this);
@@ -110,17 +128,6 @@ void ControlPanel::initialiseLookAndFeel() {
   modernLF.setBaseOffColor(Config::Colors::Button::base);
   modernLF.setBaseOnColor(Config::Colors::Button::on);
   modernLF.setTextColor(Config::Colors::Button::text);
-}
-
-void ControlPanel::initialiseCutEditors() {
-  cutResetPresenter = std::make_unique<CutResetPresenter>(*this);
-  addAndMakeVisible(silenceDetector->getInSilenceThresholdEditor());
-  addAndMakeVisible(silenceDetector->getOutSilenceThresholdEditor());
-
-  cutInEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
-  cutOutEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
-  silenceDetector->getInSilenceThresholdEditor().getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
-  silenceDetector->getOutSilenceThresholdEditor().getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
 }
 
 void ControlPanel::invokeOwnerOpenDialog() { owner.openButtonClicked(); }
@@ -193,12 +200,12 @@ void ControlPanel::paintOverChildren(juce::Graphics &g) {
   };
 
   // In Strip Connectors
-  drawConnector(inX, cutInButton, false);    // In Button -> Bottom of Marker
-  drawConnector(inX, autoCutInButton, true); // AutoCut In -> Top of Marker
+  drawConnector(inX, inStrip->getMarkerButton(), false);    // In Button -> Bottom of Marker
+  drawConnector(inX, inStrip->getAutoCutButton(), true); // AutoCut In -> Top of Marker
 
   // Out Strip Connectors
-  drawConnector(outX, cutOutButton, false);    // Out Button -> Bottom of Marker
-  drawConnector(outX, autoCutOutButton, true); // AutoCut Out -> Top of Marker
+  drawConnector(outX, outStrip->getMarkerButton(), false);    // Out Button -> Bottom of Marker
+  drawConnector(outX, outStrip->getAutoCutButton(), true); // AutoCut Out -> Top of Marker
 
   // 2. Draw group outlines
   auto drawGroupOutline = [&](const std::vector<juce::Component*>& comps) {
@@ -212,12 +219,12 @@ void ControlPanel::paintOverChildren(juce::Graphics &g) {
   };
 
   std::vector<juce::Component*> inGroup = { 
-      &cutInButton, &cutInEditor, &resetInButton, 
-      &getSilenceDetector().getInSilenceThresholdEditor(), &autoCutInButton 
+      &inStrip->getMarkerButton(), &inStrip->getTimerEditor(), &inStrip->getResetButton(), 
+      &getSilenceDetector().getInSilenceThresholdEditor(), &inStrip->getAutoCutButton() 
   };
   std::vector<juce::Component*> outGroup = { 
-      &cutOutButton, &cutOutEditor, &resetOutButton, 
-      &getSilenceDetector().getOutSilenceThresholdEditor(), &autoCutOutButton 
+      &outStrip->getMarkerButton(), &outStrip->getTimerEditor(), &outStrip->getResetButton(), 
+      &getSilenceDetector().getOutSilenceThresholdEditor(), &outStrip->getAutoCutButton() 
   };
 
   drawGroupOutline(inGroup);
@@ -225,8 +232,8 @@ void ControlPanel::paintOverChildren(juce::Graphics &g) {
 }
 
 void ControlPanel::updatePlayButtonText(bool isPlaying) {
-  playStopButton.setButtonText(isPlaying ? ControlPanelCopy::stopButtonText()
-                                         : ControlPanelCopy::playButtonText());
+  if (transportStrip != nullptr)
+    transportStrip->updatePlayButtonText(isPlaying);
 }
 
 bool ControlPanel::isZKeyDown() const {
@@ -269,19 +276,20 @@ void ControlPanel::animationUpdate(float breathingPulse) {
 
   if (cutLayerView != nullptr)
     cutLayerView->repaint();
-
-  if (m_showEyeCandy) {
-    if (autoCutInButton.getProperties().getWithDefault("isProcessing", false))
-      autoCutInButton.repaint();
-
-    if (autoCutOutButton.getProperties().getWithDefault("isProcessing", false))
-      autoCutOutButton.repaint();
-  }
 }
 
 void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences& prefs) {
-  autoCutInButton.setToggleState(prefs.autoCut.inActive, juce::dontSendNotification);
-  autoCutOutButton.setToggleState(prefs.autoCut.outActive, juce::dontSendNotification);
+  m_isCutModeActive = prefs.active;
+  
+  if (transportStrip != nullptr) {
+    transportStrip->updateAutoplayState(prefs.autoplay);
+    transportStrip->updateCutModeState(prefs.active);
+  }
+
+  if (inStrip != nullptr)
+    inStrip->updateAutoCutState(prefs.autoCut.inActive);
+  if (outStrip != nullptr)
+    outStrip->updateAutoCutState(prefs.autoCut.outActive);
   
   if (silenceDetector != nullptr) {
     silenceDetector->setIsAutoCutInActive(prefs.autoCut.inActive);
@@ -347,6 +355,11 @@ void ControlPanel::setCutOutPosition(double pos) {
 }
 
 void ControlPanel::updateCutLabels() {
+  if (inStrip != nullptr)
+    inStrip->updateTimerText(TimeUtils::formatTime(getCutInPosition()));
+  if (outStrip != nullptr)
+    outStrip->updateTimerText(TimeUtils::formatTime(getCutOutPosition()));
+
   if (repeatPresenter != nullptr)
     repeatPresenter->updateCutLabels();
 
@@ -360,9 +373,21 @@ void ControlPanel::updateComponentStates() {
 }
 
 void ControlPanel::updateUIFromState() {
-  const auto &autoCut = sessionState.getCutPrefs().autoCut;
-  autoCutInButton.setToggleState(autoCut.inActive, juce::dontSendNotification);
-  autoCutOutButton.setToggleState(autoCut.outActive, juce::dontSendNotification);
+  const auto &prefs = sessionState.getCutPrefs();
+  const auto &autoCut = prefs.autoCut;
+  
+  m_isCutModeActive = prefs.active;
+  
+  if (transportStrip != nullptr) {
+    transportStrip->updateAutoplayState(prefs.autoplay);
+    transportStrip->updateCutModeState(prefs.active);
+  }
+
+  if (inStrip != nullptr)
+    inStrip->updateAutoCutState(autoCut.inActive);
+  if (outStrip != nullptr)
+    outStrip->updateAutoCutState(autoCut.outActive);
+
   silenceDetector->setIsAutoCutInActive(autoCut.inActive);
   silenceDetector->setIsAutoCutOutActive(autoCut.outActive);
 
@@ -384,10 +409,14 @@ void ControlPanel::updateUIFromState() {
 
 void ControlPanel::setAutoCutInActive(bool isActive) {
   sessionState.setAutoCutInActive(isActive);
+  if (inStrip != nullptr)
+    inStrip->updateAutoCutState(isActive);
 }
 
 void ControlPanel::setAutoCutOutActive(bool isActive) {
   sessionState.setAutoCutOutActive(isActive);
+  if (outStrip != nullptr)
+    outStrip->updateAutoCutState(isActive);
 }
 
 void ControlPanel::toggleStats() {
@@ -405,11 +434,14 @@ void ControlPanel::triggerModeButton() { modeButton.triggerClick(); }
 
 void ControlPanel::triggerChannelViewButton() { channelViewButton.triggerClick(); }
 
-void ControlPanel::triggerRepeatButton() { repeatButton.triggerClick(); }
+void ControlPanel::triggerRepeatButton() { 
+  if (transportStrip != nullptr)
+    transportStrip->getRepeatButton().triggerClick(); 
+}
 
-void ControlPanel::resetIn() { resetInButton.triggerClick(); }
+void ControlPanel::resetIn() { if (inStrip != nullptr) inStrip->getResetButton().triggerClick(); }
 
-void ControlPanel::resetOut() { resetOutButton.triggerClick(); }
+void ControlPanel::resetOut() { if (outStrip != nullptr) outStrip->getResetButton().triggerClick(); }
 
 void ControlPanel::setStatsDisplayText(const juce::String &text,
                                        juce::Colour color) {

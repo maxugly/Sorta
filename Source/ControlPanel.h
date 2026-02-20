@@ -9,6 +9,8 @@ class FocusManager;
 #include "Config.h"
 #include "ControlPanelLayoutCache.h"
 #include "UI/Components/TransportButton.h"
+#include "UI/Components/TransportStrip.h"
+#include "UI/Components/MarkerStrip.h"
 #include "UI/Components/ModernLookAndFeel.h" 
 #include "MouseHandler.h"      
 #include "Core/SessionState.h"
@@ -59,6 +61,8 @@ class PlaybackCursorView;
 class ZoomView;
 
 class PlaybackRepeatController;
+
+class TransportStrip;
 
 /**
  * @ingroup UI
@@ -176,8 +180,8 @@ public:
   void logStatusMessage(const juce::String &message,
                         bool isError = false);
 
-  juce::TextButton& getAutoCutInButton() { return autoCutInButton; }
-  juce::TextButton& getAutoCutOutButton() { return autoCutOutButton; }
+  juce::TextButton& getAutoCutInButton() { return inStrip->getAutoCutButton(); }
+  juce::TextButton& getAutoCutOutButton() { return outStrip->getAutoCutButton(); }
 
   void updateStatsFromAudio();
 
@@ -210,6 +214,7 @@ public:
   SilenceDetector &getSilenceDetector() { return *silenceDetector; }
   const SilenceDetector &getSilenceDetector() const { return *silenceDetector; }
 
+  TransportStrip* getTransportStrip() { return transportStrip.get(); }
   SilenceDetectionPresenter* getSilenceDetectionPresenter() { return silenceDetectionPresenter.get(); }
 
   int getBottomRowTopY() const { return layoutCache.bottomRowTopY; }
@@ -315,13 +320,11 @@ private:
   /** @brief Manages repeat and autoplay logic. */
   std::unique_ptr<PlaybackRepeatController> playbackRepeatController;
 
-  juce::TextButton openButton, playStopButton, stopButton, modeButton, exitButton,
-      statsButton, repeatButton, channelViewButton, eyeCandyButton;
-  juce::TextButton resetInButton, resetOutButton;
-  juce::TextEditor cutInEditor, cutOutEditor;
+  juce::TextButton openButton, modeButton, exitButton,
+      statsButton, channelViewButton, eyeCandyButton;
+  std::unique_ptr<TransportStrip> transportStrip;
+  std::unique_ptr<MarkerStrip> inStrip, outStrip;
   juce::TextEditor elapsedTimeEditor, remainingTimeEditor, cutLengthEditor;
-  TransportButton cutInButton, cutOutButton;
-  juce::TextButton autoplayButton, autoCutInButton, autoCutOutButton, cutButton;
 
   ControlPanelLayoutCache layoutCache;
 

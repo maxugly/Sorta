@@ -24,12 +24,15 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled)
 {
     owner.openButton.setEnabled(true);
     owner.exitButton.setEnabled(true);
-    owner.repeatButton.setEnabled(true);
-    owner.autoplayButton.setEnabled(true);
-    owner.cutButton.setEnabled(true);
 
-    owner.playStopButton.setEnabled(enabled);
-    owner.stopButton.setEnabled(enabled);
+    if (auto* ts = owner.getTransportStrip()) {
+        ts->getRepeatButton().setEnabled(true);
+        ts->getAutoplayButton().setEnabled(true);
+        ts->getCutButton().setEnabled(true);
+        ts->getPlayStopButton().setEnabled(enabled);
+        ts->getStopButton().setEnabled(enabled);
+    }
+
     owner.modeButton.setEnabled(enabled);
     owner.statsButton.setEnabled(enabled);
     owner.channelViewButton.setEnabled(enabled);
@@ -47,34 +50,21 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled)
 
 void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, bool enabled)
 {
-    owner.cutInButton.setEnabled(enabled && isCutModeActive);
-    owner.cutInEditor.setEnabled(enabled && isCutModeActive);
-    owner.resetInButton.setEnabled(enabled && isCutModeActive);
+    if (owner.inStrip != nullptr) {
+        owner.inStrip->setEnabled(enabled && isCutModeActive);
+        owner.inStrip->setVisible(isCutModeActive);
+    }
 
-    owner.cutOutButton.setEnabled(enabled && isCutModeActive);
-    owner.cutOutEditor.setEnabled(enabled && isCutModeActive);
-    owner.resetOutButton.setEnabled(enabled && isCutModeActive);
+    if (owner.outStrip != nullptr) {
+        owner.outStrip->setEnabled(enabled && isCutModeActive);
+        owner.outStrip->setVisible(isCutModeActive);
+    }
 
     owner.cutLengthEditor.setEnabled(enabled && isCutModeActive);
     owner.cutLengthEditor.setVisible(isCutModeActive);
 
-    owner.autoCutInButton.setEnabled(isCutModeActive);
-    owner.autoCutOutButton.setEnabled(isCutModeActive);
-
-    owner.autoCutInButton.setToggleState(owner.getSilenceDetector().getIsAutoCutInActive(), juce::dontSendNotification);
-    owner.autoCutOutButton.setToggleState(owner.getSilenceDetector().getIsAutoCutOutActive(), juce::dontSendNotification);
-
-    owner.getSilenceDetector().getInSilenceThresholdEditor().setEnabled(enabled && isCutModeActive);
-    owner.getSilenceDetector().getOutSilenceThresholdEditor().setEnabled(enabled && isCutModeActive);
-
-    owner.cutInButton.setVisible(isCutModeActive);
-    owner.cutOutButton.setVisible(isCutModeActive);
-    owner.cutInEditor.setVisible(isCutModeActive);
-    owner.cutOutEditor.setVisible(isCutModeActive);
-    owner.resetInButton.setVisible(isCutModeActive);
-    owner.resetOutButton.setVisible(isCutModeActive);
-    owner.getSilenceDetector().getInSilenceThresholdEditor().setVisible(isCutModeActive);
-    owner.getSilenceDetector().getOutSilenceThresholdEditor().setVisible(isCutModeActive);
-    owner.autoCutInButton.setVisible(isCutModeActive);
-    owner.autoCutOutButton.setVisible(isCutModeActive);
+    if (owner.inStrip != nullptr)
+        owner.inStrip->updateAutoCutState(owner.getSilenceDetector().getIsAutoCutInActive());
+    if (owner.outStrip != nullptr)
+        owner.outStrip->updateAutoCutState(owner.getSilenceDetector().getIsAutoCutOutActive());
 }

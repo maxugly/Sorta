@@ -112,6 +112,10 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/RepeatPresenter.cpp
             Source/UI/Components/TransportButton.h
             Source/UI/Components/TransportButton.cpp
+            Source/UI/Components/TransportStrip.h
+            Source/UI/Components/TransportStrip.cpp
+            Source/UI/Components/MarkerStrip.h
+            Source/UI/Components/MarkerStrip.cpp
             Source/PlaybackRepeatController.h
             Source/PlaybackRepeatController.cpp
             Source/PlaybackTextPresenter.h

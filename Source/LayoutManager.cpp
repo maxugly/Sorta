@@ -43,20 +43,11 @@ void LayoutManager::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHei
     controlPanel.openButton.setBounds(topRow.removeFromLeft(buttonWidth));
     topRow.removeFromLeft(margin);
 
-    // Transport Group (Left, Middle, Middle, Middle, Right)
-    controlPanel.playStopButton.setBounds(topRow.removeFromLeft(buttonWidth));
-    topRow.removeFromLeft(spacing);
-
-    controlPanel.stopButton.setBounds(topRow.removeFromLeft(buttonWidth));
-    topRow.removeFromLeft(spacing);
-
-    controlPanel.autoplayButton.setBounds(topRow.removeFromLeft(buttonWidth));
-    topRow.removeFromLeft(spacing);
-
-    controlPanel.repeatButton.setBounds(topRow.removeFromLeft(buttonWidth));
-    topRow.removeFromLeft(spacing);
-
-    controlPanel.cutButton.setBounds(topRow.removeFromLeft(buttonWidth));
+    // Transport Group (Modular TransportStrip)
+    if (auto* ts = controlPanel.getTransportStrip()) {
+        const int stripWidth = (buttonWidth * 5) + (spacing * 4);
+        ts->setBounds(topRow.removeFromLeft(stripWidth));
+    }
     topRow.removeFromLeft(margin);
 
     controlPanel.exitButton.setBounds(topRow.removeFromRight(buttonWidth));
@@ -85,27 +76,16 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int>& bounds, int rowHeigh
     auto cutRow = bounds.removeFromTop(height + margin * 2).reduced(margin);
     cutRow.setHeight(height);
 
-    // In Strip: [In(L)] [Timer] [Reset] [Threshold] [AutoCut(R)]
-    controlPanel.cutInButton.setBounds(cutRow.removeFromLeft((int)(Config::UI::CutButtonWidthUnits * unit)));
-    cutRow.removeFromLeft(spacing);
-    controlPanel.cutInEditor.setBounds(cutRow.removeFromLeft((int)(Config::UI::TimerWidthUnits * unit)));
-    cutRow.removeFromLeft(spacing);
-    controlPanel.resetInButton.setBounds(cutRow.removeFromLeft((int)(Config::UI::ResetButtonWidthUnits * unit)));
-    cutRow.removeFromLeft(spacing);
-    controlPanel.getSilenceDetector().getInSilenceThresholdEditor().setBounds(cutRow.removeFromLeft((int)(Config::UI::ThresholdWidthUnits * unit)));
-    cutRow.removeFromLeft(spacing);
-    controlPanel.autoCutInButton.setBounds(cutRow.removeFromLeft((int)(Config::UI::CutButtonWidthUnits * unit)));
+    const int stripWidth = (int)((Config::UI::CutButtonWidthUnits * 2 + 
+                                  Config::UI::TimerWidthUnits + 
+                                  Config::UI::ResetButtonWidthUnits + 
+                                  Config::UI::ThresholdWidthUnits) * unit) + (spacing * 4);
 
-    // Out Strip (Right-Aligned & Mirrored): [AutoCut(L)] [Threshold] [Reset] [Timer] [Out(R)]
-    controlPanel.cutOutButton.setBounds(cutRow.removeFromRight((int)(Config::UI::CutButtonWidthUnits * unit)));
-    cutRow.removeFromRight(spacing);
-    controlPanel.cutOutEditor.setBounds(cutRow.removeFromRight((int)(Config::UI::TimerWidthUnits * unit)));
-    cutRow.removeFromRight(spacing);
-    controlPanel.resetOutButton.setBounds(cutRow.removeFromRight((int)(Config::UI::ResetButtonWidthUnits * unit)));
-    cutRow.removeFromRight(spacing);
-    controlPanel.getSilenceDetector().getOutSilenceThresholdEditor().setBounds(cutRow.removeFromRight((int)(Config::UI::ThresholdWidthUnits * unit)));
-    cutRow.removeFromRight(spacing);
-    controlPanel.autoCutOutButton.setBounds(cutRow.removeFromRight((int)(Config::UI::CutButtonWidthUnits * unit)));
+    if (controlPanel.inStrip != nullptr)
+        controlPanel.inStrip->setBounds(cutRow.removeFromLeft(stripWidth));
+
+    if (controlPanel.outStrip != nullptr)
+        controlPanel.outStrip->setBounds(cutRow.removeFromRight(stripWidth));
 }
 
 void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, int rowHeight)

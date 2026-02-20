@@ -26,23 +26,10 @@ private:
     void initialiseChannelViewButton();
 
     void initialiseExitButton();
+void initialiseStatsButton();
+void initialiseEyeCandyButton();
 
-    void initialiseStatsButton();
-
-    void initialiseRepeatButton();
-
-    void initialiseAutoplayButton();
-
-    void initialiseAutoCutInButton();
-
-    void initialiseAutoCutOutButton();
-
-    void initialiseCutButton();
-    void initialiseEyeCandyButton();
-    void initialiseCutBoundaryButtons();
-
-    void initialiseClearButtons();
-
+private:
     ControlPanel& owner;
 };
 

@@ -41,12 +41,7 @@ void RepeatPresenter::initialiseEditors() {
     editor.setSelectAllWhenFocused(true);
   };
 
-  owner.addAndMakeVisible(cutInEditor);
-
   configure(cutInEditor);
-
-  owner.addAndMakeVisible(cutOutEditor);
-
   configure(cutOutEditor);
 }
 
