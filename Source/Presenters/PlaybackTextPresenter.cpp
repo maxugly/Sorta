@@ -15,6 +15,7 @@ PlaybackTextPresenter::PlaybackTextPresenter(ControlPanel &ownerPanel)
     : owner(ownerPanel) {}
 
 PlaybackTextPresenter::~PlaybackTextPresenter() {
+  owner.getPlaybackTimerManager().removeListener(this);
   owner.elapsedTimeEditor.removeListener(this);
   owner.remainingTimeEditor.removeListener(this);
   owner.cutLengthEditor.removeListener(this);
@@ -190,7 +191,7 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
     }
 
     owner.ensureCutOrder();
-    owner.updateCutLabels();
+    owner.refreshLabels();
   }
 
   updateEditors();
@@ -320,7 +321,7 @@ void PlaybackTextPresenter::mouseWheelMove(
     }
 
     owner.ensureCutOrder();
-    owner.updateCutLabels();
+    owner.refreshLabels();
   }
 
   updateEditors();

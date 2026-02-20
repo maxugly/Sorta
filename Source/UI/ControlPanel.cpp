@@ -64,7 +64,6 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   playbackTimerManager->addListener(playbackCursorView.get());
   playbackTimerManager->addListener(zoomView.get());
   playbackTimerManager->addListener(cutLayerView.get());
-  playbackTimerManager->addListener(this);
 
   playbackRepeatController = std::make_unique<PlaybackRepeatController>(getAudioPlayer(), *this);
 
@@ -111,6 +110,9 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
                                                   inStrip->getTimerEditor(), outStrip->getTimerEditor());
   repeatPresenter->initialiseEditors();
 
+  playbackTimerManager->addListener(repeatPresenter.get());
+  playbackTimerManager->addListener(playbackTextPresenter.get());
+
   inStrip->setPresenter(repeatPresenter.get());
   outStrip->setPresenter(repeatPresenter.get());
 
@@ -149,8 +151,6 @@ void ControlPanel::invokeOwnerOpenDialog() { owner.openButtonClicked(); }
 void ControlPanel::finaliseSetup() {
   if (playbackTextPresenter != nullptr)
     playbackTextPresenter->initialiseEditors();
-
-  updateCutLabels();
 
   updateComponentStates();
 }
@@ -257,26 +257,11 @@ void ControlPanel::updatePlayButtonText(bool isPlaying) {
     transportStrip->updatePlayButtonText(isPlaying);
 }
 
-void ControlPanel::playbackTimerTick() {
-  updateCutLabels();
-}
-
-void ControlPanel::activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) {
-  if (newPoint == AppEnums::ActiveZoomPoint::None) {
-    performDelayedJumpIfNeeded();
-  }
-
-  if (zoomView != nullptr)
-    zoomView->repaint();
-
-  repaint();
-}
-
-void ControlPanel::animationUpdate(float breathingPulse) {
-  m_currentPulseAlpha = breathingPulse;
-
-  if (cutLayerView != nullptr)
-    cutLayerView->repaint();
+void ControlPanel::refreshLabels() {
+  if (repeatPresenter != nullptr)
+    repeatPresenter->refreshLabels();
+  if (playbackTextPresenter != nullptr)
+    playbackTextPresenter->updateEditors();
 }
 
 void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences& prefs) {
@@ -309,25 +294,37 @@ void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences& prefs)
 
 void ControlPanel::cutInChanged(double value) {
   juce::ignoreUnused(value);
-  updateCutLabels();
   repaint();
 }
 
 void ControlPanel::cutOutChanged(double value) {
   juce::ignoreUnused(value);
-  updateCutLabels();
   repaint();
 }
 
 void ControlPanel::jumpToCutIn() {
   getAudioPlayer().setPlayheadPosition(getCutInPosition());
-  m_needsJumpToCutIn = false;
+  setNeedsJumpToCutIn(false);
 }
 
-void ControlPanel::performDelayedJumpIfNeeded() {
-  if (m_needsJumpToCutIn)
+juce::Rectangle<int> ControlPanel::getZoomPopupBounds() const {
+  return interactionCoordinator->getZoomPopupBounds();
+}
 
-    jumpToCutIn();
+void ControlPanel::setZoomPopupBounds(juce::Rectangle<int> bounds) {
+  interactionCoordinator->setZoomPopupBounds(bounds);
+}
+
+std::pair<double, double> ControlPanel::getZoomTimeRange() const {
+  return interactionCoordinator->getZoomTimeRange();
+}
+
+void ControlPanel::setZoomTimeRange(double start, double end) {
+  interactionCoordinator->setZoomTimeRange(start, end);
+}
+
+void ControlPanel::setNeedsJumpToCutIn(bool needs) {
+  interactionCoordinator->setNeedsJumpToCutIn(needs);
 }
 
 double ControlPanel::getCutInPosition() const {
@@ -344,19 +341,6 @@ void ControlPanel::setCutInPosition(double pos) {
 
 void ControlPanel::setCutOutPosition(double pos) {
   sessionState.setCutOut(pos);
-}
-
-void ControlPanel::updateCutLabels() {
-  if (inStrip != nullptr)
-    inStrip->updateTimerText(TimeUtils::formatTime(getCutInPosition()));
-  if (outStrip != nullptr)
-    outStrip->updateTimerText(TimeUtils::formatTime(getCutOutPosition()));
-
-  if (repeatPresenter != nullptr)
-    repeatPresenter->updateCutLabels();
-
-  if (playbackTextPresenter != nullptr)
-    playbackTextPresenter->updateEditors();
 }
 
 void ControlPanel::updateComponentStates() {
@@ -392,7 +376,11 @@ void ControlPanel::updateUIFromState() {
 
   updateComponentStates();
 
-  updateCutLabels();
+  if (repeatPresenter != nullptr)
+    repeatPresenter->refreshLabels();
+  if (playbackTextPresenter != nullptr)
+    playbackTextPresenter->updateEditors();
+
   if (zoomView != nullptr)
     zoomView->repaint();
 
@@ -481,6 +469,9 @@ AudioPlayer &ControlPanel::getAudioPlayer() { return *owner.getAudioPlayer(); }
 AudioPlayer &ControlPanel::getAudioPlayer() const {
   return *owner.getAudioPlayer();
 }
+
+RepeatPresenter& ControlPanel::getRepeatPresenter() { return *repeatPresenter; }
+PlaybackTextPresenter& ControlPanel::getPlaybackTextPresenter() { return *playbackTextPresenter; }
 
 const MouseHandler &ControlPanel::getMouseHandler() const {
   return cutPresenter->getMouseHandler();

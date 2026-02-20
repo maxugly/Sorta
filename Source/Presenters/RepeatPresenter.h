@@ -9,12 +9,15 @@
     #include <JuceHeader.h>
 #endif
 
+#include "Presenters/PlaybackTimerManager.h"
+
 class ControlPanel;
 
 class SilenceDetector;
 
 class RepeatPresenter : private juce::TextEditor::Listener,
-                        public juce::MouseListener {
+                        public juce::MouseListener,
+                        public PlaybackTimerManager::Listener {
 public:
 
   RepeatPresenter(ControlPanel &ownerPanel, SilenceDetector &detector,
@@ -34,11 +37,15 @@ public:
 
   void ensureCutOrder();
 
-  void updateCutLabels();
+  void refreshLabels();
 
   void setCutStartFromSample(int sampleIndex);
 
   void setCutEndFromSample(int sampleIndex);
+
+  // PlaybackTimerManager::Listener
+  void playbackTimerTick() override { refreshLabels(); }
+  void animationUpdate(float breathingPulse) override { juce::ignoreUnused(breathingPulse); }
 
 private:
 

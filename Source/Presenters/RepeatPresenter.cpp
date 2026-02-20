@@ -46,6 +46,7 @@ void RepeatPresenter::initialiseEditors() {
 }
 
 RepeatPresenter::~RepeatPresenter() {
+  owner.getPlaybackTimerManager().removeListener(this);
   cutInEditor.removeListener(this);
   cutOutEditor.removeListener(this);
   cutInEditor.removeMouseListener(this);
@@ -131,7 +132,7 @@ void RepeatPresenter::ensureCutOrder() {
   }
 }
 
-void RepeatPresenter::updateCutLabels() {
+void RepeatPresenter::refreshLabels() {
   const double currentIn = owner.getAudioPlayer().getCutIn();
   const double currentOut = owner.getAudioPlayer().getCutOut();
   if (!isEditingIn && !cutInEditor.hasKeyboardFocus(true)) {
@@ -156,7 +157,7 @@ void RepeatPresenter::setCutStartFromSample(int sampleIndex) {
 
   ensureCutOrder();
 
-  updateCutLabels();
+  refreshLabels();
   owner.repaint();
 }
 
@@ -171,7 +172,7 @@ void RepeatPresenter::setCutEndFromSample(int sampleIndex) {
 
   ensureCutOrder();
 
-  updateCutLabels();
+  refreshLabels();
   owner.repaint();
 }
 
@@ -264,7 +265,7 @@ bool RepeatPresenter::applyCutInFromEditor(double newPosition,
                      Config::Colors::playbackText);
     owner.repaint();
 
-    updateCutLabels();
+    refreshLabels();
     return true;
   }
 
@@ -295,7 +296,7 @@ bool RepeatPresenter::applyCutOutFromEditor(double newPosition,
                      Config::Colors::playbackText);
     owner.repaint();
 
-    updateCutLabels();
+    refreshLabels();
     return true;
   }
 
@@ -413,7 +414,7 @@ void RepeatPresenter::mouseWheelMove(const juce::MouseEvent &event,
 
       ensureCutOrder();
 
-      updateCutLabels();
+      refreshLabels();
       owner.repaint();
     }
   } else if (editor == &cutOutEditor) {
@@ -427,7 +428,7 @@ void RepeatPresenter::mouseWheelMove(const juce::MouseEvent &event,
 
       ensureCutOrder();
 
-      updateCutLabels();
+      refreshLabels();
       owner.repaint();
     }
   }

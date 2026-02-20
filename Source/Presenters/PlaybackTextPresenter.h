@@ -9,10 +9,13 @@
     #include <JuceHeader.h>
 #endif
 
+#include "Presenters/PlaybackTimerManager.h"
+
 class ControlPanel;
 
 class PlaybackTextPresenter : public juce::TextEditor::Listener,
-                              public juce::MouseListener {
+                              public juce::MouseListener,
+                              public PlaybackTimerManager::Listener {
 public:
 
   explicit PlaybackTextPresenter(ControlPanel &ownerPanel);
@@ -33,6 +36,10 @@ public:
   const juce::String &getTotalTimeStaticString() const {
     return totalTimeStaticStr;
   }
+
+  // PlaybackTimerManager::Listener
+  void playbackTimerTick() override { updateEditors(); }
+  void animationUpdate(float breathingPulse) override { juce::ignoreUnused(breathingPulse); }
 
 private:
 

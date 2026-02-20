@@ -50,7 +50,18 @@ void PlaybackTimerManager::timerCallback()
 
     const auto currentActivePoint = interactionCoordinator.getActiveZoomPoint();
     if (currentActivePoint != lastActivePoint)
+    {
         listeners.call(&Listener::activeZoomPointChanged, currentActivePoint);
+
+        if (currentActivePoint == AppEnums::ActiveZoomPoint::None)
+        {
+            if (interactionCoordinator.getNeedsJumpToCutIn())
+            {
+                audioPlayer.setPlayheadPosition(sessionState.getCutIn());
+                interactionCoordinator.setNeedsJumpToCutIn(false);
+            }
+        }
+    }
 
     if (m_repeatController != nullptr)
         m_repeatController->tick();

@@ -234,7 +234,7 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
                 owner.getAudioPlayer().setPlayheadPosition(zoomedTime);
             }
 
-            owner.updateCutLabels();
+            owner.refreshLabels();
             owner.repaint();
             return;
         }
@@ -280,7 +280,7 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
             }
 
             owner.ensureCutOrder();
-            owner.updateCutLabels();
+            owner.refreshLabels();
             owner.repaint();
         }
     }
@@ -337,7 +337,7 @@ void MouseHandler::mouseUp(const juce::MouseEvent& event)
                     owner.setAutoCutOutActive(false);
                 }
                 owner.ensureCutOrder();
-                owner.updateCutLabels();
+                owner.refreshLabels();
                 owner.jumpToCutIn();
             }
             currentPlacementMode = AppEnums::PlacementMode::None;
@@ -416,7 +416,7 @@ void MouseHandler::handleRightClickForCutPlacement(int x)
     }
     owner.ensureCutOrder();
     owner.updateCutButtonColors();
-    owner.updateCutLabels();
+    owner.refreshLabels();
     owner.repaint();
 }
 

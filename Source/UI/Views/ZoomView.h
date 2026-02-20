@@ -27,6 +27,7 @@ public:
 
     void playbackTimerTick() override;
     void animationUpdate (float breathingPulse) override;
+    void activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) override;
 
 private:
     ControlPanel& owner;

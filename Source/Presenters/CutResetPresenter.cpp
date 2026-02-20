@@ -18,7 +18,7 @@ void CutResetPresenter::resetIn()
     owner.setCutInPosition(0.0);
     owner.ensureCutOrder();
     owner.updateCutButtonColors();
-    owner.updateCutLabels();
+    owner.refreshLabels();
     owner.setAutoCutInActive(false);
     owner.repaint();
 }
@@ -28,7 +28,7 @@ void CutResetPresenter::resetOut()
     owner.setCutOutPosition(owner.getAudioPlayer().getThumbnail().getTotalLength());
     owner.ensureCutOrder();
     owner.updateCutButtonColors();
-    owner.updateCutLabels();
+    owner.refreshLabels();
     owner.setAutoCutOutActive(false);
     owner.repaint();
 }

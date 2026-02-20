@@ -88,6 +88,12 @@ void ZoomView::animationUpdate(float breathingPulse)
     repaint();
 }
 
+void ZoomView::activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint)
+{
+    juce::ignoreUnused(newPoint);
+    repaint();
+}
+
 void ZoomView::paint(juce::Graphics& g)
 {
     auto& audioPlayer = owner.getAudioPlayer();

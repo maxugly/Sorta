@@ -90,7 +90,7 @@ void MainComponent::openButtonClicked()
             {
                 controlPanel->setTotalTimeStaticString(TimeUtils::formatTime(audioPlayer->getThumbnail().getTotalLength()));
 
-                controlPanel->updateCutLabels();
+                controlPanel->refreshLabels();
                 controlPanel->updateComponentStates();
                 controlPanel->updateStatsFromAudio();
             }

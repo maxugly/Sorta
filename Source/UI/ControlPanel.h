@@ -78,7 +78,6 @@ class TransportStrip;
  * @see SessionState
  */
 class ControlPanel final : public juce::Component,
-                           public PlaybackTimerManager::Listener,
                            public SessionState::Listener {
 public:
   struct LayoutCache {
@@ -102,32 +101,22 @@ public:
     repaint();
   }
 
-  void playbackTimerTick() override;
-  void animationUpdate (float breathingPulse) override;
-  void activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) override;
-
   // SessionState::Listener
   void cutPreferenceChanged(const MainDomain::CutPreferences& prefs) override;
   void cutInChanged(double value) override;
   void cutOutChanged(double value) override;
 
-  juce::Rectangle<int> getZoomPopupBounds() const { return m_zoomPopupBounds; }
+  juce::Rectangle<int> getZoomPopupBounds() const;
 
-  void setZoomPopupBounds(juce::Rectangle<int> bounds) {
-    m_zoomPopupBounds = bounds;
-  }
+  void setZoomPopupBounds(juce::Rectangle<int> bounds);
 
-  std::pair<double, double> getZoomTimeRange() const { return m_zoomTimeRange; }
+  std::pair<double, double> getZoomTimeRange() const;
 
-  void setZoomTimeRange(double start, double end) {
-    m_zoomTimeRange = {start, end};
-  }
+  void setZoomTimeRange(double start, double end);
 
   void jumpToCutIn();
 
-  void setNeedsJumpToCutIn(bool needs) { m_needsJumpToCutIn = needs; }
-
-  void performDelayedJumpIfNeeded();
+  void setNeedsJumpToCutIn(bool needs);
 
   void paint(juce::Graphics &g) override;
 
@@ -137,7 +126,7 @@ public:
 
   void updatePlayButtonText(bool isPlaying);
 
-  void updateCutLabels();
+  void refreshLabels();
 
   void updateComponentStates();
 
@@ -213,7 +202,7 @@ public:
 
   void setShouldShowEyeCandy(bool shouldShow) { m_showEyeCandy = shouldShow; repaint(); }
 
-  float getGlowAlpha() const { return m_currentPulseAlpha; }
+  float getGlowAlpha() const { return playbackTimerManager->getBreathingPulse(); }
 
   const MouseHandler &getMouseHandler() const;
   MouseHandler &getMouseHandler();
@@ -254,6 +243,8 @@ public:
                       const juce::MouseWheelDetails &wheel) override;
 
   PlaybackTimerManager& getPlaybackTimerManager() { return *playbackTimerManager; }
+  RepeatPresenter& getRepeatPresenter();
+  PlaybackTextPresenter& getPlaybackTextPresenter();
 
 private:
   friend class LayoutManager;
@@ -349,10 +340,6 @@ private:
 
   bool m_isCutModeActive = false;
   float m_zoomFactor = 10.0f;
-  float m_currentPulseAlpha = 0.0f;
-  bool m_needsJumpToCutIn = false;
-  juce::Rectangle<int> m_zoomPopupBounds;
-  std::pair<double, double> m_zoomTimeRange;
 
   void initialiseLookAndFeel();
 

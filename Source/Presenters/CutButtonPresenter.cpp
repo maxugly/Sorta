@@ -27,5 +27,5 @@ void CutButtonPresenter::updateColours()
                 ? Config::Colors::Button::cutPlacement
                 : Config::Colors::Button::cutActive);
     
-    owner.updateCutLabels();
+    owner.refreshLabels();
 }

@@ -2,7 +2,13 @@
 #define AUDIOFILER_INTERACTIONCOORDINATOR_H
 
 #include "Core/AppEnums.h"
-#include <juce_core/juce_core.h>
+#if defined(JUCE_HEADLESS)
+    #include <juce_core/juce_core.h>
+    #include <juce_gui_basics/juce_gui_basics.h>
+#else
+    #include <JuceHeader.h>
+#endif
+#include <utility>
 
 /**
  * @class InteractionCoordinator
@@ -29,9 +35,30 @@ public:
     /** @brief Returns the manual zoom point override. */
     AppEnums::ActiveZoomPoint getManualZoomPoint() const { return m_manualZoomPoint; }
 
+    /** @brief Sets whether a jump to cut-in is pending. */
+    void setNeedsJumpToCutIn(bool needs) { m_needsJumpToCutIn = needs; }
+
+    /** @brief Returns true if a jump to cut-in is pending. */
+    bool getNeedsJumpToCutIn() const { return m_needsJumpToCutIn; }
+
+    /** @brief Sets the current zoom popup bounds. */
+    void setZoomPopupBounds(juce::Rectangle<int> bounds) { m_zoomPopupBounds = bounds; }
+
+    /** @brief Returns the current zoom popup bounds. */
+    juce::Rectangle<int> getZoomPopupBounds() const { return m_zoomPopupBounds; }
+
+    /** @brief Sets the current zoom time range. */
+    void setZoomTimeRange(double start, double end) { m_zoomTimeRange = {start, end}; }
+
+    /** @brief Returns the current zoom time range. */
+    std::pair<double, double> getZoomTimeRange() const { return m_zoomTimeRange; }
+
 private:
     AppEnums::ActiveZoomPoint m_activeZoomPoint = AppEnums::ActiveZoomPoint::None;
     AppEnums::ActiveZoomPoint m_manualZoomPoint = AppEnums::ActiveZoomPoint::None;
+    bool m_needsJumpToCutIn = false;
+    juce::Rectangle<int> m_zoomPopupBounds;
+    std::pair<double, double> m_zoomTimeRange;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InteractionCoordinator)
 };
