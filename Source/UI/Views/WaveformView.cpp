@@ -4,9 +4,8 @@
 #include "Core/WaveformManager.h"
 #include "Utils/Config.h"
 
-WaveformView::WaveformView(WaveformManager& waveformManagerIn)
-    : waveformManager(waveformManagerIn)
-{
+WaveformView::WaveformView(WaveformManager &waveformManagerIn)
+    : waveformManager(waveformManagerIn) {
     waveformManager.addChangeListener(this);
 
     setInterceptsMouseClicks(false, false);
@@ -16,33 +15,31 @@ WaveformView::WaveformView(WaveformManager& waveformManagerIn)
     setBufferedToImage(true);
 }
 
-WaveformView::~WaveformView()
-{
+WaveformView::~WaveformView() {
     waveformManager.removeChangeListener(this);
 }
 
-void WaveformView::changeListenerCallback(juce::ChangeBroadcaster* source)
-{
+void WaveformView::changeListenerCallback(juce::ChangeBroadcaster *source) {
     if (source == &waveformManager.getThumbnail())
 
         repaint();
 }
 
-void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode)
-{
-    if (currentChannelMode == channelMode) return;
+void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode) {
+    if (currentChannelMode == channelMode)
+        return;
     currentChannelMode = channelMode;
 
     repaint();
 }
 
-void WaveformView::paint(juce::Graphics& g)
-{
+void WaveformView::paint(juce::Graphics &g) {
     g.fillAll(juce::Colours::black);
 
-    auto& thumbnail = waveformManager.getThumbnail();
+    auto &thumbnail = waveformManager.getThumbnail();
     const auto audioLength = thumbnail.getTotalLength();
-    if (audioLength <= 0.0) return;
+    if (audioLength <= 0.0)
+        return;
 
     g.setColour(Config::Colors::waveform);
     const int numChannels = thumbnail.getNumChannels();

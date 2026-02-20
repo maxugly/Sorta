@@ -4,61 +4,67 @@
 #define AUDIOFILER_MOUSEHANDLER_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
-#include "Utils/Config.h"
 #include "Core/AppEnums.h"
+#include "Utils/Config.h"
 
 class ControlPanel;
 
-class MouseHandler : public juce::MouseListener
-{
-public:
-
-    explicit MouseHandler(ControlPanel& controlPanel);
+class MouseHandler : public juce::MouseListener {
+  public:
+    explicit MouseHandler(ControlPanel &controlPanel);
     ~MouseHandler() override = default;
 
-    void mouseMove(const juce::MouseEvent& event) override;
+    void mouseMove(const juce::MouseEvent &event) override;
 
-    void mouseDown(const juce::MouseEvent& event) override;
+    void mouseDown(const juce::MouseEvent &event) override;
 
-    void mouseDrag(const juce::MouseEvent& event) override;
+    void mouseDrag(const juce::MouseEvent &event) override;
 
-    void mouseUp(const juce::MouseEvent& event) override;
+    void mouseUp(const juce::MouseEvent &event) override;
 
-    void mouseExit(const juce::MouseEvent& event) override;
+    void mouseExit(const juce::MouseEvent &event) override;
 
-    void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
+    void mouseWheelMove(const juce::MouseEvent &event,
+                        const juce::MouseWheelDetails &wheel) override;
 
-    int getMouseCursorX() const { return mouseCursorX; }
+    int getMouseCursorX() const {
+        return mouseCursorX;
+    }
 
-    int getMouseCursorY() const { return mouseCursorY; }
+    int getMouseCursorY() const {
+        return mouseCursorY;
+    }
 
-    double getMouseCursorTime() const { return mouseCursorTime; }
+    double getMouseCursorTime() const {
+        return mouseCursorTime;
+    }
 
-    enum class CutMarkerHandle {
-        None,
-        In,
-        Out,
-        Full
-    };
+    enum class CutMarkerHandle { None, In, Out, Full };
 
-    CutMarkerHandle getHoveredHandle() const { return hoveredHandle; }
+    CutMarkerHandle getHoveredHandle() const {
+        return hoveredHandle;
+    }
 
-    CutMarkerHandle getDraggedHandle() const { return draggedHandle; }
+    CutMarkerHandle getDraggedHandle() const {
+        return draggedHandle;
+    }
 
     /** @brief Returns true if the given handle is currently hovered, dragged, or armed. */
     bool isHandleActive(CutMarkerHandle handle) const;
 
-    bool isScrubbing() const { return isScrubbingState; }
+    bool isScrubbing() const {
+        return isScrubbingState;
+    }
 
-private:
-    double getMouseTime(int x, const juce::Rectangle<int>& bounds, double duration) const;
+  private:
+    double getMouseTime(int x, const juce::Rectangle<int> &bounds, double duration) const;
 
-    ControlPanel& owner;
+    ControlPanel &owner;
     int mouseCursorX = -1, mouseCursorY = -1;
     double mouseCursorTime = 0.0;
     bool isDragging = false;
@@ -78,9 +84,9 @@ private:
 
     void seekToMousePosition(int x);
 
-    void clearTextEditorFocusIfNeeded(const juce::MouseEvent& event);
+    void clearTextEditorFocusIfNeeded(const juce::MouseEvent &event);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MouseHandler)
 };
 
-#endif 
+#endif

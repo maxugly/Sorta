@@ -1,37 +1,17 @@
 #ifndef AUDIOFILER_APPENUMS_H
 #define AUDIOFILER_APPENUMS_H
 
-namespace AppEnums
-{
+namespace AppEnums {
 
-    enum class ViewMode {
-        Classic,
-        Overlay
-    };
+enum class ViewMode { Classic, Overlay };
 
-    enum class PlacementMode {
-        None,
-        CutIn,
-        CutOut
-    };
+enum class PlacementMode { None, CutIn, CutOut };
 
-    enum class ChannelViewMode {
-        Mono,
-        Stereo
-    };
+enum class ChannelViewMode { Mono, Stereo };
 
-    enum class ActiveZoomPoint {
-        None,
-        In,
-        Out
-    };
+enum class ActiveZoomPoint { None, In, Out };
 
-    enum class GroupPosition {
-        Alone,
-        Left,
-        Middle,
-        Right
-    };
-}
+enum class GroupPosition { Alone, Left, Middle, Right };
+} // namespace AppEnums
 
-#endif 
+#endif

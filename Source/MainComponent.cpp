@@ -1,14 +1,12 @@
 
 
 #include "MainComponent.h"
-#include "Utils/TimeUtils.h"
 #include "UI/ControlPanel.h"
-#include "Utils/Config.h"
 #include "UI/KeybindHandler.h"
+#include "Utils/Config.h"
+#include "Utils/TimeUtils.h"
 
-MainComponent::MainComponent()
-{
-
+MainComponent::MainComponent() {
     audioPlayer = std::make_unique<AudioPlayer>(sessionState);
     audioPlayer->addChangeListener(this);
 
@@ -23,80 +21,65 @@ MainComponent::MainComponent()
 
     setWantsKeyboardFocus(true);
     openGLContext.attachTo(*this);
-
 }
 
-MainComponent::~MainComponent()
-{
+MainComponent::~MainComponent() {
     openGLContext.detach();
     audioPlayer->removeChangeListener(this);
 
     shutdownAudio();
-
 }
 
-void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
-{
+void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate) {
     audioPlayer->prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
-void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
-{
+void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) {
     audioPlayer->getNextAudioBlock(bufferToFill);
 }
 
-void MainComponent::releaseResources()
-{
+void MainComponent::releaseResources() {
     audioPlayer->releaseResources();
 }
 
-void MainComponent::paint(juce::Graphics& g)
-{
-
+void MainComponent::paint(juce::Graphics &g) {
     g.fillAll(Config::Colors::Window::background);
 }
 
-void MainComponent::resized()
-{
-
+void MainComponent::resized() {
     if (controlPanel != nullptr)
         controlPanel->setBounds(getLocalBounds());
 }
 
-void MainComponent::changeListenerCallback(juce::ChangeBroadcaster* source)
-{
-    if (source == audioPlayer.get())
-    {
+void MainComponent::changeListenerCallback(juce::ChangeBroadcaster *source) {
+    if (source == audioPlayer.get()) {
         controlPanel->updatePlayButtonText(audioPlayer->isPlaying());
 
-        repaint(); 
+        repaint();
     }
 }
 
-void MainComponent::openButtonClicked()
-{
-    chooser = std::make_unique<juce::FileChooser>("Select Audio...",
-        juce::File::getSpecialLocation(juce::File::userHomeDirectory),
+void MainComponent::openButtonClicked() {
+    chooser = std::make_unique<juce::FileChooser>(
+        "Select Audio...", juce::File::getSpecialLocation(juce::File::userHomeDirectory),
         audioPlayer->getFormatManager().getWildcardForAllFormats());
 
     auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
 
-    chooser->launchAsync(flags, [this](const juce::FileChooser& fc) {
+    chooser->launchAsync(flags, [this](const juce::FileChooser &fc) {
         auto file = fc.getResult();
-        if (file.exists())
-        {
+        if (file.exists()) {
             auto result = audioPlayer->loadFile(file);
-            if (result.wasOk())
-            {
-                controlPanel->setTotalTimeStaticString(TimeUtils::formatTime(audioPlayer->getThumbnail().getTotalLength()));
+            if (result.wasOk()) {
+                controlPanel->setTotalTimeStaticString(
+                    TimeUtils::formatTime(audioPlayer->getThumbnail().getTotalLength()));
 
                 controlPanel->refreshLabels();
                 controlPanel->updateComponentStates();
                 controlPanel->updateStatsFromAudio();
-            }
-            else
-            {
-                controlPanel->setStatsDisplayText(result.getErrorMessage(), Config::Colors::statsErrorText);
+            } else {
+                controlPanel->setStatsDisplayText(result.getErrorMessage(),
+                                                  Config::Colors::statsErrorText);
             }
         }
 
@@ -104,20 +87,18 @@ void MainComponent::openButtonClicked()
     });
 }
 
-void MainComponent::seekToPosition(int x)
-{
-    if (audioPlayer->getThumbnail().getTotalLength() > 0.0)
-    {
+void MainComponent::seekToPosition(int x) {
+    if (audioPlayer->getThumbnail().getTotalLength() > 0.0) {
         auto relativeX = (double)(x - controlPanel->getWaveformBounds().getX());
         auto proportion = relativeX / (double)controlPanel->getWaveformBounds().getWidth();
-        auto newPosition = juce::jlimit(0.0, 1.0, proportion) * audioPlayer->getThumbnail().getTotalLength();
+        auto newPosition =
+            juce::jlimit(0.0, 1.0, proportion) * audioPlayer->getThumbnail().getTotalLength();
 
         audioPlayer->setPlayheadPosition(newPosition);
     }
 }
 
-bool MainComponent::keyPressed(const juce::KeyPress& key)
-{
+bool MainComponent::keyPressed(const juce::KeyPress &key) {
     if (keybindHandler != nullptr)
         return keybindHandler->handleKeyPress(key);
     return false;

@@ -1,13 +1,12 @@
-#include <juce_core/juce_core.h>
 #include "Utils/PlaybackHelpers.h"
+#include <juce_core/juce_core.h>
 
-class PlaybackHelpersTest : public juce::UnitTest
-{
-public:
-    PlaybackHelpersTest() : juce::UnitTest("PlaybackHelpers Testing") {}
+class PlaybackHelpersTest : public juce::UnitTest {
+  public:
+    PlaybackHelpersTest() : juce::UnitTest("PlaybackHelpers Testing") {
+    }
 
-    void runTest() override
-    {
+    void runTest() override {
         beginTest("constrainPosition handles normal range");
         {
             double in = 10.0;

@@ -2,19 +2,15 @@
 
 #include "Presenters/CutResetPresenter.h"
 
+#include "Core/AudioPlayer.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
-#include "Utils/Config.h"
 #include "Workers/SilenceDetector.h"
-#include "Core/AudioPlayer.h"
 
-CutResetPresenter::CutResetPresenter(ControlPanel& ownerPanel)
-    : owner(ownerPanel)
-{
+CutResetPresenter::CutResetPresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {
 }
 
-void CutResetPresenter::resetIn()
-{
+void CutResetPresenter::resetIn() {
     owner.setCutInPosition(0.0);
     owner.ensureCutOrder();
     owner.updateCutButtonColors();
@@ -23,8 +19,7 @@ void CutResetPresenter::resetIn()
     owner.repaint();
 }
 
-void CutResetPresenter::resetOut()
-{
+void CutResetPresenter::resetOut() {
     owner.setCutOutPosition(owner.getAudioPlayer().getThumbnail().getTotalLength());
     owner.ensureCutOrder();
     owner.updateCutButtonColors();

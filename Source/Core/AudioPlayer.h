@@ -2,26 +2,26 @@
 #define AUDIOFILER_AUDIOPLAYER_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_core/juce_core.h>
-    #include <juce_audio_basics/juce_audio_basics.h>
-    #include <juce_audio_formats/juce_audio_formats.h>
-    #include <juce_audio_devices/juce_audio_devices.h>
-    #include <juce_events/juce_events.h>
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_devices/juce_audio_devices.h>
+#include <juce_audio_formats/juce_audio_formats.h>
+#include <juce_core/juce_core.h>
+#include <juce_events/juce_events.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
-#include "Utils/Config.h"
 #include "Core/SessionState.h"
 #include "MainDomain.h"
+#include "Utils/Config.h"
 #if !defined(JUCE_HEADLESS)
 #include "Core/WaveformManager.h"
 #endif
 #include <mutex>
 
 /**
+ * @file AudioPlayer.h
  * @ingroup AudioEngine
- * @class AudioPlayer
  * @brief High-level audio playback and file handling class.
  * @details This class wraps `juce::AudioTransportSource` and handles loading audio files,
  *          managing playback position, and enforcing cut regions defined in `SessionState`.
@@ -31,15 +31,14 @@
  *
  * @see SessionState
  * @see MainComponent
+ * @see WaveformManager
  */
 class AudioPlayer : public juce::AudioSource,
                     public juce::ChangeListener,
                     public juce::ChangeBroadcaster,
-                    public SessionState::Listener
-{
-public:
-
-    explicit AudioPlayer(SessionState& state);
+                    public SessionState::Listener {
+  public:
+    explicit AudioPlayer(SessionState &state);
 
     ~AudioPlayer() override;
 
@@ -47,7 +46,7 @@ public:
     void setPlayheadPosition(double seconds);
 
     /** @brief Loads an audio file and synchronizes SessionState with its metadata. */
-    juce::Result loadFile(const juce::File& file);
+    juce::Result loadFile(const juce::File &file);
 
     /** @brief Toggles between playback and paused states. */
     void togglePlayStop();
@@ -58,23 +57,23 @@ public:
     /** @brief Returns the current transport position in seconds. */
     double getCurrentPosition() const;
 
-    /** @brief Returns true if the player is set to loop between cut points. */
+    /** @brief Returns true if the player is set to repeat between cut points. */
     bool isRepeating() const;
 
-    /** @brief Sets whether the player should loop between cut points. */
+    /** @brief Sets whether the player should repeat between cut points. */
     void setRepeating(bool shouldRepeat);
 
-    #if !defined(JUCE_HEADLESS)
+#if !defined(JUCE_HEADLESS)
 
     /** @brief Returns the audio thumbnail for waveform rendering. */
-    juce::AudioThumbnail& getThumbnail();
+    juce::AudioThumbnail &getThumbnail();
 
     /** @brief Provides access to the WaveformManager for thumbnail updates. */
-    WaveformManager& getWaveformManager();
+    WaveformManager &getWaveformManager();
 
     /** @brief Provides read-only access to the WaveformManager. */
-    const WaveformManager& getWaveformManager() const;
-    #endif
+    const WaveformManager &getWaveformManager() const;
+#endif
 
     /** @brief Starts audio playback. */
     void startPlayback();
@@ -86,10 +85,10 @@ public:
     void stopPlaybackAndReset();
 
     /** @brief Provides access to the global audio format manager. */
-    juce::AudioFormatManager& getFormatManager();
+    juce::AudioFormatManager &getFormatManager();
 
     /** @brief Returns the underlying audio format reader for the loaded file. */
-    juce::AudioFormatReader* getAudioFormatReader() const;
+    juce::AudioFormatReader *getAudioFormatReader() const;
 
     /** @brief Returns the juce::File handle for the currently loaded audio. */
     juce::File getLoadedFile() const;
@@ -105,50 +104,60 @@ public:
      *          3. If cut mode is inactive, simply delegate to `transportSource`.
      *          4. If active, check the current playback position against `cutIn` and `cutOut`.
      *          5. If the position exceeds `cutOut`:
-     *             - If looping is enabled, seek back to `cutIn`.
+     *             - If repeating is enabled, seek back to `cutIn`.
      *             - If not, stop playback.
      *          6. If the current block crosses the `cutOut` boundary, fade out or truncate
      *             the buffer to ensure no audio is played past the cut point.
      *
      * @param bufferToFill The buffer to populate with audio data.
      */
-    void getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill) override;
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) override;
 
     void releaseResources() override;
 
-    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+    void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
-    void cutPreferenceChanged(const MainDomain::CutPreferences& prefs) override;
+    void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
 
-    double getCutIn() const { return sessionState.getCutIn(); }
+    double getCutIn() const {
+        return sessionState.getCutIn();
+    }
 
-    double getCutOut() const { return sessionState.getCutOut(); }
+    double getCutOut() const {
+        return sessionState.getCutOut();
+    }
 
-    void setCutIn(double positionSeconds) { sessionState.setCutIn(positionSeconds); }
+    void setCutIn(double positionSeconds) {
+        sessionState.setCutIn(positionSeconds);
+    }
 
-    void setCutOut(double positionSeconds) { sessionState.setCutOut(positionSeconds); }
+    void setCutOut(double positionSeconds) {
+        sessionState.setCutOut(positionSeconds);
+    }
 
-    std::mutex& getReaderMutex() { return readerMutex; }
+    std::mutex &getReaderMutex() {
+        return readerMutex;
+    }
 
-    bool getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamplesOut) const;
+    bool getReaderInfo(double &sampleRateOut, juce::int64 &lengthInSamplesOut) const;
 
 #if JUCE_UNIT_TESTS
 
-    void setSourceForTesting(juce::PositionableAudioSource* source, double sampleRate);
+    void setSourceForTesting(juce::PositionableAudioSource *source, double sampleRate);
 #endif
 
-private:
+  private:
     juce::AudioFormatManager formatManager;
     std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     juce::TimeSliceThread readAheadThread;
     juce::AudioTransportSource transportSource;
 
-    #if !defined(JUCE_HEADLESS)
+#if !defined(JUCE_HEADLESS)
     WaveformManager waveformManager;
-    #endif
+#endif
 
     juce::File loadedFile;
-    SessionState& sessionState;
+    SessionState &sessionState;
     float lastAutoCutThresholdIn{-1.0f};
     float lastAutoCutThresholdOut{-1.0f};
     bool lastAutoCutInActive{false};
@@ -160,4 +169,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPlayer)
 };
 
-#endif 
+#endif

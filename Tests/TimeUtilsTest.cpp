@@ -1,13 +1,12 @@
-#include <juce_core/juce_core.h>
 #include "Utils/TimeUtils.h"
+#include <juce_core/juce_core.h>
 
-class TimeUtilsTest : public juce::UnitTest
-{
-public:
-    TimeUtilsTest() : juce::UnitTest("TimeUtils Testing") {}
+class TimeUtilsTest : public juce::UnitTest {
+  public:
+    TimeUtilsTest() : juce::UnitTest("TimeUtils Testing") {
+    }
 
-    void runTest() override
-    {
+    void runTest() override {
         beginTest("formatTime handles basic times");
         expectEquals(TimeUtils::formatTime(0.0), juce::String("00:00:00:000"));
         expectEquals(TimeUtils::formatTime(1.0), juce::String("00:00:01:000"));
@@ -82,9 +81,8 @@ public:
 
         beginTest("Round trip consistency");
         // Check a range of times
-        double testTimes[] = { 0.0, 0.5, 1.0, 60.0, 3600.0, 3661.5, 9999.999 };
-        for (double t : testTimes)
-        {
+        double testTimes[] = {0.0, 0.5, 1.0, 60.0, 3600.0, 3661.5, 9999.999};
+        for (double t : testTimes) {
             expectWithinAbsoluteError(TimeUtils::parseTime(TimeUtils::formatTime(t)), t, 0.001);
         }
     }

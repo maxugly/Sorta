@@ -2,9 +2,9 @@
 #define AUDIOFILER_TRANSPORTSTRIP_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 #include "Core/AudioPlayer.h"
@@ -18,10 +18,9 @@
  * @details Owns Play, Stop, Auto-Play, Repeat, and Cut buttons.
  *          Handles its own layout and callbacks.
  */
-class TransportStrip : public juce::Component
-{
-public:
-    TransportStrip(AudioPlayer& player, SessionState& state);
+class TransportStrip : public juce::Component {
+  public:
+    TransportStrip(AudioPlayer &player, SessionState &state);
     ~TransportStrip() override = default;
 
     void resized() override;
@@ -31,15 +30,25 @@ public:
     void updateAutoplayState(bool isAutoplayActive);
     void updateRepeatState(bool isRepeating);
 
-    juce::TextButton& getPlayStopButton() { return playStopButton; }
-    juce::TextButton& getStopButton()     { return stopButton; }
-    juce::TextButton& getAutoplayButton() { return autoplayButton; }
-    juce::TextButton& getRepeatButton()   { return repeatButton; }
-    juce::TextButton& getCutButton()      { return cutButton; }
+    juce::TextButton &getPlayStopButton() {
+        return playStopButton;
+    }
+    juce::TextButton &getStopButton() {
+        return stopButton;
+    }
+    juce::TextButton &getAutoplayButton() {
+        return autoplayButton;
+    }
+    juce::TextButton &getRepeatButton() {
+        return repeatButton;
+    }
+    juce::TextButton &getCutButton() {
+        return cutButton;
+    }
 
-private:
-    AudioPlayer& audioPlayer;
-    SessionState& sessionState;
+  private:
+    AudioPlayer &audioPlayer;
+    SessionState &sessionState;
 
     juce::TextButton playStopButton;
     juce::TextButton stopButton;

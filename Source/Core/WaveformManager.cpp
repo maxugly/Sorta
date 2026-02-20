@@ -2,32 +2,26 @@
 
 #include "Core/WaveformManager.h"
 
-WaveformManager::WaveformManager(juce::AudioFormatManager& formatManagerIn)
-    : formatManager(formatManagerIn)
-{
+WaveformManager::WaveformManager(juce::AudioFormatManager &formatManagerIn)
+    : formatManager(formatManagerIn) {
 }
 
-void WaveformManager::loadFile(const juce::File& file)
-{
+void WaveformManager::loadFile(const juce::File &file) {
     thumbnail.setSource(new juce::FileInputSource(file));
 }
 
-juce::AudioThumbnail& WaveformManager::getThumbnail()
-{
+juce::AudioThumbnail &WaveformManager::getThumbnail() {
     return thumbnail;
 }
 
-const juce::AudioThumbnail& WaveformManager::getThumbnail() const
-{
+const juce::AudioThumbnail &WaveformManager::getThumbnail() const {
     return thumbnail;
 }
 
-void WaveformManager::addChangeListener(juce::ChangeListener* listener)
-{
+void WaveformManager::addChangeListener(juce::ChangeListener *listener) {
     thumbnail.addChangeListener(listener);
 }
 
-void WaveformManager::removeChangeListener(juce::ChangeListener* listener)
-{
+void WaveformManager::removeChangeListener(juce::ChangeListener *listener) {
     thumbnail.removeChangeListener(listener);
 }

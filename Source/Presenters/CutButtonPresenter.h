@@ -4,23 +4,21 @@
 #define AUDIOFILER_CUTBUTTONPRESENTER_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_core/juce_core.h>
+#include <juce_core/juce_core.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 class ControlPanel;
 
-class CutButtonPresenter
-{
-public:
-
-    explicit CutButtonPresenter(ControlPanel& ownerPanel);
+class CutButtonPresenter {
+  public:
+    explicit CutButtonPresenter(ControlPanel &ownerPanel);
 
     void updateColours();
 
-private:
-    ControlPanel& owner;
+  private:
+    ControlPanel &owner;
 };
 
-#endif 
+#endif

@@ -2,40 +2,32 @@
 
 #include "Presenters/SilenceThresholdPresenter.h"
 
-#include "Workers/SilenceDetector.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
-#include "Utils/Config.h"
+#include "Workers/SilenceDetector.h"
 
-SilenceThresholdPresenter::SilenceThresholdPresenter(SilenceDetector& detectorIn,
-                                                     ControlPanel& ownerPanel)
-    : detector(detectorIn),
-      owner(ownerPanel)
-{
-    const auto& autoCut = owner.getSessionState().getCutPrefs().autoCut;
+SilenceThresholdPresenter::SilenceThresholdPresenter(SilenceDetector &detectorIn,
+                                                     ControlPanel &ownerPanel)
+    : detector(detectorIn), owner(ownerPanel) {
+    const auto &autoCut = owner.getSessionState().getCutPrefs().autoCut;
     detector.currentInSilenceThreshold = autoCut.thresholdIn;
     detector.currentOutSilenceThreshold = autoCut.thresholdOut;
 
-    configureEditor(detector.inSilenceThresholdEditor,
-                    detector.currentInSilenceThreshold,
+    configureEditor(detector.inSilenceThresholdEditor, detector.currentInSilenceThreshold,
                     Config::Labels::silenceThresholdInTooltip);
-    configureEditor(detector.outSilenceThresholdEditor,
-                    detector.currentOutSilenceThreshold,
+    configureEditor(detector.outSilenceThresholdEditor, detector.currentOutSilenceThreshold,
                     Config::Labels::silenceThresholdOutTooltip);
 }
 
-SilenceThresholdPresenter::~SilenceThresholdPresenter()
-{
+SilenceThresholdPresenter::~SilenceThresholdPresenter() {
     detector.inSilenceThresholdEditor.removeListener(this);
     detector.inSilenceThresholdEditor.removeMouseListener(this);
     detector.outSilenceThresholdEditor.removeListener(this);
     detector.outSilenceThresholdEditor.removeMouseListener(this);
 }
 
-void SilenceThresholdPresenter::configureEditor(juce::TextEditor& editor,
-                                                float initialValue,
-                                                const juce::String& tooltip)
-{
+void SilenceThresholdPresenter::configureEditor(juce::TextEditor &editor, float initialValue,
+                                                const juce::String &tooltip) {
     editor.setText(juce::String(static_cast<int>(initialValue * 100.0f)));
     editor.setReadOnly(false);
     editor.setJustification(juce::Justification::centred);
@@ -52,8 +44,7 @@ void SilenceThresholdPresenter::configureEditor(juce::TextEditor& editor,
     editor.setSelectAllWhenFocused(true);
 }
 
-void SilenceThresholdPresenter::textEditorTextChanged(juce::TextEditor& editor)
-{
+void SilenceThresholdPresenter::textEditorTextChanged(juce::TextEditor &editor) {
     const int newPercentage = editor.getText().getIntValue();
     if (isValidPercentage(newPercentage))
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
@@ -66,24 +57,20 @@ void SilenceThresholdPresenter::textEditorTextChanged(juce::TextEditor& editor)
     updateThresholdFromEditorIfValid(editor);
 }
 
-void SilenceThresholdPresenter::textEditorReturnKeyPressed(juce::TextEditor& editor)
-{
-
+void SilenceThresholdPresenter::textEditorReturnKeyPressed(juce::TextEditor &editor) {
     applyThresholdFromEditor(editor);
 }
 
-void SilenceThresholdPresenter::textEditorFocusLost(juce::TextEditor& editor)
-{
-
+void SilenceThresholdPresenter::textEditorFocusLost(juce::TextEditor &editor) {
     applyThresholdFromEditor(editor);
 }
 
-void SilenceThresholdPresenter::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
-{
+void SilenceThresholdPresenter::mouseWheelMove(const juce::MouseEvent &event,
+                                               const juce::MouseWheelDetails &wheel) {
     if (wheel.deltaY == 0.0f)
         return;
 
-    auto* editor = dynamic_cast<juce::TextEditor*>(event.eventComponent);
+    auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
     if (editor == nullptr)
         return;
 
@@ -94,55 +81,45 @@ void SilenceThresholdPresenter::mouseWheelMove(const juce::MouseEvent& event, co
     const int direction = (wheel.deltaY > 0) ? 1 : -1;
     const int newPercentage = juce::jlimit(1, 99, currentPercentage + direction);
 
-    if (newPercentage != currentPercentage)
-    {
+    if (newPercentage != currentPercentage) {
         editor->setText(juce::String(newPercentage), juce::sendNotification);
 
         applyThresholdFromEditor(*editor);
     }
 }
 
-void SilenceThresholdPresenter::applyThresholdFromEditor(juce::TextEditor& editor)
-{
+void SilenceThresholdPresenter::applyThresholdFromEditor(juce::TextEditor &editor) {
     const int intValue = editor.getText().getIntValue();
 
-    if (isValidPercentage(intValue))
-    {
-
+    if (isValidPercentage(intValue)) {
         updateThresholdFromEditorIfValid(editor);
 
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
         editor.setColour(juce::TextEditor::backgroundColourId,
                          owner.getLookAndFeel().findColour(juce::TextEditor::backgroundColourId));
         editor.setText(juce::String(intValue), juce::dontSendNotification);
-    }
-    else
-    {
-
+    } else {
         restoreEditorToCurrentValue(editor);
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorWarning);
-        owner.getStatsDisplay().insertTextAtCaret("Warning: Threshold value must be between 1 and 99. Restored to last valid value.\n");
+        owner.getStatsDisplay().insertTextAtCaret(
+            "Warning: Threshold value must be between 1 and 99. Restored to last valid value.\n");
     }
 }
 
-void SilenceThresholdPresenter::updateThresholdFromEditorIfValid(juce::TextEditor& editor)
-{
+void SilenceThresholdPresenter::updateThresholdFromEditorIfValid(juce::TextEditor &editor) {
     const int intValue = editor.getText().getIntValue();
     if (!isValidPercentage(intValue))
         return;
 
     const float normalized = static_cast<float>(intValue) / 100.0f;
-    if (isInEditor(editor))
-    {
+    if (isInEditor(editor)) {
         if (detector.currentInSilenceThreshold == normalized)
             return;
         detector.currentInSilenceThreshold = normalized;
         owner.getSessionState().setThresholdIn(normalized);
         if (detector.getIsAutoCutInActive())
             detector.detectInSilence();
-    }
-    else
-    {
+    } else {
         if (detector.currentOutSilenceThreshold == normalized)
             return;
         detector.currentOutSilenceThreshold = normalized;
@@ -152,15 +129,13 @@ void SilenceThresholdPresenter::updateThresholdFromEditorIfValid(juce::TextEdito
     }
 }
 
-void SilenceThresholdPresenter::restoreEditorToCurrentValue(juce::TextEditor& editor)
-{
-    const float currentValue = isInEditor(editor)
-        ? detector.currentInSilenceThreshold
-        : detector.currentOutSilenceThreshold;
-    editor.setText(juce::String(static_cast<int>(currentValue * 100.0f)), juce::dontSendNotification);
+void SilenceThresholdPresenter::restoreEditorToCurrentValue(juce::TextEditor &editor) {
+    const float currentValue = isInEditor(editor) ? detector.currentInSilenceThreshold
+                                                  : detector.currentOutSilenceThreshold;
+    editor.setText(juce::String(static_cast<int>(currentValue * 100.0f)),
+                   juce::dontSendNotification);
 }
 
-bool SilenceThresholdPresenter::isInEditor(const juce::TextEditor& editor) const noexcept
-{
+bool SilenceThresholdPresenter::isInEditor(const juce::TextEditor &editor) const noexcept {
     return &editor == &detector.inSilenceThresholdEditor;
 }

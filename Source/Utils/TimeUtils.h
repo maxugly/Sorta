@@ -8,10 +8,8 @@
  * @class TimeUtils
  * @brief Static utility class for time formatting and parsing.
  */
-class TimeUtils
-{
-public:
-
+class TimeUtils {
+  public:
     /**
      * @brief Formats a time value in seconds into a string (HH:MM:SS.ms).
      * @param seconds The time in seconds.
@@ -24,7 +22,7 @@ public:
      * @param timeString The string to parse.
      * @return The time in seconds, or 0.0 if parsing fails.
      */
-    static double parseTime(const juce::String& timeString);
+    static double parseTime(const juce::String &timeString);
 };
 
 #endif

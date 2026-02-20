@@ -4,35 +4,34 @@
 #define AUDIOFILER_FOCUSMANAGER_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_core/juce_core.h>
+#include <juce_core/juce_core.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 class ControlPanel;
 
 enum class FocusTarget {
-  None,
-  CutIn,     
-  CutOut,    
-  Playback,   
-  MouseManual 
+    None,
+    CutIn,
+    CutOut,
+    Playback,
+    MouseManual
 
 };
 
 class FocusManager {
-public:
+  public:
+    explicit FocusManager(ControlPanel &owner);
 
-  explicit FocusManager(ControlPanel &owner);
+    FocusTarget getCurrentTarget() const;
 
-  FocusTarget getCurrentTarget() const;
+    double getFocusedTime() const;
 
-  double getFocusedTime() const;
+    static double getStepMultiplier(bool shift, bool ctrl);
 
-  static double getStepMultiplier(bool shift, bool ctrl);
-
-private:
-  ControlPanel &owner;
+  private:
+    ControlPanel &owner;
 };
 
-#endif 
+#endif

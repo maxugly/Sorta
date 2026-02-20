@@ -3,26 +3,19 @@
 #include "UI/Views/CutLayerView.h"
 
 #include "Core/SessionState.h"
-#include "Workers/SilenceDetector.h"
-#include "UI/MouseHandler.h"
 #include "Core/WaveformManager.h"
-#include "Utils/CoordinateMapper.h"
 #include "UI/ControlPanel.h"
+#include "UI/MouseHandler.h"
+#include "Utils/CoordinateMapper.h"
+#include "Workers/SilenceDetector.h"
 
-CutLayerView::CutLayerView(ControlPanel& ownerIn,
-                           SessionState& sessionStateIn,
-                           SilenceDetector& silenceDetectorIn,
-                           WaveformManager& waveformManagerIn,
-                           InteractionCoordinator& coordinatorIn,
+CutLayerView::CutLayerView(ControlPanel &ownerIn, SessionState &sessionStateIn,
+                           SilenceDetector &silenceDetectorIn, WaveformManager &waveformManagerIn,
+                           InteractionCoordinator &coordinatorIn,
                            std::function<float()> glowAlphaProviderIn)
-    : owner(ownerIn),
-      sessionState(sessionStateIn),
-      silenceDetector(silenceDetectorIn),
-      waveformManager(waveformManagerIn),
-      interactionCoordinator(coordinatorIn),
-      glowAlphaProvider(std::move(glowAlphaProviderIn))
-{
-
+    : owner(ownerIn), sessionState(sessionStateIn), silenceDetector(silenceDetectorIn),
+      waveformManager(waveformManagerIn), interactionCoordinator(coordinatorIn),
+      glowAlphaProvider(std::move(glowAlphaProviderIn)) {
     setInterceptsMouseClicks(false, false);
 
     setOpaque(false);
@@ -31,35 +24,31 @@ CutLayerView::CutLayerView(ControlPanel& ownerIn,
     waveformManager.addChangeListener(this);
 }
 
-CutLayerView::~CutLayerView()
-{
+CutLayerView::~CutLayerView() {
     owner.getPlaybackTimerManager().removeListener(this);
     waveformManager.removeChangeListener(this);
 }
 
-void CutLayerView::changeListenerCallback(juce::ChangeBroadcaster* source)
-{
+void CutLayerView::changeListenerCallback(juce::ChangeBroadcaster *source) {
     if (source == &waveformManager.getThumbnail())
 
         repaint();
 }
 
-void CutLayerView::animationUpdate(float breathingPulse)
-{
+void CutLayerView::animationUpdate(float breathingPulse) {
     juce::ignoreUnused(breathingPulse);
     repaint();
 }
 
-void CutLayerView::setChannelMode(AppEnums::ChannelViewMode mode)
-{
-    if (currentChannelMode == mode) return;
+void CutLayerView::setChannelMode(AppEnums::ChannelViewMode mode) {
+    if (currentChannelMode == mode)
+        return;
     currentChannelMode = mode;
 
     repaint();
 }
 
-void CutLayerView::paint(juce::Graphics& g)
-{
+void CutLayerView::paint(juce::Graphics &g) {
     if (!markersVisible)
         return;
 
@@ -68,8 +57,7 @@ void CutLayerView::paint(juce::Graphics& g)
     if (audioLength <= 0.0f)
         return;
 
-    auto drawThresholdVisualisation = [&](double cutPos, float threshold)
-    {
+    auto drawThresholdVisualisation = [&](double cutPos, float threshold) {
         const float normalisedThreshold = threshold;
         const float centerY = (float)bounds.getCentreY();
         const float halfHeight = (float)bounds.getHeight() / 2.0f;
@@ -77,10 +65,14 @@ void CutLayerView::paint(juce::Graphics& g)
         float topThresholdY = centerY - (normalisedThreshold * halfHeight);
         float bottomThresholdY = centerY + (normalisedThreshold * halfHeight);
 
-        topThresholdY = juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), topThresholdY);
-        bottomThresholdY = juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), bottomThresholdY);
+        topThresholdY =
+            juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), topThresholdY);
+        bottomThresholdY =
+            juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), bottomThresholdY);
 
-        const float xPos = (float)bounds.getX() + CoordinateMapper::secondsToPixels(cutPos, (float)bounds.getWidth(), (double)audioLength);
+        const float xPos = (float)bounds.getX() +
+                           CoordinateMapper::secondsToPixels(cutPos, (float)bounds.getWidth(),
+                                                             (double)audioLength);
         const float halfThresholdLineWidth = Config::Animation::thresholdLineWidth / 2.0f;
         float lineStartX = xPos - halfThresholdLineWidth;
         float lineEndX = xPos + halfThresholdLineWidth;
@@ -92,12 +84,12 @@ void CutLayerView::paint(juce::Graphics& g)
         g.setColour(Config::Colors::thresholdRegion);
         g.fillRect(lineStartX, topThresholdY, currentLineWidth, bottomThresholdY - topThresholdY);
 
-        if (interactionCoordinator.shouldShowEyeCandy())
-        {
+        if (interactionCoordinator.shouldShowEyeCandy()) {
             const float pulse = glowAlphaProvider();
-            const juce::Colour glowColor = Config::Colors::thresholdLine.withAlpha(0.2f + 0.6f * pulse);
+            const juce::Colour glowColor =
+                Config::Colors::thresholdLine.withAlpha(0.2f + 0.6f * pulse);
             g.setColour(glowColor);
-            
+
             // Draw a wider rectangle behind the line for a glow effect
             g.fillRect(lineStartX, topThresholdY - 2.5f, currentLineWidth, 5.0f);
             g.fillRect(lineStartX, bottomThresholdY - 2.5f, currentLineWidth, 5.0f);
@@ -116,41 +108,57 @@ void CutLayerView::paint(juce::Graphics& g)
     const double actualIn = juce::jmin(cutIn, cutOut);
     const double actualOut = juce::jmax(cutIn, cutOut);
 
-    const float inX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), (float)bounds.getX() + CoordinateMapper::secondsToPixels(actualIn, (float)bounds.getWidth(), (double)audioLength));
-    const float outX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), (float)bounds.getX() + CoordinateMapper::secondsToPixels(actualOut, (float)bounds.getWidth(), (double)audioLength));
+    const float inX = juce::jlimit(
+        (float)bounds.getX(), (float)bounds.getRight(),
+        (float)bounds.getX() + CoordinateMapper::secondsToPixels(actualIn, (float)bounds.getWidth(),
+                                                                 (double)audioLength));
+    const float outX = juce::jlimit(
+        (float)bounds.getX(), (float)bounds.getRight(),
+        (float)bounds.getX() + CoordinateMapper::secondsToPixels(
+                                   actualOut, (float)bounds.getWidth(), (double)audioLength));
 
     const float fadeLength = bounds.getWidth() * Config::Layout::Waveform::cutRegionFadeProportion;
     const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;
 
-    const juce::Rectangle<float> leftRegion((float)bounds.getX(), (float)bounds.getY(), juce::jmax(0.0f, inX - (float)bounds.getX()), (float)bounds.getHeight());
-    if (leftRegion.getWidth() > 0.0f)
-    {
+    const juce::Rectangle<float> leftRegion((float)bounds.getX(), (float)bounds.getY(),
+                                            juce::jmax(0.0f, inX - (float)bounds.getX()),
+                                            (float)bounds.getHeight());
+    if (leftRegion.getWidth() > 0.0f) {
         const float actualFade = juce::jmin(fadeLength, leftRegion.getWidth());
 
-        juce::Rectangle<float> solidBlackLeft = leftRegion.withWidth(juce::jmax(0.0f, leftRegion.getWidth() - actualFade));
+        juce::Rectangle<float> solidBlackLeft =
+            leftRegion.withWidth(juce::jmax(0.0f, leftRegion.getWidth() - actualFade));
         g.setColour(juce::Colours::black);
         g.fillRect(solidBlackLeft);
 
-        juce::Rectangle<float> fadeAreaLeft(inX - actualFade, (float)bounds.getY(), actualFade, (float)bounds.getHeight());
-        juce::ColourGradient leftFadeGradient(Config::Colors::cutRegion, inX, leftRegion.getCentreY(),
-                                              juce::Colours::black, inX - actualFade, leftRegion.getCentreY(), false);
+        juce::Rectangle<float> fadeAreaLeft(inX - actualFade, (float)bounds.getY(), actualFade,
+                                            (float)bounds.getHeight());
+        juce::ColourGradient leftFadeGradient(Config::Colors::cutRegion, inX,
+                                              leftRegion.getCentreY(), juce::Colours::black,
+                                              inX - actualFade, leftRegion.getCentreY(), false);
         g.setGradientFill(leftFadeGradient);
         g.fillRect(fadeAreaLeft);
     }
 
-    const juce::Rectangle<float> rightRegion(outX, (float)bounds.getY(), juce::jmax(0.0f, (float)bounds.getRight() - outX), (float)bounds.getHeight());
-    if (rightRegion.getWidth() > 0.0f)
-    {
+    const juce::Rectangle<float> rightRegion(outX, (float)bounds.getY(),
+                                             juce::jmax(0.0f, (float)bounds.getRight() - outX),
+                                             (float)bounds.getHeight());
+    if (rightRegion.getWidth() > 0.0f) {
         const float actualFade = juce::jmin(fadeLength, rightRegion.getWidth());
 
         float solidBlackStart = outX + actualFade;
-        juce::Rectangle<float> solidBlackRight(solidBlackStart, (float)bounds.getY(), juce::jmax(0.0f, (float)bounds.getRight() - solidBlackStart), (float)bounds.getHeight());
+        juce::Rectangle<float> solidBlackRight(
+            solidBlackStart, (float)bounds.getY(),
+            juce::jmax(0.0f, (float)bounds.getRight() - solidBlackStart),
+            (float)bounds.getHeight());
         g.setColour(juce::Colours::black);
         g.fillRect(solidBlackRight);
 
-        juce::Rectangle<float> fadeAreaRight(outX, (float)bounds.getY(), actualFade, (float)bounds.getHeight());
-        juce::ColourGradient rightFadeGradient(Config::Colors::cutRegion, outX, rightRegion.getCentreY(),
-                                               juce::Colours::black, outX + actualFade, rightRegion.getCentreY(), false);
+        juce::Rectangle<float> fadeAreaRight(outX, (float)bounds.getY(), actualFade,
+                                             (float)bounds.getHeight());
+        juce::ColourGradient rightFadeGradient(Config::Colors::cutRegion, outX,
+                                               rightRegion.getCentreY(), juce::Colours::black,
+                                               outX + actualFade, rightRegion.getCentreY(), false);
         g.setGradientFill(rightFadeGradient);
         g.fillRect(fadeAreaRight);
     }
@@ -158,49 +166,49 @@ void CutLayerView::paint(juce::Graphics& g)
     auto drawCutMarker = [&](float x, MouseHandler::CutMarkerHandle handleType) {
         juce::Colour markerColor = Config::Colors::cutLine;
 
-        if (handleType == MouseHandler::CutMarkerHandle::In && silenceDetector.getIsAutoCutInActive())
+        if (handleType == MouseHandler::CutMarkerHandle::In &&
+            silenceDetector.getIsAutoCutInActive())
             markerColor = Config::Colors::cutMarkerAuto;
-        else if (handleType == MouseHandler::CutMarkerHandle::Out && silenceDetector.getIsAutoCutOutActive())
+        else if (handleType == MouseHandler::CutMarkerHandle::Out &&
+                 silenceDetector.getIsAutoCutOutActive())
             markerColor = Config::Colors::cutMarkerAuto;
 
         float thickness = Config::Layout::Glow::cutBoxOutlineThickness;
         bool shouldPulse = false;
 
-        if (mouseHandler != nullptr)
-        {
-            shouldPulse = mouseHandler->isHandleActive(handleType) || 
+        if (mouseHandler != nullptr) {
+            shouldPulse = mouseHandler->isHandleActive(handleType) ||
                           mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full ||
                           mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full;
 
-            if (mouseHandler->getDraggedHandle() == handleType || 
-                (handleType != MouseHandler::CutMarkerHandle::Full && mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full))
-            {
+            if (mouseHandler->getDraggedHandle() == handleType ||
+                (handleType != MouseHandler::CutMarkerHandle::Full &&
+                 mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full)) {
                 markerColor = Config::Colors::cutMarkerDrag;
                 thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-            }
-            else if (mouseHandler->getHoveredHandle() == handleType ||
-                     (handleType != MouseHandler::CutMarkerHandle::Full && mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full))
-            {
+            } else if (mouseHandler->getHoveredHandle() == handleType ||
+                       (handleType != MouseHandler::CutMarkerHandle::Full &&
+                        mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full)) {
                 markerColor = Config::Colors::cutMarkerHover;
                 thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
             }
         }
 
         // Draw Glow if active
-        if (shouldPulse && interactionCoordinator.shouldShowEyeCandy())
-        {
+        if (shouldPulse && interactionCoordinator.shouldShowEyeCandy()) {
             const float pulse = glowAlphaProvider();
-            const juce::Colour glowColor = Config::Colors::cutLine.withAlpha(Config::Colors::cutLine.getFloatAlpha() * (0.2f + 0.8f * pulse));
+            const juce::Colour glowColor = Config::Colors::cutLine.withAlpha(
+                Config::Colors::cutLine.getFloatAlpha() * (0.2f + 0.8f * pulse));
             g.setColour(glowColor);
-            g.fillRect(x - (Config::Layout::Glow::cutLineGlowThickness * Config::Layout::Glow::offsetFactor - 0.5f), 
-                       (float)bounds.getY() + boxHeight, 
-                       Config::Layout::Glow::cutLineGlowThickness, 
+            g.fillRect(x - (Config::Layout::Glow::cutLineGlowThickness *
+                                Config::Layout::Glow::offsetFactor -
+                            0.5f),
+                       (float)bounds.getY() + boxHeight, Config::Layout::Glow::cutLineGlowThickness,
                        (float)bounds.getHeight() - (2.0f * boxHeight));
-        }
-        else
-        {
+        } else {
             g.setColour(Config::Colors::cutLine.withAlpha(0.3f));
-            g.fillRect(x - 0.5f, (float)bounds.getY() + boxHeight, 1.0f, (float)bounds.getHeight() - (2.0f * boxHeight));
+            g.fillRect(x - 0.5f, (float)bounds.getY() + boxHeight, 1.0f,
+                       (float)bounds.getHeight() - (2.0f * boxHeight));
         }
 
         const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
@@ -208,12 +216,13 @@ void CutLayerView::paint(juce::Graphics& g)
 
         g.setColour(markerColor);
         g.drawRect(x - halfBoxWidth, (float)bounds.getY(), boxWidth, boxHeight, thickness);
-        g.drawRect(x - halfBoxWidth, (float)bounds.getBottom() - boxHeight, boxWidth, boxHeight, thickness);
+        g.drawRect(x - halfBoxWidth, (float)bounds.getBottom() - boxHeight, boxWidth, boxHeight,
+                   thickness);
 
         g.setColour(markerColor);
-        g.fillRect(x - Config::Layout::Glow::cutMarkerWidthThin / Config::Layout::Glow::cutMarkerCenterDivisor,
-                   (float)bounds.getY() + boxHeight,
-                   Config::Layout::Glow::cutMarkerWidthThin,
+        g.fillRect(x - Config::Layout::Glow::cutMarkerWidthThin /
+                           Config::Layout::Glow::cutMarkerCenterDivisor,
+                   (float)bounds.getY() + boxHeight, Config::Layout::Glow::cutMarkerWidthThin,
                    (float)bounds.getHeight() - (2.0f * boxHeight));
     };
 
@@ -224,18 +233,14 @@ void CutLayerView::paint(juce::Graphics& g)
     float hollowThickness = Config::Layout::Glow::cutBoxOutlineThickness;
     bool regionActive = false;
 
-    if (mouseHandler != nullptr)
-    {
+    if (mouseHandler != nullptr) {
         regionActive = mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full ||
                        mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full;
 
-        if (mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full)
-        {
+        if (mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full) {
             hollowColor = Config::Colors::cutMarkerDrag;
             hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-        }
-        else if (mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full)
-        {
+        } else if (mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full) {
             hollowColor = Config::Colors::cutMarkerHover;
             hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
         }
@@ -250,11 +255,13 @@ void CutLayerView::paint(juce::Graphics& g)
     const float startX = inX + halfBoxWidth;
     const float endX = outX - halfBoxWidth;
 
-    if (startX < endX)
-    {
+    if (startX < endX) {
         g.drawLine(startX, (float)bounds.getY(), endX, (float)bounds.getY(), hollowThickness);
-        g.drawLine(startX, (float)bounds.getY() + boxHeight, endX, (float)bounds.getY() + boxHeight, hollowThickness);
-        g.drawLine(startX, (float)bounds.getBottom() - 1.0f, endX, (float)bounds.getBottom() - 1.0f, hollowThickness);
-        g.drawLine(startX, (float)bounds.getBottom() - boxHeight, endX, (float)bounds.getBottom() - boxHeight, hollowThickness);
+        g.drawLine(startX, (float)bounds.getY() + boxHeight, endX, (float)bounds.getY() + boxHeight,
+                   hollowThickness);
+        g.drawLine(startX, (float)bounds.getBottom() - 1.0f, endX, (float)bounds.getBottom() - 1.0f,
+                   hollowThickness);
+        g.drawLine(startX, (float)bounds.getBottom() - boxHeight, endX,
+                   (float)bounds.getBottom() - boxHeight, hollowThickness);
     }
 }

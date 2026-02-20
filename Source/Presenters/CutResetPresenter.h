@@ -5,18 +5,16 @@
 
 class ControlPanel;
 
-class CutResetPresenter
-{
-public:
-
-    explicit CutResetPresenter(ControlPanel& ownerPanel);
+class CutResetPresenter {
+  public:
+    explicit CutResetPresenter(ControlPanel &ownerPanel);
 
     void resetIn();
 
     void resetOut();
 
-private:
-    ControlPanel& owner;
+  private:
+    ControlPanel &owner;
 };
 
-#endif 
+#endif

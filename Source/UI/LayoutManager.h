@@ -7,25 +7,22 @@
 
 class ControlPanel;
 
-class LayoutManager final
-{
-public:
-
-    explicit LayoutManager(ControlPanel& controlPanelIn);
+class LayoutManager final {
+  public:
+    explicit LayoutManager(ControlPanel &controlPanelIn);
 
     void performLayout();
 
-private:
+  private:
+    void layoutTopRowButtons(juce::Rectangle<int> &bounds, int rowHeight);
 
-    void layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHeight);
+    void layoutCutControls(juce::Rectangle<int> &bounds, int rowHeight);
 
-    void layoutCutControls(juce::Rectangle<int>& bounds, int rowHeight);
+    void layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, int rowHeight);
 
-    void layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, int rowHeight);
+    void layoutWaveformAndStats(juce::Rectangle<int> &bounds);
 
-    void layoutWaveformAndStats(juce::Rectangle<int>& bounds);
-
-    ControlPanel& controlPanel;
+    ControlPanel &controlPanel;
 };
 
-#endif 
+#endif

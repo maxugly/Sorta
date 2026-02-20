@@ -5,10 +5,8 @@
 
 #include <juce_core/juce_core.h>
 
-class PlaybackHelpers
-{
-public:
-
+class PlaybackHelpers {
+  public:
     static double constrainPosition(double position, double cutIn, double cutOut);
 };
 

@@ -2,19 +2,16 @@
 
 #include "UI/LayoutManager.h"
 
+#include "Presenters/PlaybackTextPresenter.h"
+#include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
 #include "Workers/SilenceDetector.h"
-#include "Presenters/StatsPresenter.h"
-#include "Presenters/PlaybackTextPresenter.h"
 
-LayoutManager::LayoutManager(ControlPanel& controlPanelIn)
-    : controlPanel(controlPanelIn)
-{
+LayoutManager::LayoutManager(ControlPanel &controlPanelIn) : controlPanel(controlPanelIn) {
 }
 
-void LayoutManager::performLayout()
-{
+void LayoutManager::performLayout() {
     auto bounds = controlPanel.getLocalBounds();
     const int margin = Config::Layout::windowBorderMargins;
     const int rowHeight = (int)Config::UI::WidgetHeight + margin * 2;
@@ -28,8 +25,7 @@ void LayoutManager::performLayout()
     layoutWaveformAndStats(bounds);
 }
 
-void LayoutManager::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHeight)
-{
+void LayoutManager::layoutTopRowButtons(juce::Rectangle<int> &bounds, int rowHeight) {
     juce::ignoreUnused(rowHeight);
     const int margin = Config::Layout::windowBorderMargins;
     const int buttonWidth = Config::Layout::buttonWidth;
@@ -44,7 +40,7 @@ void LayoutManager::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHei
     topRow.removeFromLeft(margin);
 
     // Transport Group (Modular TransportStrip)
-    if (auto* ts = controlPanel.getTransportStrip()) {
+    if (auto *ts = controlPanel.getTransportStrip()) {
         const int stripWidth = (buttonWidth * 5) + (spacing * 4);
         ts->setBounds(topRow.removeFromLeft(stripWidth));
     }
@@ -65,8 +61,7 @@ void LayoutManager::layoutTopRowButtons(juce::Rectangle<int>& bounds, int rowHei
     controlPanel.eyeCandyButton.setBounds(topRow.removeFromRight((int)Config::UI::WidgetUnit));
 }
 
-void LayoutManager::layoutCutControls(juce::Rectangle<int>& bounds, int rowHeight)
-{
+void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int rowHeight) {
     juce::ignoreUnused(rowHeight);
     const int margin = Config::Layout::windowBorderMargins;
     const float unit = Config::UI::WidgetUnit;
@@ -76,10 +71,11 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int>& bounds, int rowHeigh
     auto cutRow = bounds.removeFromTop(height + margin * 2).reduced(margin);
     cutRow.setHeight(height);
 
-    const int stripWidth = (int)((Config::UI::CutButtonWidthUnits * 2 + 
-                                  Config::UI::TimerWidthUnits + 
-                                  Config::UI::ResetButtonWidthUnits + 
-                                  Config::UI::ThresholdWidthUnits) * unit) + (spacing * 4);
+    const int stripWidth =
+        (int)((Config::UI::CutButtonWidthUnits * 2 + Config::UI::TimerWidthUnits +
+               Config::UI::ResetButtonWidthUnits + Config::UI::ThresholdWidthUnits) *
+              unit) +
+        (spacing * 4);
 
     if (controlPanel.inStrip != nullptr)
         controlPanel.inStrip->setBounds(cutRow.removeFromLeft(stripWidth));
@@ -88,8 +84,7 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int>& bounds, int rowHeigh
         controlPanel.outStrip->setBounds(cutRow.removeFromRight(stripWidth));
 }
 
-void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, int rowHeight)
-{
+void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, int rowHeight) {
     const int margin = Config::Layout::windowBorderMargins;
     const int buttonWidth = Config::Layout::buttonWidth;
     const int playbackWidth = Config::Layout::Text::playbackWidth;
@@ -100,15 +95,15 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int>& bounds, 
 
     const auto fullBounds = controlPanel.getLocalBounds();
     controlPanel.layoutCache.playbackLeftTextX = fullBounds.getX() + margin;
-    controlPanel.layoutCache.playbackCenterTextX = (fullBounds.getWidth() / 2) - (playbackWidth / 2);
+    controlPanel.layoutCache.playbackCenterTextX =
+        (fullBounds.getWidth() / 2) - (playbackWidth / 2);
     controlPanel.layoutCache.playbackRightTextX = fullBounds.getRight() - margin - playbackWidth;
 
     if (controlPanel.playbackTextPresenter != nullptr)
         controlPanel.playbackTextPresenter->layoutEditors();
 }
 
-void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int>& bounds)
-{
+void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {
     const int margin = Config::Layout::windowBorderMargins;
     if (controlPanel.currentMode == AppEnums::ViewMode::Overlay) {
         controlPanel.layoutCache.waveformBounds = controlPanel.getLocalBounds();

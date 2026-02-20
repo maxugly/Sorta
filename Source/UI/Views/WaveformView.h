@@ -4,9 +4,9 @@
 #define AUDIOFILER_WAVEFORMVIEW_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 #include "Core/AppEnums.h"
@@ -14,28 +14,25 @@
 
 class WaveformManager;
 
-class WaveformView : public juce::Component, public juce::ChangeListener
-{
-public:
-
-    explicit WaveformView(WaveformManager& waveformManager);
+class WaveformView : public juce::Component, public juce::ChangeListener {
+  public:
+    explicit WaveformView(WaveformManager &waveformManager);
 
     ~WaveformView() override;
 
     void setChannelMode(AppEnums::ChannelViewMode channelMode);
 
-    void paint(juce::Graphics& g) override;
+    void paint(juce::Graphics &g) override;
 
-    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+    void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
-private:
+  private:
+    void drawWaveform(juce::Graphics &g, const juce::Rectangle<int> &bounds) const;
 
-    void drawWaveform(juce::Graphics& g, const juce::Rectangle<int>& bounds) const;
-
-    WaveformManager& waveformManager;
+    WaveformManager &waveformManager;
     AppEnums::ChannelViewMode currentChannelMode = AppEnums::ChannelViewMode::Mono;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveformView)
 };
 
-#endif 
+#endif

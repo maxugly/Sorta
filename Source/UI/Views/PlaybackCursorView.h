@@ -4,33 +4,30 @@
 #define AUDIOFILER_PLAYBACKCURSORVIEW_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 #include "Presenters/PlaybackTimerManager.h"
 
 class ControlPanel;
 
-class PlaybackCursorView : public juce::Component,
-                           public PlaybackTimerManager::Listener
-{
-public:
-
-    explicit PlaybackCursorView(ControlPanel& owner);
+class PlaybackCursorView : public juce::Component, public PlaybackTimerManager::Listener {
+  public:
+    explicit PlaybackCursorView(ControlPanel &owner);
     ~PlaybackCursorView() override;
 
-    void paint(juce::Graphics& g) override;
+    void paint(juce::Graphics &g) override;
 
     void playbackTimerTick() override;
-    void animationUpdate (float breathingPulse) override;
+    void animationUpdate(float breathingPulse) override;
 
-private:
-    ControlPanel& owner;
+  private:
+    ControlPanel &owner;
     int lastCursorX = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaybackCursorView)
 };
 
-#endif 
+#endif

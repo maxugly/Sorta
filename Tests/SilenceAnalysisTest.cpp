@@ -1,14 +1,12 @@
-#include <juce_core/juce_core.h>
-#include <juce_audio_formats/juce_audio_formats.h>
 #include "Workers/SilenceAnalysisAlgorithms.h"
+#include <juce_audio_formats/juce_audio_formats.h>
+#include <juce_core/juce_core.h>
 
 // Mock Reader that simulates a large file (e.g. 3 billion samples)
-class LargeFileMockReader : public juce::AudioFormatReader
-{
-public:
+class LargeFileMockReader : public juce::AudioFormatReader {
+  public:
     LargeFileMockReader(juce::int64 length, int channels, double rate)
-        : juce::AudioFormatReader(nullptr, "MockReader")
-    {
+        : juce::AudioFormatReader(nullptr, "MockReader") {
         lengthInSamples = length;
         numChannels = channels;
         sampleRate = rate;
@@ -16,25 +14,23 @@ public:
         usesFloatingPointData = true;
     }
 
-    bool readSamples(int* const* destSamples, int numDestChannels, int startOffsetInDestBuffer,
-                     juce::int64 startSampleInFile, int numSamples) override
-    {
+    bool readSamples(int *const *destSamples, int numDestChannels, int startOffsetInDestBuffer,
+                     juce::int64 startSampleInFile, int numSamples) override {
         // Simulate silence everywhere except at specific points
-        for (int ch = 0; ch < numDestChannels; ++ch)
-        {
-            if (destSamples[ch] != nullptr)
-            {
+        for (int ch = 0; ch < numDestChannels; ++ch) {
+            if (destSamples[ch] != nullptr) {
                 // Fill with silence
-                juce::FloatVectorOperations::clear((float*)destSamples[ch] + startOffsetInDestBuffer, numSamples);
+                juce::FloatVectorOperations::clear(
+                    (float *)destSamples[ch] + startOffsetInDestBuffer, numSamples);
 
                 // Inject signal at specific location (e.g. 2.5 billion)
                 juce::int64 signalPos = 2500000000;
 
-                // For a chunk, check if signalPos falls within [startSampleInFile, startSampleInFile + numSamples)
-                if (signalPos >= startSampleInFile && signalPos < startSampleInFile + numSamples)
-                {
+                // For a chunk, check if signalPos falls within [startSampleInFile,
+                // startSampleInFile + numSamples)
+                if (signalPos >= startSampleInFile && signalPos < startSampleInFile + numSamples) {
                     int offset = (int)(signalPos - startSampleInFile);
-                    float* buffer = (float*)destSamples[ch] + startOffsetInDestBuffer;
+                    float *buffer = (float *)destSamples[ch] + startOffsetInDestBuffer;
                     buffer[offset] = 1.0f; // Full volume signal
                 }
             }
@@ -43,13 +39,12 @@ public:
     }
 };
 
-class SilenceAnalysisTest : public juce::UnitTest
-{
-public:
-    SilenceAnalysisTest() : juce::UnitTest("Silence Analysis Large File Test") {}
+class SilenceAnalysisTest : public juce::UnitTest {
+  public:
+    SilenceAnalysisTest() : juce::UnitTest("Silence Analysis Large File Test") {
+    }
 
-    void runTest() override
-    {
+    void runTest() override {
         beginTest("Find Silence In - Large File");
 
         // 3 billion samples > INT_MAX

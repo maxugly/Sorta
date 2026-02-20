@@ -2,15 +2,13 @@
 
 #include "Presenters/StatsPresenter.h"
 
-#include "UI/ControlPanel.h"
 #include "Core/AudioPlayer.h"
+#include "UI/ControlPanel.h"
 #include <cmath>
 
-StatsPresenter::StatsPresenter(ControlPanel& ownerIn)
-    : owner(ownerIn)
-{
+StatsPresenter::StatsPresenter(ControlPanel &ownerIn) : owner(ownerIn) {
     owner.addAndMakeVisible(statsOverlay);
-    auto& statsDisplay = statsOverlay.statsDisplay;
+    auto &statsDisplay = statsOverlay.statsDisplay;
     statsDisplay.setReadOnly(true);
     statsDisplay.setMultiLine(true);
     statsDisplay.setWantsKeyboardFocus(false);
@@ -19,42 +17,33 @@ StatsPresenter::StatsPresenter(ControlPanel& ownerIn)
     statsDisplay.setColour(juce::TextEditor::textColourId, Config::Colors::statsText);
     statsOverlay.setVisible(false);
 
-    statsOverlay.onHeightChanged = [this](int newHeight) {
-        currentHeight = newHeight;
-    };
+    statsOverlay.onHeightChanged = [this](int newHeight) { currentHeight = newHeight; };
 }
 
-void StatsPresenter::updateStats()
-{
+void StatsPresenter::updateStats() {
     setDisplayText(buildStatsString(), Config::Colors::statsText);
 }
 
-void StatsPresenter::toggleVisibility()
-{
-
+void StatsPresenter::toggleVisibility() {
     setShouldShowStats(!showStats);
 }
 
-void StatsPresenter::setShouldShowStats(bool shouldShowStats)
-{
+void StatsPresenter::setShouldShowStats(bool shouldShowStats) {
     showStats = shouldShowStats;
 
     updateVisibility();
-    owner.resized(); 
+    owner.resized();
 }
 
-juce::String StatsPresenter::getStatsText() const
-{
+juce::String StatsPresenter::getStatsText() const {
     return statsOverlay.statsDisplay.getText();
 }
 
-void StatsPresenter::layoutWithin(const juce::Rectangle<int>& contentAreaBounds)
-{
+void StatsPresenter::layoutWithin(const juce::Rectangle<int> &contentAreaBounds) {
     auto statsBounds = contentAreaBounds.withHeight(currentHeight)
-                                        .reduced(Config::Layout::Stats::sideMargin, 0)
-                                        .translated(0, Config::Layout::Stats::topMargin);
-    if (showStats)
-    {
+                           .reduced(Config::Layout::Stats::sideMargin, 0)
+                           .translated(0, Config::Layout::Stats::topMargin);
+    if (showStats) {
         statsOverlay.setBounds(statsBounds);
         statsOverlay.toFront(true);
     }
@@ -62,32 +51,28 @@ void StatsPresenter::layoutWithin(const juce::Rectangle<int>& contentAreaBounds)
     updateVisibility();
 }
 
-void StatsPresenter::setDisplayText(const juce::String& text, juce::Colour color)
-{
+void StatsPresenter::setDisplayText(const juce::String &text, juce::Colour color) {
     statsOverlay.statsDisplay.setText(text, juce::dontSendNotification);
     statsOverlay.statsDisplay.setColour(juce::TextEditor::textColourId, color);
 }
 
-juce::TextEditor& StatsPresenter::getDisplay()
-{
+juce::TextEditor &StatsPresenter::getDisplay() {
     return statsOverlay.statsDisplay;
 }
 
-void StatsPresenter::setDisplayEnabled(bool shouldEnable)
-{
+void StatsPresenter::setDisplayEnabled(bool shouldEnable) {
     statsOverlay.statsDisplay.setEnabled(shouldEnable);
 }
 
-juce::String StatsPresenter::buildStatsString() const
-{
+juce::String StatsPresenter::buildStatsString() const {
     juce::String stats;
-    AudioPlayer& audioPlayer = owner.getAudioPlayer();
-    auto& thumbnail = audioPlayer.getThumbnail();
+    AudioPlayer &audioPlayer = owner.getAudioPlayer();
+    auto &thumbnail = audioPlayer.getThumbnail();
     double sampleRate = 0.0;
     juce::int64 lengthInSamples = 0;
 
-    if (thumbnail.getTotalLength() > 0.0 && audioPlayer.getReaderInfo(sampleRate, lengthInSamples))
-    {
+    if (thumbnail.getTotalLength() > 0.0 &&
+        audioPlayer.getReaderInfo(sampleRate, lengthInSamples)) {
         stats << "File: " << audioPlayer.getLoadedFile().getFileName() << "\n";
         stats << "Samples Loaded: " << lengthInSamples << "\n";
         stats << "Sample Rate: " << sampleRate << " Hz\n";
@@ -100,23 +85,20 @@ juce::String StatsPresenter::buildStatsString() const
         stats << "Approx Peak (Ch 0): " << juce::jmax(std::abs(minVal), std::abs(maxVal)) << "\n";
         stats << "Min: " << minVal << ", Max: " << maxVal << "\n";
 
-        if (thumbnail.getNumChannels() > 1)
-        {
+        if (thumbnail.getNumChannels() > 1) {
             thumbnail.getApproximateMinMax(0.0, thumbnail.getTotalLength(), 1, minVal, maxVal);
-            stats << "Approx Peak (Ch 1): " << juce::jmax(std::abs(minVal), std::abs(maxVal)) << "\n";
+            stats << "Approx Peak (Ch 1): " << juce::jmax(std::abs(minVal), std::abs(maxVal))
+                  << "\n";
             stats << "Min: " << minVal << ", Max: " << maxVal << "\n";
         }
-    }
-    else
-    {
+    } else {
         stats << "No file loaded or error reading audio.";
     }
 
     return stats;
 }
 
-void StatsPresenter::updateVisibility()
-{
+void StatsPresenter::updateVisibility() {
     statsOverlay.setVisible(showStats);
     if (showStats)
         statsOverlay.toFront(true);

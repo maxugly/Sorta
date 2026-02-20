@@ -2,18 +2,17 @@
 
 #include "Presenters/SilenceDetectionPresenter.h"
 
-#include "UI/ControlPanel.h"
-#include "Workers/SilenceDetector.h"
 #include "Core/AudioPlayer.h"
 #include "Core/SessionState.h"
 #include "Core/SilenceAnalysisWorker.h"
+#include "UI/ControlPanel.h"
+#include "Workers/SilenceDetector.h"
 
-SilenceDetectionPresenter::SilenceDetectionPresenter(ControlPanel& ownerPanel, SessionState& sessionStateIn, AudioPlayer& audioPlayerIn)
-    : owner(ownerPanel),
-      sessionState(sessionStateIn),
-      audioPlayer(audioPlayerIn),
-      silenceWorker(*this, sessionStateIn)
-{
+SilenceDetectionPresenter::SilenceDetectionPresenter(ControlPanel &ownerPanel,
+                                                     SessionState &sessionStateIn,
+                                                     AudioPlayer &audioPlayerIn)
+    : owner(ownerPanel), sessionState(sessionStateIn), audioPlayer(audioPlayerIn),
+      silenceWorker(*this, sessionStateIn) {
     sessionState.addListener(this);
     owner.getPlaybackTimerManager().addListener(this);
 
@@ -24,63 +23,58 @@ SilenceDetectionPresenter::SilenceDetectionPresenter(ControlPanel& ownerPanel, S
     lastAutoCutOutActive = prefs.autoCut.outActive;
 }
 
-SilenceDetectionPresenter::~SilenceDetectionPresenter()
-{
+SilenceDetectionPresenter::~SilenceDetectionPresenter() {
     owner.getPlaybackTimerManager().removeListener(this);
     sessionState.removeListener(this);
 }
 
-void SilenceDetectionPresenter::playbackTimerTick()
-{
+void SilenceDetectionPresenter::playbackTimerTick() {
 }
 
-void SilenceDetectionPresenter::animationUpdate(float breathingPulse)
-{
-    const auto& autoCut = sessionState.getCutPrefs().autoCut;
-    
-    auto updateButton = [&](juce::TextButton& btn, bool isActive, bool isBusy) {
-        if (isActive || isBusy)
-        {
+void SilenceDetectionPresenter::animationUpdate(float breathingPulse) {
+    const auto &autoCut = sessionState.getCutPrefs().autoCut;
+
+    auto updateButton = [&](juce::TextButton &btn, bool isActive, bool isBusy) {
+        if (isActive || isBusy) {
             btn.getProperties().set("isProcessing", true);
             btn.getProperties().set("pulseAlpha", breathingPulse);
             btn.repaint();
-        }
-        else
-        {
-            if (btn.getProperties().contains("isProcessing") && (bool)btn.getProperties()["isProcessing"])
-            {
+        } else {
+            if (btn.getProperties().contains("isProcessing") &&
+                (bool)btn.getProperties()["isProcessing"]) {
                 btn.getProperties().set("isProcessing", false);
                 btn.repaint();
             }
         }
     };
 
-    updateButton(owner.getAutoCutInButton(), autoCut.inActive, silenceWorker.isBusy() && silenceWorker.isDetectingIn());
-    updateButton(owner.getAutoCutOutButton(), autoCut.outActive, silenceWorker.isBusy() && !silenceWorker.isDetectingIn());
+    updateButton(owner.getAutoCutInButton(), autoCut.inActive,
+                 silenceWorker.isBusy() && silenceWorker.isDetectingIn());
+    updateButton(owner.getAutoCutOutButton(), autoCut.outActive,
+                 silenceWorker.isBusy() && !silenceWorker.isDetectingIn());
 }
 
-void SilenceDetectionPresenter::fileChanged(const juce::String& filePath)
-{
+void SilenceDetectionPresenter::fileChanged(const juce::String &filePath) {
     if (filePath.isEmpty())
         return;
 
     const FileMetadata activeMetadata = sessionState.getMetadataForFile(filePath);
-    if (!activeMetadata.isAnalyzed)
-    {
+    if (!activeMetadata.isAnalyzed) {
         auto prefs = sessionState.getCutPrefs();
         if (prefs.autoCut.inActive)
             startSilenceAnalysis(prefs.autoCut.thresholdIn, true);
-        
+
         if (prefs.autoCut.outActive)
             startSilenceAnalysis(prefs.autoCut.thresholdOut, false);
     }
 }
 
-void SilenceDetectionPresenter::cutPreferenceChanged(const MainDomain::CutPreferences& prefs)
-{
-    const auto& autoCut = prefs.autoCut;
-    const bool inThresholdChanged = !juce::exactlyEqual(autoCut.thresholdIn, lastAutoCutThresholdIn);
-    const bool outThresholdChanged = !juce::exactlyEqual(autoCut.thresholdOut, lastAutoCutThresholdOut);
+void SilenceDetectionPresenter::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) {
+    const auto &autoCut = prefs.autoCut;
+    const bool inThresholdChanged =
+        !juce::exactlyEqual(autoCut.thresholdIn, lastAutoCutThresholdIn);
+    const bool outThresholdChanged =
+        !juce::exactlyEqual(autoCut.thresholdOut, lastAutoCutThresholdOut);
     const bool inActiveChanged = autoCut.inActive != lastAutoCutInActive;
     const bool outActiveChanged = autoCut.outActive != lastAutoCutOutActive;
 
@@ -89,7 +83,7 @@ void SilenceDetectionPresenter::cutPreferenceChanged(const MainDomain::CutPrefer
 
     if (shouldAnalyzeIn)
         startSilenceAnalysis(autoCut.thresholdIn, true);
-    
+
     if (shouldAnalyzeOut)
         startSilenceAnalysis(autoCut.thresholdOut, false);
 
@@ -99,24 +93,20 @@ void SilenceDetectionPresenter::cutPreferenceChanged(const MainDomain::CutPrefer
     lastAutoCutOutActive = autoCut.outActive;
 }
 
-void SilenceDetectionPresenter::handleAutoCutInToggle(bool isActive)
-{
+void SilenceDetectionPresenter::handleAutoCutInToggle(bool isActive) {
     sessionState.setAutoCutInActive(isActive);
 }
 
-void SilenceDetectionPresenter::handleAutoCutOutToggle(bool isActive)
-{
+void SilenceDetectionPresenter::handleAutoCutOutToggle(bool isActive) {
     sessionState.setAutoCutOutActive(isActive);
 }
 
-void SilenceDetectionPresenter::startSilenceAnalysis(float threshold, bool detectingIn)
-{
-    if (silenceWorker.isBusy())
-    {
+void SilenceDetectionPresenter::startSilenceAnalysis(float threshold, bool detectingIn) {
+    if (silenceWorker.isBusy()) {
         // If it's busy with the same thing, ignore.
         if (silenceWorker.isDetectingIn() == detectingIn)
             return;
-        
+
         // If it's busy with the OTHER thing, we might want to queue it or just wait.
         // For now, let's at least log it.
         return;
@@ -124,58 +114,48 @@ void SilenceDetectionPresenter::startSilenceAnalysis(float threshold, bool detec
     silenceWorker.startAnalysis(threshold, detectingIn);
 }
 
-AudioPlayer& SilenceDetectionPresenter::getAudioPlayer()
-{
+AudioPlayer &SilenceDetectionPresenter::getAudioPlayer() {
     return audioPlayer;
 }
 
-void SilenceDetectionPresenter::setCutStart(int sampleIndex)
-{
+void SilenceDetectionPresenter::setCutStart(int sampleIndex) {
     if (!sessionState.getCutPrefs().autoCut.inActive)
         return;
 
     double sampleRate = 0.0;
     juce::int64 length = 0;
-    if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0)
-    {
+    if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0) {
         sessionState.setCutIn((double)sampleIndex / sampleRate);
     }
 }
 
-void SilenceDetectionPresenter::setCutEnd(int sampleIndex)
-{
+void SilenceDetectionPresenter::setCutEnd(int sampleIndex) {
     if (!sessionState.getCutPrefs().autoCut.outActive)
         return;
 
     double sampleRate = 0.0;
     juce::int64 length = 0;
-    if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0)
-    {
+    if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0) {
         sessionState.setCutOut((double)sampleIndex / sampleRate);
     }
 }
 
-void SilenceDetectionPresenter::logStatusMessage(const juce::String& message, bool isError)
-{
+void SilenceDetectionPresenter::logStatusMessage(const juce::String &message, bool isError) {
     owner.logStatusMessage(message, isError);
 }
 
-bool SilenceDetectionPresenter::isCutModeActive() const
-{
+bool SilenceDetectionPresenter::isCutModeActive() const {
     return owner.isCutModeActive();
 }
 
-bool SilenceDetectionPresenter::isAutoCutInActive() const
-{
+bool SilenceDetectionPresenter::isAutoCutInActive() const {
     return sessionState.getCutPrefs().autoCut.inActive;
 }
 
-bool SilenceDetectionPresenter::isAutoCutOutActive() const
-{
+bool SilenceDetectionPresenter::isAutoCutOutActive() const {
     return sessionState.getCutPrefs().autoCut.outActive;
 }
 
-bool SilenceDetectionPresenter::hasLoadedAudio() const
-{
+bool SilenceDetectionPresenter::hasLoadedAudio() const {
     return audioPlayer.getThumbnail().getTotalLength() > 0.0;
 }

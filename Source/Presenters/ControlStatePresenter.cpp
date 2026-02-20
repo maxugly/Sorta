@@ -2,21 +2,18 @@
 
 #include "Presenters/ControlStatePresenter.h"
 
-#include "UI/ControlPanel.h"
-#include "Presenters/StatsPresenter.h"
+#include "Core/AudioPlayer.h"
+#include "Presenters/BoundaryLogicPresenter.h"
 #include "Presenters/PlaybackTextPresenter.h"
 #include "Presenters/RepeatButtonPresenter.h"
-#include "Presenters/BoundaryLogicPresenter.h"
+#include "Presenters/StatsPresenter.h"
+#include "UI/ControlPanel.h"
 #include "Workers/SilenceDetector.h"
-#include "Core/AudioPlayer.h"
 
-ControlStatePresenter::ControlStatePresenter(ControlPanel& ownerPanel)
-    : owner(ownerPanel)
-{
+ControlStatePresenter::ControlStatePresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {
 }
 
-void ControlStatePresenter::refreshStates()
-{
+void ControlStatePresenter::refreshStates() {
     const bool enabled = owner.getAudioPlayer().getThumbnail().getTotalLength() > 0.0;
 
     updateGeneralButtonStates(enabled);
@@ -27,12 +24,11 @@ void ControlStatePresenter::refreshStates()
     owner.getRepeatButtonPresenter().cutPreferenceChanged(owner.getSessionState().getCutPrefs());
 }
 
-void ControlStatePresenter::updateGeneralButtonStates(bool enabled)
-{
+void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
     owner.openButton.setEnabled(true);
     owner.exitButton.setEnabled(true);
 
-    if (auto* ts = owner.getTransportStrip()) {
+    if (auto *ts = owner.getTransportStrip()) {
         ts->getRepeatButton().setEnabled(true);
         ts->getAutoplayButton().setEnabled(true);
         ts->getCutButton().setEnabled(true);
@@ -49,14 +45,12 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled)
     owner.elapsedTimeEditor.setVisible(enabled);
     owner.remainingTimeEditor.setVisible(enabled);
 
-    if (owner.statsPresenter != nullptr)
-    {
+    if (owner.statsPresenter != nullptr) {
         owner.statsPresenter->setDisplayEnabled(enabled);
     }
 }
 
-void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, bool enabled)
-{
+void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, bool enabled) {
     if (owner.inStrip != nullptr) {
         owner.inStrip->setEnabled(enabled && isCutModeActive);
         owner.inStrip->setVisible(isCutModeActive);

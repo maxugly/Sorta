@@ -1,39 +1,49 @@
-#include <juce_core/juce_core.h>
-#include <juce_audio_basics/juce_audio_basics.h>
 #include "Core/AudioPlayer.h"
 #include "Core/SessionState.h"
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_core/juce_core.h>
 
 // Simple Mock Source
-class MockAudioSource : public juce::PositionableAudioSource
-{
-public:
-    MockAudioSource() { lengthInSamples = 44100 * 60; } // 1 minute
+class MockAudioSource : public juce::PositionableAudioSource {
+  public:
+    MockAudioSource() {
+        lengthInSamples = 44100 * 60;
+    } // 1 minute
 
-    void setNextReadPosition (juce::int64 newPosition) override { position = newPosition; }
-    juce::int64 getNextReadPosition() const override { return position; }
-    juce::int64 getTotalLength() const override { return lengthInSamples; }
-    bool isLooping() const override { return false; }
-    void setLooping (bool) override {}
+    void setNextReadPosition(juce::int64 newPosition) override {
+        position = newPosition;
+    }
+    juce::int64 getNextReadPosition() const override {
+        return position;
+    }
+    juce::int64 getTotalLength() const override {
+        return lengthInSamples;
+    }
+    bool isLooping() const override {
+        return false;
+    }
+    void setLooping(bool) override {
+    }
 
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override
-    {
+    void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override {
         currentSampleRate = sampleRate;
     }
-    void releaseResources() override {}
-    void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override {}
+    void releaseResources() override {
+    }
+    void getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) override {
+    }
 
     double currentSampleRate = 44100.0;
     juce::int64 lengthInSamples = 0;
     juce::int64 position = 0;
 };
 
-class AudioPlayerTest : public juce::UnitTest
-{
-public:
-    AudioPlayerTest() : juce::UnitTest("AudioPlayer Testing") {}
+class AudioPlayerTest : public juce::UnitTest {
+  public:
+    AudioPlayerTest() : juce::UnitTest("AudioPlayer Testing") {
+    }
 
-    void runTest() override
-    {
+    void runTest() override {
         beginTest("setPlayheadPosition clamps position correctly");
         {
             // Create AudioPlayer
@@ -74,7 +84,8 @@ public:
             expectEquals(player.getCurrentPosition(), 5.0);
 
             player.setPlayheadPosition(1.0);
-            expectEquals(player.getCurrentPosition(), 2.0); // Expect min(cutIn, cutOut) which is 2.0
+            expectEquals(player.getCurrentPosition(),
+                         2.0); // Expect min(cutIn, cutOut) which is 2.0
 
             // Cleanup
             player.setSourceForTesting(nullptr, 0.0);

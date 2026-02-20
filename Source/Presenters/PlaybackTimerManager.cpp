@@ -1,62 +1,53 @@
 #include "Presenters/PlaybackTimerManager.h"
-#include "Core/SessionState.h"
 #include "Core/AudioPlayer.h"
-#include "Utils/UIAnimationHelper.h"
-#include "Utils/Config.h"
+#include "Core/SessionState.h"
 #include "Presenters/PlaybackRepeatController.h"
 #include "UI/InteractionCoordinator.h"
+#include "Utils/Config.h"
+#include "Utils/UIAnimationHelper.h"
 
-PlaybackTimerManager::PlaybackTimerManager(SessionState& sessionStateIn, AudioPlayer& audioPlayerIn, InteractionCoordinator& coordinatorIn)
-    : sessionState(sessionStateIn), audioPlayer(audioPlayerIn), interactionCoordinator(coordinatorIn)
-{
+PlaybackTimerManager::PlaybackTimerManager(SessionState &sessionStateIn, AudioPlayer &audioPlayerIn,
+                                           InteractionCoordinator &coordinatorIn)
+    : sessionState(sessionStateIn), audioPlayer(audioPlayerIn),
+      interactionCoordinator(coordinatorIn) {
     startTimerHz(60);
 }
-PlaybackTimerManager::~PlaybackTimerManager()
-{
+PlaybackTimerManager::~PlaybackTimerManager() {
     stopTimer();
 }
 
-void PlaybackTimerManager::addListener(Listener* l)
-{
+void PlaybackTimerManager::addListener(Listener *l) {
     const juce::ScopedLock lock(listenerLock);
     listeners.add(l);
 }
 
-void PlaybackTimerManager::removeListener(Listener* l)
-{
+void PlaybackTimerManager::removeListener(Listener *l) {
     const juce::ScopedLock lock(listenerLock);
     listeners.remove(l);
 }
 
-void PlaybackTimerManager::timerCallback()
-{
-    const bool isZDown = juce::KeyPress::isKeyCurrentlyDown('z') || juce::KeyPress::isKeyCurrentlyDown('Z');
-    
+void PlaybackTimerManager::timerCallback() {
+    const bool isZDown =
+        juce::KeyPress::isKeyCurrentlyDown('z') || juce::KeyPress::isKeyCurrentlyDown('Z');
+
     const auto lastActivePoint = interactionCoordinator.getActiveZoomPoint();
 
-    if (isZDown != m_isZKeyDown)
-    {
+    if (isZDown != m_isZKeyDown) {
         m_isZKeyDown = isZDown;
-        if (m_isZKeyDown)
-        {
+        if (m_isZKeyDown) {
             if (m_zoomPointProvider)
                 interactionCoordinator.setActiveZoomPoint(m_zoomPointProvider());
-        }
-        else
-        {
+        } else {
             interactionCoordinator.setActiveZoomPoint(interactionCoordinator.getManualZoomPoint());
         }
     }
 
     const auto currentActivePoint = interactionCoordinator.getActiveZoomPoint();
-    if (currentActivePoint != lastActivePoint)
-    {
+    if (currentActivePoint != lastActivePoint) {
         listeners.call(&Listener::activeZoomPointChanged, currentActivePoint);
 
-        if (currentActivePoint == AppEnums::ActiveZoomPoint::None)
-        {
-            if (interactionCoordinator.getNeedsJumpToCutIn())
-            {
+        if (currentActivePoint == AppEnums::ActiveZoomPoint::None) {
+            if (interactionCoordinator.getNeedsJumpToCutIn()) {
                 audioPlayer.setPlayheadPosition(sessionState.getCutIn());
                 interactionCoordinator.setNeedsJumpToCutIn(false);
             }

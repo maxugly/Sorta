@@ -6,29 +6,29 @@
 
 class FocusManager;
 #include "Core/AppEnums.h"
-#include "Core/AudioPlayer.h" 
-#include "Utils/Config.h"
+#include "Core/AudioPlayer.h"
+#include "Core/SessionState.h"
+#include "UI/Components/MarkerStrip.h"
 #include "UI/Components/TransportButton.h"
 #include "UI/Components/TransportStrip.h"
-#include "UI/Components/MarkerStrip.h"
-#include "UI/LookAndFeel/ModernLookAndFeel.h" 
-#include "UI/MouseHandler.h"      
-#include "Core/SessionState.h"
-#include "Workers/SilenceDetector.h"   
+#include "UI/LookAndFeel/ModernLookAndFeel.h"
+#include "UI/MouseHandler.h"
+#include "Utils/Config.h"
+#include "Workers/SilenceDetector.h"
 #include "Workers/SilenceWorkerClient.h"
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_core/juce_core.h>
-    #include <juce_gui_basics/juce_gui_basics.h>
-    #include <juce_events/juce_events.h>
+#include <juce_core/juce_core.h>
+#include <juce_events/juce_events.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
-#include <memory> 
+#include <memory>
 #include <tuple>
 
-class MainComponent; 
+class MainComponent;
 
 class LayoutManager;
 
@@ -39,8 +39,6 @@ class CutLayerView;
 class CutPresenter;
 
 class StatsPresenter;
-
-class RepeatPresenter;
 
 class ControlStatePresenter;
 
@@ -71,8 +69,8 @@ class MarkerStrip;
 class OverlayView;
 
 /**
+ * @file ControlPanel.h
  * @ingroup UI
- * @class ControlPanel
  * @brief The main container for UI controls and waveform visualization.
  * @details This component instantiates and manages all the presenters and views (e.g.,
  *          `WaveformView`, `TransportPresenter`). It handles the layout logic and
@@ -82,264 +80,305 @@ class OverlayView;
  *
  * @see MainComponent
  * @see SessionState
+ * @see LayoutManager
+ * @see WaveformView
  */
-class ControlPanel final : public juce::Component,
-                           public SessionState::Listener {
-public:
-  struct LayoutCache {
-    juce::Rectangle<int> waveformBounds;
-    juce::Rectangle<int> contentAreaBounds;
-    int bottomRowTopY{0};
-    int playbackLeftTextX{0};
-    int playbackCenterTextX{0};
-    int playbackRightTextX{0};
-  };
+class ControlPanel final : public juce::Component, public SessionState::Listener {
+  public:
+    struct LayoutCache {
+        juce::Rectangle<int> waveformBounds;
+        juce::Rectangle<int> contentAreaBounds;
+        int bottomRowTopY{0};
+        int playbackLeftTextX{0};
+        int playbackCenterTextX{0};
+        int playbackRightTextX{0};
+    };
 
-  explicit ControlPanel(MainComponent &owner, SessionState &sessionStateIn);
+    explicit ControlPanel(MainComponent &owner, SessionState &sessionStateIn);
 
-  ~ControlPanel() override;
+    ~ControlPanel() override;
 
-  float getZoomFactor() const { return m_zoomFactor; }
+    float getZoomFactor() const {
+        return m_zoomFactor;
+    }
 
-  void setZoomFactor(float factor) {
-    m_zoomFactor = juce::jlimit(1.0f, 1000000.0f, factor);
+    void setZoomFactor(float factor) {
+        m_zoomFactor = juce::jlimit(1.0f, 1000000.0f, factor);
 
-    repaint();
-  }
+        repaint();
+    }
 
-  // SessionState::Listener
-  void cutPreferenceChanged(const MainDomain::CutPreferences& prefs) override;
-  void cutInChanged(double value) override;
-  void cutOutChanged(double value) override;
+    // SessionState::Listener
+    void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
+    void cutInChanged(double value) override;
+    void cutOutChanged(double value) override;
 
-  void jumpToCutIn();
+    void jumpToCutIn();
 
-  void paint(juce::Graphics &g) override;
+    void paint(juce::Graphics &g) override;
 
-  void resized() override;
+    void resized() override;
 
-  void updatePlayButtonText(bool isPlaying);
+    void updatePlayButtonText(bool isPlaying);
 
-  void refreshLabels();
+    void refreshLabels();
 
-  void updateComponentStates();
+    void updateComponentStates();
 
-  void updateUIFromState();
+    void updateUIFromState();
 
-  void setAutoCutInActive(bool isActive);
+    void setAutoCutInActive(bool isActive);
 
-  void setAutoCutOutActive(bool isActive);
+    void setAutoCutOutActive(bool isActive);
 
-  void updateCutButtonColors();
+    void updateCutButtonColors();
 
-  double getCutInPosition() const;
+    double getCutInPosition() const;
 
-  double getCutOutPosition() const;
+    double getCutOutPosition() const;
 
-  void setCutInPosition(double pos);
+    void setCutInPosition(double pos);
 
-  void setCutOutPosition(double pos);
+    void setCutOutPosition(double pos);
 
-  void ensureCutOrder();
+    void ensureCutOrder();
 
-  void toggleStats();
+    void toggleStats();
 
-  void triggerModeButton();
+    void triggerModeButton();
 
-  void triggerChannelViewButton();
+    void triggerChannelViewButton();
 
-  void triggerRepeatButton();
+    void triggerRepeatButton();
 
-  void resetIn();
+    void resetIn();
 
-  void resetOut();
+    void resetOut();
 
-  void setShouldShowStats(bool shouldShowStats);
+    void setShouldShowStats(bool shouldShowStats);
 
-  void setTotalTimeStaticString(const juce::String &timeString);
-  void setStatsDisplayText(const juce::String &text,
-                           juce::Colour color = Config::Colors::statsText);
-  void logStatusMessage(const juce::String &message,
-                        bool isError = false);
+    void setTotalTimeStaticString(const juce::String &timeString);
+    void setStatsDisplayText(const juce::String &text,
+                             juce::Colour color = Config::Colors::statsText);
+    void logStatusMessage(const juce::String &message, bool isError = false);
 
-  juce::TextButton& getAutoCutInButton() { return inStrip->getAutoCutButton(); }
-  juce::TextButton& getAutoCutOutButton() { return outStrip->getAutoCutButton(); }
+    juce::TextButton &getAutoCutInButton() {
+        return inStrip->getAutoCutButton();
+    }
+    juce::TextButton &getAutoCutOutButton() {
+        return outStrip->getAutoCutButton();
+    }
 
-  void updateStatsFromAudio();
+    void updateStatsFromAudio();
 
-  AppEnums::PlacementMode getPlacementMode() const { return interactionCoordinator->getPlacementMode(); }
+    AppEnums::PlacementMode getPlacementMode() const {
+        return interactionCoordinator->getPlacementMode();
+    }
 
-  void setPlacementMode(AppEnums::PlacementMode mode) { interactionCoordinator->setPlacementMode(mode); }
+    void setPlacementMode(AppEnums::PlacementMode mode) {
+        interactionCoordinator->setPlacementMode(mode);
+    }
 
-  bool shouldAutoplay() const { return sessionState.getCutPrefs().autoplay; }
+    bool shouldAutoplay() const {
+        return sessionState.getCutPrefs().autoplay;
+    }
 
-  bool isCutModeActive() const { return m_isCutModeActive; }
+    bool isCutModeActive() const {
+        return m_isCutModeActive;
+    }
+
+    juce::Rectangle<int> getWaveformBounds() const {
+        return layoutCache.waveformBounds;
+    }
+
+    AudioPlayer &getAudioPlayer();
+    AudioPlayer &getAudioPlayer() const;
+    SessionState &getSessionState() {
+        return sessionState;
+    }
+    const SessionState &getSessionState() const {
+        return sessionState;
+    }
+
+    InteractionCoordinator &getInteractionCoordinator() {
+        return *interactionCoordinator;
+    }
+
+    AppEnums::ChannelViewMode getChannelViewMode() const {
+        return currentChannelViewMode;
+    }
+
+    const MouseHandler &getMouseHandler() const;
+    MouseHandler &getMouseHandler();
+
+    SilenceDetector &getSilenceDetector() {
+        return *silenceDetector;
+    }
+    const SilenceDetector &getSilenceDetector() const {
+        return *silenceDetector;
+    }
+
+    TransportStrip *getTransportStrip() {
+        return transportStrip.get();
+    }
+    MarkerStrip *getInStrip() {
+        return inStrip.get();
+    }
+    MarkerStrip *getOutStrip() {
+        return outStrip.get();
+    }
+    SilenceDetectionPresenter *getSilenceDetectionPresenter() {
+        return silenceDetectionPresenter.get();
+    }
+
+    int getBottomRowTopY() const {
+        return layoutCache.bottomRowTopY;
+    }
+
+    std::tuple<int, int, int> getPlaybackLabelXs() const {
+        return {layoutCache.playbackLeftTextX, layoutCache.playbackCenterTextX,
+                layoutCache.playbackRightTextX};
+    }
 
-  juce::Rectangle<int> getWaveformBounds() const {
-    return layoutCache.waveformBounds;
-  }
+    juce::TextEditor &getStatsDisplay();
 
-  AudioPlayer &getAudioPlayer();
-  AudioPlayer &getAudioPlayer() const;
-  SessionState &getSessionState() { return sessionState; }
-  const SessionState &getSessionState() const { return sessionState; }
+    void setCutStart(int sampleIndex);
 
-  InteractionCoordinator& getInteractionCoordinator() { return *interactionCoordinator; }
+    void setCutEnd(int sampleIndex);
 
-  AppEnums::ChannelViewMode getChannelViewMode() const {
-    return currentChannelViewMode;
-  }
+    juce::String formatTime(double seconds) const;
+    const juce::LookAndFeel &getLookAndFeel() const;
+    FocusManager &getFocusManager() const {
+        return *focusManager;
+    }
 
-  const MouseHandler &getMouseHandler() const;
-  MouseHandler &getMouseHandler();
+    void mouseMove(const juce::MouseEvent &event) override;
 
-  SilenceDetector &getSilenceDetector() { return *silenceDetector; }
-  const SilenceDetector &getSilenceDetector() const { return *silenceDetector; }
+    void mouseDown(const juce::MouseEvent &event) override;
 
-  TransportStrip* getTransportStrip() { return transportStrip.get(); }
-  MarkerStrip* getInStrip() { return inStrip.get(); }
-  MarkerStrip* getOutStrip() { return outStrip.get(); }
-  SilenceDetectionPresenter* getSilenceDetectionPresenter() { return silenceDetectionPresenter.get(); }
+    void mouseDrag(const juce::MouseEvent &event) override;
 
-  int getBottomRowTopY() const { return layoutCache.bottomRowTopY; }
+    void mouseUp(const juce::MouseEvent &event) override;
 
-  std::tuple<int, int, int> getPlaybackLabelXs() const {
-    return {layoutCache.playbackLeftTextX, layoutCache.playbackCenterTextX,
-            layoutCache.playbackRightTextX};
-  }
+    void mouseExit(const juce::MouseEvent &event) override;
+    void mouseWheelMove(const juce::MouseEvent &event,
+                        const juce::MouseWheelDetails &wheel) override;
 
-  juce::TextEditor &getStatsDisplay();
+    PlaybackTimerManager &getPlaybackTimerManager() {
+        return *playbackTimerManager;
+    }
+    BoundaryLogicPresenter &getBoundaryLogicPresenter();
+    RepeatButtonPresenter &getRepeatButtonPresenter();
+    PlaybackTextPresenter &getPlaybackTextPresenter();
 
-  void setCutStart(int sampleIndex);
+  private:
+    friend class LayoutManager;
+    friend class ControlStatePresenter;
+    friend class SilenceDetectionPresenter;
+    friend class ControlButtonsPresenter;
+    friend class CutButtonPresenter;
+    friend class CutResetPresenter;
+    friend class PlaybackTextPresenter;
+    friend class RepeatButtonPresenter;
+    friend class BoundaryLogicPresenter;
 
-  void setCutEnd(int sampleIndex);
+    MainComponent &owner;
+    /** @brief Reference to the shared application state. */
+    SessionState &sessionState;
+    ModernLookAndFeel modernLF;
 
-  juce::String formatTime(double seconds) const;
-  const juce::LookAndFeel &getLookAndFeel() const;
-  FocusManager &getFocusManager() const { return *focusManager; }
+    /** @brief Manages high-frequency updates. */
+    std::unique_ptr<PlaybackTimerManager> playbackTimerManager;
 
-  void mouseMove(const juce::MouseEvent &event) override;
+    /** @brief Handles silence detection logic and background workers. */
+    std::unique_ptr<SilenceDetector> silenceDetector;
 
-  void mouseDown(const juce::MouseEvent &event) override;
+    /** @brief Manages the logic for cut operations (in/out points). */
+    std::unique_ptr<CutPresenter> cutPresenter;
 
-  void mouseDrag(const juce::MouseEvent &event) override;
+    /** @brief Calculates and caches component positions. */
+    std::unique_ptr<LayoutManager> layoutManager;
 
-  void mouseUp(const juce::MouseEvent &event) override;
+    /** @brief Renders the static waveform visualization. */
+    std::unique_ptr<WaveformView> waveformView;
 
-  void mouseExit(const juce::MouseEvent &event) override;
-  void mouseWheelMove(const juce::MouseEvent &event,
-                      const juce::MouseWheelDetails &wheel) override;
+    /** @brief Renders the overlay for cut regions. */
+    std::unique_ptr<CutLayerView> cutLayerView;
 
-  PlaybackTimerManager& getPlaybackTimerManager() { return *playbackTimerManager; }
-  BoundaryLogicPresenter& getBoundaryLogicPresenter();
-  RepeatButtonPresenter& getRepeatButtonPresenter();
-  PlaybackTextPresenter& getPlaybackTextPresenter();
+    /** @brief Manages playback position text display. */
+    std::unique_ptr<PlaybackTextPresenter> playbackTextPresenter;
 
-private:
-  friend class LayoutManager;
-  friend class ControlStatePresenter;
-  friend class SilenceDetectionPresenter;
-  friend class ControlButtonsPresenter;
-  friend class CutButtonPresenter;
-  friend class CutResetPresenter;
-  friend class PlaybackTextPresenter;
-  friend class RepeatButtonPresenter;
-  friend class BoundaryLogicPresenter;
+    /** @brief Manages file statistics (sample rate, bit depth, etc.). */
+    std::unique_ptr<StatsPresenter> statsPresenter;
 
-  MainComponent &owner;
-  /** @brief Reference to the shared application state. */
-  SessionState &sessionState;
-  ModernLookAndFeel modernLF;
+    /** @brief Manages manual time entry for cut boundaries. */
+    std::unique_ptr<BoundaryLogicPresenter> boundaryLogicPresenter;
 
-  /** @brief Manages high-frequency updates. */
-  std::unique_ptr<PlaybackTimerManager> playbackTimerManager;
+    /** @brief Manages repeat toggle button. */
+    std::unique_ptr<RepeatButtonPresenter> repeatButtonPresenter;
 
-  /** @brief Handles silence detection logic and background workers. */
-  std::unique_ptr<SilenceDetector> silenceDetector;
+    /** @brief Updates UI state based on SessionState changes. */
+    std::unique_ptr<ControlStatePresenter> controlStatePresenter;
 
-  /** @brief Manages the logic for cut operations (in/out points). */
-  std::unique_ptr<CutPresenter> cutPresenter;
+    /** @brief Presenter for silence detection settings. */
+    std::unique_ptr<SilenceDetectionPresenter> silenceDetectionPresenter;
 
-  /** @brief Calculates and caches component positions. */
-  std::unique_ptr<LayoutManager> layoutManager;
+    /** @brief Manages general control buttons (Open, Save, etc.). */
+    std::unique_ptr<ControlButtonsPresenter> buttonPresenter;
 
-  /** @brief Renders the static waveform visualization. */
-  std::unique_ptr<WaveformView> waveformView;
+    /** @brief Manages cut button interactions. */
+    std::unique_ptr<CutButtonPresenter> cutButtonPresenter;
 
-  /** @brief Renders the overlay for cut regions. */
-  std::unique_ptr<CutLayerView> cutLayerView;
+    /** @brief Manages reset buttons for cut points. */
+    std::unique_ptr<CutResetPresenter> cutResetPresenter;
 
-  /** @brief Manages playback position text display. */
-  std::unique_ptr<PlaybackTextPresenter> playbackTextPresenter;
+    /** @brief Handles keyboard focus navigation. */
+    std::unique_ptr<FocusManager> focusManager;
 
-  /** @brief Manages file statistics (sample rate, bit depth, etc.). */
-  std::unique_ptr<StatsPresenter> statsPresenter;
+    /** @brief Renders the playback cursor and glow effects. */
+    std::unique_ptr<PlaybackCursorView> playbackCursorView;
 
-  /** @brief Manages manual time entry for cut boundaries. */
-  std::unique_ptr<BoundaryLogicPresenter> boundaryLogicPresenter;
+    /** @brief Renders the zoom window. */
+    std::unique_ptr<ZoomView> zoomView;
 
-  /** @brief Manages repeat/loop toggle button. */
-  std::unique_ptr<RepeatButtonPresenter> repeatButtonPresenter;
+    /** @brief Renders eye-candy overlays. */
+    std::unique_ptr<OverlayView> overlayView;
 
-  /** @brief Updates UI state based on SessionState changes. */
-  std::unique_ptr<ControlStatePresenter> controlStatePresenter;
+    /** @brief Manages transient UI interaction states. */
+    std::unique_ptr<InteractionCoordinator> interactionCoordinator;
 
-  /** @brief Presenter for silence detection settings. */
-  std::unique_ptr<SilenceDetectionPresenter> silenceDetectionPresenter;
+    /** @brief Manages repeat and autoplay logic. */
+    std::unique_ptr<PlaybackRepeatController> playbackRepeatController;
 
-  /** @brief Manages general control buttons (Open, Save, etc.). */
-  std::unique_ptr<ControlButtonsPresenter> buttonPresenter;
+    juce::TextButton openButton, modeButton, exitButton, statsButton, channelViewButton,
+        eyeCandyButton;
+    std::unique_ptr<TransportStrip> transportStrip;
+    std::unique_ptr<MarkerStrip> inStrip, outStrip;
+    juce::TextEditor elapsedTimeEditor, remainingTimeEditor, cutLengthEditor;
 
-  /** @brief Manages cut button interactions. */
-  std::unique_ptr<CutButtonPresenter> cutButtonPresenter;
+    LayoutCache layoutCache;
 
-  /** @brief Manages reset buttons for cut points. */
-  std::unique_ptr<CutResetPresenter> cutResetPresenter;
+    AppEnums::ViewMode currentMode = AppEnums::ViewMode::Classic;
+    AppEnums::ChannelViewMode currentChannelViewMode = AppEnums::ChannelViewMode::Mono;
 
-  /** @brief Handles keyboard focus navigation. */
-  std::unique_ptr<FocusManager> focusManager;
+    juce::String cutInDisplayString, cutOutDisplayString;
+    int cutInTextX = 0, cutOutTextX = 0, cutTextY = 0;
 
-  /** @brief Renders the playback cursor and glow effects. */
-  std::unique_ptr<PlaybackCursorView> playbackCursorView;
+    bool m_isCutModeActive = false;
+    float m_zoomFactor = 10.0f;
 
-  /** @brief Renders the zoom window. */
-  std::unique_ptr<ZoomView> zoomView;
+    void initialiseLookAndFeel();
 
-  /** @brief Renders eye-candy overlays. */
-  std::unique_ptr<OverlayView> overlayView;
+    void setupCoreComponents();
+    void setupViews();
+    void setupStrips();
+    void setupPresenters();
+    void setupListeners();
 
-  /** @brief Manages transient UI interaction states. */
-  std::unique_ptr<InteractionCoordinator> interactionCoordinator;
+    void invokeOwnerOpenDialog();
+    void finaliseSetup();
 
-  /** @brief Manages repeat and autoplay logic. */
-  std::unique_ptr<PlaybackRepeatController> playbackRepeatController;
-
-  juce::TextButton openButton, modeButton, exitButton,
-      statsButton, channelViewButton, eyeCandyButton;
-  std::unique_ptr<TransportStrip> transportStrip;
-  std::unique_ptr<MarkerStrip> inStrip, outStrip;
-  juce::TextEditor elapsedTimeEditor, remainingTimeEditor, cutLengthEditor;
-
-  LayoutCache layoutCache;
-
-  AppEnums::ViewMode currentMode = AppEnums::ViewMode::Classic;
-  AppEnums::ChannelViewMode currentChannelViewMode = AppEnums::ChannelViewMode::Mono;
-
-  juce::String cutInDisplayString, cutOutDisplayString;
-  int cutInTextX = 0, cutOutTextX = 0, cutTextY = 0;
-
-  bool m_isCutModeActive = false;
-  float m_zoomFactor = 10.0f;
-
-  void initialiseLookAndFeel();
-
-  void initialiseCutEditors();
-
-  void invokeOwnerOpenDialog();
-
-  void finaliseSetup();
-
-  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPanel)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPanel)
 };
 
-#endif 
+#endif

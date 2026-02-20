@@ -4,28 +4,26 @@
 #define AUDIOFILER_PLAYBACKREPEATCONTROLLER_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_core/juce_core.h>
+#include <juce_core/juce_core.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 class AudioPlayer;
 
 class ControlPanel;
 
-class PlaybackRepeatController final
-{
-public:
-
-    PlaybackRepeatController(AudioPlayer& audioPlayerIn, ControlPanel& controlPanelIn);
+class PlaybackRepeatController final {
+  public:
+    PlaybackRepeatController(AudioPlayer &audioPlayerIn, ControlPanel &controlPanelIn);
 
     void tick();
 
-private:
-    AudioPlayer& audioPlayer;
-    ControlPanel& controlPanel;
+  private:
+    AudioPlayer &audioPlayer;
+    ControlPanel &controlPanel;
     bool lastIsPlaying = false;
     bool lastAutoPlayPreference = false;
 };
 
-#endif 
+#endif

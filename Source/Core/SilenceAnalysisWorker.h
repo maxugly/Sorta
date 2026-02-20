@@ -2,15 +2,15 @@
 #define AUDIOFILER_SILENCEANALYSISWORKER_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_core/juce_core.h>
-    #include <juce_events/juce_events.h>
+#include <juce_core/juce_core.h>
+#include <juce_events/juce_events.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
+#include "Workers/SilenceWorkerClient.h"
 #include <atomic>
 #include <memory>
-#include "Workers/SilenceWorkerClient.h"
 
 class SessionState;
 
@@ -27,11 +27,9 @@ class SessionState;
  *
  * @see SilenceAnalysisAlgorithms
  */
-class SilenceAnalysisWorker : public juce::Thread
-{
-public:
-
-    explicit SilenceAnalysisWorker(SilenceWorkerClient& client, SessionState& sessionState);
+class SilenceAnalysisWorker : public juce::Thread {
+  public:
+    explicit SilenceAnalysisWorker(SilenceWorkerClient &client, SessionState &sessionState);
 
     ~SilenceAnalysisWorker() override;
 
@@ -39,17 +37,18 @@ public:
 
     bool isBusy() const;
 
-    bool isDetectingIn() const { return detectingIn.load(); }
+    bool isDetectingIn() const {
+        return detectingIn.load();
+    }
 
-private:
-
+  private:
     void run() override;
 
-    SilenceWorkerClient& client;
-    SessionState& sessionState;
-    std::atomic<float> threshold { 0.0f };
-    std::atomic<bool> detectingIn { true };
-    std::atomic<bool> busy { false };
+    SilenceWorkerClient &client;
+    SessionState &sessionState;
+    std::atomic<float> threshold{0.0f};
+    std::atomic<bool> detectingIn{true};
+    std::atomic<bool> busy{false};
     juce::String assignedFilePath;
 
     std::shared_ptr<bool> lifeToken;
@@ -57,4 +56,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SilenceAnalysisWorker)
 };
 
-#endif 
+#endif

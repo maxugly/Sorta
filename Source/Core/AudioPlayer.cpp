@@ -1,21 +1,22 @@
 
 
+/**
+ * @file AudioPlayer.cpp
+ */
 #include "Core/AudioPlayer.h"
-#include "Utils/PlaybackHelpers.h"
-#include "Core/SessionState.h"
 #include "Core/FileMetadata.h"
+#include "Core/SessionState.h"
+#include "Utils/PlaybackHelpers.h"
 #include <algorithm>
 #include <cmath>
 
-AudioPlayer::AudioPlayer(SessionState& state)
-    #if !defined(JUCE_HEADLESS)
+AudioPlayer::AudioPlayer(SessionState &state)
+#if !defined(JUCE_HEADLESS)
     : waveformManager(formatManager),
-    #else
+#else
     :
-    #endif
-      readAheadThread("Audio File Reader"),
-      sessionState(state)
-{
+#endif
+      readAheadThread("Audio File Reader"), sessionState(state) {
     formatManager.registerBasicFormats();
     sessionState.addListener(this);
     readAheadThread.startThread();
@@ -27,31 +28,25 @@ AudioPlayer::AudioPlayer(SessionState& state)
     lastAutoCutOutActive = sessionState.getCutPrefs().autoCut.outActive;
 }
 
-AudioPlayer::~AudioPlayer()
-{
+AudioPlayer::~AudioPlayer() {
     sessionState.removeListener(this);
     transportSource.setSource(nullptr);
     readAheadThread.stopThread(1000);
     transportSource.removeChangeListener(this);
 }
 
-juce::Result AudioPlayer::loadFile(const juce::File& file)
-{
-    auto* reader = formatManager.createReaderFor(file);
+juce::Result AudioPlayer::loadFile(const juce::File &file) {
+    auto *reader = formatManager.createReaderFor(file);
 
-    if (reader != nullptr)
-    {
+    if (reader != nullptr) {
         const juce::String filePath = file.getFullPathName();
         const double totalDuration = (double)reader->lengthInSamples / reader->sampleRate;
         sessionState.setTotalDuration(totalDuration);
 
-        if (sessionState.hasMetadataForFile(filePath))
-        {
+        if (sessionState.hasMetadataForFile(filePath)) {
             const FileMetadata cached = sessionState.getMetadataForFile(filePath);
             sessionState.setMetadataForFile(filePath, cached);
-        }
-        else
-        {
+        } else {
             FileMetadata metadata;
             if (reader->sampleRate > 0.0)
                 metadata.cutOut = totalDuration;
@@ -65,13 +60,13 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
 
         loadedFile = file;
         {
-
             std::lock_guard<std::mutex> lock(readerMutex);
             auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
-            transportSource.setSource(newSource.get(), Config::Audio::readAheadBufferSize, &readAheadThread, reader->sampleRate);
-            #if !defined(JUCE_HEADLESS)
+            transportSource.setSource(newSource.get(), Config::Audio::readAheadBufferSize,
+                                      &readAheadThread, reader->sampleRate);
+#if !defined(JUCE_HEADLESS)
             waveformManager.loadFile(file);
-            #endif
+#endif
             readerSource.reset(newSource.release());
         }
         setPlayheadPosition(sessionState.getCutPrefs().cutIn);
@@ -84,101 +79,83 @@ juce::Result AudioPlayer::loadFile(const juce::File& file)
     return juce::Result::fail("Failed to read audio file: " + file.getFileName());
 }
 
-juce::File AudioPlayer::getLoadedFile() const
-{
+juce::File AudioPlayer::getLoadedFile() const {
     return loadedFile;
 }
 
-void AudioPlayer::togglePlayStop()
-{
+void AudioPlayer::togglePlayStop() {
     if (transportSource.isPlaying())
         transportSource.stop();
     else
         transportSource.start();
 }
 
-bool AudioPlayer::isPlaying() const
-{
+bool AudioPlayer::isPlaying() const {
     return transportSource.isPlaying();
 }
 
-double AudioPlayer::getCurrentPosition() const
-{
+double AudioPlayer::getCurrentPosition() const {
     return transportSource.getCurrentPosition();
 }
 
-bool AudioPlayer::isRepeating() const
-{
+bool AudioPlayer::isRepeating() const {
     return repeating;
 }
 
-void AudioPlayer::setRepeating(bool shouldRepeat)
-{
+void AudioPlayer::setRepeating(bool shouldRepeat) {
     repeating = shouldRepeat;
 }
 
 #if !defined(JUCE_HEADLESS)
-juce::AudioThumbnail& AudioPlayer::getThumbnail()
-{
+juce::AudioThumbnail &AudioPlayer::getThumbnail() {
     return waveformManager.getThumbnail();
 }
 
-WaveformManager& AudioPlayer::getWaveformManager()
-{
+WaveformManager &AudioPlayer::getWaveformManager() {
     return waveformManager;
 }
 
-const WaveformManager& AudioPlayer::getWaveformManager() const
-{
+const WaveformManager &AudioPlayer::getWaveformManager() const {
     return waveformManager;
 }
 #endif
 
-void AudioPlayer::startPlayback()
-{
+void AudioPlayer::startPlayback() {
     transportSource.start();
 }
 
-void AudioPlayer::stopPlayback()
-{
+void AudioPlayer::stopPlayback() {
     transportSource.stop();
 }
 
-void AudioPlayer::stopPlaybackAndReset()
-{
+void AudioPlayer::stopPlaybackAndReset() {
     transportSource.stop();
     setPlayheadPosition(sessionState.getCutIn());
 }
 
-juce::AudioFormatManager& AudioPlayer::getFormatManager()
-{
+juce::AudioFormatManager &AudioPlayer::getFormatManager() {
     return formatManager;
 }
 
-void AudioPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
-{
+void AudioPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate) {
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
-void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
-{
-    if (readerSource.get() == nullptr)
-    {
+void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) {
+    if (readerSource.get() == nullptr) {
         bufferToFill.clearActiveBufferRegion();
         return;
     }
 
     const auto prefs = sessionState.getCutPrefs();
-    if (!prefs.active)
-    {
+    if (!prefs.active) {
         transportSource.getNextAudioBlock(bufferToFill);
         return;
     }
 
     double sampleRate = 0.0;
     juce::int64 lengthInSamples = 0;
-    if (!getReaderInfo(sampleRate, lengthInSamples) || sampleRate <= 0.0)
-    {
+    if (!getReaderInfo(sampleRate, lengthInSamples) || sampleRate <= 0.0) {
         transportSource.getNextAudioBlock(bufferToFill);
         return;
     }
@@ -187,16 +164,12 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
     const double cutOut = prefs.cutOut;
     const double startPos = transportSource.getCurrentPosition();
 
-    if (startPos >= cutOut)
-    {
-        if (repeating)
-        {
+    if (startPos >= cutOut) {
+        if (repeating) {
             transportSource.setPosition(cutIn);
             transportSource.start();
             transportSource.getNextAudioBlock(bufferToFill);
-        }
-        else
-        {
+        } else {
             transportSource.stop();
             transportSource.setPosition(cutOut);
             bufferToFill.clearActiveBufferRegion();
@@ -207,49 +180,37 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferTo
     transportSource.getNextAudioBlock(bufferToFill);
 
     const double endPos = startPos + ((double)bufferToFill.numSamples / sampleRate);
-    if (endPos >= cutOut)
-    {
-        const int samplesToKeep = juce::jlimit(
-            0,
-            bufferToFill.numSamples,
-            (int)std::floor((cutOut - startPos) * sampleRate));
+    if (endPos >= cutOut) {
+        const int samplesToKeep = juce::jlimit(0, bufferToFill.numSamples,
+                                               (int)std::floor((cutOut - startPos) * sampleRate));
 
-        if (samplesToKeep < bufferToFill.numSamples)
-        {
+        if (samplesToKeep < bufferToFill.numSamples) {
             bufferToFill.buffer->clear(bufferToFill.startSample + samplesToKeep,
                                        bufferToFill.numSamples - samplesToKeep);
         }
 
-        if (repeating)
-        {
+        if (repeating) {
             transportSource.setPosition(cutIn);
             transportSource.start();
-        }
-        else
-        {
+        } else {
             transportSource.stop();
             transportSource.setPosition(cutOut);
         }
     }
 }
 
-void AudioPlayer::releaseResources()
-{
+void AudioPlayer::releaseResources() {
     transportSource.releaseResources();
 }
 
-void AudioPlayer::changeListenerCallback(juce::ChangeBroadcaster* source)
-{
-    if (source == &transportSource)
-    {
-
+void AudioPlayer::changeListenerCallback(juce::ChangeBroadcaster *source) {
+    if (source == &transportSource) {
         sendChangeMessage();
     }
 }
 
-void AudioPlayer::cutPreferenceChanged(const MainDomain::CutPreferences& prefs)
-{
-    const auto& autoCut = prefs.autoCut;
+void AudioPlayer::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) {
+    const auto &autoCut = prefs.autoCut;
 
     lastAutoCutThresholdIn = autoCut.thresholdIn;
     lastAutoCutThresholdOut = autoCut.thresholdOut;
@@ -257,21 +218,18 @@ void AudioPlayer::cutPreferenceChanged(const MainDomain::CutPreferences& prefs)
     lastAutoCutOutActive = autoCut.outActive;
 }
 
-juce::AudioFormatReader* AudioPlayer::getAudioFormatReader() const
-{
+juce::AudioFormatReader *AudioPlayer::getAudioFormatReader() const {
     if (readerSource != nullptr)
         return readerSource->getAudioFormatReader();
     return nullptr;
 }
 
-bool AudioPlayer::getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamplesOut) const
-{
-
+bool AudioPlayer::getReaderInfo(double &sampleRateOut, juce::int64 &lengthInSamplesOut) const {
     std::lock_guard<std::mutex> lock(readerMutex);
     if (readerSource == nullptr)
         return false;
 
-    auto* reader = readerSource->getAudioFormatReader();
+    auto *reader = readerSource->getAudioFormatReader();
     if (reader == nullptr)
         return false;
 
@@ -281,14 +239,12 @@ bool AudioPlayer::getReaderInfo(double& sampleRateOut, juce::int64& lengthInSamp
 }
 
 #if JUCE_UNIT_TESTS
-void AudioPlayer::setSourceForTesting(juce::PositionableAudioSource* source, double sampleRate)
-{
+void AudioPlayer::setSourceForTesting(juce::PositionableAudioSource *source, double sampleRate) {
     transportSource.setSource(source, 0, nullptr, sampleRate);
 }
 #endif
 
-void AudioPlayer::setPlayheadPosition(double seconds)
-{
+void AudioPlayer::setPlayheadPosition(double seconds) {
     double sampleRate = 0.0;
     juce::int64 lengthInSamples = 0;
     if (!getReaderInfo(sampleRate, lengthInSamples) || sampleRate <= 0.0)
@@ -300,8 +256,7 @@ void AudioPlayer::setPlayheadPosition(double seconds)
     double cutOut = totalDuration;
 
     const auto prefs = sessionState.getCutPrefs();
-    if (prefs.active)
-    {
+    if (prefs.active) {
         cutIn = prefs.cutIn;
         cutOut = prefs.cutOut;
     }

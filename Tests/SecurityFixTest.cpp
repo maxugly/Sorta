@@ -1,12 +1,11 @@
 #include <juce_core/juce_core.h>
 
-class SecurityFixTest : public juce::UnitTest
-{
-public:
-    SecurityFixTest() : juce::UnitTest("Security Fix: Integer Overflow Prevention") {}
+class SecurityFixTest : public juce::UnitTest {
+  public:
+    SecurityFixTest() : juce::UnitTest("Security Fix: Integer Overflow Prevention") {
+    }
 
-    void runTest() override
-    {
+    void runTest() override {
         beginTest("Case 1: Large file length causing integer overflow if cast directly");
 
         // Case 1: Large file length causing integer overflow if cast directly
@@ -14,7 +13,7 @@ public:
         juce::int64 largeLength = 3000000000;
 
         // The vulnerability was: (int) lengthInSamples
-        int truncatedLength = (int) largeLength;
+        int truncatedLength = (int)largeLength;
 
         // This demonstrates the overflow behavior:
         // 3,000,000,000 is 0xB2D05E00
@@ -28,9 +27,8 @@ public:
 
         // Verify chunking logic works correctly with large files
         // Simulate one iteration
-        if (currentPos < largeLength)
-        {
-            int numThisTime = (int) std::min((juce::int64) kChunkSize, largeLength - currentPos);
+        if (currentPos < largeLength) {
+            int numThisTime = (int)std::min((juce::int64)kChunkSize, largeLength - currentPos);
             expect(numThisTime == kChunkSize);
             expect(numThisTime > 0);
 

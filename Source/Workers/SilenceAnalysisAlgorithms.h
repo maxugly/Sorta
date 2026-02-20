@@ -2,11 +2,11 @@
 #define SILENCE_ANALYSIS_ALGORITHMS_H
 
 #ifdef JUCE_HEADLESS
- #include <juce_core/juce_core.h>
- #include <juce_audio_basics/juce_audio_basics.h>
- #include <juce_audio_formats/juce_audio_formats.h>
+#include <juce_audio_basics/juce_audio_basics.h>
+#include <juce_audio_formats/juce_audio_formats.h>
+#include <juce_core/juce_core.h>
 #else
- #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 /**
@@ -17,10 +17,8 @@
  *          It operates on `juce::AudioFormatReader` to support scanning files on disk without
  *          loading the entire file into memory.
  */
-class SilenceAnalysisAlgorithms
-{
-public:
-
+class SilenceAnalysisAlgorithms {
+  public:
     /**
      * @brief Finds the first non-silent sample from the start of the file.
      * @details This function scans the audio file in chunks (typically 65536 samples)
@@ -29,11 +27,12 @@ public:
      *
      * @param reader The audio reader for the file.
      * @param threshold The amplitude threshold (0.0 to 1.0).
-     * @param thread Optional pointer to the calling thread to check for cancellation (`thread->threadShouldExit()`).
+     * @param thread Optional pointer to the calling thread to check for cancellation
+     * (`thread->threadShouldExit()`).
      * @return The sample index of the start of the audio, or 0 if not found.
      */
-    static juce::int64 findSilenceIn(juce::AudioFormatReader& reader, float threshold,
-                                     juce::Thread* thread = nullptr);
+    static juce::int64 findSilenceIn(juce::AudioFormatReader &reader, float threshold,
+                                     juce::Thread *thread = nullptr);
 
     /**
      * @brief Finds the last non-silent sample from the end of the file.
@@ -46,8 +45,8 @@ public:
      * @param thread Optional pointer to the calling thread to check for cancellation.
      * @return The sample index of the end of the audio, or the file length if not found.
      */
-    static juce::int64 findSilenceOut(juce::AudioFormatReader& reader, float threshold,
-                                      juce::Thread* thread = nullptr);
+    static juce::int64 findSilenceOut(juce::AudioFormatReader &reader, float threshold,
+                                      juce::Thread *thread = nullptr);
 };
 
-#endif 
+#endif

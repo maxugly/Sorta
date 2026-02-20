@@ -5,18 +5,15 @@
 
 class ControlPanel;
 
-class ControlButtonsPresenter final
-{
-public:
-
-    explicit ControlButtonsPresenter(ControlPanel& ownerPanel);
+class ControlButtonsPresenter final {
+  public:
+    explicit ControlButtonsPresenter(ControlPanel &ownerPanel);
 
     void initialiseAllButtons();
 
-  void refreshStates();
+    void refreshStates();
 
-private:
-
+  private:
     void initialiseOpenButton();
 
     void initialisePlayStopButton();
@@ -28,11 +25,11 @@ private:
     void initialiseChannelViewButton();
 
     void initialiseExitButton();
-void initialiseStatsButton();
-void initialiseEyeCandyButton();
+    void initialiseStatsButton();
+    void initialiseEyeCandyButton();
 
-private:
-    ControlPanel& owner;
+  private:
+    ControlPanel &owner;
 };
 
-#endif 
+#endif

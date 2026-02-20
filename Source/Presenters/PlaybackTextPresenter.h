@@ -4,9 +4,9 @@
 #define AUDIOFILER_PLAYBACKTEXTPRESENTER_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_gui_basics/juce_gui_basics.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 #include "Presenters/PlaybackTimerManager.h"
@@ -16,58 +16,60 @@ class ControlPanel;
 class PlaybackTextPresenter : public juce::TextEditor::Listener,
                               public juce::MouseListener,
                               public PlaybackTimerManager::Listener {
-public:
+  public:
+    explicit PlaybackTextPresenter(ControlPanel &ownerPanel);
 
-  explicit PlaybackTextPresenter(ControlPanel &ownerPanel);
+    ~PlaybackTextPresenter() override;
 
-  ~PlaybackTextPresenter() override;
+    void initialiseEditors();
 
-  void initialiseEditors();
+    void updateEditors();
 
-  void updateEditors();
+    void layoutEditors();
 
-  void layoutEditors();
+    void render(juce::Graphics &g) const;
 
-  void render(juce::Graphics &g) const;
+    void setTotalTimeStaticString(const juce::String &text) {
+        totalTimeStaticStr = text;
+    }
+    const juce::String &getTotalTimeStaticString() const {
+        return totalTimeStaticStr;
+    }
 
-  void setTotalTimeStaticString(const juce::String &text) {
-    totalTimeStaticStr = text;
-  }
-  const juce::String &getTotalTimeStaticString() const {
-    return totalTimeStaticStr;
-  }
+    // PlaybackTimerManager::Listener
+    void playbackTimerTick() override {
+        updateEditors();
+    }
+    void animationUpdate(float breathingPulse) override {
+        juce::ignoreUnused(breathingPulse);
+    }
 
-  // PlaybackTimerManager::Listener
-  void playbackTimerTick() override { updateEditors(); }
-  void animationUpdate(float breathingPulse) override { juce::ignoreUnused(breathingPulse); }
+  private:
+    void textEditorTextChanged(juce::TextEditor &editor) override;
 
-private:
+    void textEditorReturnKeyPressed(juce::TextEditor &editor) override;
 
-  void textEditorTextChanged(juce::TextEditor &editor) override;
+    void textEditorEscapeKeyPressed(juce::TextEditor &editor) override;
 
-  void textEditorReturnKeyPressed(juce::TextEditor &editor) override;
+    void textEditorFocusLost(juce::TextEditor &editor) override;
 
-  void textEditorEscapeKeyPressed(juce::TextEditor &editor) override;
+    void mouseWheelMove(const juce::MouseEvent &event,
+                        const juce::MouseWheelDetails &wheel) override;
 
-  void textEditorFocusLost(juce::TextEditor &editor) override;
+    void mouseUp(const juce::MouseEvent &event) override;
 
-  void mouseWheelMove(const juce::MouseEvent &event,
-                      const juce::MouseWheelDetails &wheel) override;
+    void applyTimeEdit(juce::TextEditor &editor);
+    void syncEditorToPosition(juce::TextEditor &editor, double positionSeconds,
+                              bool isRemaining = false);
 
-  void mouseUp(const juce::MouseEvent &event) override;
+    ControlPanel &owner;
+    juce::String totalTimeStaticStr;
 
-  void applyTimeEdit(juce::TextEditor &editor);
-  void syncEditorToPosition(juce::TextEditor &editor, double positionSeconds,
-                            bool isRemaining = false);
+    bool isEditingElapsed{false};
+    bool isEditingRemaining{false};
+    bool isEditingCutLength{false};
 
-  ControlPanel &owner;
-  juce::String totalTimeStaticStr;
-
-  bool isEditingElapsed{false};
-  bool isEditingRemaining{false};
-  bool isEditingCutLength{false};
-
-  void mouseDown(const juce::MouseEvent &event) override;
+    void mouseDown(const juce::MouseEvent &event) override;
 };
 
-#endif 
+#endif

@@ -2,10 +2,10 @@
 #define AUDIOFILER_PLAYBACKTIMERMANAGER_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_core/juce_core.h>
-    #include <juce_events/juce_events.h>
+#include <juce_core/juce_core.h>
+#include <juce_events/juce_events.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 #include "Core/AppEnums.h"
@@ -19,32 +19,32 @@ class InteractionCoordinator;
 /**
  * @class PlaybackTimerManager
  * @brief A domain-level utility that manages high-frequency (60Hz) UI heartbeats.
- * 
- * This manager evacuates high-frequency polling from the UI layer. It monitors 
+ *
+ * This manager evacuates high-frequency polling from the UI layer. It monitors
  * playback progress and keyboard state, notifying registered listeners at 60Hz.
- * 
+ *
  * @ingroup Logic
  */
-class PlaybackTimerManager final : public juce::Timer
-{
-public:
+class PlaybackTimerManager final : public juce::Timer {
+  public:
     /**
      * @class Listener
      * @brief Interface for components that need high-frequency updates.
      */
-    class Listener
-    {
-    public:
+    class Listener {
+      public:
         virtual ~Listener() = default;
 
         /** @brief Called at a 60Hz frequency to trigger UI updates. */
         virtual void playbackTimerTick() = 0;
 
         /** @brief Called at a 60Hz frequency to broadcast the master pulse. */
-        virtual void animationUpdate (float breathingPulse) = 0;
+        virtual void animationUpdate(float breathingPulse) = 0;
 
         /** @brief Called when the active zoom point changes (e.g., via 'Z' key). */
-        virtual void activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) { juce::ignoreUnused(newPoint); }
+        virtual void activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) {
+            juce::ignoreUnused(newPoint);
+        }
     };
 
     /**
@@ -53,45 +53,56 @@ public:
      * @param audioPlayerIn Reference to the audio engine.
      * @param coordinatorIn Reference to the interaction coordinator.
      */
-    PlaybackTimerManager(SessionState& sessionStateIn, AudioPlayer& audioPlayerIn, InteractionCoordinator& coordinatorIn);
-    
+    PlaybackTimerManager(SessionState &sessionStateIn, AudioPlayer &audioPlayerIn,
+                         InteractionCoordinator &coordinatorIn);
+
     /** @brief Destructor. stops the timer. */
     ~PlaybackTimerManager() override;
 
     /** @brief Sets the repeat controller to be ticked by this manager. */
-    void setRepeatController(PlaybackRepeatController* controller) { m_repeatController = controller; }
+    void setRepeatController(PlaybackRepeatController *controller) {
+        m_repeatController = controller;
+    }
 
     /** @brief Sets the provider for the active zoom point. */
-    void setZoomPointProvider(std::function<AppEnums::ActiveZoomPoint()> provider) { m_zoomPointProvider = std::move(provider); }
+    void setZoomPointProvider(std::function<AppEnums::ActiveZoomPoint()> provider) {
+        m_zoomPointProvider = std::move(provider);
+    }
 
     /** @brief Registers a listener for timer ticks. */
-    void addListener(Listener* l);
+    void addListener(Listener *l);
 
     /** @brief Unregisters a listener. */
-    void removeListener(Listener* l);
+    void removeListener(Listener *l);
 
     /** @brief Returns true if the 'z' key is currently held down. */
-    bool isZKeyDown() const { return m_isZKeyDown; }
+    bool isZKeyDown() const {
+        return m_isZKeyDown;
+    }
 
     /** @brief Returns the master animation phase (0.0 to 1.0). */
-    float getMasterPhase() const { return m_masterPhase; }
+    float getMasterPhase() const {
+        return m_masterPhase;
+    }
 
     /** @brief Returns the breathing pulse value (0.0 to 1.0). */
-    float getBreathingPulse() const { return m_breathingPulse; }
+    float getBreathingPulse() const {
+        return m_breathingPulse;
+    }
 
     /** @brief Internal timer callback. */
     void timerCallback() override;
 
-private:
-    SessionState& sessionState;
-    AudioPlayer& audioPlayer;
-    InteractionCoordinator& interactionCoordinator;
-    PlaybackRepeatController* m_repeatController = nullptr;
+  private:
+    SessionState &sessionState;
+    AudioPlayer &audioPlayer;
+    InteractionCoordinator &interactionCoordinator;
+    PlaybackRepeatController *m_repeatController = nullptr;
     std::function<AppEnums::ActiveZoomPoint()> m_zoomPointProvider;
-    
+
     juce::ListenerList<Listener> listeners;
     juce::CriticalSection listenerLock;
-    
+
     bool m_isZKeyDown = false;
     float m_masterPhase = 0.0f;
     float m_breathingPulse = 0.0f;
@@ -99,4 +110,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaybackTimerManager)
 };
 
-#endif 
+#endif

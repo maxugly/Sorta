@@ -4,9 +4,9 @@
 #define AUDIOFILER_SILENCEDETECTOR_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_core/juce_core.h>
+#include <juce_core/juce_core.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
 #include "Utils/Config.h"
@@ -15,11 +15,9 @@ class ControlPanel;
 
 class SilenceThresholdPresenter;
 
-class SilenceDetector
-{
-public:
-
-    explicit SilenceDetector(ControlPanel& ownerPanel);
+class SilenceDetector {
+  public:
+    explicit SilenceDetector(ControlPanel &ownerPanel);
 
     ~SilenceDetector();
 
@@ -27,25 +25,41 @@ public:
 
     void detectOutSilence();
 
-    juce::TextEditor& getInSilenceThresholdEditor() { return inSilenceThresholdEditor; }
+    juce::TextEditor &getInSilenceThresholdEditor() {
+        return inSilenceThresholdEditor;
+    }
 
-    juce::TextEditor& getOutSilenceThresholdEditor() { return outSilenceThresholdEditor; }
+    juce::TextEditor &getOutSilenceThresholdEditor() {
+        return outSilenceThresholdEditor;
+    }
 
-    bool getIsAutoCutInActive() const noexcept { return isAutoCutInActive; }
+    bool getIsAutoCutInActive() const noexcept {
+        return isAutoCutInActive;
+    }
 
-    void setIsAutoCutInActive(bool active) noexcept { isAutoCutInActive = active; }
+    void setIsAutoCutInActive(bool active) noexcept {
+        isAutoCutInActive = active;
+    }
 
-    bool getIsAutoCutOutActive() const noexcept { return isAutoCutOutActive; }
+    bool getIsAutoCutOutActive() const noexcept {
+        return isAutoCutOutActive;
+    }
 
-    void setIsAutoCutOutActive(bool active) noexcept { isAutoCutOutActive = active; }
+    void setIsAutoCutOutActive(bool active) noexcept {
+        isAutoCutOutActive = active;
+    }
 
-    float getCurrentInSilenceThreshold() const noexcept { return currentInSilenceThreshold; }
-    float getCurrentOutSilenceThreshold() const noexcept { return currentOutSilenceThreshold; }
+    float getCurrentInSilenceThreshold() const noexcept {
+        return currentInSilenceThreshold;
+    }
+    float getCurrentOutSilenceThreshold() const noexcept {
+        return currentOutSilenceThreshold;
+    }
 
-private:
+  private:
     friend class SilenceThresholdPresenter;
 
-    ControlPanel& owner;
+    ControlPanel &owner;
     juce::TextEditor inSilenceThresholdEditor;
     juce::TextEditor outSilenceThresholdEditor;
 
@@ -60,4 +74,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SilenceDetector)
 };
 
-#endif 
+#endif

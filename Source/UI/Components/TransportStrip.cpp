@@ -1,15 +1,13 @@
 #include "UI/Components/TransportStrip.h"
-#include "Utils/Config.h"
 #include "Core/AppEnums.h"
+#include "Utils/Config.h"
 
-TransportStrip::TransportStrip(AudioPlayer& player, SessionState& state)
-    : audioPlayer(player), sessionState(state)
-{
+TransportStrip::TransportStrip(AudioPlayer &player, SessionState &state)
+    : audioPlayer(player), sessionState(state) {
     initialiseButtons();
 }
 
-void TransportStrip::initialiseButtons()
-{
+void TransportStrip::initialiseButtons() {
     // Play/Stop Button
     addAndMakeVisible(playStopButton);
     playStopButton.setButtonText(Config::Labels::playButton);
@@ -51,10 +49,9 @@ void TransportStrip::initialiseButtons()
     cutButton.onClick = [this] {
         const bool active = cutButton.getToggleState();
         sessionState.setCutActive(active);
-        
+
         // If enabling cut mode while playing, we might need to jump to cut in
-        if (active && audioPlayer.isPlaying())
-        {
+        if (active && audioPlayer.isPlaying()) {
             const double pos = audioPlayer.getCurrentPosition();
             const double cutIn = sessionState.getCutIn();
             const double cutOut = sessionState.getCutOut();
@@ -64,8 +61,7 @@ void TransportStrip::initialiseButtons()
     };
 }
 
-void TransportStrip::resized()
-{
+void TransportStrip::resized() {
     auto b = getLocalBounds();
     const int buttonWidth = Config::Layout::buttonWidth;
     const int spacing = (int)Config::UI::GroupSpacing;
@@ -81,22 +77,19 @@ void TransportStrip::resized()
     cutButton.setBounds(b.removeFromLeft(buttonWidth));
 }
 
-void TransportStrip::updatePlayButtonText(bool isPlaying)
-{
-    playStopButton.setButtonText(isPlaying ? Config::Labels::stopButton : Config::Labels::playButton);
+void TransportStrip::updatePlayButtonText(bool isPlaying) {
+    playStopButton.setButtonText(isPlaying ? Config::Labels::stopButton
+                                           : Config::Labels::playButton);
 }
 
-void TransportStrip::updateCutModeState(bool isCutModeActive)
-{
+void TransportStrip::updateCutModeState(bool isCutModeActive) {
     cutButton.setToggleState(isCutModeActive, juce::dontSendNotification);
 }
 
-void TransportStrip::updateAutoplayState(bool isAutoplayActive)
-{
+void TransportStrip::updateAutoplayState(bool isAutoplayActive) {
     autoplayButton.setToggleState(isAutoplayActive, juce::dontSendNotification);
 }
 
-void TransportStrip::updateRepeatState(bool isRepeating)
-{
+void TransportStrip::updateRepeatState(bool isRepeating) {
     repeatButton.setToggleState(isRepeating, juce::dontSendNotification);
 }

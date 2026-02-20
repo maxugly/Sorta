@@ -4,40 +4,39 @@
 #define AUDIOFILER_SILENCEDETECTIONPRESENTER_H
 
 #if defined(JUCE_HEADLESS)
-    #include <juce_core/juce_core.h>
+#include <juce_core/juce_core.h>
 #else
-    #include <JuceHeader.h>
+#include <JuceHeader.h>
 #endif
 
-#include "Workers/SilenceWorkerClient.h"
-#include "Core/SilenceAnalysisWorker.h"
 #include "Core/SessionState.h"
+#include "Core/SilenceAnalysisWorker.h"
 #include "Presenters/PlaybackTimerManager.h"
+#include "Workers/SilenceWorkerClient.h"
 
 class ControlPanel;
 
 class AudioPlayer;
 
 class SilenceDetectionPresenter final : public SilenceWorkerClient,
-                                         public SessionState::Listener,
-                                         public PlaybackTimerManager::Listener
-{
-public:
-
-    SilenceDetectionPresenter(ControlPanel& ownerPanel, SessionState& sessionState, AudioPlayer& audioPlayer);
+                                        public SessionState::Listener,
+                                        public PlaybackTimerManager::Listener {
+  public:
+    SilenceDetectionPresenter(ControlPanel &ownerPanel, SessionState &sessionState,
+                              AudioPlayer &audioPlayer);
     ~SilenceDetectionPresenter() override;
 
     /** @brief Called when the playback timer ticks at 60Hz. */
     void playbackTimerTick() override;
-    
+
     /** @brief Updates the UI animation state based on the master pulse. */
     void animationUpdate(float breathingPulse) override;
 
     /** @brief Triggered when the current file in SessionState changes. */
-    void fileChanged(const juce::String& filePath) override;
+    void fileChanged(const juce::String &filePath) override;
 
     /** @brief Triggered when cut preferences (thresholds, active state) change. */
-    void cutPreferenceChanged(const MainDomain::CutPreferences& prefs) override;
+    void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
 
     /** @brief Toggles the auto-cut-in feature in SessionState. */
     void handleAutoCutInToggle(bool isActive);
@@ -49,10 +48,12 @@ public:
     void startSilenceAnalysis(float threshold, bool detectingIn);
 
     /** @brief Returns true if a silence analysis task is currently running. */
-    bool isAnalyzing() const { return silenceWorker.isBusy(); }
+    bool isAnalyzing() const {
+        return silenceWorker.isBusy();
+    }
 
     /** @brief Provides access to the audio engine for analysis workers. */
-    AudioPlayer& getAudioPlayer() override;
+    AudioPlayer &getAudioPlayer() override;
 
     /** @brief Sets the cut-in position in samples. */
     void setCutStart(int sampleIndex) override;
@@ -61,8 +62,8 @@ public:
     void setCutEnd(int sampleIndex) override;
 
     /** @brief Logs a status message to the UI (via ControlPanel). */
-    void logStatusMessage(const juce::String& message, bool isError = false) override;
-    
+    void logStatusMessage(const juce::String &message, bool isError = false) override;
+
     /** @brief Returns true if cut mode is currently active. */
     bool isCutModeActive() const override;
 
@@ -72,13 +73,12 @@ public:
     /** @brief Returns true if auto-cut-out is active. */
     bool isAutoCutOutActive() const override;
 
-private:
-
+  private:
     bool hasLoadedAudio() const;
 
-    ControlPanel& owner;
-    SessionState& sessionState;
-    AudioPlayer& audioPlayer;
+    ControlPanel &owner;
+    SessionState &sessionState;
+    AudioPlayer &audioPlayer;
     SilenceAnalysisWorker silenceWorker;
 
     float lastAutoCutThresholdIn{-1.0f};
@@ -87,4 +87,4 @@ private:
     bool lastAutoCutOutActive{false};
 };
 
-#endif 
+#endif

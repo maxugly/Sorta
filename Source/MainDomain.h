@@ -18,4 +18,4 @@ struct CutPreferences {
     } autoCut;
 };
 
-} 
+} // namespace MainDomain

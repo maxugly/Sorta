@@ -2,8 +2,8 @@
 
 #include "UI/Views/PlaybackCursorGlow.h"
 
-void PlaybackCursorGlow::renderGlow(juce::Graphics& g, int x, int topY, int bottomY, juce::Colour baseColor)
-{
+void PlaybackCursorGlow::renderGlow(juce::Graphics &g, int x, int topY, int bottomY,
+                                    juce::Colour baseColor) {
     const float glowWidth = Config::Layout::Glow::thickness;
 
     juce::ColourGradient gradient(baseColor.withAlpha(0.0f), (float)x - glowWidth, 0.0f,
