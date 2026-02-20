@@ -14,6 +14,7 @@
 class SessionState;
 class AudioPlayer;
 class PlaybackRepeatController;
+class InteractionCoordinator;
 
 /**
  * @class PlaybackTimerManager
@@ -50,8 +51,9 @@ public:
      * @brief Constructor.
      * @param sessionStateIn Reference to the central application state.
      * @param audioPlayerIn Reference to the audio engine.
+     * @param coordinatorIn Reference to the interaction coordinator.
      */
-    PlaybackTimerManager(SessionState& sessionStateIn, AudioPlayer& audioPlayerIn);
+    PlaybackTimerManager(SessionState& sessionStateIn, AudioPlayer& audioPlayerIn, InteractionCoordinator& coordinatorIn);
     
     /** @brief Destructor. stops the timer. */
     ~PlaybackTimerManager() override;
@@ -61,12 +63,6 @@ public:
 
     /** @brief Sets the provider for the active zoom point. */
     void setZoomPointProvider(std::function<AppEnums::ActiveZoomPoint()> provider) { m_zoomPointProvider = std::move(provider); }
-
-    /** @brief Sets a manual override for the zoom point (e.g. from mouse hover). */
-    void setManualZoomPoint(AppEnums::ActiveZoomPoint point);
-
-    /** @brief Returns the current active zoom point. */
-    AppEnums::ActiveZoomPoint getActiveZoomPoint() const { return m_activeZoomPoint; }
 
     /** @brief Registers a listener for timer ticks. */
     void addListener(Listener* l);
@@ -89,6 +85,7 @@ public:
 private:
     SessionState& sessionState;
     AudioPlayer& audioPlayer;
+    InteractionCoordinator& interactionCoordinator;
     PlaybackRepeatController* m_repeatController = nullptr;
     std::function<AppEnums::ActiveZoomPoint()> m_zoomPointProvider;
     
@@ -96,9 +93,6 @@ private:
     juce::CriticalSection listenerLock;
     
     bool m_isZKeyDown = false;
-    bool m_wasZKeyDown = false;
-    AppEnums::ActiveZoomPoint m_activeZoomPoint = AppEnums::ActiveZoomPoint::None;
-    AppEnums::ActiveZoomPoint m_manualZoomPoint = AppEnums::ActiveZoomPoint::None;
     float m_masterPhase = 0.0f;
     float m_breathingPulse = 0.0f;
 

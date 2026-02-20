@@ -19,7 +19,7 @@ FocusTarget FocusManager::getCurrentTarget() const
     if (mouseHandler.isScrubbing())
         return FocusTarget::MouseManual;
 
-    const auto activePoint = owner.getActiveZoomPoint();
+    const auto activePoint = owner.getInteractionCoordinator().getActiveZoomPoint();
     if (activePoint == AppEnums::ActiveZoomPoint::In)
         return FocusTarget::CutIn;
     if (activePoint == AppEnums::ActiveZoomPoint::Out)

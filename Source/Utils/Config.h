@@ -143,6 +143,7 @@ namespace Config {
              static constexpr int mouseHighlightOffset = 2;
              static constexpr int mouseHighlightSize = 5;
              static constexpr float mouseAmplitudeAlpha = 0.7f;
+             static constexpr int glowRadius = 15;
              static constexpr int mouseTextOffset = 5;
              static constexpr float thickness = 4.0f;
              static constexpr float mouseAmplitudeGlowThickness = 3.0f;

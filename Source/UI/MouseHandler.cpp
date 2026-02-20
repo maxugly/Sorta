@@ -61,7 +61,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
 
     clearTextEditorFocusIfNeeded(event);
 
-    if (owner.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
+    if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
     {
         auto zoomBounds = owner.getZoomPopupBounds();
         if (zoomBounds.contains(event.getPosition()))
@@ -87,7 +87,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
                 }
                 else
                 {
-                    double cutPointTime = (owner.getActiveZoomPoint() == AppEnums::ActiveZoomPoint::In)
+                    double cutPointTime = (owner.getInteractionCoordinator().getActiveZoomPoint() == AppEnums::ActiveZoomPoint::In)
                                            ? owner.getCutInPosition() : owner.getCutOutPosition();
 
                     float indicatorX = (float)zoomBounds.getX() + 
@@ -97,7 +97,7 @@ void MouseHandler::mouseDown(const juce::MouseEvent& event)
 
                     if (std::abs(event.x - (int)indicatorX) < 20)
                     {
-                        draggedHandle = (owner.getActiveZoomPoint() == AppEnums::ActiveZoomPoint::In) 
+                        draggedHandle = (owner.getInteractionCoordinator().getActiveZoomPoint() == AppEnums::ActiveZoomPoint::In) 
                                          ? CutMarkerHandle::In : CutMarkerHandle::Out;
                         dragStartMouseOffset = zoomedTime - cutPointTime;
 
@@ -208,7 +208,7 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
         }
     }
 
-    if (interactionStartedInZoom && owner.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None && (draggedHandle != CutMarkerHandle::None || isDragging))
+    if (interactionStartedInZoom && owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None && (draggedHandle != CutMarkerHandle::None || isDragging))
     {
         auto zoomBounds = owner.getZoomPopupBounds();
         if (zoomBounds.contains(event.getPosition()) || draggedHandle != CutMarkerHandle::None || isDragging)
@@ -294,7 +294,7 @@ void MouseHandler::mouseDrag(const juce::MouseEvent& event)
 
 void MouseHandler::mouseUp(const juce::MouseEvent& event)
 {
-    if (owner.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None && (isDragging || draggedHandle != CutMarkerHandle::None || currentPlacementMode != AppEnums::PlacementMode::None))
+    if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None && (isDragging || draggedHandle != CutMarkerHandle::None || currentPlacementMode != AppEnums::PlacementMode::None))
     {
         if (currentPlacementMode != AppEnums::PlacementMode::None)
         {

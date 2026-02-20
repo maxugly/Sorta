@@ -4,9 +4,10 @@
 #include "Utils/UIAnimationHelper.h"
 #include "Utils/Config.h"
 #include "Presenters/PlaybackRepeatController.h"
+#include "UI/InteractionCoordinator.h"
 
-PlaybackTimerManager::PlaybackTimerManager(SessionState& sessionStateIn, AudioPlayer& audioPlayerIn)
-    : sessionState(sessionStateIn), audioPlayer(audioPlayerIn)
+PlaybackTimerManager::PlaybackTimerManager(SessionState& sessionStateIn, AudioPlayer& audioPlayerIn, InteractionCoordinator& coordinatorIn)
+    : sessionState(sessionStateIn), audioPlayer(audioPlayerIn), interactionCoordinator(coordinatorIn)
 {
     startTimerHz(60);
 }
@@ -27,28 +28,11 @@ void PlaybackTimerManager::removeListener(Listener* l)
     listeners.remove(l);
 }
 
-void PlaybackTimerManager::setManualZoomPoint(AppEnums::ActiveZoomPoint point)
-{
-    if (m_manualZoomPoint != point)
-    {
-        m_manualZoomPoint = point;
-        // If we are not overriding with Z, update the active point immediately
-        if (!m_isZKeyDown)
-        {
-            if (m_activeZoomPoint != m_manualZoomPoint)
-            {
-                m_activeZoomPoint = m_manualZoomPoint;
-                listeners.call(&Listener::activeZoomPointChanged, m_activeZoomPoint);
-            }
-        }
-    }
-}
-
 void PlaybackTimerManager::timerCallback()
 {
     const bool isZDown = juce::KeyPress::isKeyCurrentlyDown('z') || juce::KeyPress::isKeyCurrentlyDown('Z');
     
-    const auto lastActivePoint = m_activeZoomPoint;
+    const auto lastActivePoint = interactionCoordinator.getActiveZoomPoint();
 
     if (isZDown != m_isZKeyDown)
     {
@@ -56,16 +40,17 @@ void PlaybackTimerManager::timerCallback()
         if (m_isZKeyDown)
         {
             if (m_zoomPointProvider)
-                m_activeZoomPoint = m_zoomPointProvider();
+                interactionCoordinator.setActiveZoomPoint(m_zoomPointProvider());
         }
         else
         {
-            m_activeZoomPoint = m_manualZoomPoint;
+            interactionCoordinator.setActiveZoomPoint(interactionCoordinator.getManualZoomPoint());
         }
     }
 
-    if (m_activeZoomPoint != lastActivePoint)
-        listeners.call(&Listener::activeZoomPointChanged, m_activeZoomPoint);
+    const auto currentActivePoint = interactionCoordinator.getActiveZoomPoint();
+    if (currentActivePoint != lastActivePoint)
+        listeners.call(&Listener::activeZoomPointChanged, currentActivePoint);
 
     if (m_repeatController != nullptr)
         m_repeatController->tick();

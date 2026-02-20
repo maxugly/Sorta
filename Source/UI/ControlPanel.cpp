@@ -58,7 +58,9 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   addAndMakeVisible(zoomView.get());
   zoomView->setVisible(true);
 
-  playbackTimerManager = std::make_unique<PlaybackTimerManager>(sessionState, getAudioPlayer());
+  interactionCoordinator = std::make_unique<InteractionCoordinator>();
+
+  playbackTimerManager = std::make_unique<PlaybackTimerManager>(sessionState, getAudioPlayer(), *interactionCoordinator);
   playbackTimerManager->addListener(playbackCursorView.get());
   playbackTimerManager->addListener(zoomView.get());
   playbackTimerManager->addListener(cutLayerView.get());
@@ -248,21 +250,8 @@ void ControlPanel::updatePlayButtonText(bool isPlaying) {
     transportStrip->updatePlayButtonText(isPlaying);
 }
 
-AppEnums::ActiveZoomPoint ControlPanel::getActiveZoomPoint() const {
-  if (playbackTimerManager != nullptr)
-    return playbackTimerManager->getActiveZoomPoint();
-  return AppEnums::ActiveZoomPoint::None;
-}
-
-bool ControlPanel::isZKeyDown() const {
-  if (playbackTimerManager != nullptr)
-    return playbackTimerManager->isZKeyDown();
-  return false;
-}
-
 void ControlPanel::playbackTimerTick() {
   updateCutLabels();
-  repaint();
 }
 
 void ControlPanel::activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) {

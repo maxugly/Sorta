@@ -234,7 +234,7 @@ void RepeatPresenter::textEditorFocusLost(juce::TextEditor &editor) {
     applyCutOutFromEditor(newPosition, editor);
   }
 
-  owner.getPlaybackTimerManager().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
+  owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
 }
 
 void RepeatPresenter::mouseDown(const juce::MouseEvent &event) {
@@ -257,7 +257,7 @@ bool RepeatPresenter::applyCutInFromEditor(double newPosition,
     owner.updateCutButtonColors();
     owner.setAutoCutInActive(false);
 
-    if (owner.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
+    if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
       owner.setNeedsJumpToCutIn(true);
 
     editor.setColour(juce::TextEditor::textColourId,
@@ -288,7 +288,7 @@ bool RepeatPresenter::applyCutOutFromEditor(double newPosition,
     owner.updateCutButtonColors();
     owner.setAutoCutOutActive(false);
 
-    if (owner.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
+    if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
       owner.setNeedsJumpToCutIn(true);
 
     editor.setColour(juce::TextEditor::textColourId,
@@ -321,15 +321,15 @@ void RepeatPresenter::syncEditorToPosition(juce::TextEditor &editor,
 
 void RepeatPresenter::mouseEnter(const juce::MouseEvent &event) {
   if (event.eventComponent == &cutInEditor)
-    owner.getPlaybackTimerManager().setManualZoomPoint(AppEnums::ActiveZoomPoint::In);
+    owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::In);
   else if (event.eventComponent == &cutOutEditor)
-    owner.getPlaybackTimerManager().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
+    owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
 }
 
 void RepeatPresenter::mouseExit(const juce::MouseEvent &event) {
   auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
   if (editor != nullptr && !editor->hasKeyboardFocus(false)) {
-    owner.getPlaybackTimerManager().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
+    owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
   }
 }
 

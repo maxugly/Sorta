@@ -31,7 +31,7 @@ void ZoomView::playbackTimerTick()
 
     const auto& timerManager = owner.getPlaybackTimerManager();
     const bool zDown = timerManager.isZKeyDown();
-    const auto activePoint = owner.getActiveZoomPoint();
+    const auto activePoint = owner.getInteractionCoordinator().getActiveZoomPoint();
     const bool isZooming = zDown || activePoint != AppEnums::ActiveZoomPoint::None;
 
     if (currentMouseX != lastMouseX || currentMouseY != lastMouseY)
@@ -125,7 +125,7 @@ void ZoomView::paint(juce::Graphics& g)
         }
         else
         {
-            if (owner.isZKeyDown())
+            if (owner.getPlaybackTimerManager().isZKeyDown())
             {
                 currentLineColor = Config::Colors::mousePlacementMode;
                 currentHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
@@ -195,8 +195,8 @@ void ZoomView::paint(juce::Graphics& g)
         g.drawHorizontalLine(localMouseY, (float)waveformBounds.getX(), (float)waveformBounds.getRight());
     }
 
-    const bool zDown = owner.isZKeyDown();
-    const auto activePoint = owner.getActiveZoomPoint();
+    const bool zDown = owner.getPlaybackTimerManager().isZKeyDown();
+    const auto activePoint = owner.getInteractionCoordinator().getActiveZoomPoint();
 
     if (zDown || activePoint != AppEnums::ActiveZoomPoint::None)
     {

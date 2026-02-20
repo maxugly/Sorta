@@ -2,6 +2,7 @@
 #define AUDIOFILER_CONTROLPANEL_H
 
 #include "Presenters/PlaybackTimerManager.h"
+#include "UI/InteractionCoordinator.h"
 
 class FocusManager;
 #include "Core/AppEnums.h"
@@ -93,8 +94,6 @@ public:
 
   ~ControlPanel() override;
 
-  AppEnums::ActiveZoomPoint getActiveZoomPoint() const;
-
   float getZoomFactor() const { return m_zoomFactor; }
 
   void setZoomFactor(float factor) {
@@ -102,8 +101,6 @@ public:
 
     repaint();
   }
-
-  bool isZKeyDown() const;
 
   void playbackTimerTick() override;
   void animationUpdate (float breathingPulse) override;
@@ -205,6 +202,8 @@ public:
   AudioPlayer &getAudioPlayer() const;
   SessionState &getSessionState() { return sessionState; }
   const SessionState &getSessionState() const { return sessionState; }
+
+  InteractionCoordinator& getInteractionCoordinator() { return *interactionCoordinator; }
 
   AppEnums::ChannelViewMode getChannelViewMode() const {
     return currentChannelViewMode;
@@ -322,6 +321,9 @@ private:
 
   /** @brief Renders the zoom window. */
   std::unique_ptr<ZoomView> zoomView;
+
+  /** @brief Manages transient UI interaction states. */
+  std::unique_ptr<InteractionCoordinator> interactionCoordinator;
 
   /** @brief Manages repeat and autoplay logic. */
   std::unique_ptr<PlaybackRepeatController> playbackRepeatController;

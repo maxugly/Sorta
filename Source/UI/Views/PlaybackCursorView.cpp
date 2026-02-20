@@ -46,7 +46,7 @@ void PlaybackCursorView::playbackTimerTick()
 
         const auto& timerManager = owner.getPlaybackTimerManager();
         const bool zDown = timerManager.isZKeyDown();
-        const auto activePoint = owner.getActiveZoomPoint();
+        const auto activePoint = owner.getInteractionCoordinator().getActiveZoomPoint();
         const bool isZooming = zDown || activePoint != AppEnums::ActiveZoomPoint::None;
 
         if (isZooming && owner.getZoomPopupBounds().translated(-layout.getX(), -layout.getY()).contains(currentX, 10))
@@ -59,7 +59,8 @@ void PlaybackCursorView::playbackTimerTick()
 void PlaybackCursorView::animationUpdate(float breathingPulse)
 {
     juce::ignoreUnused(breathingPulse);
-    repaint();
+    if (lastCursorX >= 0)
+        repaint(lastCursorX - Config::Layout::Glow::glowRadius, 0, Config::Layout::Glow::glowRadius * 2, getHeight());
 }
 
 void PlaybackCursorView::paint(juce::Graphics& g)
