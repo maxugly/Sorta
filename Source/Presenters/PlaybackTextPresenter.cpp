@@ -191,7 +191,7 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
     }
 
     owner.ensureCutOrder();
-    owner.refreshLabels();
+    owner.getBoundaryLogicPresenter().refreshLabels();
   }
 
   updateEditors();
@@ -321,7 +321,7 @@ void PlaybackTextPresenter::mouseWheelMove(
     }
 
     owner.ensureCutOrder();
-    owner.refreshLabels();
+    owner.getBoundaryLogicPresenter().refreshLabels();
   }
 
   updateEditors();

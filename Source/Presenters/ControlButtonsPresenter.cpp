@@ -6,7 +6,8 @@
 #include "Utils/Config.h"
 #include "Presenters/TransportPresenter.h"
 #include "Presenters/SilenceDetectionPresenter.h"
-#include "Presenters/RepeatPresenter.h"
+#include "Presenters/RepeatButtonPresenter.h"
+#include "Presenters/BoundaryLogicPresenter.h"
 #include "Presenters/CutResetPresenter.h"
 #include "UI/MouseHandler.h"
 #include "Workers/SilenceDetector.h"
@@ -24,6 +25,7 @@ void ControlButtonsPresenter::initialiseAllButtons()
     initialiseExitButton();
     initialiseStatsButton();
     initialiseEyeCandyButton();
+    initialiseRepeatButton();
 }
 
 void ControlButtonsPresenter::initialiseOpenButton()
@@ -102,6 +104,11 @@ void ControlButtonsPresenter::initialiseEyeCandyButton()
         owner.getInteractionCoordinator().setShouldShowEyeCandy(owner.eyeCandyButton.getToggleState());
         owner.repaint();
     };
+}
+
+void ControlButtonsPresenter::initialiseRepeatButton()
+{
+    owner.getRepeatButtonPresenter().initialiseButton(owner.eyeCandyButton);
 }
 
 void ControlButtonsPresenter::refreshStates()

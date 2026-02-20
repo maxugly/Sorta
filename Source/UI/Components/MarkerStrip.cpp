@@ -30,7 +30,7 @@ void MarkerStrip::initialiseComponents()
 
     // Timer Editor
     addAndMakeVisible(timerEditor);
-    // Style will be applied by RepeatPresenter::initialiseEditors()
+    // Style will be applied by BoundaryLogicPresenter::initialiseEditors()
     timerEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
 
     // Reset Button

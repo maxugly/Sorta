@@ -48,6 +48,10 @@ class TransportPresenter;
 
 class SilenceDetectionPresenter;
 
+class RepeatButtonPresenter;
+
+class BoundaryLogicPresenter;
+
 class ControlButtonsPresenter;
 
 class CutResetPresenter;
@@ -233,7 +237,8 @@ public:
                       const juce::MouseWheelDetails &wheel) override;
 
   PlaybackTimerManager& getPlaybackTimerManager() { return *playbackTimerManager; }
-  RepeatPresenter& getRepeatPresenter();
+  BoundaryLogicPresenter& getBoundaryLogicPresenter();
+  RepeatButtonPresenter& getRepeatButtonPresenter();
   PlaybackTextPresenter& getPlaybackTextPresenter();
 
 private:
@@ -245,6 +250,8 @@ private:
   friend class CutButtonPresenter;
   friend class CutResetPresenter;
   friend class PlaybackTextPresenter;
+  friend class RepeatButtonPresenter;
+  friend class BoundaryLogicPresenter;
 
   MainComponent &owner;
   /** @brief Reference to the shared application state. */
@@ -275,8 +282,11 @@ private:
   /** @brief Manages file statistics (sample rate, bit depth, etc.). */
   std::unique_ptr<StatsPresenter> statsPresenter;
 
-  /** @brief Manages repeat/loop functionality. */
-  std::unique_ptr<RepeatPresenter> repeatPresenter;
+  /** @brief Manages manual time entry for cut boundaries. */
+  std::unique_ptr<BoundaryLogicPresenter> boundaryLogicPresenter;
+
+  /** @brief Manages repeat/loop toggle button. */
+  std::unique_ptr<RepeatButtonPresenter> repeatButtonPresenter;
 
   /** @brief Updates UI state based on SessionState changes. */
   std::unique_ptr<ControlStatePresenter> controlStatePresenter;

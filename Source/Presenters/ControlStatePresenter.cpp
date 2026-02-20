@@ -4,6 +4,9 @@
 
 #include "UI/ControlPanel.h"
 #include "Presenters/StatsPresenter.h"
+#include "Presenters/PlaybackTextPresenter.h"
+#include "Presenters/RepeatButtonPresenter.h"
+#include "Presenters/BoundaryLogicPresenter.h"
 #include "Workers/SilenceDetector.h"
 #include "Core/AudioPlayer.h"
 
@@ -18,6 +21,10 @@ void ControlStatePresenter::refreshStates()
 
     updateGeneralButtonStates(enabled);
     updateCutModeControlStates(owner.isCutModeActive(), enabled);
+
+    owner.getBoundaryLogicPresenter().refreshLabels();
+    owner.getPlaybackTextPresenter().updateEditors();
+    owner.getRepeatButtonPresenter().cutPreferenceChanged(owner.getSessionState().getCutPrefs());
 }
 
 void ControlStatePresenter::updateGeneralButtonStates(bool enabled)

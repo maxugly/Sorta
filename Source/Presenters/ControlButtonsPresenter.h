@@ -15,6 +15,8 @@ public:
 
   void refreshStates();
 
+  void initialiseRepeatButton();
+
 private:
 
     void initialiseOpenButton();

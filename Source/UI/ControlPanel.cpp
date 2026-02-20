@@ -9,7 +9,8 @@
 #include "UI/FocusManager.h"
 #include "UI/LayoutManager.h"
 #include "Presenters/CutButtonPresenter.h"
-#include "Presenters/RepeatPresenter.h"
+#include "Presenters/RepeatButtonPresenter.h"
+#include "Presenters/BoundaryLogicPresenter.h"
 #include "Presenters/CutResetPresenter.h"
 #include "MainComponent.h"
 #include "UI/Views/PlaybackCursorView.h"
@@ -41,6 +42,9 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
 
   interactionCoordinator = std::make_unique<InteractionCoordinator>();
 
+  // Initialize Timer Manager early so providers can use it
+  playbackTimerManager = std::make_unique<PlaybackTimerManager>(sessionState, getAudioPlayer(), *interactionCoordinator);
+
   waveformView = std::make_unique<WaveformView>(getAudioPlayer().getWaveformManager());
   addAndMakeVisible(waveformView.get());
 
@@ -65,15 +69,15 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   overlayView = std::make_unique<OverlayView>(*this);
   addAndMakeVisible(overlayView.get());
 
-  playbackTimerManager = std::make_unique<PlaybackTimerManager>(sessionState, getAudioPlayer(), *interactionCoordinator);
+  // Register early listeners
   playbackTimerManager->addListener(playbackCursorView.get());
   playbackTimerManager->addListener(zoomView.get());
   playbackTimerManager->addListener(cutLayerView.get());
   playbackTimerManager->addListener(overlayView.get());
 
   playbackRepeatController = std::make_unique<PlaybackRepeatController>(getAudioPlayer(), *this);
-
   playbackTimerManager->setRepeatController(playbackRepeatController.get());
+
   playbackTimerManager->setZoomPointProvider([this]() {
     auto dragged = getMouseHandler().getDraggedHandle();
     if (dragged == MouseHandler::CutMarkerHandle::In)
@@ -83,18 +87,13 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
     return AppEnums::ActiveZoomPoint::None;
   });
 
-  transportStrip = std::make_unique<TransportStrip>(getAudioPlayer(), sessionState);
-  addAndMakeVisible(transportStrip.get());
-
   statsPresenter = std::make_unique<StatsPresenter>(*this);
   silenceDetectionPresenter = std::make_unique<SilenceDetectionPresenter>(*this, sessionState, *owner.getAudioPlayer());
   playbackTextPresenter = std::make_unique<PlaybackTextPresenter>(*this);
+  playbackTextPresenter->initialiseEditors();
 
-  buttonPresenter = std::make_unique<ControlButtonsPresenter>(*this);
-  buttonPresenter->initialiseAllButtons();
-
-  cutButtonPresenter = std::make_unique<CutButtonPresenter>(*this);
-  cutResetPresenter = std::make_unique<CutResetPresenter>(*this);
+  transportStrip = std::make_unique<TransportStrip>(getAudioPlayer(), sessionState);
+  addAndMakeVisible(transportStrip.get());
 
   inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In, getAudioPlayer(), sessionState, *silenceDetector);
   inStrip->onMarkerRightClick = [this] {
@@ -112,15 +111,26 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
   };
   addAndMakeVisible(outStrip.get());
 
-  repeatPresenter = std::make_unique<RepeatPresenter>(*this, *silenceDetector,
-                                                  inStrip->getTimerEditor(), outStrip->getTimerEditor());
-  repeatPresenter->initialiseEditors();
+  repeatButtonPresenter = std::make_unique<RepeatButtonPresenter>(*this, getAudioPlayer(), sessionState);
+  repeatButtonPresenter->initialiseButton(transportStrip->getRepeatButton());
 
-  playbackTimerManager->addListener(repeatPresenter.get());
+  boundaryLogicPresenter = std::make_unique<BoundaryLogicPresenter>(*this, *silenceDetector,
+                                                                    inStrip->getTimerEditor(),
+                                                                    outStrip->getTimerEditor());
+  boundaryLogicPresenter->initialiseEditors();
+
+  buttonPresenter = std::make_unique<ControlButtonsPresenter>(*this);
+  buttonPresenter->initialiseAllButtons();
+
+  cutButtonPresenter = std::make_unique<CutButtonPresenter>(*this);
+  cutResetPresenter = std::make_unique<CutResetPresenter>(*this);
+
+  // Register remaining listeners
+  playbackTimerManager->addListener(boundaryLogicPresenter.get());
   playbackTimerManager->addListener(playbackTextPresenter.get());
 
-  inStrip->setPresenter(repeatPresenter.get());
-  outStrip->setPresenter(repeatPresenter.get());
+  inStrip->setPresenter(boundaryLogicPresenter.get());
+  outStrip->setPresenter(boundaryLogicPresenter.get());
 
   controlStatePresenter = std::make_unique<ControlStatePresenter>(*this);
   transportPresenter = std::make_unique<TransportPresenter>(*this);
@@ -196,8 +206,8 @@ void ControlPanel::updatePlayButtonText(bool isPlaying) {
 }
 
 void ControlPanel::refreshLabels() {
-  if (repeatPresenter != nullptr)
-    repeatPresenter->refreshLabels();
+  if (boundaryLogicPresenter != nullptr)
+    boundaryLogicPresenter->refreshLabels();
   if (playbackTextPresenter != nullptr)
     playbackTextPresenter->updateEditors();
 }
@@ -208,6 +218,7 @@ void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences& prefs)
   if (transportStrip != nullptr) {
     transportStrip->updateAutoplayState(prefs.autoplay);
     transportStrip->updateCutModeState(prefs.active);
+    transportStrip->updateRepeatState(getAudioPlayer().isRepeating());
   }
 
   if (inStrip != nullptr)
@@ -294,8 +305,8 @@ void ControlPanel::updateUIFromState() {
 
   updateComponentStates();
 
-  if (repeatPresenter != nullptr)
-    repeatPresenter->refreshLabels();
+  if (boundaryLogicPresenter != nullptr)
+    boundaryLogicPresenter->refreshLabels();
   if (playbackTextPresenter != nullptr)
     playbackTextPresenter->updateEditors();
 
@@ -359,8 +370,8 @@ void ControlPanel::updateStatsFromAudio() {
 }
 
 void ControlPanel::ensureCutOrder() {
-  if (repeatPresenter != nullptr)
-    repeatPresenter->ensureCutOrder();
+  if (boundaryLogicPresenter != nullptr)
+    boundaryLogicPresenter->ensureCutOrder();
 }
 
 void ControlPanel::setShouldShowStats(bool shouldShowStatsParam) {
@@ -388,7 +399,8 @@ AudioPlayer &ControlPanel::getAudioPlayer() const {
   return *owner.getAudioPlayer();
 }
 
-RepeatPresenter& ControlPanel::getRepeatPresenter() { return *repeatPresenter; }
+BoundaryLogicPresenter& ControlPanel::getBoundaryLogicPresenter() { return *boundaryLogicPresenter; }
+RepeatButtonPresenter& ControlPanel::getRepeatButtonPresenter() { return *repeatButtonPresenter; }
 PlaybackTextPresenter& ControlPanel::getPlaybackTextPresenter() { return *playbackTextPresenter; }
 
 const MouseHandler &ControlPanel::getMouseHandler() const {
@@ -406,13 +418,13 @@ juce::TextEditor &ControlPanel::getStatsDisplay() {
 }
 
 void ControlPanel::setCutStart(int sampleIndex) {
-  if (silenceDetectionPresenter != nullptr)
-    silenceDetectionPresenter->setCutStart(sampleIndex);
+  if (boundaryLogicPresenter != nullptr)
+    boundaryLogicPresenter->setCutStartFromSample(sampleIndex);
 }
 
 void ControlPanel::setCutEnd(int sampleIndex) {
-  if (silenceDetectionPresenter != nullptr)
-    silenceDetectionPresenter->setCutEnd(sampleIndex);
+  if (boundaryLogicPresenter != nullptr)
+    boundaryLogicPresenter->setCutEndFromSample(sampleIndex);
 }
 
 juce::String ControlPanel::formatTime(double seconds) const {
@@ -446,6 +458,7 @@ void ControlPanel::mouseExit(const juce::MouseEvent &event) {
 
 void ControlPanel::mouseWheelMove(const juce::MouseEvent &event,
                                   const juce::MouseWheelDetails &wheel) {
+  if (wheel.deltaY == 0.0f) return;
   getMouseHandler().mouseWheelMove(event, wheel);
 }
 
