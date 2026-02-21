@@ -21,10 +21,6 @@ class SilenceDetector {
 
     ~SilenceDetector();
 
-    void detectInSilence();
-
-    void detectOutSilence();
-
     juce::TextEditor &getInSilenceThresholdEditor() {
         return inSilenceThresholdEditor;
     }

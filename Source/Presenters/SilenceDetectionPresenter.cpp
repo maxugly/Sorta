@@ -71,10 +71,13 @@ void SilenceDetectionPresenter::fileChanged(const juce::String &filePath) {
 
 void SilenceDetectionPresenter::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) {
     const auto &autoCut = prefs.autoCut;
+
+    // Check for significant change (> 0.01)
     const bool inThresholdChanged =
-        !juce::exactlyEqual(autoCut.thresholdIn, lastAutoCutThresholdIn);
+        std::abs(autoCut.thresholdIn - lastAutoCutThresholdIn) > 0.01001f;
     const bool outThresholdChanged =
-        !juce::exactlyEqual(autoCut.thresholdOut, lastAutoCutThresholdOut);
+        std::abs(autoCut.thresholdOut - lastAutoCutThresholdOut) > 0.01001f;
+
     const bool inActiveChanged = autoCut.inActive != lastAutoCutInActive;
     const bool outActiveChanged = autoCut.outActive != lastAutoCutOutActive;
 

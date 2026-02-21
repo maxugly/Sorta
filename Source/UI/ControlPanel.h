@@ -242,10 +242,6 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
 
     juce::TextEditor &getStatsDisplay();
 
-    void setCutStart(int sampleIndex);
-
-    void setCutEnd(int sampleIndex);
-
     juce::String formatTime(double seconds) const;
     const juce::LookAndFeel &getLookAndFeel() const;
     FocusManager &getFocusManager() const {

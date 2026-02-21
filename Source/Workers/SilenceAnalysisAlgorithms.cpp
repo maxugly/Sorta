@@ -1,5 +1,3 @@
-
-
 #include "Workers/SilenceAnalysisAlgorithms.h"
 #include <algorithm>
 #include <cmath>
@@ -28,9 +26,13 @@ juce::int64 SilenceAnalysisAlgorithms::findSilenceIn(juce::AudioFormatReader &re
         if (!reader.read(&buffer, 0, numThisTime, currentPos, true, true))
             return -1;
 
-        for (int sample = 0; sample < numThisTime; ++sample) {
-            if (thread != nullptr && thread->threadShouldExit())
+        if (thread != nullptr) {
+            if (thread->threadShouldExit())
                 return -1;
+            thread->wait(1);
+        }
+
+        for (int sample = 0; sample < numThisTime; ++sample) {
             for (int channel = 0; channel < buffer.getNumChannels(); ++channel) {
                 if (std::abs(buffer.getSample(channel, sample)) > threshold) {
                     return currentPos + sample;
@@ -60,9 +62,13 @@ juce::int64 SilenceAnalysisAlgorithms::findSilenceOut(juce::AudioFormatReader &r
         if (!reader.read(&buffer, 0, numThisTime, startSample, true, true))
             return -1;
 
-        for (int sample = numThisTime - 1; sample >= 0; --sample) {
-            if (thread != nullptr && thread->threadShouldExit())
+        if (thread != nullptr) {
+            if (thread->threadShouldExit())
                 return -1;
+            thread->wait(1);
+        }
+
+        for (int sample = numThisTime - 1; sample >= 0; --sample) {
             for (int channel = 0; channel < buffer.getNumChannels(); ++channel) {
                 if (std::abs(buffer.getSample(channel, sample)) > threshold) {
                     return startSample + sample;

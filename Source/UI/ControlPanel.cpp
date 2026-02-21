@@ -235,12 +235,6 @@ void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences &prefs)
     if (silenceDetector != nullptr) {
         silenceDetector->setIsAutoCutInActive(prefs.autoCut.inActive);
         silenceDetector->setIsAutoCutOutActive(prefs.autoCut.outActive);
-
-        if (prefs.autoCut.inActive && getAudioPlayer().getThumbnail().getTotalLength() > 0.0)
-            silenceDetector->detectInSilence();
-
-        if (prefs.autoCut.outActive && getAudioPlayer().getThumbnail().getTotalLength() > 0.0)
-            silenceDetector->detectOutSilence();
     }
 
     updateComponentStates();
@@ -324,14 +318,10 @@ void ControlPanel::updateUIFromState() {
 
 void ControlPanel::setAutoCutInActive(bool isActive) {
     sessionState.setAutoCutInActive(isActive);
-    if (inStrip != nullptr)
-        inStrip->updateAutoCutState(isActive);
 }
 
 void ControlPanel::setAutoCutOutActive(bool isActive) {
     sessionState.setAutoCutOutActive(isActive);
-    if (outStrip != nullptr)
-        outStrip->updateAutoCutState(isActive);
 }
 
 void ControlPanel::toggleStats() {
@@ -432,16 +422,6 @@ MouseHandler &ControlPanel::getMouseHandler() {
 juce::TextEditor &ControlPanel::getStatsDisplay() {
     jassert(statsPresenter != nullptr);
     return statsPresenter->getDisplay();
-}
-
-void ControlPanel::setCutStart(int sampleIndex) {
-    if (boundaryLogicPresenter != nullptr)
-        boundaryLogicPresenter->setCutStartFromSample(sampleIndex);
-}
-
-void ControlPanel::setCutEnd(int sampleIndex) {
-    if (boundaryLogicPresenter != nullptr)
-        boundaryLogicPresenter->setCutEndFromSample(sampleIndex);
 }
 
 juce::String ControlPanel::formatTime(double seconds) const {

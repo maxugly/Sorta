@@ -2,7 +2,6 @@
 
 #include "Workers/SilenceDetector.h"
 #include "Core/AudioPlayer.h"
-#include "Presenters/SilenceDetectionPresenter.h"
 #include "Presenters/SilenceThresholdPresenter.h"
 #include "UI/ControlPanel.h"
 
@@ -14,12 +13,3 @@ SilenceDetector::SilenceDetector(ControlPanel &ownerPanel)
 
 SilenceDetector::~SilenceDetector() = default;
 
-void SilenceDetector::detectInSilence() {
-    if (auto *presenter = owner.getSilenceDetectionPresenter())
-        presenter->startSilenceAnalysis(currentInSilenceThreshold, true);
-}
-
-void SilenceDetector::detectOutSilence() {
-    if (auto *presenter = owner.getSilenceDetectionPresenter())
-        presenter->startSilenceAnalysis(currentOutSilenceThreshold, false);
-}

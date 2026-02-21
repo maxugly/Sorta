@@ -301,8 +301,6 @@ void BoundaryLogicPresenter::setCutInPosition(double positionSeconds) {
 
     if (silenceDetector.getIsAutoCutInActive() && newPos >= currentOut) {
         setCutOutPosition(totalLength);
-        if (silenceDetector.getIsAutoCutOutActive())
-            silenceDetector.detectOutSilence();
     }
 
     audioPlayer.setPlayheadPosition(audioPlayer.getCurrentPosition());
@@ -323,8 +321,6 @@ void BoundaryLogicPresenter::setCutOutPosition(double positionSeconds) {
 
     if (silenceDetector.getIsAutoCutOutActive() && newPos <= currentIn) {
         setCutInPosition(0.0);
-        if (silenceDetector.getIsAutoCutInActive())
-            silenceDetector.detectInSilence();
     }
 
     audioPlayer.setPlayheadPosition(audioPlayer.getCurrentPosition());

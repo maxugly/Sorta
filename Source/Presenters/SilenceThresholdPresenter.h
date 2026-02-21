@@ -14,13 +14,16 @@ class ControlPanel;
 class SilenceDetector;
 
 class SilenceThresholdPresenter final : private juce::TextEditor::Listener,
-                                        public juce::MouseListener {
+                                        public juce::MouseListener,
+                                        private juce::Timer {
   public:
     SilenceThresholdPresenter(SilenceDetector &detectorIn, ControlPanel &ownerPanel);
 
     ~SilenceThresholdPresenter() override;
 
   private:
+    void timerCallback() override;
+
     void configureEditor(juce::TextEditor &editor, float initialValue, const juce::String &tooltip);
 
     void textEditorTextChanged(juce::TextEditor &editor) override;
@@ -44,6 +47,12 @@ class SilenceThresholdPresenter final : private juce::TextEditor::Listener,
 
     SilenceDetector &detector;
     ControlPanel &owner;
+
+    struct PendingThreshold {
+        float value{0.0f};
+        bool isIn{true};
+        bool active{false};
+    } pendingIn, pendingOut;
 };
 
 #endif

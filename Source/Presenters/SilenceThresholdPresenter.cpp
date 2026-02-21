@@ -20,10 +20,27 @@ SilenceThresholdPresenter::SilenceThresholdPresenter(SilenceDetector &detectorIn
 }
 
 SilenceThresholdPresenter::~SilenceThresholdPresenter() {
+    stopTimer();
     detector.inSilenceThresholdEditor.removeListener(this);
     detector.inSilenceThresholdEditor.removeMouseListener(this);
     detector.outSilenceThresholdEditor.removeListener(this);
     detector.outSilenceThresholdEditor.removeMouseListener(this);
+}
+
+void SilenceThresholdPresenter::timerCallback() {
+    stopTimer();
+
+    if (pendingIn.active) {
+        detector.currentInSilenceThreshold = pendingIn.value;
+        owner.getSessionState().setThresholdIn(pendingIn.value);
+        pendingIn.active = false;
+    }
+
+    if (pendingOut.active) {
+        detector.currentOutSilenceThreshold = pendingOut.value;
+        owner.getSessionState().setThresholdOut(pendingOut.value);
+        pendingOut.active = false;
+    }
 }
 
 void SilenceThresholdPresenter::configureEditor(juce::TextEditor &editor, float initialValue,
@@ -115,18 +132,16 @@ void SilenceThresholdPresenter::updateThresholdFromEditorIfValid(juce::TextEdito
     if (isInEditor(editor)) {
         if (detector.currentInSilenceThreshold == normalized)
             return;
-        detector.currentInSilenceThreshold = normalized;
-        owner.getSessionState().setThresholdIn(normalized);
-        if (detector.getIsAutoCutInActive())
-            detector.detectInSilence();
+        pendingIn.value = normalized;
+        pendingIn.active = true;
     } else {
         if (detector.currentOutSilenceThreshold == normalized)
             return;
-        detector.currentOutSilenceThreshold = normalized;
-        owner.getSessionState().setThresholdOut(normalized);
-        if (detector.getIsAutoCutOutActive())
-            detector.detectOutSilence();
+        pendingOut.value = normalized;
+        pendingOut.active = true;
     }
+
+    startTimer(250);
 }
 
 void SilenceThresholdPresenter::restoreEditorToCurrentValue(juce::TextEditor &editor) {
