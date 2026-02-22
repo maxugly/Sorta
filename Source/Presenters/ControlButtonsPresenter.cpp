@@ -24,21 +24,24 @@ void ControlButtonsPresenter::initialiseAllButtons() {
 }
 
 void ControlButtonsPresenter::initialiseOpenButton() {
-    owner.addAndMakeVisible(owner.openButton);
-    owner.openButton.setButtonText(Config::Labels::openButton);
-    owner.openButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Alone);
-    owner.openButton.onClick = [this] { owner.invokeOwnerOpenDialog(); };
+    if (owner.topBarView == nullptr) return;
+    auto& btn = owner.topBarView->openButton;
+    btn.setButtonText(Config::Labels::openButton);
+    btn.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Alone);
+    btn.onClick = [this] { owner.invokeOwnerOpenDialog(); };
 }
 
 void ControlButtonsPresenter::initialiseModeButton() {
-    owner.addAndMakeVisible(owner.modeButton);
-    owner.modeButton.setButtonText(Config::Labels::viewModeClassic);
-    owner.modeButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
-    owner.modeButton.setClickingTogglesState(true);
-    owner.modeButton.onClick = [this] {
-        owner.currentMode = owner.modeButton.getToggleState() ? AppEnums::ViewMode::Overlay
+    if (owner.topBarView == nullptr) return;
+    auto& btn = owner.topBarView->modeButton;
+    btn.setButtonText(Config::Labels::viewModeClassic);
+    btn.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
+    btn.setClickingTogglesState(true);
+    btn.onClick = [this] {
+        if (owner.topBarView == nullptr) return;
+        owner.currentMode = owner.topBarView->modeButton.getToggleState() ? AppEnums::ViewMode::Overlay
                                                               : AppEnums::ViewMode::Classic;
-        owner.modeButton.setButtonText(owner.currentMode == AppEnums::ViewMode::Classic
+        owner.topBarView->modeButton.setButtonText(owner.currentMode == AppEnums::ViewMode::Classic
                                            ? Config::Labels::viewModeClassic
                                            : Config::Labels::viewModeOverlay);
         owner.resized();
@@ -47,16 +50,18 @@ void ControlButtonsPresenter::initialiseModeButton() {
 }
 
 void ControlButtonsPresenter::initialiseChannelViewButton() {
-    owner.addAndMakeVisible(owner.channelViewButton);
-    owner.channelViewButton.setButtonText(Config::Labels::channelViewMono);
-    owner.channelViewButton.getProperties().set("GroupPosition",
+    if (owner.topBarView == nullptr) return;
+    auto& btn = owner.topBarView->channelViewButton;
+    btn.setButtonText(Config::Labels::channelViewMono);
+    btn.getProperties().set("GroupPosition",
                                                 (int)AppEnums::GroupPosition::Right);
-    owner.channelViewButton.setClickingTogglesState(true);
-    owner.channelViewButton.onClick = [this] {
-        owner.currentChannelViewMode = owner.channelViewButton.getToggleState()
+    btn.setClickingTogglesState(true);
+    btn.onClick = [this] {
+        if (owner.topBarView == nullptr) return;
+        owner.currentChannelViewMode = owner.topBarView->channelViewButton.getToggleState()
                                            ? AppEnums::ChannelViewMode::Stereo
                                            : AppEnums::ChannelViewMode::Mono;
-        owner.channelViewButton.setButtonText(owner.currentChannelViewMode ==
+        owner.topBarView->channelViewButton.setButtonText(owner.currentChannelViewMode ==
                                                       AppEnums::ChannelViewMode::Mono
                                                   ? Config::Labels::channelViewMono
                                                   : Config::Labels::channelViewStereo);
@@ -67,38 +72,44 @@ void ControlButtonsPresenter::initialiseChannelViewButton() {
 }
 
 void ControlButtonsPresenter::initialiseExitButton() {
-    owner.addAndMakeVisible(owner.exitButton);
-    owner.exitButton.setButtonText(Config::Labels::exitButton);
-    owner.exitButton.setColour(juce::TextButton::buttonColourId, Config::Colors::Button::exit);
-    owner.exitButton.onClick = [] { juce::JUCEApplication::getInstance()->systemRequestedQuit(); };
+    if (owner.topBarView == nullptr) return;
+    auto& btn = owner.topBarView->exitButton;
+    btn.setButtonText(Config::Labels::exitButton);
+    btn.setColour(juce::TextButton::buttonColourId, Config::Colors::Button::exit);
+    btn.onClick = [] { juce::JUCEApplication::getInstance()->systemRequestedQuit(); };
 }
 
 void ControlButtonsPresenter::initialiseStatsButton() {
-    owner.addAndMakeVisible(owner.statsButton);
-    owner.statsButton.setButtonText(Config::Labels::statsButton);
-    owner.statsButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
-    owner.statsButton.setClickingTogglesState(true);
-    owner.statsButton.onClick = [this] {
-        owner.setShouldShowStats(owner.statsButton.getToggleState());
+    if (owner.topBarView == nullptr) return;
+    auto& btn = owner.topBarView->statsButton;
+    btn.setButtonText(Config::Labels::statsButton);
+    btn.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
+    btn.setClickingTogglesState(true);
+    btn.onClick = [this] {
+        if (owner.topBarView == nullptr) return;
+        owner.setShouldShowStats(owner.topBarView->statsButton.getToggleState());
         owner.updateComponentStates();
     };
 }
 
 void ControlButtonsPresenter::initialiseEyeCandyButton() {
-    owner.addAndMakeVisible(owner.eyeCandyButton);
-    owner.eyeCandyButton.setButtonText("*");
-    owner.eyeCandyButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Alone);
-    owner.eyeCandyButton.setClickingTogglesState(true);
-    owner.eyeCandyButton.setToggleState(owner.getInteractionCoordinator().shouldShowEyeCandy(),
+    if (owner.topBarView == nullptr) return;
+    auto& btn = owner.topBarView->eyeCandyButton;
+    btn.setButtonText("*");
+    btn.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Alone);
+    btn.setClickingTogglesState(true);
+    btn.setToggleState(owner.getInteractionCoordinator().shouldShowEyeCandy(),
                                         juce::dontSendNotification);
-    owner.eyeCandyButton.onClick = [this] {
+    btn.onClick = [this] {
+        if (owner.topBarView == nullptr) return;
         owner.getInteractionCoordinator().setShouldShowEyeCandy(
-            owner.eyeCandyButton.getToggleState());
+            owner.topBarView->eyeCandyButton.getToggleState());
         owner.repaint();
     };
 }
 
 void ControlButtonsPresenter::refreshStates() {
-    owner.eyeCandyButton.setToggleState(owner.getInteractionCoordinator().shouldShowEyeCandy(),
-                                        juce::dontSendNotification);
+    if (owner.topBarView != nullptr)
+        owner.topBarView->eyeCandyButton.setToggleState(owner.getInteractionCoordinator().shouldShowEyeCandy(),
+                                            juce::dontSendNotification);
 }

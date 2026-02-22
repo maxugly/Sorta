@@ -77,12 +77,12 @@ void ControlPanel::setupViews() {
 
     overlayView = std::make_unique<OverlayView>(*this);
     addAndMakeVisible(overlayView.get());
+
+    topBarView = std::make_unique<TopBarView>(*this);
+    addAndMakeVisible(topBarView.get());
 }
 
 void ControlPanel::setupStrips() {
-    transportStrip = std::make_unique<TransportStrip>(getAudioPlayer(), sessionState);
-    addAndMakeVisible(transportStrip.get());
-
     inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In, getAudioPlayer(),
                                             sessionState, *silenceDetector);
     inStrip->onMarkerRightClick = [this] {
@@ -114,7 +114,8 @@ void ControlPanel::setupPresenters() {
 
     repeatButtonPresenter =
         std::make_unique<RepeatButtonPresenter>(*this, getAudioPlayer(), sessionState);
-    repeatButtonPresenter->initialiseButton(transportStrip->getRepeatButton());
+    if (auto* ts = getTransportStrip())
+        repeatButtonPresenter->initialiseButton(ts->getRepeatButton());
 
     boundaryLogicPresenter = std::make_unique<BoundaryLogicPresenter>(
         *this, *silenceDetector, inStrip->getTimerEditor(), outStrip->getTimerEditor());
@@ -208,8 +209,8 @@ void ControlPanel::paint(juce::Graphics &g) {
 }
 
 void ControlPanel::updatePlayButtonText(bool isPlaying) {
-    if (transportStrip != nullptr)
-        transportStrip->updatePlayButtonText(isPlaying);
+    if (auto* ts = getTransportStrip())
+        ts->updatePlayButtonText(isPlaying);
 }
 
 void ControlPanel::refreshLabels() {
@@ -222,9 +223,9 @@ void ControlPanel::refreshLabels() {
 void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) {
     m_isCutModeActive = prefs.active;
 
-    if (transportStrip != nullptr) {
-        transportStrip->updateAutoplayState(prefs.autoplay);
-        transportStrip->updateCutModeState(prefs.active);
+    if (auto* ts = getTransportStrip()) {
+        ts->updateAutoplayState(prefs.autoplay);
+        ts->updateCutModeState(prefs.active);
     }
 
     if (inStrip != nullptr)
@@ -283,9 +284,9 @@ void ControlPanel::updateUIFromState() {
 
     m_isCutModeActive = prefs.active;
 
-    if (transportStrip != nullptr) {
-        transportStrip->updateAutoplayState(prefs.autoplay);
-        transportStrip->updateCutModeState(prefs.active);
+    if (auto* ts = getTransportStrip()) {
+        ts->updateAutoplayState(prefs.autoplay);
+        ts->updateCutModeState(prefs.active);
     }
 
     if (inStrip != nullptr)
@@ -329,22 +330,26 @@ void ControlPanel::toggleStats() {
         return;
 
     statsPresenter->toggleVisibility();
-    statsButton.setToggleState(statsPresenter->isShowingStats(), juce::dontSendNotification);
+    if (topBarView != nullptr)
+        topBarView->statsButton.setToggleState(statsPresenter->isShowingStats(),
+                                              juce::dontSendNotification);
 
     updateComponentStates();
 }
 
 void ControlPanel::triggerModeButton() {
-    modeButton.triggerClick();
+    if (topBarView != nullptr)
+        topBarView->modeButton.triggerClick();
 }
 
 void ControlPanel::triggerChannelViewButton() {
-    channelViewButton.triggerClick();
+    if (topBarView != nullptr)
+        topBarView->channelViewButton.triggerClick();
 }
 
 void ControlPanel::triggerRepeatButton() {
-    if (transportStrip != nullptr)
-        transportStrip->getRepeatButton().triggerClick();
+    if (auto* ts = getTransportStrip())
+        ts->getRepeatButton().triggerClick();
 }
 
 void ControlPanel::resetIn() {

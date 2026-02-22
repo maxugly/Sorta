@@ -25,8 +25,10 @@ void ControlStatePresenter::refreshStates() {
 }
 
 void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
-    owner.openButton.setEnabled(true);
-    owner.exitButton.setEnabled(true);
+    if (owner.topBarView != nullptr) {
+        owner.topBarView->openButton.setEnabled(true);
+        owner.topBarView->exitButton.setEnabled(true);
+    }
 
     if (auto *ts = owner.getTransportStrip()) {
         ts->getRepeatButton().setEnabled(true);
@@ -36,9 +38,11 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
         ts->getStopButton().setEnabled(enabled);
     }
 
-    owner.modeButton.setEnabled(enabled);
-    owner.statsButton.setEnabled(enabled);
-    owner.channelViewButton.setEnabled(enabled);
+    if (owner.topBarView != nullptr) {
+        owner.topBarView->modeButton.setEnabled(enabled);
+        owner.topBarView->statsButton.setEnabled(enabled);
+        owner.topBarView->channelViewButton.setEnabled(enabled);
+    }
 
     owner.elapsedTimeEditor.setEnabled(enabled);
     owner.remainingTimeEditor.setEnabled(enabled);

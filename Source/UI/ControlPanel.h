@@ -11,6 +11,7 @@ class FocusManager;
 #include "UI/Components/MarkerStrip.h"
 #include "UI/Components/TransportButton.h"
 #include "UI/Components/TransportStrip.h"
+#include "UI/Views/TopBarView.h"
 #include "UI/LookAndFeel/ModernLookAndFeel.h"
 #include "UI/MouseHandler.h"
 #include "Utils/Config.h"
@@ -219,7 +220,7 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
     }
 
     TransportStrip *getTransportStrip() {
-        return transportStrip.get();
+        return topBarView != nullptr ? topBarView->transportStrip.get() : nullptr;
     }
     MarkerStrip *getInStrip() {
         return inStrip.get();
@@ -346,9 +347,7 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
     /** @brief Manages repeat and autoplay logic. */
     std::unique_ptr<PlaybackRepeatController> playbackRepeatController;
 
-    juce::TextButton openButton, modeButton, exitButton, statsButton, channelViewButton,
-        eyeCandyButton;
-    std::unique_ptr<TransportStrip> transportStrip;
+    std::unique_ptr<TopBarView> topBarView;
     std::unique_ptr<MarkerStrip> inStrip, outStrip;
     juce::TextEditor elapsedTimeEditor, remainingTimeEditor, cutLengthEditor;
 
