@@ -4,7 +4,8 @@
 #include "Core/AudioPlayer.h"
 #include "UI/ControlPanel.h"
 #include "UI/FocusManager.h"
-#include "UI/MouseHandler.h"
+#include "UI/Handlers/MarkerMouseHandler.h"
+#include "UI/Handlers/WaveformMouseHandler.h"
 #include "UI/Views/PlaybackCursorGlow.h"
 #include "Utils/Config.h"
 #include "Utils/CoordinateMapper.h"
@@ -20,7 +21,7 @@ ZoomView::~ZoomView() {
 }
 
 void ZoomView::playbackTimerTick() {
-    const auto &mouse = owner.getMouseHandler();
+    const auto &mouse = owner.getWaveformMouseHandler();
     const int currentMouseX = mouse.getMouseCursorX();
     const int currentMouseY = mouse.getMouseCursorY();
 
@@ -84,11 +85,12 @@ void ZoomView::paint(juce::Graphics &g) {
         return;
 
     const auto waveformBounds = getLocalBounds();
-    const auto &mouse = owner.getMouseHandler();
+    const auto &waveformMouse = owner.getWaveformMouseHandler();
+    const auto &markerMouse = owner.getMarkerMouseHandler();
 
-    if (mouse.getMouseCursorX() != -1) {
-        const int localMouseX = mouse.getMouseCursorX() - getX();
-        const int localMouseY = mouse.getMouseCursorY() - getY();
+    if (waveformMouse.getMouseCursorX() != -1) {
+        const int localMouseX = waveformMouse.getMouseCursorX() - getX();
+        const int localMouseY = waveformMouse.getMouseCursorY() - getY();
 
         juce::Colour currentLineColor = Config::Colors::mouseCursorLine;
         juce::Colour currentHighlightColor = Config::Colors::mouseCursorHighlight;
@@ -132,7 +134,7 @@ void ZoomView::paint(juce::Graphics &g) {
             if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0) {
                 float minVal = 0.0f, maxVal = 0.0f;
                 audioPlayer.getWaveformManager().getThumbnail().getApproximateMinMax(
-                    mouse.getMouseCursorTime(), mouse.getMouseCursorTime() + (1.0 / sampleRate), 0,
+                    waveformMouse.getMouseCursorTime(), waveformMouse.getMouseCursorTime() + (1.0 / sampleRate), 0,
                     minVal, maxVal);
                 amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
             }
@@ -177,7 +179,7 @@ void ZoomView::paint(juce::Graphics &g) {
                    (int)bottomAmplitudeY, 100, Config::Layout::Text::mouseCursorSize,
                    juce::Justification::left, true);
 
-        const juce::String timeText = owner.formatTime(mouse.getMouseCursorTime());
+        const juce::String timeText = owner.formatTime(waveformMouse.getMouseCursorTime());
         g.drawText(timeText, localMouseX + Config::Layout::Glow::mouseTextOffset,
                    localMouseY + Config::Layout::Glow::mouseTextOffset, 100,
                    Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
@@ -288,8 +290,8 @@ void ZoomView::paint(juce::Graphics &g) {
             }
         };
 
-        bool isDraggingCutIn = mouse.getDraggedHandle() == MouseHandler::CutMarkerHandle::In;
-        bool isDraggingCutOut = mouse.getDraggedHandle() == MouseHandler::CutMarkerHandle::Out;
+        bool isDraggingCutIn = markerMouse.getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::In;
+        bool isDraggingCutOut = markerMouse.getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Out;
 
         drawFineLine(cutIn, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse), 2.0f);
 

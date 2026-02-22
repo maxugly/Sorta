@@ -41,6 +41,9 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
     if (owner.topBarView != nullptr) {
         owner.topBarView->modeButton.setEnabled(enabled);
         owner.topBarView->statsButton.setEnabled(enabled);
+        owner.topBarView->statsButton.setToggleState(
+            owner.getPresenterCore().getStatsPresenter().isShowingStats(),
+            juce::dontSendNotification);
         owner.topBarView->channelViewButton.setEnabled(enabled);
     }
 

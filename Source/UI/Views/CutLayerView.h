@@ -19,7 +19,7 @@ class SessionState;
 
 class SilenceDetector;
 
-class MouseHandler;
+class MarkerMouseHandler;
 
 class WaveformManager;
 
@@ -35,8 +35,8 @@ class CutLayerView : public juce::Component,
 
     ~CutLayerView() override;
 
-    void setMouseHandler(MouseHandler &mouseHandlerIn) {
-        mouseHandler = &mouseHandlerIn;
+    void setMarkerMouseHandler(MarkerMouseHandler &handler) {
+        markerMouseHandler = &handler;
     }
 
     void setMarkersVisible(bool visible) {
@@ -59,7 +59,7 @@ class CutLayerView : public juce::Component,
     SessionState &sessionState;
     SilenceDetector &silenceDetector;
     InteractionCoordinator &interactionCoordinator;
-    MouseHandler *mouseHandler = nullptr;
+    MarkerMouseHandler *markerMouseHandler = nullptr;
     WaveformManager &waveformManager;
     std::function<float()> glowAlphaProvider;
     bool markersVisible = false;

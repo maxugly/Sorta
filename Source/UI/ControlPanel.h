@@ -14,8 +14,9 @@ class FocusManager;
 #include "UI/Components/TransportStrip.h"
 #include "UI/Views/PlaybackTimeView.h"
 #include "UI/Views/TopBarView.h"
+#include "UI/Handlers/MarkerMouseHandler.h"
+#include "UI/Handlers/WaveformMouseHandler.h"
 #include "UI/LookAndFeel/ModernLookAndFeel.h"
-#include "UI/MouseHandler.h"
 #include "Utils/Config.h"
 #include "Workers/SilenceDetector.h"
 #include "Workers/SilenceWorkerClient.h"
@@ -146,17 +147,9 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
 
     void ensureCutOrder();
 
-    void toggleStats();
+    void toggleViewMode();
 
-    void triggerModeButton();
-
-    void triggerChannelViewButton();
-
-    void triggerRepeatButton();
-
-    void resetIn();
-
-    void resetOut();
+    void toggleChannelViewMode();
 
     void setShouldShowStats(bool shouldShowStats);
 
@@ -211,8 +204,11 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
         return currentChannelViewMode;
     }
 
-    const MouseHandler &getMouseHandler() const;
-    MouseHandler &getMouseHandler();
+    const MarkerMouseHandler &getMarkerMouseHandler() const;
+    MarkerMouseHandler &getMarkerMouseHandler();
+
+    const WaveformMouseHandler &getWaveformMouseHandler() const;
+    WaveformMouseHandler &getWaveformMouseHandler();
 
     SilenceDetector &getSilenceDetector() {
         return *silenceDetector;

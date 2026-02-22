@@ -3,7 +3,6 @@
 #include "Presenters/CutButtonPresenter.h"
 
 #include "UI/ControlPanel.h"
-#include "UI/MouseHandler.h"
 #include "Utils/Config.h"
 
 CutButtonPresenter::CutButtonPresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {

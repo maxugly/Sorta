@@ -5,6 +5,8 @@
 #include "Core/AppEnums.h"
 #include "Core/AudioPlayer.h"
 #include "MainComponent.h"
+#include "Presenters/CutResetPresenter.h"
+#include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
 
@@ -64,19 +66,21 @@ bool KeybindHandler::handlePlaybackKeybinds(const juce::KeyPress &key) {
 bool KeybindHandler::handleUIToggleKeybinds(const juce::KeyPress &key) {
     const auto keyChar = key.getTextCharacter();
     if (keyChar == 's' || keyChar == 'S') {
-        controlPanel.toggleStats();
+        controlPanel.getPresenterCore().getStatsPresenter().toggleVisibility();
+        controlPanel.updateComponentStates();
         return true;
     }
     if (keyChar == 'v' || keyChar == 'V') {
-        controlPanel.triggerModeButton();
+        controlPanel.toggleViewMode();
         return true;
     }
     if (keyChar == 'c' || keyChar == 'C') {
-        controlPanel.triggerChannelViewButton();
+        controlPanel.toggleChannelViewMode();
         return true;
     }
     if (keyChar == 'r' || keyChar == 'R') {
-        controlPanel.triggerRepeatButton();
+        audioPlayer.setRepeating(!audioPlayer.isRepeating());
+        controlPanel.updateComponentStates();
         return true;
     }
     return false;
@@ -103,11 +107,11 @@ bool KeybindHandler::handleCutKeybinds(const juce::KeyPress &key) {
         }
     }
     if (keyChar == 'u' || keyChar == 'U') {
-        controlPanel.resetIn();
+        controlPanel.getPresenterCore().getCutResetPresenter().resetIn();
         return true;
     }
     if (keyChar == 'p' || keyChar == 'P') {
-        controlPanel.resetOut();
+        controlPanel.getPresenterCore().getCutResetPresenter().resetOut();
         return true;
     }
     return false;

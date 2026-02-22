@@ -125,8 +125,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/ControlPanel.cpp
             Source/UI/InteractionCoordinator.h
             Source/UI/InteractionCoordinator.cpp
-            Source/UI/MouseHandler.h
-            Source/UI/MouseHandler.cpp
+            Source/UI/Handlers/MarkerMouseHandler.cpp
+            Source/UI/Handlers/WaveformMouseHandler.cpp
             Source/UI/KeybindHandler.h
             Source/UI/KeybindHandler.cpp
             Source/UI/LayoutManager.h

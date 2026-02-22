@@ -3,20 +3,22 @@
 #include "UI/FocusManager.h"
 #include "Core/AudioPlayer.h"
 #include "UI/ControlPanel.h"
-#include "UI/MouseHandler.h"
+#include "UI/Handlers/MarkerMouseHandler.h"
+#include "UI/Handlers/WaveformMouseHandler.h"
 
 FocusManager::FocusManager(ControlPanel &owner) : owner(owner) {
 }
 
 FocusTarget FocusManager::getCurrentTarget() const {
-    const auto &mouseHandler = owner.getMouseHandler();
+    const auto &markerMouse = owner.getMarkerMouseHandler();
+    const auto &waveformMouse = owner.getWaveformMouseHandler();
 
-    if (mouseHandler.getDraggedHandle() == MouseHandler::CutMarkerHandle::In)
+    if (markerMouse.getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::In)
         return FocusTarget::CutIn;
-    if (mouseHandler.getDraggedHandle() == MouseHandler::CutMarkerHandle::Out)
+    if (markerMouse.getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Out)
         return FocusTarget::CutOut;
 
-    if (mouseHandler.isScrubbing())
+    if (waveformMouse.isScrubbing())
         return FocusTarget::MouseManual;
 
     const auto activePoint = owner.getInteractionCoordinator().getActiveZoomPoint();

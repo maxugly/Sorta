@@ -5,7 +5,7 @@
 #include "Core/SessionState.h"
 #include "Core/WaveformManager.h"
 #include "UI/ControlPanel.h"
-#include "UI/MouseHandler.h"
+#include "UI/Handlers/MarkerMouseHandler.h"
 #include "Utils/CoordinateMapper.h"
 #include "Workers/SilenceDetector.h"
 
@@ -163,32 +163,32 @@ void CutLayerView::paint(juce::Graphics &g) {
         g.fillRect(fadeAreaRight);
     }
 
-    auto drawCutMarker = [&](float x, MouseHandler::CutMarkerHandle handleType) {
+    auto drawCutMarker = [&](float x, MarkerMouseHandler::CutMarkerHandle handleType) {
         juce::Colour markerColor = Config::Colors::cutLine;
 
-        if (handleType == MouseHandler::CutMarkerHandle::In &&
+        if (handleType == MarkerMouseHandler::CutMarkerHandle::In &&
             silenceDetector.getIsAutoCutInActive())
             markerColor = Config::Colors::cutMarkerAuto;
-        else if (handleType == MouseHandler::CutMarkerHandle::Out &&
+        else if (handleType == MarkerMouseHandler::CutMarkerHandle::Out &&
                  silenceDetector.getIsAutoCutOutActive())
             markerColor = Config::Colors::cutMarkerAuto;
 
         float thickness = Config::Layout::Glow::cutBoxOutlineThickness;
         bool shouldPulse = false;
 
-        if (mouseHandler != nullptr) {
-            shouldPulse = mouseHandler->isHandleActive(handleType) ||
-                          mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full ||
-                          mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full;
+        if (markerMouseHandler != nullptr) {
+            shouldPulse = markerMouseHandler->isHandleActive(handleType) ||
+                          markerMouseHandler->getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Full ||
+                          markerMouseHandler->getHoveredHandle() == MarkerMouseHandler::CutMarkerHandle::Full;
 
-            if (mouseHandler->getDraggedHandle() == handleType ||
-                (handleType != MouseHandler::CutMarkerHandle::Full &&
-                 mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full)) {
+            if (markerMouseHandler->getDraggedHandle() == handleType ||
+                (handleType != MarkerMouseHandler::CutMarkerHandle::Full &&
+                 markerMouseHandler->getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Full)) {
                 markerColor = Config::Colors::cutMarkerDrag;
                 thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-            } else if (mouseHandler->getHoveredHandle() == handleType ||
-                       (handleType != MouseHandler::CutMarkerHandle::Full &&
-                        mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full)) {
+            } else if (markerMouseHandler->getHoveredHandle() == handleType ||
+                       (handleType != MarkerMouseHandler::CutMarkerHandle::Full &&
+                        markerMouseHandler->getHoveredHandle() == MarkerMouseHandler::CutMarkerHandle::Full)) {
                 markerColor = Config::Colors::cutMarkerHover;
                 thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
             }
@@ -226,21 +226,21 @@ void CutLayerView::paint(juce::Graphics &g) {
                    (float)bounds.getHeight() - (2.0f * boxHeight));
     };
 
-    drawCutMarker(inX, MouseHandler::CutMarkerHandle::In);
-    drawCutMarker(outX, MouseHandler::CutMarkerHandle::Out);
+    drawCutMarker(inX, MarkerMouseHandler::CutMarkerHandle::In);
+    drawCutMarker(outX, MarkerMouseHandler::CutMarkerHandle::Out);
 
     juce::Colour hollowColor = Config::Colors::cutLine;
     float hollowThickness = Config::Layout::Glow::cutBoxOutlineThickness;
     bool regionActive = false;
 
-    if (mouseHandler != nullptr) {
-        regionActive = mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full ||
-                       mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full;
+    if (markerMouseHandler != nullptr) {
+        regionActive = markerMouseHandler->getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Full ||
+                       markerMouseHandler->getHoveredHandle() == MarkerMouseHandler::CutMarkerHandle::Full;
 
-        if (mouseHandler->getDraggedHandle() == MouseHandler::CutMarkerHandle::Full) {
+        if (markerMouseHandler->getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Full) {
             hollowColor = Config::Colors::cutMarkerDrag;
             hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-        } else if (mouseHandler->getHoveredHandle() == MouseHandler::CutMarkerHandle::Full) {
+        } else if (markerMouseHandler->getHoveredHandle() == MarkerMouseHandler::CutMarkerHandle::Full) {
             hollowColor = Config::Colors::cutMarkerHover;
             hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
         }

@@ -6,7 +6,9 @@
 
 CutPresenter::CutPresenter(ControlPanel &controlPanel, SessionState &sessionStateIn,
                            CutLayerView &cutLayerViewIn)
-    : sessionState(sessionStateIn), cutLayerView(cutLayerViewIn), mouseHandler(controlPanel) {
+    : sessionState(sessionStateIn), cutLayerView(cutLayerViewIn) {
+    markerMouseHandler = std::make_unique<MarkerMouseHandler>(controlPanel);
+    waveformMouseHandler = std::make_unique<WaveformMouseHandler>(controlPanel);
     sessionState.addListener(this);
 
     refreshMarkersVisibility();

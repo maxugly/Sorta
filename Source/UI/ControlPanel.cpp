@@ -64,7 +64,7 @@ void ControlPanel::setupViews() {
         *this, sessionState, *silenceDetector, getAudioPlayer().getWaveformManager(),
         *interactionCoordinator, [this]() { return playbackTimerManager->getBreathingPulse(); });
     cutPresenter = std::make_unique<CutPresenter>(*this, sessionState, *cutLayerView);
-    cutLayerView->setMouseHandler(cutPresenter->getMouseHandler());
+    cutLayerView->setMarkerMouseHandler(getMarkerMouseHandler());
     addAndMakeVisible(cutLayerView.get());
 
     playbackCursorView = std::make_unique<PlaybackCursorView>(*this);
@@ -118,10 +118,10 @@ void ControlPanel::setupListeners() {
     playbackTimerManager->addListener(&getPlaybackTextPresenter());
 
     playbackTimerManager->setZoomPointProvider([this]() {
-        auto dragged = getMouseHandler().getDraggedHandle();
-        if (dragged == MouseHandler::CutMarkerHandle::In)
+        auto dragged = getMarkerMouseHandler().getDraggedHandle();
+        if (dragged == MarkerMouseHandler::CutMarkerHandle::In)
             return AppEnums::ActiveZoomPoint::In;
-        if (dragged == MouseHandler::CutMarkerHandle::Out)
+        if (dragged == MarkerMouseHandler::CutMarkerHandle::Out)
             return AppEnums::ActiveZoomPoint::Out;
         return AppEnums::ActiveZoomPoint::None;
     });
@@ -294,39 +294,40 @@ void ControlPanel::setAutoCutOutActive(bool isActive) {
     sessionState.setAutoCutOutActive(isActive);
 }
 
-void ControlPanel::toggleStats() {
-    auto& sp = getPresenterCore().getStatsPresenter();
-    sp.toggleVisibility();
-    if (topBarView != nullptr)
-        topBarView->statsButton.setToggleState(sp.isShowingStats(),
+void ControlPanel::toggleViewMode() {
+    currentMode = (currentMode == AppEnums::ViewMode::Classic) ? AppEnums::ViewMode::Overlay
+                                                              : AppEnums::ViewMode::Classic;
+
+    if (topBarView != nullptr) {
+        topBarView->modeButton.setToggleState(currentMode == AppEnums::ViewMode::Overlay,
                                               juce::dontSendNotification);
+        topBarView->modeButton.setButtonText(currentMode == AppEnums::ViewMode::Classic
+                                                 ? Config::Labels::viewModeClassic
+                                                 : Config::Labels::viewModeOverlay);
+    }
 
-    updateComponentStates();
+    resized();
+    repaint();
 }
 
-void ControlPanel::triggerModeButton() {
-    if (topBarView != nullptr)
-        topBarView->modeButton.triggerClick();
-}
+void ControlPanel::toggleChannelViewMode() {
+    currentChannelViewMode = (currentChannelViewMode == AppEnums::ChannelViewMode::Mono)
+                                 ? AppEnums::ChannelViewMode::Stereo
+                                 : AppEnums::ChannelViewMode::Mono;
 
-void ControlPanel::triggerChannelViewButton() {
-    if (topBarView != nullptr)
-        topBarView->channelViewButton.triggerClick();
-}
+    if (topBarView != nullptr) {
+        topBarView->channelViewButton.setToggleState(
+            currentChannelViewMode == AppEnums::ChannelViewMode::Stereo, juce::dontSendNotification);
+        topBarView->channelViewButton.setButtonText(
+            currentChannelViewMode == AppEnums::ChannelViewMode::Mono
+                ? Config::Labels::channelViewMono
+                : Config::Labels::channelViewStereo);
+    }
 
-void ControlPanel::triggerRepeatButton() {
-    if (auto* ts = getTransportStrip())
-        ts->getRepeatButton().triggerClick();
-}
+    if (waveformView != nullptr)
+        waveformView->setChannelMode(currentChannelViewMode);
 
-void ControlPanel::resetIn() {
-    if (inStrip != nullptr)
-        inStrip->getResetButton().triggerClick();
-}
-
-void ControlPanel::resetOut() {
-    if (outStrip != nullptr)
-        outStrip->getResetButton().triggerClick();
+    repaint();
 }
 
 void ControlPanel::setStatsDisplayText(const juce::String &text, juce::Colour color) {
@@ -367,12 +368,20 @@ AudioPlayer &ControlPanel::getAudioPlayer() const {
     return *owner.getAudioPlayer();
 }
 
-const MouseHandler &ControlPanel::getMouseHandler() const {
-    return cutPresenter->getMouseHandler();
+const MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() const {
+    return cutPresenter->getMarkerMouseHandler();
 }
 
-MouseHandler &ControlPanel::getMouseHandler() {
-    return cutPresenter->getMouseHandler();
+MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() {
+    return cutPresenter->getMarkerMouseHandler();
+}
+
+const WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() const {
+    return cutPresenter->getWaveformMouseHandler();
+}
+
+WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() {
+    return cutPresenter->getWaveformMouseHandler();
 }
 
 juce::TextEditor &ControlPanel::getStatsDisplay() {
@@ -388,28 +397,33 @@ const juce::LookAndFeel &ControlPanel::getLookAndFeel() const {
 }
 
 void ControlPanel::mouseMove(const juce::MouseEvent &event) {
-    getMouseHandler().mouseMove(event);
+    getMarkerMouseHandler().mouseMove(event);
+    getWaveformMouseHandler().mouseMove(event);
 }
 
 void ControlPanel::mouseDown(const juce::MouseEvent &event) {
-    getMouseHandler().mouseDown(event);
+    getMarkerMouseHandler().mouseDown(event);
+    getWaveformMouseHandler().mouseDown(event);
 }
 
 void ControlPanel::mouseDrag(const juce::MouseEvent &event) {
-    getMouseHandler().mouseDrag(event);
+    getMarkerMouseHandler().mouseDrag(event);
+    getWaveformMouseHandler().mouseDrag(event);
 }
 
 void ControlPanel::mouseUp(const juce::MouseEvent &event) {
-    getMouseHandler().mouseUp(event);
+    getMarkerMouseHandler().mouseUp(event);
+    getWaveformMouseHandler().mouseUp(event);
 }
 
 void ControlPanel::mouseExit(const juce::MouseEvent &event) {
-    getMouseHandler().mouseExit(event);
+    getMarkerMouseHandler().mouseExit(event);
+    getWaveformMouseHandler().mouseExit(event);
 }
 
 void ControlPanel::mouseWheelMove(const juce::MouseEvent &event,
                                   const juce::MouseWheelDetails &wheel) {
     if (wheel.deltaY == 0.0f)
         return;
-    getMouseHandler().mouseWheelMove(event, wheel);
+    getWaveformMouseHandler().mouseWheelMove(event, wheel);
 }

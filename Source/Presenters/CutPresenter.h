@@ -4,7 +4,8 @@
 #define AUDIOFILER_CUTPRESENTER_H
 
 #include "Core/SessionState.h"
-#include "UI/MouseHandler.h"
+#include "UI/Handlers/MarkerMouseHandler.h"
+#include "UI/Handlers/WaveformMouseHandler.h"
 
 class CutLayerView;
 
@@ -17,12 +18,20 @@ class CutPresenter : public SessionState::Listener {
 
     ~CutPresenter() override;
 
-    MouseHandler &getMouseHandler() {
-        return mouseHandler;
+    MarkerMouseHandler &getMarkerMouseHandler() {
+        return *markerMouseHandler;
     }
 
-    const MouseHandler &getMouseHandler() const {
-        return mouseHandler;
+    const MarkerMouseHandler &getMarkerMouseHandler() const {
+        return *markerMouseHandler;
+    }
+
+    WaveformMouseHandler &getWaveformMouseHandler() {
+        return *waveformMouseHandler;
+    }
+
+    const WaveformMouseHandler &getWaveformMouseHandler() const {
+        return *waveformMouseHandler;
     }
 
     void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
@@ -32,7 +41,8 @@ class CutPresenter : public SessionState::Listener {
 
     SessionState &sessionState;
     CutLayerView &cutLayerView;
-    MouseHandler mouseHandler;
+    std::unique_ptr<MarkerMouseHandler> markerMouseHandler;
+    std::unique_ptr<WaveformMouseHandler> waveformMouseHandler;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CutPresenter)
 };
