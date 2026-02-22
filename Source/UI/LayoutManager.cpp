@@ -75,8 +75,11 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, 
         (fullBounds.getWidth() / 2) - (playbackWidth / 2);
     controlPanel.layoutCache.playbackRightTextX = fullBounds.getRight() - margin - playbackWidth;
 
-    if (controlPanel.playbackTextPresenter != nullptr)
-        controlPanel.playbackTextPresenter->layoutEditors();
+    if (controlPanel.playbackTimeView != nullptr) {
+        const int textY = controlPanel.layoutCache.bottomRowTopY - Config::Layout::Text::playbackOffsetY;
+        controlPanel.playbackTimeView->setBounds(0, textY, fullBounds.getWidth(),
+                                                Config::Layout::Text::playbackHeight);
+    }
 }
 
 void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {

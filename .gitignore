@@ -41,3 +41,4 @@ CMakeFiles/
 *.py
 /.rsync-filter
  
+/Source/repo_files_list.txt

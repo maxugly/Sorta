@@ -25,8 +25,6 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
 
     void updateEditors();
 
-    void layoutEditors();
-
     void render(juce::Graphics &g) const;
 
     void setTotalTimeStaticString(const juce::String &text) {

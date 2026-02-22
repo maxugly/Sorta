@@ -11,6 +11,7 @@ class FocusManager;
 #include "UI/Components/MarkerStrip.h"
 #include "UI/Components/TransportButton.h"
 #include "UI/Components/TransportStrip.h"
+#include "UI/Views/PlaybackTimeView.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/LookAndFeel/ModernLookAndFeel.h"
 #include "UI/MouseHandler.h"
@@ -348,8 +349,8 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
     std::unique_ptr<PlaybackRepeatController> playbackRepeatController;
 
     std::unique_ptr<TopBarView> topBarView;
+    std::unique_ptr<PlaybackTimeView> playbackTimeView;
     std::unique_ptr<MarkerStrip> inStrip, outStrip;
-    juce::TextEditor elapsedTimeEditor, remainingTimeEditor, cutLengthEditor;
 
     LayoutCache layoutCache;
 

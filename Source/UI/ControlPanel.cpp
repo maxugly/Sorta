@@ -80,6 +80,9 @@ void ControlPanel::setupViews() {
 
     topBarView = std::make_unique<TopBarView>(*this);
     addAndMakeVisible(topBarView.get());
+
+    playbackTimeView = std::make_unique<PlaybackTimeView>();
+    addAndMakeVisible(playbackTimeView.get());
 }
 
 void ControlPanel::setupStrips() {
@@ -183,8 +186,9 @@ void ControlPanel::resized() {
     if (layoutManager != nullptr)
         layoutManager->performLayout();
 
-    if (playbackTextPresenter != nullptr)
-        playbackTextPresenter->layoutEditors();
+    if (playbackTextPresenter != nullptr) {
+        // Layout handled by playbackTimeView in LayoutManager
+    }
 
     if (waveformView != nullptr)
         waveformView->setBounds(layoutCache.waveformBounds);

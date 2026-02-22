@@ -44,10 +44,15 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
         owner.topBarView->channelViewButton.setEnabled(enabled);
     }
 
-    owner.elapsedTimeEditor.setEnabled(enabled);
-    owner.remainingTimeEditor.setEnabled(enabled);
-    owner.elapsedTimeEditor.setVisible(enabled);
-    owner.remainingTimeEditor.setVisible(enabled);
+    if (owner.playbackTimeView != nullptr) {
+        auto &elapsed = owner.playbackTimeView->getElapsedEditor();
+        auto &remaining = owner.playbackTimeView->getRemainingEditor();
+
+        elapsed.setEnabled(enabled);
+        remaining.setEnabled(enabled);
+        elapsed.setVisible(enabled);
+        remaining.setVisible(enabled);
+    }
 
     if (owner.statsPresenter != nullptr) {
         owner.statsPresenter->setDisplayEnabled(enabled);
@@ -65,8 +70,11 @@ void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, boo
         owner.outStrip->setVisible(isCutModeActive);
     }
 
-    owner.cutLengthEditor.setEnabled(enabled && isCutModeActive);
-    owner.cutLengthEditor.setVisible(isCutModeActive);
+    if (owner.playbackTimeView != nullptr) {
+        auto &length = owner.playbackTimeView->getCutLengthEditor();
+        length.setEnabled(enabled && isCutModeActive);
+        length.setVisible(isCutModeActive);
+    }
 
     if (owner.inStrip != nullptr)
         owner.inStrip->updateAutoCutState(owner.getSilenceDetector().getIsAutoCutInActive());

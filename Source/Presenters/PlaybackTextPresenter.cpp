@@ -17,70 +17,60 @@ PlaybackTextPresenter::PlaybackTextPresenter(ControlPanel &ownerPanel)
 
 PlaybackTextPresenter::~PlaybackTextPresenter() {
     owner.getPlaybackTimerManager().removeListener(this);
-    owner.elapsedTimeEditor.removeListener(this);
-    owner.remainingTimeEditor.removeListener(this);
-    owner.cutLengthEditor.removeListener(this);
+    if (owner.playbackTimeView != nullptr) {
+        owner.playbackTimeView->getElapsedEditor().removeListener(this);
+        owner.playbackTimeView->getRemainingEditor().removeListener(this);
+        owner.playbackTimeView->getCutLengthEditor().removeListener(this);
+    }
 }
 
 void PlaybackTextPresenter::initialiseEditors() {
-    auto configure = [&](juce::TextEditor &ed, juce::Justification just) {
-        owner.addAndMakeVisible(ed);
-        ed.setReadOnly(false);
-        ed.setJustification(just);
-        ed.setColour(juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
-        ed.setColour(juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
-        ed.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
-        ed.setFont(juce::Font(juce::FontOptions((float)Config::Layout::Text::playbackSize)));
-        ed.applyFontToAllText(ed.getFont());
-        ed.setMultiLine(false);
-        ed.setReturnKeyStartsNewLine(false);
-        ed.setSelectAllWhenFocused(true);
-        ed.addListener(this);
-        ed.addMouseListener(this, false);
-    };
+    if (owner.playbackTimeView == nullptr)
+        return;
 
-    configure(owner.elapsedTimeEditor, juce::Justification::left);
+    auto &elapsed = owner.playbackTimeView->getElapsedEditor();
+    auto &remaining = owner.playbackTimeView->getRemainingEditor();
+    auto &length = owner.playbackTimeView->getCutLengthEditor();
 
-    configure(owner.remainingTimeEditor, juce::Justification::right);
+    elapsed.addListener(this);
+    elapsed.addMouseListener(this, false);
 
-    configure(owner.cutLengthEditor, juce::Justification::centred);
+    remaining.addListener(this);
+    remaining.addMouseListener(this, false);
+
+    length.addListener(this);
+    length.addMouseListener(this, false);
 }
 
 void PlaybackTextPresenter::updateEditors() {
-    if (!isEditingElapsed && !owner.elapsedTimeEditor.hasKeyboardFocus(true))
-        syncEditorToPosition(owner.elapsedTimeEditor, owner.getAudioPlayer().getCurrentPosition());
+    if (owner.playbackTimeView == nullptr)
+        return;
 
-    if (!isEditingRemaining && !owner.remainingTimeEditor.hasKeyboardFocus(true)) {
+    auto &elapsed = owner.playbackTimeView->getElapsedEditor();
+    auto &remaining = owner.playbackTimeView->getRemainingEditor();
+    auto &length = owner.playbackTimeView->getCutLengthEditor();
+
+    if (!isEditingElapsed && !elapsed.hasKeyboardFocus(true))
+        syncEditorToPosition(elapsed, owner.getAudioPlayer().getCurrentPosition());
+
+    if (!isEditingRemaining && !remaining.hasKeyboardFocus(true)) {
         const auto &session = owner.getSessionState();
         const auto cutOut = owner.getAudioPlayer().getCutOut();
-        const auto remaining =
+        const auto remSeconds =
             juce::jmax(0.0, (session.getCutPrefs().active
                                  ? cutOut
                                  : owner.getAudioPlayer().getThumbnail().getTotalLength()) -
                                 owner.getAudioPlayer().getCurrentPosition());
 
-        syncEditorToPosition(owner.remainingTimeEditor, remaining, true);
+        syncEditorToPosition(remaining, remSeconds, true);
     }
 
-    if (!isEditingCutLength && !owner.cutLengthEditor.hasKeyboardFocus(true)) {
-        double length = std::abs(owner.getCutOutPosition() - owner.getCutInPosition());
-        juce::String newText = owner.formatTime(length);
-        if (owner.cutLengthEditor.getText() != newText)
-            owner.cutLengthEditor.setText(newText, juce::dontSendNotification);
+    if (!isEditingCutLength && !length.hasKeyboardFocus(true)) {
+        double cutLen = std::abs(owner.getCutOutPosition() - owner.getCutInPosition());
+        juce::String newText = owner.formatTime(cutLen);
+        if (length.getText() != newText)
+            length.setText(newText, juce::dontSendNotification);
     }
-}
-
-void PlaybackTextPresenter::layoutEditors() {
-    const int textY = owner.getBottomRowTopY() - Config::Layout::Text::playbackOffsetY;
-    auto [leftX, centreX, rightX] = owner.getPlaybackLabelXs();
-
-    owner.elapsedTimeEditor.setBounds(leftX, textY, Config::Layout::Text::playbackWidth,
-                                      Config::Layout::Text::playbackHeight);
-    owner.remainingTimeEditor.setBounds(rightX, textY, Config::Layout::Text::playbackWidth,
-                                        Config::Layout::Text::playbackHeight);
-
-    owner.cutLengthEditor.setBounds(centreX, textY, Config::Layout::Text::playbackWidth / 2,
-                                    Config::Layout::Text::playbackHeight);
 }
 
 void PlaybackTextPresenter::render(juce::Graphics &g) const {
@@ -101,11 +91,12 @@ void PlaybackTextPresenter::render(juce::Graphics &g) const {
 }
 
 void PlaybackTextPresenter::textEditorTextChanged(juce::TextEditor &editor) {
-    if (&editor == &owner.elapsedTimeEditor)
+    if (owner.playbackTimeView == nullptr) return;
+    if (&editor == &owner.playbackTimeView->getElapsedEditor())
         isEditingElapsed = true;
-    else if (&editor == &owner.remainingTimeEditor)
+    else if (&editor == &owner.playbackTimeView->getRemainingEditor())
         isEditingRemaining = true;
-    else if (&editor == &owner.cutLengthEditor)
+    else if (&editor == &owner.playbackTimeView->getCutLengthEditor())
         isEditingCutLength = true;
 
     const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
@@ -114,11 +105,12 @@ void PlaybackTextPresenter::textEditorTextChanged(juce::TextEditor &editor) {
 }
 
 void PlaybackTextPresenter::textEditorReturnKeyPressed(juce::TextEditor &editor) {
-    if (&editor == &owner.elapsedTimeEditor)
+    if (owner.playbackTimeView == nullptr) return;
+    if (&editor == &owner.playbackTimeView->getElapsedEditor())
         isEditingElapsed = false;
-    else if (&editor == &owner.remainingTimeEditor)
+    else if (&editor == &owner.playbackTimeView->getRemainingEditor())
         isEditingRemaining = false;
-    else if (&editor == &owner.cutLengthEditor)
+    else if (&editor == &owner.playbackTimeView->getCutLengthEditor())
         isEditingCutLength = false;
 
     applyTimeEdit(editor);
@@ -126,11 +118,12 @@ void PlaybackTextPresenter::textEditorReturnKeyPressed(juce::TextEditor &editor)
 }
 
 void PlaybackTextPresenter::textEditorEscapeKeyPressed(juce::TextEditor &editor) {
-    if (&editor == &owner.elapsedTimeEditor)
+    if (owner.playbackTimeView == nullptr) return;
+    if (&editor == &owner.playbackTimeView->getElapsedEditor())
         isEditingElapsed = false;
-    else if (&editor == &owner.remainingTimeEditor)
+    else if (&editor == &owner.playbackTimeView->getRemainingEditor())
         isEditingRemaining = false;
-    else if (&editor == &owner.cutLengthEditor)
+    else if (&editor == &owner.playbackTimeView->getCutLengthEditor())
         isEditingCutLength = false;
 
     updateEditors();
@@ -138,17 +131,19 @@ void PlaybackTextPresenter::textEditorEscapeKeyPressed(juce::TextEditor &editor)
 }
 
 void PlaybackTextPresenter::textEditorFocusLost(juce::TextEditor &editor) {
-    if (&editor == &owner.elapsedTimeEditor)
+    if (owner.playbackTimeView == nullptr) return;
+    if (&editor == &owner.playbackTimeView->getElapsedEditor())
         isEditingElapsed = false;
-    else if (&editor == &owner.remainingTimeEditor)
+    else if (&editor == &owner.playbackTimeView->getRemainingEditor())
         isEditingRemaining = false;
-    else if (&editor == &owner.cutLengthEditor)
+    else if (&editor == &owner.playbackTimeView->getCutLengthEditor())
         isEditingCutLength = false;
 
     applyTimeEdit(editor);
 }
 
 void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
+    if (owner.playbackTimeView == nullptr) return;
     double newTime = TimeUtils::parseTime(editor.getText());
     if (newTime < 0.0)
         return;
@@ -156,13 +151,13 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
     double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
     double cutOut = owner.getAudioPlayer().getCutOut();
 
-    if (&editor == &owner.elapsedTimeEditor) {
+    if (&editor == &owner.playbackTimeView->getElapsedEditor()) {
         owner.getAudioPlayer().setPlayheadPosition(newTime);
-    } else if (&editor == &owner.remainingTimeEditor) {
+    } else if (&editor == &owner.playbackTimeView->getRemainingEditor()) {
         const auto &session = owner.getSessionState();
         const double base = session.getCutPrefs().active ? cutOut : totalLength;
         owner.getAudioPlayer().setPlayheadPosition(base - newTime);
-    } else if (&editor == &owner.cutLengthEditor) {
+    } else if (&editor == &owner.playbackTimeView->getCutLengthEditor()) {
         double currentIn = owner.getCutInPosition();
         newTime = juce::jlimit(0.0, totalLength, newTime);
 
@@ -185,10 +180,11 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
 
 void PlaybackTextPresenter::syncEditorToPosition(juce::TextEditor &editor, double positionSeconds,
                                                  bool isRemaining) {
+    if (owner.playbackTimeView == nullptr) return;
     if (editor.hasKeyboardFocus(true) ||
-        (&editor == &owner.elapsedTimeEditor && isEditingElapsed) ||
-        (&editor == &owner.remainingTimeEditor && isEditingRemaining) ||
-        (&editor == &owner.cutLengthEditor && isEditingCutLength)) {
+        (&editor == &owner.playbackTimeView->getElapsedEditor() && isEditingElapsed) ||
+        (&editor == &owner.playbackTimeView->getRemainingEditor() && isEditingRemaining) ||
+        (&editor == &owner.playbackTimeView->getCutLengthEditor() && isEditingCutLength)) {
         return;
     }
 
@@ -201,26 +197,28 @@ void PlaybackTextPresenter::syncEditorToPosition(juce::TextEditor &editor, doubl
 }
 
 void PlaybackTextPresenter::mouseDown(const juce::MouseEvent &event) {
+    if (owner.playbackTimeView == nullptr) return;
     if (auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent)) {
-        if (editor == &owner.elapsedTimeEditor)
+        if (editor == &owner.playbackTimeView->getElapsedEditor())
             isEditingElapsed = true;
-        else if (editor == &owner.remainingTimeEditor)
+        else if (editor == &owner.playbackTimeView->getRemainingEditor())
             isEditingRemaining = true;
-        else if (editor == &owner.cutLengthEditor)
+        else if (editor == &owner.playbackTimeView->getCutLengthEditor())
             isEditingCutLength = true;
     }
 }
 
 void PlaybackTextPresenter::mouseUp(const juce::MouseEvent &event) {
+    if (owner.playbackTimeView == nullptr) return;
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
     if (editor == nullptr)
         return;
 
-    if (editor == &owner.elapsedTimeEditor)
+    if (editor == &owner.playbackTimeView->getElapsedEditor())
         isEditingElapsed = true;
-    else if (editor == &owner.remainingTimeEditor)
+    else if (editor == &owner.playbackTimeView->getRemainingEditor())
         isEditingRemaining = true;
-    else if (editor == &owner.cutLengthEditor)
+    else if (editor == &owner.playbackTimeView->getCutLengthEditor())
         isEditingCutLength = true;
 
     TimeEntryHelpers::handleTimeSegmentHighlight(event);
@@ -231,14 +229,15 @@ void PlaybackTextPresenter::mouseWheelMove(const juce::MouseEvent &event,
     if (wheel.deltaY == 0.0f)
         return;
 
+    if (owner.playbackTimeView == nullptr) return;
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
     if (editor == nullptr)
         return;
 
     if (editor->hasKeyboardFocus(true) ||
-        (editor == &owner.elapsedTimeEditor && isEditingElapsed) ||
-        (editor == &owner.remainingTimeEditor && isEditingRemaining) ||
-        (editor == &owner.cutLengthEditor && isEditingCutLength))
+        (editor == &owner.playbackTimeView->getElapsedEditor() && isEditingElapsed) ||
+        (editor == &owner.playbackTimeView->getRemainingEditor() && isEditingRemaining) ||
+        (editor == &owner.playbackTimeView->getCutLengthEditor() && isEditingCutLength))
         return;
 
     double currentVal = TimeUtils::parseTime(editor->getText());
@@ -252,12 +251,12 @@ void PlaybackTextPresenter::mouseWheelMove(const juce::MouseEvent &event,
     double newVal = TimeEntryHelpers::handleTimeStep(event, wheel, currentVal, sampleRate);
     newVal = juce::jmax(0.0, newVal);
 
-    if (editor == &owner.elapsedTimeEditor) {
+    if (editor == &owner.playbackTimeView->getElapsedEditor()) {
         owner.getAudioPlayer().setPlayheadPosition(newVal);
-    } else if (editor == &owner.remainingTimeEditor) {
+    } else if (editor == &owner.playbackTimeView->getRemainingEditor()) {
         double total = owner.getAudioPlayer().getThumbnail().getTotalLength();
         owner.getAudioPlayer().setPlayheadPosition(total - newVal);
-    } else if (editor == &owner.cutLengthEditor) {
+    } else if (editor == &owner.playbackTimeView->getCutLengthEditor()) {
         const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
         newVal = juce::jlimit(0.0, totalLength, newVal);
         double proposedOut = owner.getCutInPosition() + newVal;
