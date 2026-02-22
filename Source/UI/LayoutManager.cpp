@@ -90,6 +90,6 @@ void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {
         controlPanel.layoutCache.waveformBounds = bounds.reduced(margin);
     }
 
-    if (controlPanel.statsPresenter != nullptr)
-        controlPanel.statsPresenter->layoutWithin(controlPanel.layoutCache.contentAreaBounds);
+    controlPanel.getPresenterCore().getStatsPresenter().layoutWithin(
+        controlPanel.layoutCache.contentAreaBounds);
 }

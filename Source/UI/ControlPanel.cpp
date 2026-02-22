@@ -106,31 +106,7 @@ void ControlPanel::setupStrips() {
 }
 
 void ControlPanel::setupPresenters() {
-    playbackRepeatController = std::make_unique<PlaybackRepeatController>(getAudioPlayer(), *this);
-    playbackTimerManager->setRepeatController(playbackRepeatController.get());
-
-    statsPresenter = std::make_unique<StatsPresenter>(*this);
-    silenceDetectionPresenter =
-        std::make_unique<SilenceDetectionPresenter>(*this, sessionState, *owner.getAudioPlayer());
-    playbackTextPresenter = std::make_unique<PlaybackTextPresenter>(*this);
-    playbackTextPresenter->initialiseEditors();
-
-    repeatButtonPresenter =
-        std::make_unique<RepeatButtonPresenter>(*this, getAudioPlayer(), sessionState);
-    if (auto* ts = getTransportStrip())
-        repeatButtonPresenter->initialiseButton(ts->getRepeatButton());
-
-    boundaryLogicPresenter = std::make_unique<BoundaryLogicPresenter>(
-        *this, *silenceDetector, inStrip->getTimerEditor(), outStrip->getTimerEditor());
-    boundaryLogicPresenter->initialiseEditors();
-
-    buttonPresenter = std::make_unique<ControlButtonsPresenter>(*this);
-    buttonPresenter->initialiseAllButtons();
-
-    cutButtonPresenter = std::make_unique<CutButtonPresenter>(*this);
-    cutResetPresenter = std::make_unique<CutResetPresenter>(*this);
-
-    controlStatePresenter = std::make_unique<ControlStatePresenter>(*this);
+    presenterCore = std::make_unique<PresenterCore>(*this);
 }
 
 void ControlPanel::setupListeners() {
@@ -138,8 +114,8 @@ void ControlPanel::setupListeners() {
     playbackTimerManager->addListener(zoomView.get());
     playbackTimerManager->addListener(cutLayerView.get());
     playbackTimerManager->addListener(overlayView.get());
-    playbackTimerManager->addListener(boundaryLogicPresenter.get());
-    playbackTimerManager->addListener(playbackTextPresenter.get());
+    playbackTimerManager->addListener(&getBoundaryLogicPresenter());
+    playbackTimerManager->addListener(&getPlaybackTextPresenter());
 
     playbackTimerManager->setZoomPointProvider([this]() {
         auto dragged = getMouseHandler().getDraggedHandle();
@@ -150,8 +126,8 @@ void ControlPanel::setupListeners() {
         return AppEnums::ActiveZoomPoint::None;
     });
 
-    inStrip->setPresenter(boundaryLogicPresenter.get());
-    outStrip->setPresenter(boundaryLogicPresenter.get());
+    inStrip->setPresenter(&getBoundaryLogicPresenter());
+    outStrip->setPresenter(&getBoundaryLogicPresenter());
 }
 
 ControlPanel::~ControlPanel() {
@@ -176,8 +152,7 @@ void ControlPanel::invokeOwnerOpenDialog() {
 }
 
 void ControlPanel::finaliseSetup() {
-    if (playbackTextPresenter != nullptr)
-        playbackTextPresenter->initialiseEditors();
+    getPlaybackTextPresenter().initialiseEditors();
 
     updateComponentStates();
 }
@@ -185,10 +160,6 @@ void ControlPanel::finaliseSetup() {
 void ControlPanel::resized() {
     if (layoutManager != nullptr)
         layoutManager->performLayout();
-
-    if (playbackTextPresenter != nullptr) {
-        // Layout handled by playbackTimeView in LayoutManager
-    }
 
     if (waveformView != nullptr)
         waveformView->setBounds(layoutCache.waveformBounds);
@@ -208,8 +179,7 @@ void ControlPanel::resized() {
 
 void ControlPanel::paint(juce::Graphics &g) {
     g.fillAll(Config::Colors::Window::background);
-    if (playbackTextPresenter != nullptr)
-        playbackTextPresenter->render(g);
+    getPlaybackTextPresenter().render(g);
 }
 
 void ControlPanel::updatePlayButtonText(bool isPlaying) {
@@ -218,10 +188,8 @@ void ControlPanel::updatePlayButtonText(bool isPlaying) {
 }
 
 void ControlPanel::refreshLabels() {
-    if (boundaryLogicPresenter != nullptr)
-        boundaryLogicPresenter->refreshLabels();
-    if (playbackTextPresenter != nullptr)
-        playbackTextPresenter->updateEditors();
+    getBoundaryLogicPresenter().refreshLabels();
+    getPlaybackTextPresenter().updateEditors();
 }
 
 void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) {
@@ -278,8 +246,7 @@ void ControlPanel::setCutOutPosition(double pos) {
 }
 
 void ControlPanel::updateComponentStates() {
-    if (controlStatePresenter != nullptr)
-        controlStatePresenter->refreshStates();
+    getPresenterCore().getControlStatePresenter().refreshStates();
 }
 
 void ControlPanel::updateUIFromState() {
@@ -310,10 +277,8 @@ void ControlPanel::updateUIFromState() {
 
     updateComponentStates();
 
-    if (boundaryLogicPresenter != nullptr)
-        boundaryLogicPresenter->refreshLabels();
-    if (playbackTextPresenter != nullptr)
-        playbackTextPresenter->updateEditors();
+    getBoundaryLogicPresenter().refreshLabels();
+    getPlaybackTextPresenter().updateEditors();
 
     if (zoomView != nullptr)
         zoomView->repaint();
@@ -330,12 +295,10 @@ void ControlPanel::setAutoCutOutActive(bool isActive) {
 }
 
 void ControlPanel::toggleStats() {
-    if (statsPresenter == nullptr)
-        return;
-
-    statsPresenter->toggleVisibility();
+    auto& sp = getPresenterCore().getStatsPresenter();
+    sp.toggleVisibility();
     if (topBarView != nullptr)
-        topBarView->statsButton.setToggleState(statsPresenter->isShowingStats(),
+        topBarView->statsButton.setToggleState(sp.isShowingStats(),
                                               juce::dontSendNotification);
 
     updateComponentStates();
@@ -367,8 +330,7 @@ void ControlPanel::resetOut() {
 }
 
 void ControlPanel::setStatsDisplayText(const juce::String &text, juce::Colour color) {
-    if (statsPresenter != nullptr)
-        statsPresenter->setDisplayText(text, color);
+    getPresenterCore().getStatsPresenter().setDisplayText(text, color);
 }
 
 void ControlPanel::logStatusMessage(const juce::String &message, bool isError) {
@@ -378,28 +340,23 @@ void ControlPanel::logStatusMessage(const juce::String &message, bool isError) {
 }
 
 void ControlPanel::updateStatsFromAudio() {
-    if (statsPresenter != nullptr)
-        statsPresenter->updateStats();
+    getPresenterCore().getStatsPresenter().updateStats();
 }
 
 void ControlPanel::ensureCutOrder() {
-    if (boundaryLogicPresenter != nullptr)
-        boundaryLogicPresenter->ensureCutOrder();
+    getBoundaryLogicPresenter().ensureCutOrder();
 }
 
 void ControlPanel::setShouldShowStats(bool shouldShowStatsParam) {
-    if (statsPresenter != nullptr)
-        statsPresenter->setShouldShowStats(shouldShowStatsParam);
+    getPresenterCore().getStatsPresenter().setShouldShowStats(shouldShowStatsParam);
 }
 
 void ControlPanel::setTotalTimeStaticString(const juce::String &timeString) {
-    if (playbackTextPresenter != nullptr)
-        playbackTextPresenter->setTotalTimeStaticString(timeString);
+    getPlaybackTextPresenter().setTotalTimeStaticString(timeString);
 }
 
 void ControlPanel::updateCutButtonColors() {
-    if (cutButtonPresenter != nullptr)
-        cutButtonPresenter->updateColours();
+    getPresenterCore().getCutButtonPresenter().updateColours();
 }
 
 AudioPlayer &ControlPanel::getAudioPlayer() {
@@ -408,16 +365,6 @@ AudioPlayer &ControlPanel::getAudioPlayer() {
 
 AudioPlayer &ControlPanel::getAudioPlayer() const {
     return *owner.getAudioPlayer();
-}
-
-BoundaryLogicPresenter &ControlPanel::getBoundaryLogicPresenter() {
-    return *boundaryLogicPresenter;
-}
-RepeatButtonPresenter &ControlPanel::getRepeatButtonPresenter() {
-    return *repeatButtonPresenter;
-}
-PlaybackTextPresenter &ControlPanel::getPlaybackTextPresenter() {
-    return *playbackTextPresenter;
 }
 
 const MouseHandler &ControlPanel::getMouseHandler() const {
@@ -429,8 +376,7 @@ MouseHandler &ControlPanel::getMouseHandler() {
 }
 
 juce::TextEditor &ControlPanel::getStatsDisplay() {
-    jassert(statsPresenter != nullptr);
-    return statsPresenter->getDisplay();
+    return getPresenterCore().getStatsPresenter().getDisplay();
 }
 
 juce::String ControlPanel::formatTime(double seconds) const {

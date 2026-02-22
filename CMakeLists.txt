@@ -111,6 +111,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/SilenceDetectionPresenter.cpp
             Source/Presenters/RepeatButtonPresenter.h
             Source/Presenters/RepeatButtonPresenter.cpp
+            Source/Presenters/PresenterCore.h
+            Source/Presenters/PresenterCore.cpp
             Source/Presenters/BoundaryLogicPresenter.h
             Source/Presenters/BoundaryLogicPresenter.cpp
             Source/Presenters/PlaybackTimerManager.h

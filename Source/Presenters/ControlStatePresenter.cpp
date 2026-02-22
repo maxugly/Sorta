@@ -54,9 +54,7 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
         remaining.setVisible(enabled);
     }
 
-    if (owner.statsPresenter != nullptr) {
-        owner.statsPresenter->setDisplayEnabled(enabled);
-    }
+    owner.getPresenterCore().getStatsPresenter().setDisplayEnabled(enabled);
 }
 
 void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, bool enabled) {

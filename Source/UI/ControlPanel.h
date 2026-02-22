@@ -2,6 +2,7 @@
 #define AUDIOFILER_CONTROLPANEL_H
 
 #include "Presenters/PlaybackTimerManager.h"
+#include "Presenters/PresenterCore.h"
 #include "UI/InteractionCoordinator.h"
 
 class FocusManager;
@@ -230,7 +231,7 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
         return outStrip.get();
     }
     SilenceDetectionPresenter *getSilenceDetectionPresenter() {
-        return silenceDetectionPresenter.get();
+        return presenterCore != nullptr ? &presenterCore->getSilenceDetectionPresenter() : nullptr;
     }
 
     int getBottomRowTopY() const {
@@ -265,9 +266,18 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
     PlaybackTimerManager &getPlaybackTimerManager() {
         return *playbackTimerManager;
     }
-    BoundaryLogicPresenter &getBoundaryLogicPresenter();
-    RepeatButtonPresenter &getRepeatButtonPresenter();
-    PlaybackTextPresenter &getPlaybackTextPresenter();
+    PresenterCore &getPresenterCore() {
+        return *presenterCore;
+    }
+    BoundaryLogicPresenter &getBoundaryLogicPresenter() {
+        return presenterCore->getBoundaryLogicPresenter();
+    }
+    RepeatButtonPresenter &getRepeatButtonPresenter() {
+        return presenterCore->getRepeatButtonPresenter();
+    }
+    PlaybackTextPresenter &getPlaybackTextPresenter() {
+        return presenterCore->getPlaybackTextPresenter();
+    }
 
   private:
     friend class LayoutManager;
@@ -303,32 +313,7 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
     /** @brief Renders the overlay for cut regions. */
     std::unique_ptr<CutLayerView> cutLayerView;
 
-    /** @brief Manages playback position text display. */
-    std::unique_ptr<PlaybackTextPresenter> playbackTextPresenter;
-
-    /** @brief Manages file statistics (sample rate, bit depth, etc.). */
-    std::unique_ptr<StatsPresenter> statsPresenter;
-
-    /** @brief Manages manual time entry for cut boundaries. */
-    std::unique_ptr<BoundaryLogicPresenter> boundaryLogicPresenter;
-
-    /** @brief Manages repeat toggle button. */
-    std::unique_ptr<RepeatButtonPresenter> repeatButtonPresenter;
-
-    /** @brief Updates UI state based on SessionState changes. */
-    std::unique_ptr<ControlStatePresenter> controlStatePresenter;
-
-    /** @brief Presenter for silence detection settings. */
-    std::unique_ptr<SilenceDetectionPresenter> silenceDetectionPresenter;
-
-    /** @brief Manages general control buttons (Open, Save, etc.). */
-    std::unique_ptr<ControlButtonsPresenter> buttonPresenter;
-
-    /** @brief Manages cut button interactions. */
-    std::unique_ptr<CutButtonPresenter> cutButtonPresenter;
-
-    /** @brief Manages reset buttons for cut points. */
-    std::unique_ptr<CutResetPresenter> cutResetPresenter;
+    std::unique_ptr<PresenterCore> presenterCore;
 
     /** @brief Handles keyboard focus navigation. */
     std::unique_ptr<FocusManager> focusManager;
@@ -344,9 +329,6 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
 
     /** @brief Manages transient UI interaction states. */
     std::unique_ptr<InteractionCoordinator> interactionCoordinator;
-
-    /** @brief Manages repeat and autoplay logic. */
-    std::unique_ptr<PlaybackRepeatController> playbackRepeatController;
 
     std::unique_ptr<TopBarView> topBarView;
     std::unique_ptr<PlaybackTimeView> playbackTimeView;
