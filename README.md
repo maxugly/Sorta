@@ -133,6 +133,6 @@ Use only these exact terms for these specific features:
 
 *   **Boundary / Region / Cut**: Describing a marked audio segment.
 *   **Cut Mode**: The mode for setting region boundaries.
-*   **Repeat Enabled**: The playback cycling flag.
-*   **Repeat**: The transport button for cycling playback.
-*   **Cycle / Repeat**: The act of playback returning to start.
+*   **Autocut (In/Out)**: The in/out point is determined automatically based on the in/out Threshold.
+*   **Threshold**: The percentage value for detecting the in/out cut based on the amplitiude of the audio.
+*   **Repeat**: The act of playback returning to start.
