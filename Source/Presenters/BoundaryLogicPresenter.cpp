@@ -91,8 +91,8 @@ void BoundaryLogicPresenter::ensureCutOrder() {
 
         bool acIn = silenceDetector.getIsAutoCutInActive();
         bool acOut = silenceDetector.getIsAutoCutOutActive();
-        owner.setAutoCutInActive(acOut);
-        owner.setAutoCutOutActive(acIn);
+        owner.getSessionState().setAutoCutInActive(acOut);
+        owner.getSessionState().setAutoCutOutActive(acIn);
     }
 }
 
@@ -211,13 +211,13 @@ void BoundaryLogicPresenter::mouseWheelMove(const juce::MouseEvent &event,
         const double currentIn = owner.getAudioPlayer().getCutIn();
         const double newIn = TimeEntryHelpers::handleTimeStep(event, wheel, currentIn, sampleRate);
         setCutInPosition(newIn);
-        owner.setAutoCutInActive(false);
+        owner.getSessionState().setAutoCutInActive(false);
         owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
     } else if (editor == &cutOutEditor) {
         const double currentOut = owner.getAudioPlayer().getCutOut();
         const double newOut = TimeEntryHelpers::handleTimeStep(event, wheel, currentOut, sampleRate);
         setCutOutPosition(newOut);
-        owner.setAutoCutOutActive(false);
+        owner.getSessionState().setAutoCutOutActive(false);
         owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
     }
 
@@ -242,7 +242,7 @@ bool BoundaryLogicPresenter::applyCutInFromEditor(double newPosition, juce::Text
     if (newPosition >= 0.0 && newPosition <= totalLength) {
         setCutInPosition(newPosition);
         owner.updateCutButtonColors();
-        owner.setAutoCutInActive(false);
+        owner.getSessionState().setAutoCutInActive(false);
 
         if (owner.getInteractionCoordinator().getActiveZoomPoint() !=
             AppEnums::ActiveZoomPoint::None)
@@ -269,7 +269,7 @@ bool BoundaryLogicPresenter::applyCutOutFromEditor(double newPosition, juce::Tex
 
         setCutOutPosition(newPosition);
         owner.updateCutButtonColors();
-        owner.setAutoCutOutActive(false);
+        owner.getSessionState().setAutoCutOutActive(false);
 
         if (owner.getInteractionCoordinator().getActiveZoomPoint() !=
             AppEnums::ActiveZoomPoint::None)
@@ -295,7 +295,7 @@ void BoundaryLogicPresenter::setCutInPosition(double positionSeconds) {
 
     if (!silenceDetector.getIsAutoCutInActive() && newPos >= currentOut &&
         silenceDetector.getIsAutoCutOutActive())
-        owner.setAutoCutOutActive(false);
+        owner.getSessionState().setAutoCutOutActive(false);
 
     audioPlayer.setCutIn(newPos);
 
@@ -315,7 +315,7 @@ void BoundaryLogicPresenter::setCutOutPosition(double positionSeconds) {
 
     if (!silenceDetector.getIsAutoCutOutActive() && newPos <= currentIn &&
         silenceDetector.getIsAutoCutInActive())
-        owner.setAutoCutInActive(false);
+        owner.getSessionState().setAutoCutInActive(false);
 
     audioPlayer.setCutOut(newPos);
 

@@ -91,7 +91,7 @@ bool KeybindHandler::handleCutKeybinds(const juce::KeyPress &key) {
     if (controlPanel.getPlacementMode() == AppEnums::PlacementMode::None) {
         if (keyChar == 'i' || keyChar == 'I') {
             controlPanel.setCutInPosition(audioPlayer.getCurrentPosition());
-            controlPanel.setAutoCutInActive(false);
+            controlPanel.getSessionState().setAutoCutInActive(false);
             controlPanel.getInteractionCoordinator().setNeedsJumpToCutIn(true);
             controlPanel.jumpToCutIn();
             controlPanel.repaint();
@@ -99,7 +99,7 @@ bool KeybindHandler::handleCutKeybinds(const juce::KeyPress &key) {
         }
         if (keyChar == 'o' || keyChar == 'O') {
             controlPanel.setCutOutPosition(audioPlayer.getCurrentPosition());
-            controlPanel.setAutoCutOutActive(false);
+            controlPanel.getSessionState().setAutoCutOutActive(false);
             controlPanel.getInteractionCoordinator().setNeedsJumpToCutIn(true);
             controlPanel.jumpToCutIn();
             controlPanel.repaint();

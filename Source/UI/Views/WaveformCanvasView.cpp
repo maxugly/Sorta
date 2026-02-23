@@ -7,6 +7,8 @@
 #include "UI/Views/ZoomView.h"
 
 WaveformCanvasView::WaveformCanvasView(ControlPanel& owner) {
+    setInterceptsMouseClicks(false, false);
+
     waveformView = std::make_unique<WaveformView>(owner.getAudioPlayer().getWaveformManager());
     addAndMakeVisible(waveformView.get());
 

@@ -44,8 +44,7 @@ ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionS
     setupPresenters();
     setupListeners();
 
-    sessionState.addListener(this);
-    updateUIFromState();
+    getPresenterCore().getControlStatePresenter().updateUIFromState();
     finaliseSetup();
 
     setMouseCursor(juce::MouseCursor::CrosshairCursor);
@@ -125,8 +124,6 @@ ControlPanel::~ControlPanel() {
         playbackTimerManager->stopTimer();
     }
 
-    sessionState.removeListener(this);
-
     setLookAndFeel(nullptr);
 }
 
@@ -173,38 +170,6 @@ void ControlPanel::refreshLabels() {
     getPlaybackTextPresenter().updateEditors();
 }
 
-void ControlPanel::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) {
-    m_isCutModeActive = prefs.active;
-
-    if (auto* ts = getTransportStrip()) {
-        ts->updateAutoplayState(prefs.autoplay);
-        ts->updateCutModeState(prefs.active);
-    }
-
-    if (inStrip != nullptr)
-        inStrip->updateAutoCutState(prefs.autoCut.inActive);
-    if (outStrip != nullptr)
-        outStrip->updateAutoCutState(prefs.autoCut.outActive);
-
-    if (silenceDetector != nullptr) {
-        silenceDetector->setIsAutoCutInActive(prefs.autoCut.inActive);
-        silenceDetector->setIsAutoCutOutActive(prefs.autoCut.outActive);
-    }
-
-    updateComponentStates();
-    repaint();
-}
-
-void ControlPanel::cutInChanged(double value) {
-    juce::ignoreUnused(value);
-    repaint();
-}
-
-void ControlPanel::cutOutChanged(double value) {
-    juce::ignoreUnused(value);
-    repaint();
-}
-
 void ControlPanel::jumpToCutIn() {
     getAudioPlayer().setPlayheadPosition(getCutInPosition());
     interactionCoordinator->setNeedsJumpToCutIn(false);
@@ -228,51 +193,6 @@ void ControlPanel::setCutOutPosition(double pos) {
 
 void ControlPanel::updateComponentStates() {
     getPresenterCore().getControlStatePresenter().refreshStates();
-}
-
-void ControlPanel::updateUIFromState() {
-    const auto &prefs = sessionState.getCutPrefs();
-    const auto &autoCut = prefs.autoCut;
-
-    m_isCutModeActive = prefs.active;
-
-    if (auto* ts = getTransportStrip()) {
-        ts->updateAutoplayState(prefs.autoplay);
-        ts->updateCutModeState(prefs.active);
-    }
-
-    if (inStrip != nullptr)
-        inStrip->updateAutoCutState(autoCut.inActive);
-    if (outStrip != nullptr)
-        outStrip->updateAutoCutState(autoCut.outActive);
-
-    silenceDetector->setIsAutoCutInActive(autoCut.inActive);
-    silenceDetector->setIsAutoCutOutActive(autoCut.outActive);
-
-    const int inPercent = static_cast<int>(autoCut.thresholdIn * 100.0f);
-    const int outPercent = static_cast<int>(autoCut.thresholdOut * 100.0f);
-    silenceDetector->getInSilenceThresholdEditor().setText(juce::String(inPercent),
-                                                           juce::dontSendNotification);
-    silenceDetector->getOutSilenceThresholdEditor().setText(juce::String(outPercent),
-                                                            juce::dontSendNotification);
-
-    updateComponentStates();
-
-    getBoundaryLogicPresenter().refreshLabels();
-    getPlaybackTextPresenter().updateEditors();
-
-    if (waveformCanvasView != nullptr)
-        waveformCanvasView->getZoomView().repaint();
-
-    repaint();
-}
-
-void ControlPanel::setAutoCutInActive(bool isActive) {
-    sessionState.setAutoCutInActive(isActive);
-}
-
-void ControlPanel::setAutoCutOutActive(bool isActive) {
-    sessionState.setAutoCutOutActive(isActive);
 }
 
 void ControlPanel::toggleViewMode() {

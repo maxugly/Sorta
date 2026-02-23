@@ -66,10 +66,10 @@ void WaveformMouseHandler::mouseDown(const juce::MouseEvent &event) {
                                                        owner.getCutOutPosition(), audioLength);
                     if (pm == AppEnums::PlacementMode::CutIn) {
                         owner.setCutInPosition(zoomedTime);
-                        owner.setAutoCutInActive(false);
+                        owner.getSessionState().setAutoCutInActive(false);
                     } else {
                         owner.setCutOutPosition(zoomedTime);
-                        owner.setAutoCutOutActive(false);
+                        owner.getSessionState().setAutoCutOutActive(false);
                     }
                     owner.ensureCutOrder();
                     owner.refreshLabels();
@@ -179,10 +179,10 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
                 owner.getAudioPlayer().getThumbnail().getTotalLength());
             if (pm == AppEnums::PlacementMode::CutIn) {
                 owner.setCutInPosition(t);
-                owner.setAutoCutInActive(false);
+                owner.getSessionState().setAutoCutInActive(false);
             } else {
                 owner.setCutOutPosition(t);
-                owner.setAutoCutOutActive(false);
+                owner.getSessionState().setAutoCutOutActive(false);
             }
             owner.ensureCutOrder();
             owner.refreshLabels();
@@ -237,10 +237,10 @@ void WaveformMouseHandler::handleRightClickForCutPlacement(int x) {
                                            owner.getCutOutPosition(), al);
         if (pm == AppEnums::PlacementMode::CutIn) {
             owner.setCutInPosition(t);
-            owner.setAutoCutInActive(false);
+            owner.getSessionState().setAutoCutInActive(false);
         } else {
             owner.setCutOutPosition(t);
-            owner.setAutoCutOutActive(false);
+            owner.getSessionState().setAutoCutOutActive(false);
         }
         owner.ensureCutOrder();
         owner.updateCutButtonColors();

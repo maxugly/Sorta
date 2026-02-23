@@ -15,7 +15,7 @@ void CutResetPresenter::resetIn() {
     owner.ensureCutOrder();
     owner.updateCutButtonColors();
     owner.refreshLabels();
-    owner.setAutoCutInActive(false);
+    owner.getSessionState().setAutoCutInActive(false);
     owner.repaint();
 }
 
@@ -24,6 +24,6 @@ void CutResetPresenter::resetOut() {
     owner.ensureCutOrder();
     owner.updateCutButtonColors();
     owner.refreshLabels();
-    owner.setAutoCutOutActive(false);
+    owner.getSessionState().setAutoCutOutActive(false);
     owner.repaint();
 }

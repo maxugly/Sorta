@@ -72,9 +72,9 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
                                             : CutMarkerHandle::Out;
                         dragStartMouseOffset = zoomedTime - cpt;
                         if (draggedHandle == CutMarkerHandle::In)
-                            owner.setAutoCutInActive(false);
+                            owner.getSessionState().setAutoCutInActive(false);
                         else
-                            owner.setAutoCutOutActive(false);
+                            owner.getSessionState().setAutoCutOutActive(false);
                         owner.repaint();
                         return;
                     }
@@ -101,9 +101,9 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
 
         if (draggedHandle != CutMarkerHandle::None) {
             if (draggedHandle == CutMarkerHandle::In || draggedHandle == CutMarkerHandle::Full)
-                owner.setAutoCutInActive(false);
+                owner.getSessionState().setAutoCutInActive(false);
             if (draggedHandle == CutMarkerHandle::Out || draggedHandle == CutMarkerHandle::Full)
-                owner.setAutoCutOutActive(false);
+                owner.getSessionState().setAutoCutOutActive(false);
 
             if (draggedHandle == CutMarkerHandle::Full) {
                 dragStartCutLength = std::abs(owner.getCutOutPosition() - owner.getCutInPosition());

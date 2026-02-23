@@ -8,9 +8,16 @@
 #include "Presenters/RepeatButtonPresenter.h"
 #include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
+#include "UI/Views/WaveformCanvasView.h"
+#include "UI/Views/ZoomView.h"
 #include "Workers/SilenceDetector.h"
 
 ControlStatePresenter::ControlStatePresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {
+    owner.getSessionState().addListener(this);
+}
+
+ControlStatePresenter::~ControlStatePresenter() {
+    owner.getSessionState().removeListener(this);
 }
 
 void ControlStatePresenter::refreshStates() {
@@ -22,6 +29,73 @@ void ControlStatePresenter::refreshStates() {
     owner.getBoundaryLogicPresenter().refreshLabels();
     owner.getPlaybackTextPresenter().updateEditors();
     owner.getRepeatButtonPresenter().cutPreferenceChanged(owner.getSessionState().getCutPrefs());
+}
+
+void ControlStatePresenter::updateUIFromState() {
+    const auto &prefs = owner.getSessionState().getCutPrefs();
+    const auto &autoCut = prefs.autoCut;
+
+    owner.m_isCutModeActive = prefs.active;
+
+    if (auto* ts = owner.getTransportStrip()) {
+        ts->updateAutoplayState(prefs.autoplay);
+        ts->updateCutModeState(prefs.active);
+    }
+
+    if (owner.getInStrip() != nullptr)
+        owner.getInStrip()->updateAutoCutState(autoCut.inActive);
+    if (owner.getOutStrip() != nullptr)
+        owner.getOutStrip()->updateAutoCutState(autoCut.outActive);
+
+    owner.getSilenceDetector().setIsAutoCutInActive(autoCut.inActive);
+    owner.getSilenceDetector().setIsAutoCutOutActive(autoCut.outActive);
+
+    const int inPercent = static_cast<int>(autoCut.thresholdIn * 100.0f);
+    const int outPercent = static_cast<int>(autoCut.thresholdOut * 100.0f);
+    owner.getSilenceDetector().getInSilenceThresholdEditor().setText(juce::String(inPercent),
+                                                           juce::dontSendNotification);
+    owner.getSilenceDetector().getOutSilenceThresholdEditor().setText(juce::String(outPercent),
+                                                            juce::dontSendNotification);
+
+    refreshStates();
+
+    owner.getBoundaryLogicPresenter().refreshLabels();
+    owner.getPlaybackTextPresenter().updateEditors();
+
+    if (owner.waveformCanvasView != nullptr)
+        owner.waveformCanvasView->getZoomView().repaint();
+
+    owner.repaint();
+}
+
+void ControlStatePresenter::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) {
+    owner.m_isCutModeActive = prefs.active;
+
+    if (auto* ts = owner.getTransportStrip()) {
+        ts->updateAutoplayState(prefs.autoplay);
+        ts->updateCutModeState(prefs.active);
+    }
+
+    if (owner.getInStrip() != nullptr)
+        owner.getInStrip()->updateAutoCutState(prefs.autoCut.inActive);
+    if (owner.getOutStrip() != nullptr)
+        owner.getOutStrip()->updateAutoCutState(prefs.autoCut.outActive);
+
+    owner.getSilenceDetector().setIsAutoCutInActive(prefs.autoCut.inActive);
+    owner.getSilenceDetector().setIsAutoCutOutActive(prefs.autoCut.outActive);
+
+    refreshStates();
+    owner.repaint();
+}
+
+void ControlStatePresenter::cutInChanged(double value) {
+    juce::ignoreUnused(value);
+    owner.repaint();
+}
+
+void ControlStatePresenter::cutOutChanged(double value) {
+    juce::ignoreUnused(value);
+    owner.repaint();
 }
 
 void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {

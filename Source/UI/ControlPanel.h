@@ -87,7 +87,7 @@ class OverlayView;
  * @see LayoutManager
  * @see WaveformView
  */
-class ControlPanel final : public juce::Component, public SessionState::Listener {
+class ControlPanel final : public juce::Component {
   public:
     struct LayoutCache {
         juce::Rectangle<int> waveformBounds;
@@ -112,11 +112,6 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
         repaint();
     }
 
-    // SessionState::Listener
-    void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
-    void cutInChanged(double value) override;
-    void cutOutChanged(double value) override;
-
     void jumpToCutIn();
 
     void paint(juce::Graphics &g) override;
@@ -128,12 +123,6 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
     void refreshLabels();
 
     void updateComponentStates();
-
-    void updateUIFromState();
-
-    void setAutoCutInActive(bool isActive);
-
-    void setAutoCutOutActive(bool isActive);
 
     void updateCutButtonColors();
 
