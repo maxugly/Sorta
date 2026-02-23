@@ -119,6 +119,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/PlaybackTimerManager.cpp
             Source/Presenters/PlaybackRepeatController.h
             Source/Presenters/PlaybackRepeatController.cpp
+            Source/Presenters/ZoomPresenter.h
+            Source/Presenters/ZoomPresenter.cpp
 
             # UI
             Source/UI/ControlPanel.h

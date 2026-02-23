@@ -15,6 +15,7 @@
 #include "Presenters/RepeatButtonPresenter.h"
 #include "Presenters/SilenceDetectionPresenter.h"
 #include "Presenters/StatsPresenter.h"
+#include "Presenters/ZoomPresenter.h"
 
 PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     playbackRepeatController = std::make_unique<PlaybackRepeatController>(owner.getAudioPlayer(), owner);
@@ -42,4 +43,5 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     cutButtonPresenter = std::make_unique<CutButtonPresenter>(owner);
     cutResetPresenter = std::make_unique<CutResetPresenter>(owner);
     controlStatePresenter = std::make_unique<ControlStatePresenter>(owner);
+    zoomPresenter = std::make_unique<ZoomPresenter>(owner);
 }

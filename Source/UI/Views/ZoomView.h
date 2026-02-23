@@ -15,23 +15,15 @@
 
 class ControlPanel;
 
-class ZoomView : public juce::Component, public PlaybackTimerManager::Listener {
+class ZoomView : public juce::Component {
   public:
     explicit ZoomView(ControlPanel &owner);
     ~ZoomView() override;
 
     void paint(juce::Graphics &g) override;
 
-    void playbackTimerTick() override;
-    void animationUpdate(float breathingPulse) override;
-    void activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) override;
-
   private:
     ControlPanel &owner;
-
-    juce::Rectangle<int> lastPopupBounds;
-    int lastMouseX{-1};
-    int lastMouseY{-1};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ZoomView)
 };

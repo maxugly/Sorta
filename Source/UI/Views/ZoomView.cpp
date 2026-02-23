@@ -16,67 +16,7 @@ ZoomView::ZoomView(ControlPanel &ownerIn) : owner(ownerIn) {
     setOpaque(false);
 }
 
-ZoomView::~ZoomView() {
-    owner.getPlaybackTimerManager().removeListener(this);
-}
-
-void ZoomView::playbackTimerTick() {
-    const auto &mouse = owner.getWaveformMouseHandler();
-    const int currentMouseX = mouse.getMouseCursorX();
-    const int currentMouseY = mouse.getMouseCursorY();
-
-    const auto &timerManager = owner.getPlaybackTimerManager();
-    const bool zDown = timerManager.isZKeyDown();
-    const auto activePoint = owner.getInteractionCoordinator().getActiveZoomPoint();
-    const bool isZooming = zDown || activePoint != AppEnums::ActiveZoomPoint::None;
-
-    if (currentMouseX != lastMouseX || currentMouseY != lastMouseY) {
-        if (lastMouseX != -1) {
-            repaint(lastMouseX - 1, 0, 3, getHeight());
-            repaint(0, lastMouseY - 1, getWidth(), 3);
-        }
-
-        if (currentMouseX != -1) {
-            repaint(currentMouseX - 1, 0, 3, getHeight());
-            repaint(0, currentMouseY - 1, getWidth(), 3);
-        }
-
-        lastMouseX = currentMouseX;
-        lastMouseY = currentMouseY;
-    }
-
-    if (isZooming) {
-        const auto waveformBounds = getLocalBounds();
-        const int popupWidth =
-            juce::roundToInt((float)waveformBounds.getWidth() * Config::Layout::Zoom::popupScale);
-        const int popupHeight =
-            juce::roundToInt((float)waveformBounds.getHeight() * Config::Layout::Zoom::popupScale);
-        const juce::Rectangle<int> currentPopupBounds(waveformBounds.getCentreX() - popupWidth / 2,
-                                                      waveformBounds.getCentreY() - popupHeight / 2,
-                                                      popupWidth, popupHeight);
-
-        if (currentPopupBounds != lastPopupBounds) {
-            repaint(lastPopupBounds.expanded(5));
-            repaint(currentPopupBounds.expanded(5));
-            lastPopupBounds = currentPopupBounds;
-        } else {
-            repaint(currentPopupBounds.expanded(5));
-        }
-    } else if (!lastPopupBounds.isEmpty()) {
-        repaint(lastPopupBounds.expanded(5));
-        lastPopupBounds = juce::Rectangle<int>();
-    }
-}
-
-void ZoomView::animationUpdate(float breathingPulse) {
-    juce::ignoreUnused(breathingPulse);
-    repaint();
-}
-
-void ZoomView::activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) {
-    juce::ignoreUnused(newPoint);
-    repaint();
-}
+ZoomView::~ZoomView() = default;
 
 void ZoomView::paint(juce::Graphics &g) {
     auto &audioPlayer = owner.getAudioPlayer();
@@ -87,6 +27,7 @@ void ZoomView::paint(juce::Graphics &g) {
     const auto waveformBounds = getLocalBounds();
     const auto &waveformMouse = owner.getWaveformMouseHandler();
     const auto &markerMouse = owner.getMarkerMouseHandler();
+    auto &coordinator = owner.getInteractionCoordinator();
 
     if (waveformMouse.getMouseCursorX() != -1) {
         const int localMouseX = waveformMouse.getMouseCursorX() - getX();
@@ -195,27 +136,14 @@ void ZoomView::paint(juce::Graphics &g) {
     }
 
     const bool zDown = owner.getPlaybackTimerManager().isZKeyDown();
-    const auto activePoint = owner.getInteractionCoordinator().getActiveZoomPoint();
+    const auto activePoint = coordinator.getActiveZoomPoint();
 
     if (zDown || activePoint != AppEnums::ActiveZoomPoint::None) {
-        const int popupWidth =
-            juce::roundToInt((float)waveformBounds.getWidth() * Config::Layout::Zoom::popupScale);
-        const int popupHeight =
-            juce::roundToInt((float)waveformBounds.getHeight() * Config::Layout::Zoom::popupScale);
-        const juce::Rectangle<int> popupBounds(waveformBounds.getCentreX() - popupWidth / 2,
-                                               waveformBounds.getCentreY() - popupHeight / 2,
-                                               popupWidth, popupHeight);
-
-        double zoomCenterTime = owner.getFocusManager().getFocusedTime();
-        double timeRange = audioLength / (double)owner.getZoomFactor();
-        timeRange = juce::jlimit(0.00005, audioLength, timeRange);
-
-        const double startTime = zoomCenterTime - (timeRange / 2.0);
-        const double endTime = startTime + timeRange;
-
-        auto &coordinator = owner.getInteractionCoordinator();
-        coordinator.setZoomPopupBounds(popupBounds.translated(getX(), getY()));
-        coordinator.setZoomTimeRange(startTime, endTime);
+        const juce::Rectangle<int> popupBounds = coordinator.getZoomPopupBounds().translated(-getX(), -getY());
+        auto tr = coordinator.getZoomTimeRange();
+        const double startTime = tr.first;
+        const double endTime = tr.second;
+        const double timeRange = endTime - startTime;
 
         g.setColour(juce::Colours::black);
         g.fillRect(popupBounds);
@@ -275,7 +203,7 @@ void ZoomView::paint(juce::Graphics &g) {
 
             drawShadow(audioLength, endTime, juce::Colours::black);
 
-        const float pulse = owner.getInteractionCoordinator().shouldShowEyeCandy()
+        const float pulse = coordinator.shouldShowEyeCandy()
                                 ? owner.getPlaybackTimerManager().getBreathingPulse()
                                 : 0.0f;
 

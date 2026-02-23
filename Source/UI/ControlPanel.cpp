@@ -18,6 +18,7 @@
 #include "Presenters/RepeatButtonPresenter.h"
 #include "Presenters/SilenceDetectionPresenter.h"
 #include "Presenters/StatsPresenter.h"
+#include "Presenters/ZoomPresenter.h"
 #include "UI/FocusManager.h"
 #include "UI/LayoutManager.h"
 #include "UI/Views/CutLayerView.h"
@@ -100,7 +101,7 @@ void ControlPanel::setupPresenters() {
 
 void ControlPanel::setupListeners() {
     playbackTimerManager->addListener(&waveformCanvasView->getPlaybackCursorView());
-    playbackTimerManager->addListener(&waveformCanvasView->getZoomView());
+    playbackTimerManager->addListener(&getPresenterCore().getZoomPresenter());
     playbackTimerManager->addListener(&waveformCanvasView->getCutLayerView());
     playbackTimerManager->addListener(overlayView.get());
     playbackTimerManager->addListener(&getBoundaryLogicPresenter());

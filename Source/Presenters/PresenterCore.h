@@ -21,6 +21,7 @@ class CutButtonPresenter;
 class CutResetPresenter;
 class ControlStatePresenter;
 class PlaybackRepeatController;
+#include "Presenters/ZoomPresenter.h"
 
 class PresenterCore final {
   public:
@@ -37,6 +38,7 @@ class PresenterCore final {
     CutResetPresenter& getCutResetPresenter() { return *cutResetPresenter; }
     ControlStatePresenter& getControlStatePresenter() { return *controlStatePresenter; }
     PlaybackRepeatController& getPlaybackRepeatController() { return *playbackRepeatController; }
+    ZoomPresenter& getZoomPresenter() { return *zoomPresenter; }
 
   private:
     std::unique_ptr<StatsPresenter> statsPresenter;
@@ -49,6 +51,7 @@ class PresenterCore final {
     std::unique_ptr<CutResetPresenter> cutResetPresenter;
     std::unique_ptr<ControlStatePresenter> controlStatePresenter;
     std::unique_ptr<PlaybackRepeatController> playbackRepeatController;
+    std::unique_ptr<ZoomPresenter> zoomPresenter;
 
     ControlPanel &owner;
 

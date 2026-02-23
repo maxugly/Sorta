@@ -262,6 +262,7 @@ class ControlPanel final : public juce::Component {
     friend class PlaybackTextPresenter;
     friend class RepeatButtonPresenter;
     friend class BoundaryLogicPresenter;
+    friend class ZoomPresenter;
 
     MainComponent &owner;
     /** @brief Reference to the shared application state. */
