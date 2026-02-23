@@ -132,13 +132,21 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
 
 void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, bool enabled) {
     if (owner.inStrip != nullptr) {
-        owner.inStrip->setEnabled(enabled && isCutModeActive);
+        owner.inStrip->setEnabled(isCutModeActive);
         owner.inStrip->setVisible(isCutModeActive);
+
+        owner.inStrip->getMarkerButton().setEnabled(enabled);
+        owner.inStrip->getTimerEditor().setEnabled(enabled);
+        owner.inStrip->getResetButton().setEnabled(enabled);
     }
 
     if (owner.outStrip != nullptr) {
-        owner.outStrip->setEnabled(enabled && isCutModeActive);
+        owner.outStrip->setEnabled(isCutModeActive);
         owner.outStrip->setVisible(isCutModeActive);
+
+        owner.outStrip->getMarkerButton().setEnabled(enabled);
+        owner.outStrip->getTimerEditor().setEnabled(enabled);
+        owner.outStrip->getResetButton().setEnabled(enabled);
     }
 
     if (owner.playbackTimeView != nullptr) {
