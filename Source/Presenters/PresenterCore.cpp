@@ -18,7 +18,10 @@
 #include "Presenters/ZoomPresenter.h"
 #include "Presenters/MatrixPresenter.h"
 #include "Presenters/VolumePresenter.h"
+#include "Presenters/CutPresenter.h"
 #include "UI/Views/TopBarView.h"
+#include "UI/Views/WaveformCanvasView.h"
+#include "UI/Views/CutLayerView.h"
 
 PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     playbackRepeatController = std::make_unique<PlaybackRepeatController>(owner.getAudioPlayer(), owner);
@@ -42,6 +45,11 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
 
     buttonPresenter = std::make_unique<ControlButtonsPresenter>(owner);
     buttonPresenter->initialiseAllButtons();
+
+    cutPresenter = std::make_unique<CutPresenter>(
+        owner, owner.getSessionState(), owner.waveformCanvasView->getCutLayerView(),
+        owner.getSilenceDetector(), owner.getInteractionCoordinator(),
+        owner.getPlaybackTimerManager());
 
     cutButtonPresenter = std::make_unique<CutButtonPresenter>(owner);
     cutResetPresenter = std::make_unique<CutResetPresenter>(owner);

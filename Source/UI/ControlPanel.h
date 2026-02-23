@@ -203,6 +203,9 @@ class ControlPanel final : public juce::Component {
     PresenterCore &getPresenterCore() {
         return *presenterCore;
     }
+    const PresenterCore &getPresenterCore() const {
+        return *presenterCore;
+    }
     BoundaryLogicPresenter &getBoundaryLogicPresenter() {
         return presenterCore->getBoundaryLogicPresenter();
     }
@@ -227,6 +230,7 @@ class ControlPanel final : public juce::Component {
     friend class RepeatButtonPresenter;
     friend class BoundaryLogicPresenter;
     friend class ZoomPresenter;
+    friend class PresenterCore;
 
     MainComponent &owner;
     /** @brief Reference to the shared application state. */
@@ -238,9 +242,6 @@ class ControlPanel final : public juce::Component {
 
     /** @brief Handles silence detection logic and background workers. */
     std::unique_ptr<SilenceDetector> silenceDetector;
-
-    /** @brief Manages the logic for cut operations (in/out points). */
-    std::unique_ptr<CutPresenter> cutPresenter;
 
     /** @brief Calculates and caches component positions. */
     std::unique_ptr<LayoutManager> layoutManager;

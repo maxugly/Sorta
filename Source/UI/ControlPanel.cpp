@@ -62,9 +62,6 @@ void ControlPanel::setupViews() {
     addAndMakeVisible(waveformCanvasView.get());
 
     auto& cutLayer = waveformCanvasView->getCutLayerView();
-    cutPresenter = std::make_unique<CutPresenter>(*this, sessionState, cutLayer, 
-                                                  *silenceDetector, *interactionCoordinator, 
-                                                  *playbackTimerManager);
     cutLayer.updateState({}); // Initial empty state
 
     overlayView = std::make_unique<OverlayView>(*this);
@@ -175,19 +172,19 @@ AudioPlayer &ControlPanel::getAudioPlayer() const {
 }
 
 const MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() const {
-    return cutPresenter->getMarkerMouseHandler();
+    return getPresenterCore().getCutPresenter().getMarkerMouseHandler();
 }
 
 MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() {
-    return cutPresenter->getMarkerMouseHandler();
+    return getPresenterCore().getCutPresenter().getMarkerMouseHandler();
 }
 
 const WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() const {
-    return cutPresenter->getWaveformMouseHandler();
+    return getPresenterCore().getCutPresenter().getWaveformMouseHandler();
 }
 
 WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() {
-    return cutPresenter->getWaveformMouseHandler();
+    return getPresenterCore().getCutPresenter().getWaveformMouseHandler();
 }
 
 juce::TextEditor &ControlPanel::getStatsDisplay() {
