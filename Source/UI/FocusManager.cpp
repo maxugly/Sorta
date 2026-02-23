@@ -35,9 +35,9 @@ double FocusManager::getFocusedTime() const {
 
     switch (target) {
     case FocusTarget::CutIn:
-        return owner.getCutInPosition();
+        return owner.getSessionState().getCutIn();
     case FocusTarget::CutOut:
-        return owner.getCutOutPosition();
+        return owner.getSessionState().getCutOut();
     case FocusTarget::MouseManual:
     case FocusTarget::Playback:
     default:

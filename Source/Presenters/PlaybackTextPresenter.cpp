@@ -66,7 +66,7 @@ void PlaybackTextPresenter::updateEditors() {
     }
 
     if (!isEditingCutLength && !length.hasKeyboardFocus(true)) {
-        double cutLen = std::abs(owner.getCutOutPosition() - owner.getCutInPosition());
+        double cutLen = std::abs(owner.getSessionState().getCutOut() - owner.getSessionState().getCutIn());
         juce::String newText = owner.formatTime(cutLen);
         if (length.getText() != newText)
             length.setText(newText, juce::dontSendNotification);
@@ -158,20 +158,20 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
         const double base = session.getCutPrefs().active ? cutOut : totalLength;
         owner.getAudioPlayer().setPlayheadPosition(base - newTime);
     } else if (&editor == &owner.playbackTimeView->getCutLengthEditor()) {
-        double currentIn = owner.getCutInPosition();
+        double currentIn = owner.getSessionState().getCutIn();
         newTime = juce::jlimit(0.0, totalLength, newTime);
 
         double proposedOut = currentIn + newTime;
 
         if (proposedOut > totalLength) {
             double newIn = totalLength - newTime;
-            owner.setCutInPosition(newIn);
-            owner.setCutOutPosition(totalLength);
+            owner.getSessionState().setCutIn(newIn);
+            owner.getSessionState().setCutOut(totalLength);
         } else {
-            owner.setCutOutPosition(proposedOut);
+            owner.getSessionState().setCutOut(proposedOut);
         }
 
-        owner.ensureCutOrder();
+        owner.getBoundaryLogicPresenter().ensureCutOrder();
         owner.getBoundaryLogicPresenter().refreshLabels();
     }
 
@@ -259,16 +259,16 @@ void PlaybackTextPresenter::mouseWheelMove(const juce::MouseEvent &event,
     } else if (editor == &owner.playbackTimeView->getCutLengthEditor()) {
         const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
         newVal = juce::jlimit(0.0, totalLength, newVal);
-        double proposedOut = owner.getCutInPosition() + newVal;
+        double proposedOut = owner.getSessionState().getCutIn() + newVal;
 
         if (proposedOut > totalLength) {
-            owner.setCutInPosition(totalLength - newVal);
-            owner.setCutOutPosition(totalLength);
+            owner.getSessionState().setCutIn(totalLength - newVal);
+            owner.getSessionState().setCutOut(totalLength);
         } else {
-            owner.setCutOutPosition(proposedOut);
+            owner.getSessionState().setCutOut(proposedOut);
         }
 
-        owner.ensureCutOrder();
+        owner.getBoundaryLogicPresenter().ensureCutOrder();
         owner.getBoundaryLogicPresenter().refreshLabels();
     }
 

@@ -33,8 +33,8 @@ void OverlayView::paint(juce::Graphics &g) {
         return;
 
     const auto waveformBounds = owner.getWaveformBounds();
-    const double cutIn = owner.getCutInPosition();
-    const double cutOut = owner.getCutOutPosition();
+    const double cutIn = owner.getSessionState().getCutIn();
+    const double cutOut = owner.getSessionState().getCutOut();
 
     float inX =
         (float)waveformBounds.getX() +

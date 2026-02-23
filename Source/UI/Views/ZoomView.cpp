@@ -262,8 +262,8 @@ void ZoomView::paint(juce::Graphics &g) {
             g.fillRect(x1, (float)popupBounds.getY(), x2 - x1, (float)popupBounds.getHeight());
         };
 
-        const double cutIn = owner.getCutInPosition();
-        const double cutOut = owner.getCutOutPosition();
+        const double cutIn = owner.getSessionState().getCutIn();
+        const double cutOut = owner.getSessionState().getCutOut();
 
         drawShadow(startTime, cutIn, juce::Colours::black.withAlpha(0.5f));
         drawShadow(cutOut, endTime, juce::Colours::black.withAlpha(0.5f));

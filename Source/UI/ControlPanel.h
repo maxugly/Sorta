@@ -112,8 +112,6 @@ class ControlPanel final : public juce::Component {
         repaint();
     }
 
-    void jumpToCutIn();
-
     void paint(juce::Graphics &g) override;
 
     void resized() override;
@@ -125,16 +123,6 @@ class ControlPanel final : public juce::Component {
     void updateComponentStates();
 
     void updateCutButtonColors();
-
-    double getCutInPosition() const;
-
-    double getCutOutPosition() const;
-
-    void setCutInPosition(double pos);
-
-    void setCutOutPosition(double pos);
-
-    void ensureCutOrder();
 
     void toggleViewMode();
 

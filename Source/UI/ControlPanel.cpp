@@ -170,27 +170,6 @@ void ControlPanel::refreshLabels() {
     getPlaybackTextPresenter().updateEditors();
 }
 
-void ControlPanel::jumpToCutIn() {
-    getAudioPlayer().setPlayheadPosition(getCutInPosition());
-    interactionCoordinator->setNeedsJumpToCutIn(false);
-}
-
-double ControlPanel::getCutInPosition() const {
-    return sessionState.getCutIn();
-}
-
-double ControlPanel::getCutOutPosition() const {
-    return sessionState.getCutOut();
-}
-
-void ControlPanel::setCutInPosition(double pos) {
-    sessionState.setCutIn(pos);
-}
-
-void ControlPanel::setCutOutPosition(double pos) {
-    sessionState.setCutOut(pos);
-}
-
 void ControlPanel::updateComponentStates() {
     getPresenterCore().getControlStatePresenter().refreshStates();
 }
@@ -243,10 +222,6 @@ void ControlPanel::logStatusMessage(const juce::String &message, bool isError) {
 
 void ControlPanel::updateStatsFromAudio() {
     getPresenterCore().getStatsPresenter().updateStats();
-}
-
-void ControlPanel::ensureCutOrder() {
-    getBoundaryLogicPresenter().ensureCutOrder();
 }
 
 void ControlPanel::setShouldShowStats(bool shouldShowStatsParam) {

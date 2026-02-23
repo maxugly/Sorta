@@ -60,8 +60,8 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
                 const auto pm = coordinator.getPlacementMode();
                 if (pm == AppEnums::PlacementMode::None) {
                     const auto azp = coordinator.getActiveZoomPoint();
-                    double cpt = (azp == AppEnums::ActiveZoomPoint::In) ? owner.getCutInPosition()
-                                                                        : owner.getCutOutPosition();
+                    double cpt = (azp == AppEnums::ActiveZoomPoint::In) ? owner.getSessionState().getCutIn()
+                                                                        : owner.getSessionState().getCutOut();
                     float indicatorX = (float)zb.getX() + CoordinateMapper::secondsToPixels(
                                                               cpt - tr.first, (float)zb.getWidth(),
                                                               tr.second - tr.first);
@@ -106,9 +106,9 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
                 owner.getSessionState().setAutoCutOutActive(false);
 
             if (draggedHandle == CutMarkerHandle::Full) {
-                dragStartCutLength = std::abs(owner.getCutOutPosition() - owner.getCutInPosition());
+                dragStartCutLength = std::abs(owner.getSessionState().getCutOut() - owner.getSessionState().getCutIn());
                 dragStartMouseOffset =
-                    getMouseTime(event.x, wb, audioLength) - owner.getCutInPosition();
+                    getMouseTime(event.x, wb, audioLength) - owner.getSessionState().getCutIn();
             }
             owner.repaint();
         }
@@ -138,8 +138,8 @@ void MarkerMouseHandler::mouseDrag(const juce::MouseEvent &event) {
             double tt = zt - offset;
             auto marker = (draggedHandle == CutMarkerHandle::In) ? AppEnums::ActiveZoomPoint::In
                                                                  : AppEnums::ActiveZoomPoint::Out;
-            coordinator.validateMarkerPosition(marker, tt, owner.getCutInPosition(),
-                                               owner.getCutOutPosition(), audioLength);
+            coordinator.validateMarkerPosition(marker, tt, owner.getSessionState().getCutIn(),
+                                               owner.getSessionState().getCutOut(), audioLength);
             if (draggedHandle == CutMarkerHandle::In)
                 owner.getAudioPlayer().setCutIn(tt);
             else
@@ -155,15 +155,15 @@ void MarkerMouseHandler::mouseDrag(const juce::MouseEvent &event) {
             } else {
                 auto marker = (draggedHandle == CutMarkerHandle::In) ? AppEnums::ActiveZoomPoint::In
                                                                      : AppEnums::ActiveZoomPoint::Out;
-                coordinator.validateMarkerPosition(marker, mt, owner.getCutInPosition(),
-                                                   owner.getCutOutPosition(), audioLength);
+                coordinator.validateMarkerPosition(marker, mt, owner.getSessionState().getCutIn(),
+                                                   owner.getSessionState().getCutOut(), audioLength);
                 if (draggedHandle == CutMarkerHandle::In)
                     owner.getAudioPlayer().setCutIn(mt);
                 else
                     owner.getAudioPlayer().setCutOut(mt);
             }
         }
-        owner.ensureCutOrder();
+        owner.getBoundaryLogicPresenter().ensureCutOrder();
         owner.refreshLabels();
         owner.repaint();
     }
@@ -199,13 +199,13 @@ MarkerMouseHandler::CutMarkerHandle MarkerMouseHandler::getHandleAtPosition(juce
             .contains(pos);
     };
 
-    if (check(owner.getCutInPosition()))
+    if (check(owner.getSessionState().getCutIn()))
         return CutMarkerHandle::In;
-    if (check(owner.getCutOutPosition()))
+    if (check(owner.getSessionState().getCutOut()))
         return CutMarkerHandle::Out;
 
-    const double actualIn = juce::jmin(owner.getCutInPosition(), owner.getCutOutPosition()),
-                 actualOut = juce::jmax(owner.getCutInPosition(), owner.getCutOutPosition());
+    const double actualIn = juce::jmin(owner.getSessionState().getCutIn(), owner.getSessionState().getCutOut()),
+                 actualOut = juce::jmax(owner.getSessionState().getCutIn(), owner.getSessionState().getCutOut());
     float inX = (float)wb.getX() +
                 CoordinateMapper::secondsToPixels(actualIn, (float)wb.getWidth(), al),
           outX = (float)wb.getX() +

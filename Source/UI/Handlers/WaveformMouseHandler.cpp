@@ -62,23 +62,23 @@ void WaveformMouseHandler::mouseDown(const juce::MouseEvent &event) {
                     auto marker = (pm == AppEnums::PlacementMode::CutIn)
                                       ? AppEnums::ActiveZoomPoint::In
                                       : AppEnums::ActiveZoomPoint::Out;
-                    coordinator.validateMarkerPosition(marker, zoomedTime, owner.getCutInPosition(),
-                                                       owner.getCutOutPosition(), audioLength);
+                    coordinator.validateMarkerPosition(marker, zoomedTime, owner.getSessionState().getCutIn(),
+                                                       owner.getSessionState().getCutOut(), audioLength);
                     if (pm == AppEnums::PlacementMode::CutIn) {
-                        owner.setCutInPosition(zoomedTime);
+                        owner.getSessionState().setCutIn(zoomedTime);
                         owner.getSessionState().setAutoCutInActive(false);
                     } else {
-                        owner.setCutOutPosition(zoomedTime);
+                        owner.getSessionState().setCutOut(zoomedTime);
                         owner.getSessionState().setAutoCutOutActive(false);
                     }
-                    owner.ensureCutOrder();
+                    owner.getBoundaryLogicPresenter().ensureCutOrder();
                     owner.refreshLabels();
                     owner.repaint();
                     return;
                 } else {
                     const auto azp = coordinator.getActiveZoomPoint();
-                    double cpt = (azp == AppEnums::ActiveZoomPoint::In) ? owner.getCutInPosition()
-                                                                        : owner.getCutOutPosition();
+                    double cpt = (azp == AppEnums::ActiveZoomPoint::In) ? owner.getSessionState().getCutIn()
+                                                                        : owner.getSessionState().getCutOut();
                     float indicatorX = (float)zb.getX() + CoordinateMapper::secondsToPixels(
                                                               cpt - tr.first, (float)zb.getWidth(),
                                                               tr.second - tr.first);
@@ -163,7 +163,8 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
 
     if (isDraggingFlag) {
         isDraggingFlag = isScrubbingState = false;
-        owner.jumpToCutIn();
+        owner.getAudioPlayer().setPlayheadPosition(owner.getSessionState().getCutIn());
+        owner.getInteractionCoordinator().setNeedsJumpToCutIn(false);
     }
 
     const auto wb = owner.getWaveformBounds();
@@ -175,18 +176,19 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
             auto marker = (pm == AppEnums::PlacementMode::CutIn) ? AppEnums::ActiveZoomPoint::In
                                                                  : AppEnums::ActiveZoomPoint::Out;
             coordinator.validateMarkerPosition(
-                marker, t, owner.getCutInPosition(), owner.getCutOutPosition(),
+                marker, t, owner.getSessionState().getCutIn(), owner.getSessionState().getCutOut(),
                 owner.getAudioPlayer().getThumbnail().getTotalLength());
             if (pm == AppEnums::PlacementMode::CutIn) {
-                owner.setCutInPosition(t);
+                owner.getSessionState().setCutIn(t);
                 owner.getSessionState().setAutoCutInActive(false);
             } else {
-                owner.setCutOutPosition(t);
+                owner.getSessionState().setCutOut(t);
                 owner.getSessionState().setAutoCutOutActive(false);
             }
-            owner.ensureCutOrder();
+            owner.getBoundaryLogicPresenter().ensureCutOrder();
             owner.refreshLabels();
-            owner.jumpToCutIn();
+            owner.getAudioPlayer().setPlayheadPosition(owner.getSessionState().getCutIn());
+            owner.getInteractionCoordinator().setNeedsJumpToCutIn(false);
             coordinator.setPlacementMode(AppEnums::PlacementMode::None);
             owner.updateCutButtonColors();
         } else if (mouseDragStartX == event.x) {
@@ -233,16 +235,16 @@ void WaveformMouseHandler::handleRightClickForCutPlacement(int x) {
     if (pm != AppEnums::PlacementMode::None) {
         auto m = (pm == AppEnums::PlacementMode::CutIn) ? AppEnums::ActiveZoomPoint::In
                                                         : AppEnums::ActiveZoomPoint::Out;
-        coordinator.validateMarkerPosition(m, t, owner.getCutInPosition(),
-                                           owner.getCutOutPosition(), al);
+        coordinator.validateMarkerPosition(m, t, owner.getSessionState().getCutIn(),
+                                           owner.getSessionState().getCutOut(), al);
         if (pm == AppEnums::PlacementMode::CutIn) {
-            owner.setCutInPosition(t);
+            owner.getSessionState().setCutIn(t);
             owner.getSessionState().setAutoCutInActive(false);
         } else {
-            owner.setCutOutPosition(t);
+            owner.getSessionState().setCutOut(t);
             owner.getSessionState().setAutoCutOutActive(false);
         }
-        owner.ensureCutOrder();
+        owner.getBoundaryLogicPresenter().ensureCutOrder();
         owner.updateCutButtonColors();
         owner.refreshLabels();
     }
