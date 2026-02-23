@@ -185,9 +185,9 @@ struct Layout {
         static constexpr float placementModeGlowThickness = 3.0f;
         static constexpr float thresholdGlowThickness = 3.0f;
         static constexpr float cutLineGlowThickness = 4.0f;
-        static constexpr float cutMarkerWidthThin = 2.0f;
-        static constexpr float cutBoxOutlineThickness = 2.5f;
-        static constexpr float cutBoxOutlineThicknessInteracting = 4.0f;
+        static constexpr float cutMarkerWidthThin = 1.0f;
+        static constexpr float cutBoxOutlineThickness = 5.5f;
+        static constexpr float cutBoxOutlineThicknessInteracting = 10.0f;
         static constexpr float cutMarkerBoxWidth = 30.0f;
         static constexpr int cutMarkerBoxHeight = 30;
         static constexpr float cutMarkerCenterDivisor = 2.0f;

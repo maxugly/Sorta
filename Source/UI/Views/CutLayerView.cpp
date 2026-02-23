@@ -113,6 +113,10 @@ void CutLayerView::paint(juce::Graphics &g) {
     }
 
     auto drawCutMarker = [&](float x, juce::Colour markerColor, float thickness, bool shouldPulse) {
+        const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
+        const float halfBoxWidth = boxWidth / 2.0f;
+        const float pillarHeight = (float)bounds.getHeight() * 0.15f;
+
         // Draw Glow if active
         if (shouldPulse && state.showEyeCandy) {
             const float pulse = state.glowAlpha;
@@ -131,19 +135,21 @@ void CutLayerView::paint(juce::Graphics &g) {
                        (float)bounds.getHeight() - (2.0f * boxHeight));
         }
 
-        const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
-        const float halfBoxWidth = boxWidth / 2.0f;
-
+        // Top/Bottom Boxes
         g.setColour(markerColor);
         g.drawRect(x - halfBoxWidth, (float)bounds.getY(), boxWidth, boxHeight, thickness);
         g.drawRect(x - halfBoxWidth, (float)bounds.getBottom() - boxHeight, boxWidth, boxHeight,
                    thickness);
 
-        g.setColour(markerColor);
-        g.fillRect(x - Config::Layout::Glow::cutMarkerWidthThin /
-                           Config::Layout::Glow::cutMarkerCenterDivisor,
-                   (float)bounds.getY() + boxHeight, Config::Layout::Glow::cutMarkerWidthThin,
-                   (float)bounds.getHeight() - (2.0f * boxHeight));
+        // Precision Pillars (Thick segments at top and bottom)
+        g.fillRect(x - thickness * 0.5f, (float)bounds.getY() + boxHeight, thickness, pillarHeight);
+        g.fillRect(x - thickness * 0.5f, (float)bounds.getBottom() - boxHeight - pillarHeight, thickness, pillarHeight);
+
+        // Thin Center Line (Precision)
+        g.fillRect(x - Config::Layout::Glow::cutMarkerWidthThin * 0.5f,
+                   (float)bounds.getY() + boxHeight + pillarHeight, 
+                   Config::Layout::Glow::cutMarkerWidthThin,
+                   (float)bounds.getHeight() - (2.0f * (boxHeight + pillarHeight)));
     };
 
     drawCutMarker(state.inPixelX, state.inMarkerColor, state.inMarkerThickness, state.inMarkerShouldPulse);
@@ -159,13 +165,15 @@ void CutLayerView::paint(juce::Graphics &g) {
     const float endX = actualOutX - halfBoxWidth;
 
     if (startX < endX) {
-        g.drawLine(startX, (float)bounds.getY(), endX, (float)bounds.getY(), state.regionOutlineThickness);
-        g.drawLine(startX, (float)bounds.getY() + boxHeight, endX, (float)bounds.getY() + boxHeight,
-                   state.regionOutlineThickness);
-        g.drawLine(startX, (float)bounds.getBottom() - Config::Layout::buttonOutlineThickness,
-                   endX, (float)bounds.getBottom() - Config::Layout::buttonOutlineThickness,
-                   state.regionOutlineThickness);
-        g.drawLine(startX, (float)bounds.getBottom() - boxHeight, endX,
-                   (float)bounds.getBottom() - boxHeight, state.regionOutlineThickness);
+        const float hThickness = state.regionOutlineThickness;
+        // Top edge bar
+        g.fillRect(startX, (float)bounds.getY(), endX - startX, hThickness);
+        // Box bottom horizontal bar
+        g.fillRect(startX, (float)bounds.getY() + boxHeight - hThickness, endX - startX, hThickness);
+        
+        // Bottom edge bar
+        g.fillRect(startX, (float)bounds.getBottom() - hThickness, endX - startX, hThickness);
+        // Box top horizontal bar
+        g.fillRect(startX, (float)bounds.getBottom() - boxHeight, endX - startX, hThickness);
     }
 }
