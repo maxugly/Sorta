@@ -1,15 +1,10 @@
 
 
 #include "UI/Views/ZoomView.h"
-#include "Core/AudioPlayer.h"
 #include "UI/ControlPanel.h"
-#include "UI/FocusManager.h"
-#include "UI/Handlers/MarkerMouseHandler.h"
-#include "UI/Handlers/WaveformMouseHandler.h"
 #include "UI/Views/PlaybackCursorGlow.h"
 #include "Utils/Config.h"
 #include "Utils/CoordinateMapper.h"
-#include "Utils/TimeUtils.h"
 
 ZoomView::ZoomView(ControlPanel &ownerIn) : owner(ownerIn) {
     setInterceptsMouseClicks(false, false);
@@ -20,28 +15,22 @@ ZoomView::ZoomView(ControlPanel &ownerIn) : owner(ownerIn) {
 ZoomView::~ZoomView() = default;
 
 void ZoomView::paint(juce::Graphics &g) {
-    auto &audioPlayer = owner.getAudioPlayer();
-    const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
-    if (audioLength <= 0.0)
+    if (state.audioLength <= 0.0)
         return;
 
     const auto waveformBounds = getLocalBounds();
-    const auto &waveformMouse = owner.getWaveformMouseHandler();
-    const auto &markerMouse = owner.getMarkerMouseHandler();
-    auto &coordinator = owner.getInteractionCoordinator();
 
-    if (waveformMouse.getMouseCursorX() != -1) {
-        const int localMouseX = waveformMouse.getMouseCursorX() - getX();
-        const int localMouseY = waveformMouse.getMouseCursorY() - getY();
+    if (state.mouseX != -1) {
+        const int localMouseX = state.mouseX;
+        const int localMouseY = state.mouseY;
 
         juce::Colour currentLineColor = Config::Colors::mouseCursorLine;
         juce::Colour currentHighlightColor = Config::Colors::mouseCursorHighlight;
         juce::Colour currentGlowColor = Config::Colors::mouseAmplitudeGlow;
         float currentGlowThickness = Config::Layout::Glow::thickness;
 
-        const auto placementMode = owner.getInteractionCoordinator().getPlacementMode();
-        if (placementMode == AppEnums::PlacementMode::CutIn ||
-            placementMode == AppEnums::PlacementMode::CutOut) {
+        if (state.placementMode == AppEnums::PlacementMode::CutIn ||
+            state.placementMode == AppEnums::PlacementMode::CutOut) {
             currentLineColor = Config::Colors::mousePlacementMode;
             currentHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
             currentGlowColor = Config::Colors::placementModeGlow;
@@ -58,7 +47,7 @@ void ZoomView::paint(juce::Graphics &g) {
                            (int)(currentGlowThickness * Config::Layout::Glow::offsetFactor) - 1,
                        waveformBounds.getWidth(),
                        (int)currentGlowThickness + Config::Layout::Glow::mousePadding);
-        } else if (owner.getPlaybackTimerManager().isZKeyDown()) {
+        } else if (state.isZKeyDown) {
             currentLineColor = Config::Colors::mousePlacementMode;
             currentHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
         }
@@ -69,19 +58,7 @@ void ZoomView::paint(juce::Graphics &g) {
         g.fillRect(waveformBounds.getX(), localMouseY - Config::Layout::Glow::mouseHighlightOffset,
                    waveformBounds.getWidth(), Config::Layout::Glow::mouseHighlightSize);
 
-        float amplitude = 0.0f;
-        if (audioPlayer.getWaveformManager().getThumbnail().getNumChannels() > 0) {
-            double sampleRate = 0.0;
-            juce::int64 length = 0;
-            if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0) {
-                float minVal = 0.0f, maxVal = 0.0f;
-                audioPlayer.getWaveformManager().getThumbnail().getApproximateMinMax(
-                    waveformMouse.getMouseCursorTime(), waveformMouse.getMouseCursorTime() + (1.0 / sampleRate), 0,
-                    minVal, maxVal);
-                amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
-            }
-        }
-
+        const float amplitude = state.amplitude;
         const float centerY = (float)waveformBounds.getCentreY();
         const float amplitudeY = centerY - (amplitude * waveformBounds.getHeight() *
                                             Config::Layout::Waveform::heightScale);
@@ -121,12 +98,12 @@ void ZoomView::paint(juce::Graphics &g) {
                    (int)bottomAmplitudeY, 100, Config::Layout::Text::mouseCursorSize,
                    juce::Justification::left, true);
 
-        const juce::String timeText = TimeUtils::formatTime(waveformMouse.getMouseCursorTime());
+        const juce::String timeText = state.mouseTimeText;
         g.drawText(timeText, localMouseX + Config::Layout::Glow::mouseTextOffset,
                    localMouseY + Config::Layout::Glow::mouseTextOffset, 100,
                    Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
 
-        const juce::Colour glowColor = owner.getInteractionCoordinator().shouldShowEyeCandy()
+        const juce::Colour glowColor = state.shouldShowEyeCandy
                                            ? currentLineColor
                                            : currentLineColor.withAlpha(0.0f);
         PlaybackCursorGlow::renderGlow(g, localMouseX, waveformBounds.getY(),
@@ -136,25 +113,19 @@ void ZoomView::paint(juce::Graphics &g) {
                              (float)waveformBounds.getRight());
     }
 
-    const bool zDown = owner.getPlaybackTimerManager().isZKeyDown();
-    const auto activePoint = coordinator.getActiveZoomPoint();
-
-    if (zDown || activePoint != AppEnums::ActiveZoomPoint::None) {
-        const juce::Rectangle<int> popupBounds = coordinator.getZoomPopupBounds().translated(-getX(), -getY());
-        auto tr = coordinator.getZoomTimeRange();
-        const double startTime = tr.first;
-        const double endTime = tr.second;
+    if (state.isZooming && state.thumbnail != nullptr) {
+        const juce::Rectangle<int> popupBounds = state.popupBounds;
+        const double startTime = state.startTime;
+        const double endTime = state.endTime;
         const double timeRange = endTime - startTime;
 
         g.setColour(juce::Colours::black);
         g.fillRect(popupBounds);
 
         g.setColour(Config::Colors::waveform);
-        const auto channelMode = owner.getChannelViewMode();
-        const int numChannels = audioPlayer.getWaveformManager().getThumbnail().getNumChannels();
-
-        if (channelMode == AppEnums::ChannelViewMode::Mono || numChannels == 1) {
-            audioPlayer.getWaveformManager().getThumbnail().drawChannel(g, popupBounds, startTime,
+        
+        if (state.channelMode == AppEnums::ChannelViewMode::Mono || state.numChannels == 1) {
+            state.thumbnail->drawChannel(g, popupBounds, startTime,
                                                                         endTime, 0, 1.0f);
             g.setColour(Config::Colors::zoomPopupZeroLine);
             g.drawHorizontalLine(popupBounds.getCentreY(), (float)popupBounds.getX(),
@@ -164,9 +135,9 @@ void ZoomView::paint(juce::Graphics &g) {
             auto bottomBounds =
                 popupBounds.withTop(topBounds.getBottom()).withHeight(popupBounds.getHeight() / 2);
 
-            audioPlayer.getWaveformManager().getThumbnail().drawChannel(g, topBounds, startTime,
+            state.thumbnail->drawChannel(g, topBounds, startTime,
                                                                         endTime, 0, 1.0f);
-            audioPlayer.getWaveformManager().getThumbnail().drawChannel(g, bottomBounds, startTime,
+            state.thumbnail->drawChannel(g, bottomBounds, startTime,
                                                                         endTime, 1, 1.0f);
 
             g.setColour(Config::Colors::zoomPopupZeroLine);
@@ -191,22 +162,18 @@ void ZoomView::paint(juce::Graphics &g) {
             g.fillRect(x1, (float)popupBounds.getY(), x2 - x1, (float)popupBounds.getHeight());
         };
 
-        const double cutIn = owner.getSessionState().getCutIn();
-        const double cutOut = owner.getSessionState().getCutOut();
+        const double cutIn = state.cutIn;
+        const double cutOut = state.cutOut;
 
         drawShadow(startTime, cutIn, juce::Colours::black.withAlpha(0.5f));
         drawShadow(cutOut, endTime, juce::Colours::black.withAlpha(0.5f));
 
         if (startTime < 0.0)
-
             drawShadow(startTime, 0.0, juce::Colours::black);
-        if (endTime > audioLength)
+        if (endTime > state.audioLength)
+            drawShadow(state.audioLength, endTime, juce::Colours::black);
 
-            drawShadow(audioLength, endTime, juce::Colours::black);
-
-        const float pulse = coordinator.shouldShowEyeCandy()
-                                ? owner.getPlaybackTimerManager().getBreathingPulse()
-                                : 0.0f;
+        const float pulse = state.eyeCandyPulse;
 
         auto drawFineLine = [&](double time, juce::Colour color, float thickness) {
             if (time >= startTime && time <= endTime) {
@@ -219,21 +186,17 @@ void ZoomView::paint(juce::Graphics &g) {
             }
         };
 
-        bool isDraggingCutIn = markerMouse.getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::In;
-        bool isDraggingCutOut = markerMouse.getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Out;
-
         drawFineLine(cutIn, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse), 2.0f);
-
         drawFineLine(cutOut, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse), 2.0f);
-        drawFineLine(audioPlayer.getCurrentPosition(),
+        drawFineLine(state.currentPosition,
                      Config::Colors::playbackCursor.withAlpha(0.6f + 0.4f * pulse), 1.0f);
 
-        if (isDraggingCutIn || isDraggingCutOut) {
+        if (state.isDraggingCutIn || state.isDraggingCutOut) {
             const juce::Colour trackingColor =
                 Config::Colors::zoomPopupTrackingLine.withAlpha(0.8f + 0.2f * pulse);
-            drawFineLine(isDraggingCutIn ? cutIn : cutOut, trackingColor, 2.0f + 0.5f * pulse);
+            drawFineLine(state.isDraggingCutIn ? cutIn : cutOut, trackingColor, 2.0f + 0.5f * pulse);
         } else {
-            drawFineLine(audioPlayer.getCurrentPosition(),
+            drawFineLine(state.currentPosition,
                          Config::Colors::zoomPopupPlaybackLine.withAlpha(0.7f + 0.3f * pulse),
                          2.0f);
         }

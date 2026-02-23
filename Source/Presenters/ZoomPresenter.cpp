@@ -1,13 +1,16 @@
 
 #include "Presenters/ZoomPresenter.h"
+#include "Core/AudioPlayer.h"
+#include "Core/SessionState.h"
 #include "UI/ControlPanel.h"
+#include "UI/FocusManager.h"
+#include "UI/InteractionCoordinator.h"
+#include "UI/Handlers/MarkerMouseHandler.h"
+#include "UI/Handlers/WaveformMouseHandler.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/ZoomView.h"
-#include "UI/Handlers/WaveformMouseHandler.h"
-#include "UI/InteractionCoordinator.h"
-#include "UI/FocusManager.h"
-#include "Core/AudioPlayer.h"
 #include "Utils/Config.h"
+#include "Utils/TimeUtils.h"
 
 ZoomPresenter::ZoomPresenter(ControlPanel& ownerIn) : owner(ownerIn) {
 }
@@ -25,19 +28,43 @@ void ZoomPresenter::playbackTimerTick() {
     const auto activePoint = owner.getInteractionCoordinator().getActiveZoomPoint();
     const bool isZooming = zDown || activePoint != AppEnums::ActiveZoomPoint::None;
 
-    if (currentMouseX != lastMouseX || currentMouseY != lastMouseY) {
-        if (lastMouseX != -1) {
-            zoomView.repaint(lastMouseX - 1, 0, 3, zoomView.getHeight());
-            zoomView.repaint(0, lastMouseY - 1, zoomView.getWidth(), 3);
-        }
+    ZoomViewState state;
+    state.isZooming = isZooming;
+    state.eyeCandyPulse = timerManager.getBreathingPulse();
+    state.isZKeyDown = zDown;
+    state.shouldShowEyeCandy = owner.getInteractionCoordinator().shouldShowEyeCandy();
+    state.placementMode = owner.getInteractionCoordinator().getPlacementMode();
+    state.channelMode = owner.getChannelViewMode();
+    state.cutIn = owner.getSessionState().getCutIn();
+    state.cutOut = owner.getSessionState().getCutOut();
 
-        if (currentMouseX != -1) {
-            zoomView.repaint(currentMouseX - 1, 0, 3, zoomView.getHeight());
-            zoomView.repaint(0, currentMouseY - 1, zoomView.getWidth(), 3);
-        }
+    auto& audioPlayer = owner.getAudioPlayer();
+    state.audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
+    state.numChannels = audioPlayer.getWaveformManager().getThumbnail().getNumChannels();
+    state.currentPosition = audioPlayer.getCurrentPosition();
+    state.thumbnail = &audioPlayer.getWaveformManager().getThumbnail();
 
-        lastMouseX = currentMouseX;
-        lastMouseY = currentMouseY;
+    const auto &markerMouse = owner.getMarkerMouseHandler();
+    state.isDraggingCutIn = markerMouse.getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::In;
+    state.isDraggingCutOut = markerMouse.getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Out;
+
+    if (currentMouseX != -1) {
+        state.mouseX = currentMouseX - zoomView.getX();
+        state.mouseY = currentMouseY - zoomView.getY();
+        state.mouseTime = mouse.getMouseCursorTime();
+        state.mouseTimeText = TimeUtils::formatTime(state.mouseTime);
+
+        if (state.numChannels > 0) {
+            double sampleRate = 0.0;
+            juce::int64 length = 0;
+            if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0) {
+                float minVal = 0.0f, maxVal = 0.0f;
+                audioPlayer.getWaveformManager().getThumbnail().getApproximateMinMax(
+                    state.mouseTime, state.mouseTime + (1.0 / sampleRate), 0,
+                    minVal, maxVal);
+                state.amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
+            }
+        }
     }
 
     if (isZooming) {
@@ -50,41 +77,30 @@ void ZoomPresenter::playbackTimerTick() {
                                                       waveformBounds.getCentreY() - popupHeight / 2,
                                                       popupWidth, popupHeight);
 
-        // Calculate time range for ZoomView::paint
-        auto &audioPlayer = owner.getAudioPlayer();
-        const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
-        if (audioLength > 0.0) {
+        if (state.audioLength > 0.0) {
             double zoomCenterTime = owner.getFocusManager().getFocusedTime();
-            double timeRange = audioLength / (double)owner.getSessionState().getZoomFactor();
-            timeRange = juce::jlimit(0.00005, audioLength, timeRange);
+            double timeRange = state.audioLength / (double)owner.getSessionState().getZoomFactor();
+            timeRange = juce::jlimit(0.00005, state.audioLength, timeRange);
 
-            const double startTime = zoomCenterTime - (timeRange / 2.0);
-            const double endTime = startTime + timeRange;
+            state.startTime = zoomCenterTime - (timeRange / 2.0);
+            state.endTime = state.startTime + timeRange;
+            state.popupBounds = currentPopupBounds;
 
             auto &coordinator = owner.getInteractionCoordinator();
             coordinator.setZoomPopupBounds(currentPopupBounds.translated(zoomView.getX(), zoomView.getY()));
-            coordinator.setZoomTimeRange(startTime, endTime);
+            coordinator.setZoomTimeRange(state.startTime, state.endTime);
         }
-
-        if (currentPopupBounds != lastPopupBounds) {
-            zoomView.repaint(lastPopupBounds.expanded(5));
-            zoomView.repaint(currentPopupBounds.expanded(5));
-            lastPopupBounds = currentPopupBounds;
-        } else {
-            zoomView.repaint(currentPopupBounds.expanded(5));
-        }
-    } else if (!lastPopupBounds.isEmpty()) {
-        zoomView.repaint(lastPopupBounds.expanded(5));
-        lastPopupBounds = juce::Rectangle<int>();
     }
+
+    zoomView.updateState(state);
 }
 
 void ZoomPresenter::animationUpdate(float breathingPulse) {
     juce::ignoreUnused(breathingPulse);
-    owner.waveformCanvasView->getZoomView().repaint();
+    playbackTimerTick();
 }
 
 void ZoomPresenter::activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) {
     juce::ignoreUnused(newPoint);
-    owner.waveformCanvasView->getZoomView().repaint();
+    playbackTimerTick();
 }

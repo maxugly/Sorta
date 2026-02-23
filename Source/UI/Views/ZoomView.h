@@ -15,6 +15,32 @@
 
 class ControlPanel;
 
+struct ZoomViewState {
+    int mouseX{-1};
+    int mouseY{-1};
+    juce::String mouseTimeText;
+    float amplitude{0.0f};
+    bool isZooming{false};
+    juce::Rectangle<int> popupBounds;
+    double startTime{0.0};
+    double endTime{0.0};
+    float eyeCandyPulse{0.0f};
+
+    double audioLength{0.0};
+    AppEnums::PlacementMode placementMode{AppEnums::PlacementMode::None};
+    bool isZKeyDown{false};
+    AppEnums::ChannelViewMode channelMode{AppEnums::ChannelViewMode::Mono};
+    int numChannels{0};
+    double cutIn{0.0};
+    double cutOut{0.0};
+    double currentPosition{0.0};
+    bool isDraggingCutIn{false};
+    bool isDraggingCutOut{false};
+    bool shouldShowEyeCandy{false};
+    double mouseTime{0.0};
+    juce::AudioThumbnail* thumbnail{nullptr};
+};
+
 class ZoomView : public juce::Component {
   public:
     explicit ZoomView(ControlPanel &owner);
@@ -22,8 +48,14 @@ class ZoomView : public juce::Component {
 
     void paint(juce::Graphics &g) override;
 
+    void updateState(const ZoomViewState& newState) {
+        state = newState;
+        repaint();
+    }
+
   private:
     ControlPanel &owner;
+    ZoomViewState state;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ZoomView)
 };
