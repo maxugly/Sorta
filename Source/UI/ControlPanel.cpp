@@ -75,6 +75,9 @@ void ControlPanel::setupViews() {
 
     playbackTimeView = std::make_unique<PlaybackTimeView>();
     addAndMakeVisible(playbackTimeView.get());
+
+    matrixView = std::make_unique<MatrixView>();
+    addAndMakeVisible(matrixView.get());
 }
 
 void ControlPanel::setupStrips() {

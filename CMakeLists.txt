@@ -121,6 +121,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/PlaybackRepeatController.cpp
             Source/Presenters/ZoomPresenter.h
             Source/Presenters/ZoomPresenter.cpp
+            Source/Presenters/MatrixPresenter.h
+            Source/Presenters/MatrixPresenter.cpp
 
             # UI
             Source/UI/ControlPanel.h
@@ -163,6 +165,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Views/PlaybackCursorGlow.cpp
             Source/UI/Views/OverlayView.h
             Source/UI/Views/OverlayView.cpp
+            Source/UI/Views/MatrixView.h
+            Source/UI/Views/MatrixView.cpp
 
             # UI/LookAndFeel
             Source/UI/LookAndFeel/ModernLookAndFeel.h

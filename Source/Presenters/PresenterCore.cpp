@@ -16,6 +16,7 @@
 #include "Presenters/SilenceDetectionPresenter.h"
 #include "Presenters/StatsPresenter.h"
 #include "Presenters/ZoomPresenter.h"
+#include "Presenters/MatrixPresenter.h"
 
 PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     playbackRepeatController = std::make_unique<PlaybackRepeatController>(owner.getAudioPlayer(), owner);
@@ -44,4 +45,9 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     cutResetPresenter = std::make_unique<CutResetPresenter>(owner);
     controlStatePresenter = std::make_unique<ControlStatePresenter>(owner);
     zoomPresenter = std::make_unique<ZoomPresenter>(owner);
+    matrixPresenter = std::make_unique<MatrixPresenter>(
+        owner, owner.getAudioPlayer(), owner.getSessionState(),
+        owner.getSilenceDetector(), owner.getInteractionCoordinator(), *owner.getMatrixView());
 }
+
+PresenterCore::~PresenterCore() = default;

@@ -91,6 +91,12 @@ extern const juce::Colour zoomPopupBorder;
 extern const juce::Colour zoomPopupTrackingLine;
 extern const juce::Colour zoomPopupPlaybackLine;
 extern const juce::Colour zoomPopupZeroLine;
+
+struct Matrix {
+    static const juce::Colour ledActive;
+    static const juce::Colour ledInactive;
+    static const juce::Colour ledPulse;
+};
 } // namespace Colors
 
 struct Layout {
@@ -167,6 +173,11 @@ struct Layout {
     struct Zoom {
         static constexpr float popupScale = 0.8f;
         static constexpr float borderThickness = 3.0f;
+    };
+
+    struct Matrix {
+        static constexpr int squareSize = 6;
+        static constexpr int rows = 4;
     };
 };
 

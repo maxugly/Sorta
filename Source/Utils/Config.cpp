@@ -51,6 +51,10 @@ const juce::Colour zoomPopupBorder = juce::Colours::blue;
 const juce::Colour zoomPopupTrackingLine = juce::Colours::dodgerblue;
 const juce::Colour zoomPopupPlaybackLine = juce::Colours::lime;
 const juce::Colour zoomPopupZeroLine = juce::Colours::grey.withAlpha(0.3f);
+
+const juce::Colour Colors::Matrix::ledActive = juce::Colours::lime;
+const juce::Colour Colors::Matrix::ledInactive = juce::Colours::darkgrey;
+const juce::Colour Colors::Matrix::ledPulse = juce::Colours::cyan;
 #endif
 } // namespace Colors
 

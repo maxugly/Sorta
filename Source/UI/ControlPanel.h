@@ -4,6 +4,7 @@
 #include "Presenters/PlaybackTimerManager.h"
 #include "Presenters/PresenterCore.h"
 #include "UI/InteractionCoordinator.h"
+#include "UI/Views/MatrixView.h"
 
 class FocusManager;
 #include "Core/AppEnums.h"
@@ -208,6 +209,9 @@ class ControlPanel final : public juce::Component {
     RepeatButtonPresenter &getRepeatButtonPresenter() {
         return presenterCore->getRepeatButtonPresenter();
     }
+    MatrixView* getMatrixView() {
+        return matrixView.get();
+    }
     PlaybackTextPresenter &getPlaybackTextPresenter() {
         return presenterCore->getPlaybackTextPresenter();
     }
@@ -254,6 +258,7 @@ class ControlPanel final : public juce::Component {
 
     /** @brief Manages transient UI interaction states. */
     std::unique_ptr<InteractionCoordinator> interactionCoordinator;
+    std::unique_ptr<MatrixView> matrixView;
 
     std::unique_ptr<TopBarView> topBarView;
     std::unique_ptr<PlaybackTimeView> playbackTimeView;
