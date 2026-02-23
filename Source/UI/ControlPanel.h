@@ -36,7 +36,7 @@ class MainComponent;
 
 class LayoutManager;
 
-class WaveformView;
+class WaveformCanvasView;
 
 class CutLayerView;
 
@@ -303,22 +303,13 @@ class ControlPanel final : public juce::Component, public SessionState::Listener
     /** @brief Calculates and caches component positions. */
     std::unique_ptr<LayoutManager> layoutManager;
 
-    /** @brief Renders the static waveform visualization. */
-    std::unique_ptr<WaveformView> waveformView;
-
-    /** @brief Renders the overlay for cut regions. */
-    std::unique_ptr<CutLayerView> cutLayerView;
+    /** @brief Bundles overlapping waveform display layers. */
+    std::unique_ptr<WaveformCanvasView> waveformCanvasView;
 
     std::unique_ptr<PresenterCore> presenterCore;
 
     /** @brief Handles keyboard focus navigation. */
     std::unique_ptr<FocusManager> focusManager;
-
-    /** @brief Renders the playback cursor and glow effects. */
-    std::unique_ptr<PlaybackCursorView> playbackCursorView;
-
-    /** @brief Renders the zoom window. */
-    std::unique_ptr<ZoomView> zoomView;
 
     /** @brief Renders eye-candy overlays. */
     std::unique_ptr<OverlayView> overlayView;

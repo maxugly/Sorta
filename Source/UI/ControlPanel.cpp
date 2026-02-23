@@ -24,6 +24,7 @@
 #include "UI/Views/OverlayView.h"
 #include "UI/Views/PlaybackCursorGlow.h"
 #include "UI/Views/PlaybackCursorView.h"
+#include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/WaveformView.h"
 #include "UI/Views/ZoomView.h"
 #include "Utils/Config.h"
@@ -57,23 +58,12 @@ void ControlPanel::setupCoreComponents() {
 }
 
 void ControlPanel::setupViews() {
-    waveformView = std::make_unique<WaveformView>(getAudioPlayer().getWaveformManager());
-    addAndMakeVisible(waveformView.get());
+    waveformCanvasView = std::make_unique<WaveformCanvasView>(*this);
+    addAndMakeVisible(waveformCanvasView.get());
 
-    cutLayerView = std::make_unique<CutLayerView>(
-        *this, sessionState, *silenceDetector, getAudioPlayer().getWaveformManager(),
-        *interactionCoordinator, [this]() { return playbackTimerManager->getBreathingPulse(); });
-    cutPresenter = std::make_unique<CutPresenter>(*this, sessionState, *cutLayerView);
-    cutLayerView->setMarkerMouseHandler(getMarkerMouseHandler());
-    addAndMakeVisible(cutLayerView.get());
-
-    playbackCursorView = std::make_unique<PlaybackCursorView>(*this);
-    addAndMakeVisible(playbackCursorView.get());
-    playbackCursorView->setInterceptsMouseClicks(false, false);
-
-    zoomView = std::make_unique<ZoomView>(*this);
-    addAndMakeVisible(zoomView.get());
-    zoomView->setVisible(true);
+    auto& cutLayer = waveformCanvasView->getCutLayerView();
+    cutPresenter = std::make_unique<CutPresenter>(*this, sessionState, cutLayer);
+    cutLayer.setMarkerMouseHandler(getMarkerMouseHandler());
 
     overlayView = std::make_unique<OverlayView>(*this);
     addAndMakeVisible(overlayView.get());
@@ -110,9 +100,9 @@ void ControlPanel::setupPresenters() {
 }
 
 void ControlPanel::setupListeners() {
-    playbackTimerManager->addListener(playbackCursorView.get());
-    playbackTimerManager->addListener(zoomView.get());
-    playbackTimerManager->addListener(cutLayerView.get());
+    playbackTimerManager->addListener(&waveformCanvasView->getPlaybackCursorView());
+    playbackTimerManager->addListener(&waveformCanvasView->getZoomView());
+    playbackTimerManager->addListener(&waveformCanvasView->getCutLayerView());
     playbackTimerManager->addListener(overlayView.get());
     playbackTimerManager->addListener(&getBoundaryLogicPresenter());
     playbackTimerManager->addListener(&getPlaybackTextPresenter());
@@ -161,17 +151,8 @@ void ControlPanel::resized() {
     if (layoutManager != nullptr)
         layoutManager->performLayout();
 
-    if (waveformView != nullptr)
-        waveformView->setBounds(layoutCache.waveformBounds);
-
-    if (cutLayerView != nullptr)
-        cutLayerView->setBounds(layoutCache.waveformBounds);
-
-    if (playbackCursorView != nullptr)
-        playbackCursorView->setBounds(layoutCache.waveformBounds);
-
-    if (zoomView != nullptr)
-        zoomView->setBounds(layoutCache.waveformBounds);
+    if (waveformCanvasView != nullptr)
+        waveformCanvasView->setBounds(layoutCache.waveformBounds);
 
     if (overlayView != nullptr)
         overlayView->setBounds(getLocalBounds());
@@ -280,8 +261,8 @@ void ControlPanel::updateUIFromState() {
     getBoundaryLogicPresenter().refreshLabels();
     getPlaybackTextPresenter().updateEditors();
 
-    if (zoomView != nullptr)
-        zoomView->repaint();
+    if (waveformCanvasView != nullptr)
+        waveformCanvasView->getZoomView().repaint();
 
     repaint();
 }
@@ -324,8 +305,8 @@ void ControlPanel::toggleChannelViewMode() {
                 : Config::Labels::channelViewStereo);
     }
 
-    if (waveformView != nullptr)
-        waveformView->setChannelMode(currentChannelViewMode);
+    if (waveformCanvasView != nullptr)
+        waveformCanvasView->getWaveformView().setChannelMode(currentChannelViewMode);
 
     repaint();
 }

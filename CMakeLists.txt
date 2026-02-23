@@ -145,6 +145,8 @@ if (NOT BUILD_TESTS_ONLY)
             # UI/Views
             Source/UI/Views/CutLayerView.h
             Source/UI/Views/CutLayerView.cpp
+            Source/UI/Views/WaveformCanvasView.h
+            Source/UI/Views/WaveformCanvasView.cpp
             Source/UI/Views/TopBarView.h
             Source/UI/Views/TopBarView.cpp
             Source/UI/Views/PlaybackTimeView.h
