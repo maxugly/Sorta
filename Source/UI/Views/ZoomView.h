@@ -31,9 +31,11 @@ struct ZoomViewState {
     bool isZKeyDown{false};
     AppEnums::ChannelViewMode channelMode{AppEnums::ChannelViewMode::Mono};
     int numChannels{0};
-    double cutIn{0.0};
-    double cutOut{0.0};
-    double currentPosition{0.0};
+    
+    float cutInPixelX{0.0f};
+    float cutOutPixelX{0.0f};
+    float currentPositionPixelX{0.0f};
+    
     bool isDraggingCutIn{false};
     bool isDraggingCutOut{false};
     bool shouldShowEyeCandy{false};

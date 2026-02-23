@@ -70,7 +70,8 @@ void OverlayView::paint(juce::Graphics &g) {
 
         g.setColour(blueColor);
         g.drawLine(btnCenterX, btnBottomY, x,
-                   toTop ? (float)waveformBounds.getY() : (float)waveformBounds.getBottom(), 2.0f);
+                   toTop ? (float)waveformBounds.getY() : (float)waveformBounds.getBottom(),
+                   Config::Layout::connectorLineWidth);
     };
 
     auto *inStrip = owner.getInStrip();
@@ -106,7 +107,8 @@ void OverlayView::paint(juce::Graphics &g) {
 
         if (!first) {
             g.setColour(blueColor);
-            g.drawRect(groupBounds.expanded(3).toFloat(), 2.0f);
+            g.drawRect(groupBounds.expanded(Config::Layout::Stats::internalPadding + 1).toFloat(),
+                       Config::Layout::connectorLineWidth);
         }
     };
 

@@ -15,7 +15,6 @@ CutResetPresenter::CutResetPresenter(ControlPanel &ownerPanel) : owner(ownerPane
 void CutResetPresenter::resetIn() {
     owner.getSessionState().setCutIn(0.0);
     owner.getBoundaryLogicPresenter().ensureCutOrder();
-    owner.getPresenterCore().getCutButtonPresenter().updateColours();
     owner.getBoundaryLogicPresenter().refreshLabels();
     owner.getSessionState().setAutoCutInActive(false);
     owner.repaint();
@@ -24,7 +23,6 @@ void CutResetPresenter::resetIn() {
 void CutResetPresenter::resetOut() {
     owner.getSessionState().setCutOut(owner.getAudioPlayer().getThumbnail().getTotalLength());
     owner.getBoundaryLogicPresenter().ensureCutOrder();
-    owner.getPresenterCore().getCutButtonPresenter().updateColours();
     owner.getBoundaryLogicPresenter().refreshLabels();
     owner.getSessionState().setAutoCutOutActive(false);
     owner.repaint();

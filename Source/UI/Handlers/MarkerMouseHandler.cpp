@@ -164,8 +164,6 @@ void MarkerMouseHandler::mouseDrag(const juce::MouseEvent &event) {
                     owner.getAudioPlayer().setCutOut(mt);
             }
         }
-        owner.getBoundaryLogicPresenter().ensureCutOrder();
-        owner.getBoundaryLogicPresenter().refreshLabels();
         owner.repaint();
     }
 }

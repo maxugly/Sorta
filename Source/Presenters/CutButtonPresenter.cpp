@@ -4,9 +4,26 @@
 
 #include "Presenters/BoundaryLogicPresenter.h"
 #include "UI/ControlPanel.h"
+#include "UI/InteractionCoordinator.h"
 #include "Utils/Config.h"
 
 CutButtonPresenter::CutButtonPresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {
+    owner.getPlaybackTimerManager().addListener(this);
+}
+
+CutButtonPresenter::~CutButtonPresenter() {
+    owner.getPlaybackTimerManager().removeListener(this);
+}
+
+void CutButtonPresenter::playbackTimerTick() {
+    const auto currentMode = owner.getInteractionCoordinator().getPlacementMode();
+    if (currentMode != lastPlacementMode) {
+        updateColours();
+        lastPlacementMode = currentMode;
+    }
+}
+
+void CutButtonPresenter::animationUpdate(float) {
 }
 
 void CutButtonPresenter::updateColours() {
@@ -23,6 +40,4 @@ void CutButtonPresenter::updateColours() {
                                                     placementMode == AppEnums::PlacementMode::CutOut
                                                         ? Config::Colors::Button::cutPlacement
                                                         : Config::Colors::Button::cutActive);
-
-    owner.getBoundaryLogicPresenter().refreshLabels();
 }

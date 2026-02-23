@@ -16,11 +16,14 @@
 class ControlPanel;
 
 struct CutLayerState {
-    double cutInSeconds{0.0};
-    double cutOutSeconds{0.0};
-    double audioLength{0.0};
-    float inThreshold{0.0f};
-    float outThreshold{0.0f};
+    float inPixelX{0.0f};
+    float outPixelX{0.0f};
+    float inThresholdYTop{0.0f};
+    float inThresholdYBottom{0.0f};
+    float outThresholdYTop{0.0f};
+    float outThresholdYBottom{0.0f};
+    float fadeWidthPixels{0.0f};
+    float audioLength{0.0};
     float glowAlpha{0.0f};
     bool showEyeCandy{false};
     bool isAutoIn{false};

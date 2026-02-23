@@ -73,8 +73,6 @@ void WaveformMouseHandler::mouseDown(const juce::MouseEvent &event) {
                         owner.getSessionState().setCutOut(zoomedTime);
                         owner.getSessionState().setAutoCutOutActive(false);
                     }
-                    owner.getBoundaryLogicPresenter().ensureCutOrder();
-                    owner.getBoundaryLogicPresenter().refreshLabels();
                     owner.repaint();
                     return;
                 } else {
@@ -156,7 +154,6 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
         (isDraggingFlag || coordinator.getPlacementMode() != AppEnums::PlacementMode::None)) {
         if (coordinator.getPlacementMode() != AppEnums::PlacementMode::None) {
             coordinator.setPlacementMode(AppEnums::PlacementMode::None);
-            owner.getPresenterCore().getCutButtonPresenter().updateColours();
         }
         isDraggingFlag = isScrubbingState = false;
         owner.repaint();
@@ -187,12 +184,9 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
                 owner.getSessionState().setCutOut(t);
                 owner.getSessionState().setAutoCutOutActive(false);
             }
-            owner.getBoundaryLogicPresenter().ensureCutOrder();
-            owner.getBoundaryLogicPresenter().refreshLabels();
             owner.getAudioPlayer().setPlayheadPosition(owner.getSessionState().getCutIn());
             owner.getInteractionCoordinator().setNeedsJumpToCutIn(false);
             coordinator.setPlacementMode(AppEnums::PlacementMode::None);
-            owner.getPresenterCore().getCutButtonPresenter().updateColours();
         } else if (mouseDragStartX == event.x) {
             seekToMousePosition(event.x);
         }
@@ -246,9 +240,6 @@ void WaveformMouseHandler::handleRightClickForCutPlacement(int x) {
             owner.getSessionState().setCutOut(t);
             owner.getSessionState().setAutoCutOutActive(false);
         }
-        owner.getBoundaryLogicPresenter().ensureCutOrder();
-        owner.getPresenterCore().getCutButtonPresenter().updateColours();
-        owner.getBoundaryLogicPresenter().refreshLabels();
     }
 }
 

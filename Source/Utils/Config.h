@@ -48,6 +48,10 @@ struct Window {
     static const juce::Colour background;
 };
 
+extern const juce::Colour transparentBlack;
+extern const juce::Colour solidBlack;
+extern const juce::Colour transparentWhite;
+
 struct Button {
     static const juce::Colour base;
     static const juce::Colour on;
@@ -100,6 +104,8 @@ struct Layout {
     static constexpr int clearButtonWidth = 25;
     static constexpr float buttonCornerRadius = 5.0f;
     static constexpr float buttonOutlineThickness = 1.0f;
+    static constexpr float connectorLineWidth = 2.0f;
+    static constexpr float outlineThicknessMedium = 2.5f;
     static constexpr int cutTextWidth = 165;
     static constexpr int thresholdEditorWidth = 80;
 

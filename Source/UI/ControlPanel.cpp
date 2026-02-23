@@ -82,7 +82,7 @@ void ControlPanel::setupStrips() {
                                             sessionState, *silenceDetector);
     inStrip->onMarkerRightClick = [this] {
         getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutIn);
-        getPresenterCore().getCutButtonPresenter().updateColours();
+
         repaint();
     };
     addAndMakeVisible(inStrip.get());
@@ -91,7 +91,7 @@ void ControlPanel::setupStrips() {
                                              sessionState, *silenceDetector);
     outStrip->onMarkerRightClick = [this] {
         getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutOut);
-        getPresenterCore().getCutButtonPresenter().updateColours();
+
         repaint();
     };
     addAndMakeVisible(outStrip.get());

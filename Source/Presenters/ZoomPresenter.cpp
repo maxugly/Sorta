@@ -11,6 +11,7 @@
 #include "UI/Views/ZoomView.h"
 #include "Utils/Config.h"
 #include "Utils/TimeUtils.h"
+#include "Utils/CoordinateMapper.h"
 
 ZoomPresenter::ZoomPresenter(ControlPanel& ownerIn) : owner(ownerIn) {
 }
@@ -35,13 +36,10 @@ void ZoomPresenter::playbackTimerTick() {
     state.shouldShowEyeCandy = owner.getInteractionCoordinator().shouldShowEyeCandy();
     state.placementMode = owner.getInteractionCoordinator().getPlacementMode();
     state.channelMode = owner.getChannelViewMode();
-    state.cutIn = owner.getSessionState().getCutIn();
-    state.cutOut = owner.getSessionState().getCutOut();
 
     auto& audioPlayer = owner.getAudioPlayer();
     state.audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
     state.numChannels = audioPlayer.getWaveformManager().getThumbnail().getNumChannels();
-    state.currentPosition = audioPlayer.getCurrentPosition();
     state.thumbnail = &audioPlayer.getWaveformManager().getThumbnail();
 
     const auto &markerMouse = owner.getMarkerMouseHandler();
@@ -89,6 +87,16 @@ void ZoomPresenter::playbackTimerTick() {
             auto &coordinator = owner.getInteractionCoordinator();
             coordinator.setZoomPopupBounds(currentPopupBounds.translated(zoomView.getX(), zoomView.getY()));
             coordinator.setZoomTimeRange(state.startTime, state.endTime);
+
+            auto mapToPopup = [&](double time) {
+                return (float)currentPopupBounds.getX() +
+                       CoordinateMapper::secondsToPixels(time - state.startTime,
+                                                         (float)currentPopupBounds.getWidth(), (double)timeRange);
+            };
+
+            state.cutInPixelX = mapToPopup(owner.getSessionState().getCutIn());
+            state.cutOutPixelX = mapToPopup(owner.getSessionState().getCutOut());
+            state.currentPositionPixelX = mapToPopup(audioPlayer.getCurrentPosition());
         }
     }
 

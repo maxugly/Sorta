@@ -28,26 +28,10 @@ void CutLayerView::paint(juce::Graphics &g) {
         return;
 
     const auto bounds = getLocalBounds();
-    const float audioLength = (float)state.audioLength;
-    if (audioLength <= 0.0f)
+    if (state.audioLength <= 0.0f)
         return;
 
-    auto drawThresholdVisualisation = [&](double cutPos, float threshold) {
-        const float normalisedThreshold = threshold;
-        const float centerY = (float)bounds.getCentreY();
-        const float halfHeight = (float)bounds.getHeight() / 2.0f;
-
-        float topThresholdY = centerY - (normalisedThreshold * halfHeight);
-        float bottomThresholdY = centerY + (normalisedThreshold * halfHeight);
-
-        topThresholdY =
-            juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), topThresholdY);
-        bottomThresholdY =
-            juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), bottomThresholdY);
-
-        const float xPos = (float)bounds.getX() +
-                           CoordinateMapper::secondsToPixels(cutPos, (float)bounds.getWidth(),
-                                                             (double)audioLength);
+    auto drawThresholdVisualisation = [&](float xPos, float topThresholdY, float bottomThresholdY) {
         const float halfThresholdLineWidth = Config::Animation::thresholdLineWidth / 2.0f;
         float lineStartX = xPos - halfThresholdLineWidth;
         float lineEndX = xPos + halfThresholdLineWidth;
@@ -66,8 +50,10 @@ void CutLayerView::paint(juce::Graphics &g) {
             g.setColour(glowColor);
 
             // Draw a wider rectangle behind the line for a glow effect
-            g.fillRect(lineStartX, topThresholdY - 2.5f, currentLineWidth, 5.0f);
-            g.fillRect(lineStartX, bottomThresholdY - 2.5f, currentLineWidth, 5.0f);
+            g.fillRect(lineStartX, topThresholdY - Config::Layout::outlineThicknessMedium,
+                       currentLineWidth, Config::Layout::buttonCornerRadius);
+            g.fillRect(lineStartX, bottomThresholdY - Config::Layout::outlineThicknessMedium,
+                       currentLineWidth, Config::Layout::buttonCornerRadius);
         }
 
         g.setColour(Config::Colors::thresholdLine);
@@ -75,65 +61,57 @@ void CutLayerView::paint(juce::Graphics &g) {
         g.drawHorizontalLine((int)bottomThresholdY, lineStartX, lineEndX);
     };
 
-    const double cutIn = state.cutInSeconds;
-    const double cutOut = state.cutOutSeconds;
-    drawThresholdVisualisation(cutIn, state.inThreshold);
-    drawThresholdVisualisation(cutOut, state.outThreshold);
+    drawThresholdVisualisation(state.inPixelX, state.inThresholdYTop, state.inThresholdYBottom);
+    drawThresholdVisualisation(state.outPixelX, state.outThresholdYTop, state.outThresholdYBottom);
 
-    const double actualIn = juce::jmin(cutIn, cutOut);
-    const double actualOut = juce::jmax(cutIn, cutOut);
+    const float inX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.inPixelX);
+    const float outX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.outPixelX);
 
-    const float inX = juce::jlimit(
-        (float)bounds.getX(), (float)bounds.getRight(),
-        (float)bounds.getX() + CoordinateMapper::secondsToPixels(actualIn, (float)bounds.getWidth(),
-                                                                 (double)audioLength));
-    const float outX = juce::jlimit(
-        (float)bounds.getX(), (float)bounds.getRight(),
-        (float)bounds.getX() + CoordinateMapper::secondsToPixels(
-                                   actualOut, (float)bounds.getWidth(), (double)audioLength));
+    const float actualInX = juce::jmin(inX, outX);
+    const float actualOutX = juce::jmax(inX, outX);
 
-    const float fadeLength = bounds.getWidth() * Config::Layout::Waveform::cutRegionFadeProportion;
+    const float fadeLength = state.fadeWidthPixels;
     const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;
 
     const juce::Rectangle<float> leftRegion((float)bounds.getX(), (float)bounds.getY(),
-                                            juce::jmax(0.0f, inX - (float)bounds.getX()),
+                                            juce::jmax(0.0f, actualInX - (float)bounds.getX()),
                                             (float)bounds.getHeight());
     if (leftRegion.getWidth() > 0.0f) {
         const float actualFade = juce::jmin(fadeLength, leftRegion.getWidth());
 
         juce::Rectangle<float> solidBlackLeft =
             leftRegion.withWidth(juce::jmax(0.0f, leftRegion.getWidth() - actualFade));
-        g.setColour(juce::Colours::black);
+        g.setColour(Config::Colors::solidBlack);
         g.fillRect(solidBlackLeft);
 
-        juce::Rectangle<float> fadeAreaLeft(inX - actualFade, (float)bounds.getY(), actualFade,
+        juce::Rectangle<float> fadeAreaLeft(actualInX - actualFade, (float)bounds.getY(), actualFade,
                                             (float)bounds.getHeight());
-        juce::ColourGradient leftFadeGradient(Config::Colors::cutRegion, inX,
-                                              leftRegion.getCentreY(), juce::Colours::black,
-                                              inX - actualFade, leftRegion.getCentreY(), false);
+        juce::ColourGradient leftFadeGradient(Config::Colors::cutRegion, actualInX,
+                                              leftRegion.getCentreY(), Config::Colors::solidBlack,
+                                              actualInX - actualFade, leftRegion.getCentreY(), false);
         g.setGradientFill(leftFadeGradient);
         g.fillRect(fadeAreaLeft);
     }
 
-    const juce::Rectangle<float> rightRegion(outX, (float)bounds.getY(),
-                                             juce::jmax(0.0f, (float)bounds.getRight() - outX),
+    const juce::Rectangle<float> rightRegion(actualOutX, (float)bounds.getY(),
+                                             juce::jmax(0.0f, (float)bounds.getRight() - actualOutX),
                                              (float)bounds.getHeight());
     if (rightRegion.getWidth() > 0.0f) {
         const float actualFade = juce::jmin(fadeLength, rightRegion.getWidth());
 
-        float solidBlackStart = outX + actualFade;
+        float solidBlackStart = actualOutX + actualFade;
         juce::Rectangle<float> solidBlackRight(
             solidBlackStart, (float)bounds.getY(),
             juce::jmax(0.0f, (float)bounds.getRight() - solidBlackStart),
             (float)bounds.getHeight());
-        g.setColour(juce::Colours::black);
+        g.setColour(Config::Colors::solidBlack);
         g.fillRect(solidBlackRight);
 
-        juce::Rectangle<float> fadeAreaRight(outX, (float)bounds.getY(), actualFade,
+        juce::Rectangle<float> fadeAreaRight(actualOutX, (float)bounds.getY(), actualFade,
                                              (float)bounds.getHeight());
-        juce::ColourGradient rightFadeGradient(Config::Colors::cutRegion, outX,
-                                               rightRegion.getCentreY(), juce::Colours::black,
-                                               outX + actualFade, rightRegion.getCentreY(), false);
+        juce::ColourGradient rightFadeGradient(Config::Colors::cutRegion, actualOutX,
+                                               rightRegion.getCentreY(), Config::Colors::solidBlack,
+                                               actualOutX + actualFade, rightRegion.getCentreY(), false);
         g.setGradientFill(rightFadeGradient);
         g.fillRect(fadeAreaRight);
     }
@@ -170,12 +148,13 @@ void CutLayerView::paint(juce::Graphics &g) {
             g.setColour(glowColor);
             g.fillRect(x - (Config::Layout::Glow::cutLineGlowThickness *
                                 Config::Layout::Glow::offsetFactor -
-                            0.5f),
+                            Config::Layout::buttonOutlineThickness * 0.5f),
                        (float)bounds.getY() + boxHeight, Config::Layout::Glow::cutLineGlowThickness,
                        (float)bounds.getHeight() - (2.0f * boxHeight));
         } else {
             g.setColour(Config::Colors::cutLine.withAlpha(0.3f));
-            g.fillRect(x - 0.5f, (float)bounds.getY() + boxHeight, 1.0f,
+            g.fillRect(x - Config::Layout::buttonOutlineThickness * 0.5f, (float)bounds.getY() + boxHeight,
+                       Config::Layout::buttonOutlineThickness,
                        (float)bounds.getHeight() - (2.0f * boxHeight));
         }
 
@@ -194,8 +173,8 @@ void CutLayerView::paint(juce::Graphics &g) {
                    (float)bounds.getHeight() - (2.0f * boxHeight));
     };
 
-    drawCutMarker(inX, MarkerMouseHandler::CutMarkerHandle::In);
-    drawCutMarker(outX, MarkerMouseHandler::CutMarkerHandle::Out);
+    drawCutMarker(state.inPixelX, MarkerMouseHandler::CutMarkerHandle::In);
+    drawCutMarker(state.outPixelX, MarkerMouseHandler::CutMarkerHandle::Out);
 
     juce::Colour hollowColor = Config::Colors::cutLine;
     float hollowThickness = Config::Layout::Glow::cutBoxOutlineThickness;
@@ -216,14 +195,15 @@ void CutLayerView::paint(juce::Graphics &g) {
         g.setColour(hollowColor.withAlpha(0.4f));
 
     const float halfBoxWidth = Config::Layout::Glow::cutMarkerBoxWidth / 2.0f;
-    const float startX = inX + halfBoxWidth;
-    const float endX = outX - halfBoxWidth;
+    const float startX = actualInX + halfBoxWidth;
+    const float endX = actualOutX - halfBoxWidth;
 
     if (startX < endX) {
         g.drawLine(startX, (float)bounds.getY(), endX, (float)bounds.getY(), hollowThickness);
         g.drawLine(startX, (float)bounds.getY() + boxHeight, endX, (float)bounds.getY() + boxHeight,
                    hollowThickness);
-        g.drawLine(startX, (float)bounds.getBottom() - 1.0f, endX, (float)bounds.getBottom() - 1.0f,
+        g.drawLine(startX, (float)bounds.getBottom() - Config::Layout::buttonOutlineThickness,
+                   endX, (float)bounds.getBottom() - Config::Layout::buttonOutlineThickness,
                    hollowThickness);
         g.drawLine(startX, (float)bounds.getBottom() - boxHeight, endX,
                    (float)bounds.getBottom() - boxHeight, hollowThickness);

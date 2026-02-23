@@ -8,6 +8,7 @@
 #endif
 
 #include "Presenters/PlaybackTimerManager.h"
+#include "Core/SessionState.h"
 
 class ControlPanel;
 class SilenceDetector;
@@ -18,7 +19,8 @@ class SilenceDetector;
  */
 class BoundaryLogicPresenter : private juce::TextEditor::Listener,
                                public juce::MouseListener,
-                               public PlaybackTimerManager::Listener {
+                               public PlaybackTimerManager::Listener,
+                               public SessionState::Listener {
   public:
     BoundaryLogicPresenter(ControlPanel &ownerPanel, SilenceDetector &detector,
                            juce::TextEditor &cutIn, juce::TextEditor &cutOut);
@@ -36,6 +38,10 @@ class BoundaryLogicPresenter : private juce::TextEditor::Listener,
     void animationUpdate(float breathingPulse) override {
         juce::ignoreUnused(breathingPulse);
     }
+
+    // SessionState::Listener
+    void cutInChanged(double) override { ensureCutOrder(); }
+    void cutOutChanged(double) override { ensureCutOrder(); }
 
   private:
     // TextEditor::Listener

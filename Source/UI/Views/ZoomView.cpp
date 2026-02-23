@@ -4,7 +4,6 @@
 #include "UI/ControlPanel.h"
 #include "UI/Views/PlaybackCursorGlow.h"
 #include "Utils/Config.h"
-#include "Utils/CoordinateMapper.h"
 
 ZoomView::ZoomView(ControlPanel &ownerIn) : owner(ownerIn) {
     setInterceptsMouseClicks(false, false);
@@ -117,9 +116,8 @@ void ZoomView::paint(juce::Graphics &g) {
         const juce::Rectangle<int> popupBounds = state.popupBounds;
         const double startTime = state.startTime;
         const double endTime = state.endTime;
-        const double timeRange = endTime - startTime;
 
-        g.setColour(juce::Colours::black);
+        g.setColour(Config::Colors::solidBlack);
         g.fillRect(popupBounds);
 
         g.setColour(Config::Colors::waveform);
@@ -147,58 +145,47 @@ void ZoomView::paint(juce::Graphics &g) {
                                  (float)bottomBounds.getRight());
         }
 
-        auto drawShadow = [&](double startT, double endT, juce::Colour color) {
-            if (endT <= startTime || startT >= endTime)
-                return;
-            double vStart = juce::jmax(startT, startTime);
-            double vEnd = juce::jmin(endT, endTime);
-            float x1 = (float)popupBounds.getX() +
-                       CoordinateMapper::secondsToPixels(vStart - startTime,
-                                                         (float)popupBounds.getWidth(), timeRange);
-            float x2 = (float)popupBounds.getX() +
-                       CoordinateMapper::secondsToPixels(vEnd - startTime,
-                                                         (float)popupBounds.getWidth(), timeRange);
+        auto drawShadow = [&](float x1, float x2, juce::Colour color) {
+            if (x1 >= x2) return;
             g.setColour(color);
             g.fillRect(x1, (float)popupBounds.getY(), x2 - x1, (float)popupBounds.getHeight());
         };
 
-        const double cutIn = state.cutIn;
-        const double cutOut = state.cutOut;
+        const float inX = state.cutInPixelX;
+        const float outX = state.cutOutPixelX;
+        const float actualInX = juce::jmin(inX, outX);
+        const float actualOutX = juce::jmax(inX, outX);
 
-        drawShadow(startTime, cutIn, juce::Colours::black.withAlpha(0.5f));
-        drawShadow(cutOut, endTime, juce::Colours::black.withAlpha(0.5f));
-
-        if (startTime < 0.0)
-            drawShadow(startTime, 0.0, juce::Colours::black);
-        if (endTime > state.audioLength)
-            drawShadow(state.audioLength, endTime, juce::Colours::black);
+        drawShadow((float)popupBounds.getX(), actualInX, Config::Colors::solidBlack.withAlpha(0.5f));
+        drawShadow(actualOutX, (float)popupBounds.getRight(), Config::Colors::solidBlack.withAlpha(0.5f));
 
         const float pulse = state.eyeCandyPulse;
 
-        auto drawFineLine = [&](double time, juce::Colour color, float thickness) {
-            if (time >= startTime && time <= endTime) {
-                float x = (float)popupBounds.getX() +
-                          CoordinateMapper::secondsToPixels(
-                              time - startTime, (float)popupBounds.getWidth(), timeRange);
+        auto drawFineLine = [&](float x, juce::Colour color, float thickness) {
+            if (x >= (float)popupBounds.getX() && x <= (float)popupBounds.getRight()) {
                 g.setColour(color);
                 g.drawLine(x, (float)popupBounds.getY(), x, (float)popupBounds.getBottom(),
                            thickness);
             }
         };
 
-        drawFineLine(cutIn, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse), 2.0f);
-        drawFineLine(cutOut, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse), 2.0f);
-        drawFineLine(state.currentPosition,
-                     Config::Colors::playbackCursor.withAlpha(0.6f + 0.4f * pulse), 1.0f);
+        drawFineLine(inX, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse),
+                     Config::Layout::connectorLineWidth);
+        drawFineLine(outX, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse),
+                     Config::Layout::connectorLineWidth);
+        drawFineLine(state.currentPositionPixelX,
+                     Config::Colors::playbackCursor.withAlpha(0.6f + 0.4f * pulse), 
+                     Config::Layout::buttonOutlineThickness);
 
         if (state.isDraggingCutIn || state.isDraggingCutOut) {
             const juce::Colour trackingColor =
                 Config::Colors::zoomPopupTrackingLine.withAlpha(0.8f + 0.2f * pulse);
-            drawFineLine(state.isDraggingCutIn ? cutIn : cutOut, trackingColor, 2.0f + 0.5f * pulse);
+            drawFineLine(state.isDraggingCutIn ? inX : outX, trackingColor,
+                         Config::Layout::connectorLineWidth + 0.5f * pulse);
         } else {
-            drawFineLine(state.currentPosition,
+            drawFineLine(state.currentPositionPixelX,
                          Config::Colors::zoomPopupPlaybackLine.withAlpha(0.7f + 0.3f * pulse),
-                         2.0f);
+                         Config::Layout::connectorLineWidth);
         }
 
         g.setColour(Config::Colors::zoomPopupBorder);

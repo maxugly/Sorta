@@ -9,7 +9,6 @@
 #include "Utils/TimeEntryHelpers.h"
 #include "Utils/TimeUtils.h"
 #include "Workers/SilenceDetector.h"
-
 BoundaryLogicPresenter::BoundaryLogicPresenter(ControlPanel &ownerPanel, SilenceDetector &detector,
                                                juce::TextEditor &cutIn, juce::TextEditor &cutOut)
     : owner(ownerPanel), silenceDetector(detector), cutInEditor(cutIn), cutOutEditor(cutOut) {
@@ -17,14 +16,11 @@ BoundaryLogicPresenter::BoundaryLogicPresenter(ControlPanel &ownerPanel, Silence
     cutOutEditor.addListener(this);
     cutInEditor.addMouseListener(this, false);
     cutOutEditor.addMouseListener(this, false);
+    owner.getSessionState().addListener(this);
 }
 
 BoundaryLogicPresenter::~BoundaryLogicPresenter() {
-    owner.getPlaybackTimerManager().removeListener(this);
-    cutInEditor.removeListener(this);
-    cutOutEditor.removeListener(this);
-    cutInEditor.removeMouseListener(this);
-    cutOutEditor.removeMouseListener(this);
+    owner.getSessionState().removeListener(this);
 }
 
 void BoundaryLogicPresenter::initialiseEditors() {
@@ -218,7 +214,6 @@ bool BoundaryLogicPresenter::applyCutInFromEditor(double newPosition, juce::Text
     const double totalLength = getAudioTotalLength();
     if (newPosition >= 0.0 && newPosition <= totalLength) {
         setCutInPosition(newPosition);
-        owner.getPresenterCore().getCutButtonPresenter().updateColours();
         owner.getSessionState().setAutoCutInActive(false);
 
         if (owner.getInteractionCoordinator().getActiveZoomPoint() !=
@@ -245,7 +240,6 @@ bool BoundaryLogicPresenter::applyCutOutFromEditor(double newPosition, juce::Tex
             owner.getAudioPlayer().setPlayheadPosition(owner.getAudioPlayer().getCutIn());
 
         setCutOutPosition(newPosition);
-        owner.getPresenterCore().getCutButtonPresenter().updateColours();
         owner.getSessionState().setAutoCutOutActive(false);
 
         if (owner.getInteractionCoordinator().getActiveZoomPoint() !=

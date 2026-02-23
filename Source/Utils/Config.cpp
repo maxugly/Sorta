@@ -7,6 +7,11 @@ namespace Config {
 namespace Colors {
 #if !defined(JUCE_HEADLESS)
 const juce::Colour Window::background{juce::Colours::black};
+
+const juce::Colour transparentBlack = juce::Colours::transparentBlack;
+const juce::Colour solidBlack = juce::Colours::black;
+const juce::Colour transparentWhite = juce::Colours::white.withAlpha(0.0f);
+
 const juce::Colour Button::base{0xff5a5a5a};
 const juce::Colour Button::on{0xff00bfff};
 const juce::Colour Button::text{0xFFFFFFFF};

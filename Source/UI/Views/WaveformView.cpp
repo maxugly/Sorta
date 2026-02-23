@@ -34,7 +34,7 @@ void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode) {
 }
 
 void WaveformView::paint(juce::Graphics &g) {
-    g.fillAll(juce::Colours::black);
+    g.fillAll(Config::Colors::solidBlack);
 
     auto &thumbnail = waveformManager.getThumbnail();
     const auto audioLength = thumbnail.getTotalLength();

@@ -9,16 +9,24 @@
 #include <JuceHeader.h>
 #endif
 
+#include "Presenters/PlaybackTimerManager.h"
+
 class ControlPanel;
 
-class CutButtonPresenter {
+class CutButtonPresenter : public PlaybackTimerManager::Listener {
   public:
     explicit CutButtonPresenter(ControlPanel &ownerPanel);
+    ~CutButtonPresenter() override;
 
     void updateColours();
 
+    // PlaybackTimerManager::Listener
+    void playbackTimerTick() override;
+    void animationUpdate(float breathingPulse) override;
+
   private:
     ControlPanel &owner;
+    AppEnums::PlacementMode lastPlacementMode{AppEnums::PlacementMode::None};
 };
 
 #endif
