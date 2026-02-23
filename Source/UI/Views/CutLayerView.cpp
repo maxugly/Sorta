@@ -166,14 +166,26 @@ void CutLayerView::paint(juce::Graphics &g) {
 
     if (startX < endX) {
         const float hThickness = state.regionOutlineThickness;
-        // Top edge bar
-        g.fillRect(startX, (float)bounds.getY(), endX - startX, hThickness);
-        // Box bottom horizontal bar
-        g.fillRect(startX, (float)bounds.getY() + boxHeight - hThickness, endX - startX, hThickness);
+        const float w = endX - startX;
+        const float shadowHeight = 1.5f;
         
-        // Bottom edge bar
-        g.fillRect(startX, (float)bounds.getBottom() - hThickness, endX - startX, hThickness);
-        // Box top horizontal bar
-        g.fillRect(startX, (float)bounds.getBottom() - boxHeight, endX - startX, hThickness);
+        auto drawBarWithShadow = [&](float y) {
+            // Main semi-transparent bar
+            if (state.regionShouldPulse && state.showEyeCandy)
+                g.setColour(state.regionOutlineColor.withAlpha(0.5f + 0.5f * state.glowAlpha));
+            else
+                g.setColour(state.regionOutlineColor.withAlpha(0.4f));
+            
+            g.fillRect(startX, y, w, hThickness);
+
+            // Relative "Shadow/Detail" Line (darker and more opaque)
+            g.setColour(state.regionOutlineColor.darker(0.4f).withAlpha(0.7f));
+            g.fillRect(startX, y + (hThickness - shadowHeight) * 0.5f, w, shadowHeight);
+        };
+
+        drawBarWithShadow((float)bounds.getY());                                // Top edge
+        drawBarWithShadow((float)bounds.getY() + boxHeight - hThickness);       // Box bottom
+        drawBarWithShadow((float)bounds.getBottom() - hThickness);              // Bottom edge
+        drawBarWithShadow((float)bounds.getBottom() - boxHeight);               // Box top
     }
 }
