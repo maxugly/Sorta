@@ -69,6 +69,7 @@ juce::Result AudioPlayer::loadFile(const juce::File &file) {
 #endif
             readerSource.reset(newSource.release());
         }
+        transportSource.setGain(sessionState.getVolume());
         setPlayheadPosition(sessionState.getCutPrefs().cutIn);
 
         sessionState.setCurrentFilePath(filePath);
@@ -216,6 +217,10 @@ void AudioPlayer::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) 
     lastAutoCutThresholdOut = autoCut.thresholdOut;
     lastAutoCutInActive = autoCut.inActive;
     lastAutoCutOutActive = autoCut.outActive;
+}
+
+void AudioPlayer::volumeChanged(float newVolume) {
+    transportSource.setGain(newVolume);
 }
 
 juce::AudioFormatReader *AudioPlayer::getAudioFormatReader() const {

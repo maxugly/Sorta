@@ -18,6 +18,7 @@
 
 class ControlPanel;
 class TransportStrip;
+class VolumeView;
 
 class TopBarView final : public juce::Component {
   public:
@@ -25,6 +26,8 @@ class TopBarView final : public juce::Component {
     ~TopBarView() override;
 
     void resized() override;
+
+    VolumeView& getVolumeView() { return *volumeView; }
 
     juce::TextButton openButton;
     juce::TextButton modeButton;
@@ -35,6 +38,7 @@ class TopBarView final : public juce::Component {
 
     // We keep transportStrip here to manage the top row layout entirely
     std::unique_ptr<TransportStrip> transportStrip;
+    std::unique_ptr<VolumeView> volumeView;
 
   private:
     ControlPanel &controlPanel;

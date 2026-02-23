@@ -5,6 +5,7 @@
 #include "UI/Views/TopBarView.h"
 #include "UI/ControlPanel.h"
 #include "UI/Components/TransportStrip.h"
+#include "UI/Views/VolumeView.h"
 #include "Utils/Config.h"
 
 TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
@@ -17,6 +18,9 @@ TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
 
     transportStrip = std::make_unique<TransportStrip>(cp.getAudioPlayer(), cp.getSessionState());
     addAndMakeVisible(transportStrip.get());
+
+    volumeView = std::make_unique<VolumeView>();
+    addAndMakeVisible(volumeView.get());
 }
 
 TopBarView::~TopBarView() = default;
@@ -35,6 +39,12 @@ void TopBarView::resized() {
     if (transportStrip != nullptr) {
         const int stripWidth = (buttonWidth * 5) + (spacing * 4);
         transportStrip->setBounds(topRow.removeFromLeft(stripWidth));
+    }
+    topRow.removeFromLeft(margin);
+
+    if (volumeView != nullptr) {
+        const int knobSize = Config::Layout::TopBar::volumeKnobSize;
+        volumeView->setBounds(topRow.removeFromLeft(knobSize));
     }
     topRow.removeFromLeft(margin);
 

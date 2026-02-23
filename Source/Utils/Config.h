@@ -91,6 +91,8 @@ extern const juce::Colour zoomPopupBorder;
 extern const juce::Colour zoomPopupTrackingLine;
 extern const juce::Colour zoomPopupPlaybackLine;
 extern const juce::Colour zoomPopupZeroLine;
+extern const juce::Colour volumeKnobFill;
+extern const juce::Colour volumeKnobTrack;
 
 struct Matrix {
     static const juce::Colour ledActive;
@@ -178,6 +180,10 @@ struct Layout {
     struct Matrix {
         static constexpr int squareSize = 6;
         static constexpr int rows = 4;
+    };
+
+    struct TopBar {
+        static constexpr int volumeKnobSize = 80;
     };
 };
 

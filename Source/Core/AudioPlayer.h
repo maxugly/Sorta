@@ -119,6 +119,8 @@ class AudioPlayer : public juce::AudioSource,
 
     void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
 
+    void volumeChanged(float newVolume) override;
+
     double getCutIn() const {
         return sessionState.getCutIn();
     }

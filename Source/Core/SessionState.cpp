@@ -20,6 +20,20 @@ MainDomain::CutPreferences SessionState::getCutPrefs() const {
     return cutPrefs;
 }
 
+void SessionState::setVolume(float v) {
+    const juce::ScopedLock lock(stateLock);
+    const float clampedV = juce::jlimit(0.0f, 1.0f, v);
+    if (m_masterVolume != clampedV) {
+        m_masterVolume = clampedV;
+        listeners.call([clampedV](Listener &l) { l.volumeChanged(clampedV); });
+    }
+}
+
+float SessionState::getVolume() const {
+    const juce::ScopedLock lock(stateLock);
+    return m_masterVolume;
+}
+
 void SessionState::setCutActive(bool active) {
     const juce::ScopedLock lock(stateLock);
     if (cutPrefs.active != active) {

@@ -38,6 +38,9 @@ class SessionState {
         virtual void cutOutChanged(double value) {
             juce::ignoreUnused(value);
         }
+        virtual void volumeChanged(float newVolume) {
+            juce::ignoreUnused(newVolume);
+        }
     };
 
     SessionState();
@@ -47,6 +50,9 @@ class SessionState {
     void removeListener(Listener *listener);
 
     MainDomain::CutPreferences getCutPrefs() const;
+
+    void setVolume(float v);
+    float getVolume() const;
 
     void setCutActive(bool active);
 
@@ -96,6 +102,7 @@ class SessionState {
     juce::ListenerList<Listener> listeners;
 
     float m_zoomFactor{10.0f};
+    float m_masterVolume{1.0f};
     AppEnums::ViewMode currentMode{AppEnums::ViewMode::Classic};
     AppEnums::ChannelViewMode currentChannelViewMode{AppEnums::ChannelViewMode::Mono};
 

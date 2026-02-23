@@ -123,6 +123,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/ZoomPresenter.cpp
             Source/Presenters/MatrixPresenter.h
             Source/Presenters/MatrixPresenter.cpp
+            Source/Presenters/VolumePresenter.h
+            Source/Presenters/VolumePresenter.cpp
 
             # UI
             Source/UI/ControlPanel.h
@@ -167,6 +169,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Views/OverlayView.cpp
             Source/UI/Views/MatrixView.h
             Source/UI/Views/MatrixView.cpp
+            Source/UI/Views/VolumeView.h
+            Source/UI/Views/VolumeView.cpp
 
             # UI/LookAndFeel
             Source/UI/LookAndFeel/ModernLookAndFeel.h
