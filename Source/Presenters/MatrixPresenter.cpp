@@ -84,11 +84,11 @@ void MatrixPresenter::playbackTimerTick() {
     float vol = sessionState.getVolume();
     juce::Colour flameColor;
     if (vol < 0.33f) {
-        flameColor = juce::Colours::red.interpolatedWith(juce::Colours::orange, vol / 0.33f);
+        flameColor = Config::Colors::VolumeFlame::low.interpolatedWith(Config::Colors::VolumeFlame::mid, vol / 0.33f);
     } else if (vol < 0.66f) {
-        flameColor = juce::Colours::orange.interpolatedWith(juce::Colours::blue, (vol - 0.33f) / 0.33f);
+        flameColor = Config::Colors::VolumeFlame::mid.interpolatedWith(Config::Colors::VolumeFlame::high, (vol - 0.33f) / 0.33f);
     } else {
-        flameColor = juce::Colours::blue.interpolatedWith(juce::Colours::white, (vol - 0.66f) / 0.34f);
+        flameColor = Config::Colors::VolumeFlame::high.interpolatedWith(Config::Colors::VolumeFlame::peak, (vol - 0.66f) / 0.34f);
     }
     state.ledColors.push_back(flameColor);
 

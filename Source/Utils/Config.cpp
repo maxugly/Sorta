@@ -54,6 +54,12 @@ const juce::Colour zoomPopupZeroLine = juce::Colours::grey.withAlpha(0.3f);
 
 const juce::Colour volumeKnobFill = juce::Colours::orange;
 const juce::Colour volumeKnobTrack = juce::Colours::darkgrey;
+const juce::Colour volumeKnobPointer = juce::Colours::white;
+
+const juce::Colour Colors::VolumeFlame::low = juce::Colours::red;
+const juce::Colour Colors::VolumeFlame::mid = juce::Colours::orange;
+const juce::Colour Colors::VolumeFlame::high = juce::Colours::blue;
+const juce::Colour Colors::VolumeFlame::peak = juce::Colours::white;
 
 const juce::Colour Colors::Matrix::ledActive = juce::Colours::lime;
 const juce::Colour Colors::Matrix::ledInactive = juce::Colours::darkgrey;

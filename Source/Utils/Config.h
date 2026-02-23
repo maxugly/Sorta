@@ -93,6 +93,14 @@ extern const juce::Colour zoomPopupPlaybackLine;
 extern const juce::Colour zoomPopupZeroLine;
 extern const juce::Colour volumeKnobFill;
 extern const juce::Colour volumeKnobTrack;
+extern const juce::Colour volumeKnobPointer;
+
+struct VolumeFlame {
+    static const juce::Colour low;
+    static const juce::Colour mid;
+    static const juce::Colour high;
+    static const juce::Colour peak;
+};
 
 struct Matrix {
     static const juce::Colour ledActive;
@@ -116,6 +124,12 @@ struct Layout {
     static constexpr float outlineThicknessMedium = 2.5f;
     static constexpr int cutTextWidth = 165;
     static constexpr int thresholdEditorWidth = 80;
+
+    struct VolumeKnob {
+        static constexpr float outlineThickness = 2.0f;
+        static constexpr float pointerThickness = 3.0f;
+        static constexpr float pointerLengthProportion = 0.4f;
+    };
 
     struct Text {
         static constexpr int playbackWidth = 520;

@@ -6,7 +6,7 @@ class KnobLookAndFeel : public juce::LookAndFeel_V4 {
     void drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height,
                           float sliderPos, const float rotaryStartAngle,
                           const float rotaryEndAngle, juce::Slider &slider) override {
-        auto outlineThickness = 2.0f;
+        auto outlineThickness = Config::Layout::VolumeKnob::outlineThickness;
         auto radius = (float)juce::jmin(width / 2, height / 2) - outlineThickness * 2.0f;
         auto centreX = (float)x + (float)width * 0.5f;
         auto centreY = (float)y + (float)height * 0.5f;
@@ -31,12 +31,12 @@ class KnobLookAndFeel : public juce::LookAndFeel_V4 {
 
         // 4. Draw Pointer
         juce::Path p;
-        auto pointerLength = radius * 0.4f;
-        auto pointerThickness = 3.0f;
+        auto pointerLength = radius * Config::Layout::VolumeKnob::pointerLengthProportion;
+        auto pointerThickness = Config::Layout::VolumeKnob::pointerThickness;
         p.addRoundedRectangle(-pointerThickness * 0.5f, -radius, pointerThickness, pointerLength, 1.0f);
         p.applyTransform(juce::AffineTransform::rotation(angle).translated(centreX, centreY));
 
-        g.setColour(juce::Colours::white);
+        g.setColour(Config::Colors::volumeKnobPointer);
         g.fillPath(p);
     }
 };
@@ -52,7 +52,7 @@ VolumeView::VolumeView() {
 
     volumeKnob.setColour(juce::Slider::rotarySliderFillColourId, Config::Colors::volumeKnobFill);
     volumeKnob.setColour(juce::Slider::rotarySliderOutlineColourId, Config::Colors::volumeKnobTrack);
-    volumeKnob.setColour(juce::Slider::thumbColourId, juce::Colours::white);
+    volumeKnob.setColour(juce::Slider::thumbColourId, Config::Colors::volumeKnobPointer);
 }
 
 void VolumeView::resized() {
