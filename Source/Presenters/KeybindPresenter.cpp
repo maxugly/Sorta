@@ -1,26 +1,23 @@
-
-
-#include "UI/KeybindHandler.h"
+#include "Presenters/KeybindPresenter.h"
 
 #include "Core/AppEnums.h"
 #include "Core/AudioPlayer.h"
-#include "MainComponent.h"
 #include "Presenters/ControlStatePresenter.h"
 #include "Presenters/CutResetPresenter.h"
 #include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
+#include "UI/Views/TopBarView.h"
 #include "Utils/Config.h"
 
-KeybindHandler::KeybindHandler(MainComponent &mainComponentIn, AudioPlayer &audioPlayerIn,
-                               ControlPanel &controlPanelIn)
-    : mainComponent(mainComponentIn), audioPlayer(audioPlayerIn), controlPanel(controlPanelIn) {
+KeybindPresenter::KeybindPresenter(ControlPanel &ownerPanel)
+    : owner(ownerPanel) {
 }
 
-bool KeybindHandler::handleKeyPress(const juce::KeyPress &key) {
+bool KeybindPresenter::handleKeyPress(const juce::KeyPress &key) {
     if (handleGlobalKeybinds(key))
         return true;
 
-    if (audioPlayer.getThumbnail().getTotalLength() > 0.0) {
+    if (owner.getAudioPlayer().getThumbnail().getTotalLength() > 0.0) {
         if (handlePlaybackKeybinds(key))
             return true;
         if (handleUIToggleKeybinds(key))
@@ -31,7 +28,7 @@ bool KeybindHandler::handleKeyPress(const juce::KeyPress &key) {
     return false;
 }
 
-bool KeybindHandler::handleGlobalKeybinds(const juce::KeyPress &key) {
+bool KeybindPresenter::handleGlobalKeybinds(const juce::KeyPress &key) {
     const juce::juce_wchar keyChar = key.getTextCharacter();
     if (keyChar == 'e' || keyChar == 'E') {
         if (auto *app = juce::JUCEApplication::getInstance())
@@ -39,13 +36,14 @@ bool KeybindHandler::handleGlobalKeybinds(const juce::KeyPress &key) {
         return true;
     }
     if (keyChar == 'd' || keyChar == 'D') {
-        mainComponent.openButtonClicked();
+        owner.invokeOwnerOpenDialog();
         return true;
     }
     return false;
 }
 
-bool KeybindHandler::handlePlaybackKeybinds(const juce::KeyPress &key) {
+bool KeybindPresenter::handlePlaybackKeybinds(const juce::KeyPress &key) {
+    auto& audioPlayer = owner.getAudioPlayer();
     if (key == juce::KeyPress::spaceKey) {
         audioPlayer.togglePlayStop();
         return true;
@@ -64,57 +62,60 @@ bool KeybindHandler::handlePlaybackKeybinds(const juce::KeyPress &key) {
     return false;
 }
 
-bool KeybindHandler::handleUIToggleKeybinds(const juce::KeyPress &key) {
+bool KeybindPresenter::handleUIToggleKeybinds(const juce::KeyPress &key) {
     const auto keyChar = key.getTextCharacter();
     if (keyChar == 's' || keyChar == 'S') {
-        controlPanel.getPresenterCore().getStatsPresenter().toggleVisibility();
-        controlPanel.getPresenterCore().getControlStatePresenter().refreshStates();
+        owner.getPresenterCore().getStatsPresenter().toggleVisibility();
+        owner.getPresenterCore().getControlStatePresenter().refreshStates();
         return true;
     }
     if (keyChar == 'v' || keyChar == 'V') {
-        if (auto* tb = controlPanel.getTopBarView())
+        if (auto* tb = owner.getTopBarView())
             tb->modeButton.triggerClick();
         return true;
     }
     if (keyChar == 'c' || keyChar == 'C') {
-        if (auto* tb = controlPanel.getTopBarView())
+        if (auto* tb = owner.getTopBarView())
             tb->channelViewButton.triggerClick();
         return true;
     }
     if (keyChar == 'r' || keyChar == 'R') {
+        auto& audioPlayer = owner.getAudioPlayer();
         audioPlayer.setRepeating(!audioPlayer.isRepeating());
-        controlPanel.getPresenterCore().getControlStatePresenter().refreshStates();
+        owner.getPresenterCore().getControlStatePresenter().refreshStates();
         return true;
     }
     return false;
 }
 
-bool KeybindHandler::handleCutKeybinds(const juce::KeyPress &key) {
+bool KeybindPresenter::handleCutKeybinds(const juce::KeyPress &key) {
     const auto keyChar = key.getTextCharacter();
-    if (controlPanel.getInteractionCoordinator().getPlacementMode() == AppEnums::PlacementMode::None) {
+    auto& sessionState = owner.getSessionState();
+    auto& audioPlayer = owner.getAudioPlayer();
+    auto& interactionCoordinator = owner.getInteractionCoordinator();
+
+    if (interactionCoordinator.getPlacementMode() == AppEnums::PlacementMode::None) {
         if (keyChar == 'i' || keyChar == 'I') {
-            controlPanel.getSessionState().setCutIn(audioPlayer.getCurrentPosition());
-            controlPanel.getSessionState().setAutoCutInActive(false);
-            controlPanel.getInteractionCoordinator().setNeedsJumpToCutIn(false);
-            controlPanel.getAudioPlayer().setPlayheadPosition(controlPanel.getSessionState().getCutIn());
-            controlPanel.repaint();
+            sessionState.setCutIn(audioPlayer.getCurrentPosition());
+            sessionState.setAutoCutInActive(false);
+            interactionCoordinator.setNeedsJumpToCutIn(false);
+            audioPlayer.setPlayheadPosition(sessionState.getCutIn());
             return true;
         }
         if (keyChar == 'o' || keyChar == 'O') {
-            controlPanel.getSessionState().setCutOut(audioPlayer.getCurrentPosition());
-            controlPanel.getSessionState().setAutoCutOutActive(false);
-            controlPanel.getInteractionCoordinator().setNeedsJumpToCutIn(false);
-            controlPanel.getAudioPlayer().setPlayheadPosition(controlPanel.getSessionState().getCutIn());
-            controlPanel.repaint();
+            sessionState.setCutOut(audioPlayer.getCurrentPosition());
+            sessionState.setAutoCutOutActive(false);
+            interactionCoordinator.setNeedsJumpToCutIn(false);
+            audioPlayer.setPlayheadPosition(sessionState.getCutIn());
             return true;
         }
     }
     if (keyChar == 'u' || keyChar == 'U') {
-        controlPanel.getPresenterCore().getCutResetPresenter().resetIn();
+        owner.getPresenterCore().getCutResetPresenter().resetIn();
         return true;
     }
     if (keyChar == 'p' || keyChar == 'P') {
-        controlPanel.getPresenterCore().getCutResetPresenter().resetOut();
+        owner.getPresenterCore().getCutResetPresenter().resetOut();
         return true;
     }
     return false;

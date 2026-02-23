@@ -33,59 +33,30 @@ class FocusManager;
 #include <tuple>
 
 class MainComponent;
-
 class LayoutManager;
-
 class WaveformCanvasView;
-
 class CutLayerView;
-
 class CutPresenter;
-
 class StatsPresenter;
-
 class ControlStatePresenter;
-
 class SilenceDetectionPresenter;
-
 class RepeatButtonPresenter;
-
 class BoundaryLogicPresenter;
-
 class ControlButtonsPresenter;
-
 class CutResetPresenter;
-
 class CutButtonPresenter;
-
 class PlaybackTextPresenter;
-
 class PlaybackCursorView;
-
 class ZoomView;
-
 class PlaybackRepeatController;
-
 class TransportStrip;
-
 class MarkerStrip;
-
 class OverlayView;
 
 /**
  * @file ControlPanel.h
  * @ingroup UI
  * @brief The main container for UI controls and waveform visualization.
- * @details This component instantiates and manages all the presenters and views (e.g.,
- *          `WaveformView`, `TransportPresenter`). It handles the layout logic and
- *          coordinates communication between the UI and the `SessionState`.
- *
- *          It acts as the "Glue" layer, ensuring presenters have access to the models they need.
- *
- * @see MainComponent
- * @see SessionState
- * @see LayoutManager
- * @see WaveformView
  */
 class ControlPanel final : public juce::Component {
   public:
@@ -99,42 +70,24 @@ class ControlPanel final : public juce::Component {
     };
 
     explicit ControlPanel(MainComponent &owner, SessionState &sessionStateIn);
-
     ~ControlPanel() override;
 
-
-
     void paint(juce::Graphics &g) override;
-
     void resized() override;
 
-    juce::TextButton &getAutoCutInButton() {
-        return inStrip->getAutoCutButton();
-    }
-    juce::TextButton &getAutoCutOutButton() {
-        return outStrip->getAutoCutButton();
-    }
+    juce::TextButton &getAutoCutInButton() { return inStrip->getAutoCutButton(); }
+    juce::TextButton &getAutoCutOutButton() { return outStrip->getAutoCutButton(); }
 
-    juce::Rectangle<int> getWaveformBounds() const {
-        return layoutCache.waveformBounds;
-    }
+    juce::Rectangle<int> getWaveformBounds() const { return layoutCache.waveformBounds; }
 
     AudioPlayer &getAudioPlayer();
     AudioPlayer &getAudioPlayer() const;
-    SessionState &getSessionState() {
-        return sessionState;
-    }
-    const SessionState &getSessionState() const {
-        return sessionState;
-    }
+    SessionState &getSessionState() { return sessionState; }
+    const SessionState &getSessionState() const { return sessionState; }
 
-    InteractionCoordinator &getInteractionCoordinator() {
-        return *interactionCoordinator;
-    }
+    InteractionCoordinator &getInteractionCoordinator() { return *interactionCoordinator; }
 
-    AppEnums::ChannelViewMode getChannelViewMode() const {
-        return sessionState.getChannelViewMode();
-    }
+    AppEnums::ChannelViewMode getChannelViewMode() const { return sessionState.getChannelViewMode(); }
 
     const MarkerMouseHandler &getMarkerMouseHandler() const;
     MarkerMouseHandler &getMarkerMouseHandler();
@@ -145,25 +98,15 @@ class ControlPanel final : public juce::Component {
     TransportStrip *getTransportStrip() {
         return topBarView != nullptr ? topBarView->transportStrip.get() : nullptr;
     }
-    TopBarView* getTopBarView() {
-        return topBarView.get();
-    }
-    MarkerStrip *getInStrip() {
-        return inStrip.get();
-    }
-    MarkerStrip *getOutStrip() {
-        return outStrip.get();
-    }
-    PlaybackTimeView* getPlaybackTimeView() {
-        return playbackTimeView.get();
-    }
+    TopBarView* getTopBarView() { return topBarView.get(); }
+    MarkerStrip *getInStrip() { return inStrip.get(); }
+    MarkerStrip *getOutStrip() { return outStrip.get(); }
+    PlaybackTimeView* getPlaybackTimeView() { return playbackTimeView.get(); }
     SilenceDetectionPresenter *getSilenceDetectionPresenter() {
         return presenterCore != nullptr ? &presenterCore->getSilenceDetectionPresenter() : nullptr;
     }
 
-    int getBottomRowTopY() const {
-        return layoutCache.bottomRowTopY;
-    }
+    int getBottomRowTopY() const { return layoutCache.bottomRowTopY; }
 
     std::tuple<int, int, int> getPlaybackLabelXs() const {
         return {layoutCache.playbackLeftTextX, layoutCache.playbackCenterTextX,
@@ -173,43 +116,25 @@ class ControlPanel final : public juce::Component {
     juce::TextEditor &getStatsDisplay();
 
     const juce::LookAndFeel &getLookAndFeel() const;
-    FocusManager &getFocusManager() const {
-        return *focusManager;
-    }
+    FocusManager &getFocusManager() const { return *focusManager; }
 
     void mouseMove(const juce::MouseEvent &event) override;
-
     void mouseDown(const juce::MouseEvent &event) override;
-
     void mouseDrag(const juce::MouseEvent &event) override;
-
     void mouseUp(const juce::MouseEvent &event) override;
-
     void mouseExit(const juce::MouseEvent &event) override;
     void mouseWheelMove(const juce::MouseEvent &event,
                         const juce::MouseWheelDetails &wheel) override;
 
-    PlaybackTimerManager &getPlaybackTimerManager() {
-        return *playbackTimerManager;
-    }
-    PresenterCore &getPresenterCore() {
-        return *presenterCore;
-    }
-    const PresenterCore &getPresenterCore() const {
-        return *presenterCore;
-    }
-    BoundaryLogicPresenter &getBoundaryLogicPresenter() {
-        return presenterCore->getBoundaryLogicPresenter();
-    }
-    RepeatButtonPresenter &getRepeatButtonPresenter() {
-        return presenterCore->getRepeatButtonPresenter();
-    }
-    MatrixView& getMatrixView() {
-        return *matrixView;
-    }
-    PlaybackTextPresenter &getPlaybackTextPresenter() {
-        return presenterCore->getPlaybackTextPresenter();
-    }
+    PlaybackTimerManager &getPlaybackTimerManager() { return *playbackTimerManager; }
+    PresenterCore &getPresenterCore() { return *presenterCore; }
+    const PresenterCore &getPresenterCore() const { return *presenterCore; }
+    BoundaryLogicPresenter &getBoundaryLogicPresenter() { return presenterCore->getBoundaryLogicPresenter(); }
+    RepeatButtonPresenter &getRepeatButtonPresenter() { return presenterCore->getRepeatButtonPresenter(); }
+    MatrixView& getMatrixView() { return *matrixView; }
+    PlaybackTextPresenter &getPlaybackTextPresenter() { return presenterCore->getPlaybackTextPresenter(); }
+
+    void invokeOwnerOpenDialog();
 
   private:
     friend class LayoutManager;
@@ -225,28 +150,15 @@ class ControlPanel final : public juce::Component {
     friend class PresenterCore;
 
     MainComponent &owner;
-    /** @brief Reference to the shared application state. */
     SessionState &sessionState;
     ModernLookAndFeel modernLF;
 
-    /** @brief Manages high-frequency updates. */
     std::unique_ptr<PlaybackTimerManager> playbackTimerManager;
-
-    /** @brief Calculates and caches component positions. */
     std::unique_ptr<LayoutManager> layoutManager;
-
-    /** @brief Bundles overlapping waveform display layers. */
     std::unique_ptr<WaveformCanvasView> waveformCanvasView;
-
     std::unique_ptr<PresenterCore> presenterCore;
-
-    /** @brief Handles keyboard focus navigation. */
     std::unique_ptr<FocusManager> focusManager;
-
-    /** @brief Renders eye-candy overlays. */
     std::unique_ptr<OverlayView> overlayView;
-
-    /** @brief Manages transient UI interaction states. */
     std::unique_ptr<InteractionCoordinator> interactionCoordinator;
     std::unique_ptr<MatrixView> matrixView;
 
@@ -257,14 +169,11 @@ class ControlPanel final : public juce::Component {
     LayoutCache layoutCache;
 
     void initialiseLookAndFeel();
-
     void setupCoreComponents();
     void setupViews();
     void setupStrips();
     void setupPresenters();
     void setupListeners();
-
-    void invokeOwnerOpenDialog();
     void finaliseSetup();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPanel)

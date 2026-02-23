@@ -1,7 +1,5 @@
-
-
-#ifndef AUDIOFILER_KEYBINDHANDLER_H
-#define AUDIOFILER_KEYBINDHANDLER_H
+#ifndef AUDIOFILER_KEYBINDPRESENTER_H
+#define AUDIOFILER_KEYBINDPRESENTER_H
 
 #if defined(JUCE_HEADLESS)
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -9,31 +7,25 @@
 #include <JuceHeader.h>
 #endif
 
-class MainComponent;
-
-class AudioPlayer;
-
 class ControlPanel;
 
-class KeybindHandler final {
+/**
+ * @class KeybindPresenter
+ * @brief Handles keyboard shortcuts and routes them to state mutations or peer presenters.
+ */
+class KeybindPresenter final {
   public:
-    KeybindHandler(MainComponent &mainComponentIn, AudioPlayer &audioPlayerIn,
-                   ControlPanel &controlPanelIn);
+    explicit KeybindPresenter(ControlPanel &ownerPanel);
 
     bool handleKeyPress(const juce::KeyPress &key);
 
   private:
     bool handleGlobalKeybinds(const juce::KeyPress &key);
-
     bool handlePlaybackKeybinds(const juce::KeyPress &key);
-
     bool handleUIToggleKeybinds(const juce::KeyPress &key);
-
     bool handleCutKeybinds(const juce::KeyPress &key);
 
-    MainComponent &mainComponent;
-    AudioPlayer &audioPlayer;
-    ControlPanel &controlPanel;
+    ControlPanel &owner;
 };
 
 #endif

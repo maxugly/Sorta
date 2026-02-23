@@ -1,12 +1,10 @@
-
-
 #include "MainComponent.h"
 #include "Presenters/BoundaryLogicPresenter.h"
 #include "Presenters/ControlStatePresenter.h"
 #include "Presenters/PlaybackTextPresenter.h"
 #include "Presenters/StatsPresenter.h"
+#include "Presenters/KeybindPresenter.h"
 #include "UI/ControlPanel.h"
-#include "UI/KeybindHandler.h"
 #include "UI/Views/PlaybackTimeView.h"
 #include "Utils/Config.h"
 #include "Utils/TimeUtils.h"
@@ -17,8 +15,6 @@ MainComponent::MainComponent() {
 
     controlPanel = std::make_unique<ControlPanel>(*this, sessionState);
     addAndMakeVisible(controlPanel.get());
-
-    keybindHandler = std::make_unique<KeybindHandler>(*this, *audioPlayer, *controlPanel);
 
     setAudioChannels(0, 2);
 
@@ -102,7 +98,7 @@ void MainComponent::seekToPosition(int x) {
 }
 
 bool MainComponent::keyPressed(const juce::KeyPress &key) {
-    if (keybindHandler != nullptr)
-        return keybindHandler->handleKeyPress(key);
+    if (controlPanel != nullptr)
+        return controlPanel->getPresenterCore().getKeybindPresenter().handleKeyPress(key);
     return false;
 }

@@ -20,6 +20,7 @@
 #include "Presenters/VolumePresenter.h"
 #include "Presenters/CutPresenter.h"
 #include "Presenters/SilenceThresholdPresenter.h"
+#include "Presenters/KeybindPresenter.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/CutLayerView.h"
@@ -60,6 +61,8 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
 
     silenceThresholdPresenter = std::make_unique<SilenceThresholdPresenter>(
         owner, owner.getInStrip()->getThresholdEditor(), owner.getOutStrip()->getThresholdEditor());
+
+    keybindPresenter = std::make_unique<KeybindPresenter>(owner);
 
     if (auto* tbv = owner.getTopBarView())
         volumePresenter = std::make_unique<VolumePresenter>(tbv->getVolumeView(), owner.getSessionState());

@@ -122,6 +122,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/MatrixPresenter.cpp
             Source/Presenters/VolumePresenter.h
             Source/Presenters/VolumePresenter.cpp
+            Source/Presenters/KeybindPresenter.h
+            Source/Presenters/KeybindPresenter.cpp
 
             # UI
             Source/UI/ControlPanel.h
@@ -130,8 +132,6 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/InteractionCoordinator.cpp
             Source/UI/Handlers/MarkerMouseHandler.cpp
             Source/UI/Handlers/WaveformMouseHandler.cpp
-            Source/UI/KeybindHandler.h
-            Source/UI/KeybindHandler.cpp
             Source/UI/LayoutManager.h
             Source/UI/LayoutManager.cpp
             Source/UI/FocusManager.h
