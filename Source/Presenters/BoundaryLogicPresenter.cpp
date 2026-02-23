@@ -70,10 +70,13 @@ void BoundaryLogicPresenter::ensureCutOrder() {
 }
 
 void BoundaryLogicPresenter::textEditorTextChanged(juce::TextEditor &editor) {
-    if (&editor == &cutInEditor)
+    if (&editor == &cutInEditor) {
         isEditingIn = true;
-    else if (&editor == &cutOutEditor)
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::In);
+    } else if (&editor == &cutOutEditor) {
         isEditingOut = true;
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
+    }
 
     TimeEntryHelpers::validateTimeEntry(editor, getAudioTotalLength());
 }
@@ -124,10 +127,13 @@ void BoundaryLogicPresenter::textEditorFocusLost(juce::TextEditor &editor) {
 }
 
 void BoundaryLogicPresenter::mouseDown(const juce::MouseEvent &event) {
-    if (event.eventComponent == &cutInEditor)
+    if (event.eventComponent == &cutInEditor) {
         isEditingIn = true;
-    else if (event.eventComponent == &cutOutEditor)
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::In);
+    } else if (event.eventComponent == &cutOutEditor) {
         isEditingOut = true;
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
+    }
 }
 
 void BoundaryLogicPresenter::mouseUp(const juce::MouseEvent &event) {
@@ -181,12 +187,14 @@ void BoundaryLogicPresenter::mouseWheelMove(const juce::MouseEvent &event,
     owner.getAudioPlayer().getReaderInfo(sampleRate, length);
 
     if (editor == &cutInEditor) {
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::In);
         const double currentIn = owner.getAudioPlayer().getCutIn();
         const double newIn = TimeEntryHelpers::handleTimeStep(event, wheel, currentIn, sampleRate);
         setCutInPosition(newIn);
         owner.getSessionState().setAutoCutInActive(false);
         owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
     } else if (editor == &cutOutEditor) {
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
         const double currentOut = owner.getAudioPlayer().getCutOut();
         const double newOut = TimeEntryHelpers::handleTimeStep(event, wheel, currentOut, sampleRate);
         setCutOutPosition(newOut);

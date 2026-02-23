@@ -34,12 +34,14 @@ void PlaybackTimerManager::timerCallback() {
 
     if (isZDown != m_isZKeyDown) {
         m_isZKeyDown = isZDown;
-        if (m_isZKeyDown) {
-            if (m_zoomPointProvider)
-                interactionCoordinator.setActiveZoomPoint(m_zoomPointProvider());
-        } else {
-            interactionCoordinator.setActiveZoomPoint(interactionCoordinator.getManualZoomPoint());
+        if (m_isZKeyDown && m_zoomPointProvider) {
+            interactionCoordinator.setActiveZoomPoint(m_zoomPointProvider());
         }
+    }
+
+    // Continuously sync manual zoom point when 'Z' is not overriding it
+    if (!m_isZKeyDown) {
+        interactionCoordinator.setActiveZoomPoint(interactionCoordinator.getManualZoomPoint());
     }
 
     const auto currentActivePoint = interactionCoordinator.getActiveZoomPoint();
