@@ -35,7 +35,6 @@
 
 ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionStateIn)
     : owner(ownerComponent), sessionState(sessionStateIn), modernLF(),
-      silenceDetector(std::make_unique<SilenceDetector>(*this)),
       layoutManager(std::make_unique<LayoutManager>(*this)),
       focusManager(std::make_unique<FocusManager>(*this)) {
     initialiseLookAndFeel();
@@ -79,7 +78,7 @@ void ControlPanel::setupViews() {
 
 void ControlPanel::setupStrips() {
     inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In, getAudioPlayer(),
-                                            sessionState, *silenceDetector);
+                                            sessionState);
     inStrip->onMarkerRightClick = [this] {
         getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutIn);
 
@@ -88,7 +87,7 @@ void ControlPanel::setupStrips() {
     addAndMakeVisible(inStrip.get());
 
     outStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::Out, getAudioPlayer(),
-                                             sessionState, *silenceDetector);
+                                             sessionState);
     outStrip->onMarkerRightClick = [this] {
         getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutOut);
 

@@ -207,6 +207,10 @@ void PlaybackTextPresenter::mouseUp(const juce::MouseEvent &event) {
     TimeEntryHelpers::handleTimeSegmentHighlight(event);
 }
 
+void PlaybackTextPresenter::mouseMove(const juce::MouseEvent &event) {
+    owner.getSessionState().setZoomFactor(TimeEntryHelpers::getZoomFactorForPosition(event));
+}
+
 void PlaybackTextPresenter::mouseWheelMove(const juce::MouseEvent &event,
                                            const juce::MouseWheelDetails &wheel) {
     if (wheel.deltaY == 0.0f)

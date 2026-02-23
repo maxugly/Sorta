@@ -7,7 +7,6 @@
 #include "Presenters/CutButtonPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
-#include "Workers/SilenceDetector.h"
 
 CutResetPresenter::CutResetPresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {
 }

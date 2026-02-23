@@ -8,10 +8,10 @@
 #include "Utils/PlaybackHelpers.h"
 #include "Utils/TimeEntryHelpers.h"
 #include "Utils/TimeUtils.h"
-#include "Workers/SilenceDetector.h"
-BoundaryLogicPresenter::BoundaryLogicPresenter(ControlPanel &ownerPanel, SilenceDetector &detector,
+
+BoundaryLogicPresenter::BoundaryLogicPresenter(ControlPanel &ownerPanel,
                                                juce::TextEditor &cutIn, juce::TextEditor &cutOut)
-    : owner(ownerPanel), silenceDetector(detector), cutInEditor(cutIn), cutOutEditor(cutOut) {
+    : owner(ownerPanel), cutInEditor(cutIn), cutOutEditor(cutOut) {
     cutInEditor.addListener(this);
     cutOutEditor.addListener(this);
     cutInEditor.addMouseListener(this, false);
@@ -62,8 +62,8 @@ void BoundaryLogicPresenter::ensureCutOrder() {
         audioPlayer.setCutIn(currentIn);
         audioPlayer.setCutOut(currentOut);
 
-        bool acIn = silenceDetector.getIsAutoCutInActive();
-        bool acOut = silenceDetector.getIsAutoCutOutActive();
+        bool acIn = owner.getSessionState().getCutPrefs().autoCut.inActive;
+        bool acOut = owner.getSessionState().getCutPrefs().autoCut.outActive;
         owner.getSessionState().setAutoCutInActive(acOut);
         owner.getSessionState().setAutoCutOutActive(acIn);
     }
@@ -160,6 +160,10 @@ void BoundaryLogicPresenter::mouseExit(const juce::MouseEvent &event) {
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
     if (editor != nullptr && !editor->hasKeyboardFocus(false))
         owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
+}
+
+void BoundaryLogicPresenter::mouseMove(const juce::MouseEvent &event) {
+    owner.getSessionState().setZoomFactor(TimeEntryHelpers::getZoomFactorForPosition(event));
 }
 
 void BoundaryLogicPresenter::mouseWheelMove(const juce::MouseEvent &event,
@@ -273,13 +277,13 @@ void BoundaryLogicPresenter::setCutInPosition(double positionSeconds) {
 
     double newPos = PlaybackHelpers::constrainPosition(positionSeconds, 0.0, totalLength);
 
-    if (!silenceDetector.getIsAutoCutInActive() && newPos >= currentOut &&
-        silenceDetector.getIsAutoCutOutActive())
+    if (!owner.getSessionState().getCutPrefs().autoCut.inActive && newPos >= currentOut &&
+        owner.getSessionState().getCutPrefs().autoCut.outActive)
         owner.getSessionState().setAutoCutOutActive(false);
 
     audioPlayer.setCutIn(newPos);
 
-    if (silenceDetector.getIsAutoCutInActive() && newPos >= currentOut) {
+    if (owner.getSessionState().getCutPrefs().autoCut.inActive && newPos >= currentOut) {
         setCutOutPosition(totalLength);
     }
 
@@ -294,13 +298,13 @@ void BoundaryLogicPresenter::setCutOutPosition(double positionSeconds) {
 
     double newPos = PlaybackHelpers::constrainPosition(positionSeconds, 0.0, totalLength);
 
-    if (!silenceDetector.getIsAutoCutOutActive() && newPos <= currentIn &&
-        silenceDetector.getIsAutoCutInActive())
+    if (!owner.getSessionState().getCutPrefs().autoCut.outActive && newPos <= currentIn &&
+        owner.getSessionState().getCutPrefs().autoCut.inActive)
         owner.getSessionState().setAutoCutInActive(false);
 
     audioPlayer.setCutOut(newPos);
 
-    if (silenceDetector.getIsAutoCutOutActive() && newPos <= currentIn) {
+    if (owner.getSessionState().getCutPrefs().autoCut.outActive && newPos <= currentIn) {
         setCutInPosition(0.0);
     }
 

@@ -19,6 +19,7 @@
 #include "Presenters/MatrixPresenter.h"
 #include "Presenters/VolumePresenter.h"
 #include "Presenters/CutPresenter.h"
+#include "Presenters/SilenceThresholdPresenter.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/CutLayerView.h"
@@ -40,7 +41,7 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
         repeatButtonPresenter->initialiseButton(ts->getRepeatButton());
 
     boundaryLogicPresenter = std::make_unique<BoundaryLogicPresenter>(
-        owner, owner.getSilenceDetector(), owner.getInStrip()->getTimerEditor(), owner.getOutStrip()->getTimerEditor());
+        owner, owner.getInStrip()->getTimerEditor(), owner.getOutStrip()->getTimerEditor());
     boundaryLogicPresenter->initialiseEditors();
 
     buttonPresenter = std::make_unique<ControlButtonsPresenter>(owner);
@@ -48,7 +49,7 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
 
     cutPresenter = std::make_unique<CutPresenter>(
         owner, owner.getSessionState(), owner.waveformCanvasView->getCutLayerView(),
-        owner.getSilenceDetector(), owner.getInteractionCoordinator(),
+        owner.getInteractionCoordinator(),
         owner.getPlaybackTimerManager());
 
     cutButtonPresenter = std::make_unique<CutButtonPresenter>(owner);
@@ -56,6 +57,10 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     controlStatePresenter = std::make_unique<ControlStatePresenter>(owner);
     zoomPresenter = std::make_unique<ZoomPresenter>(owner);
     matrixPresenter = std::make_unique<MatrixPresenter>(owner);
+
+    silenceThresholdPresenter = std::make_unique<SilenceThresholdPresenter>(
+        owner, owner.getInStrip()->getThresholdEditor(), owner.getOutStrip()->getThresholdEditor());
+
     if (auto* tbv = owner.getTopBarView())
         volumePresenter = std::make_unique<VolumePresenter>(tbv->getVolumeView(), owner.getSessionState());
 }

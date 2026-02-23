@@ -6,7 +6,6 @@
 #include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
-#include "Workers/SilenceDetector.h"
 
 LayoutManager::LayoutManager(ControlPanel &controlPanelIn) : controlPanel(controlPanelIn) {
 }

@@ -115,7 +115,7 @@ void OverlayView::paint(juce::Graphics &g) {
     if (inStrip != nullptr) {
         std::vector<juce::Component *> inGroup = {
             &inStrip->getMarkerButton(), &inStrip->getTimerEditor(), &inStrip->getResetButton(),
-            &owner.getSilenceDetector().getInSilenceThresholdEditor(),
+            &inStrip->getThresholdEditor(),
             &inStrip->getAutoCutButton()};
         drawGroupOutline(inGroup);
     }
@@ -123,7 +123,7 @@ void OverlayView::paint(juce::Graphics &g) {
     if (outStrip != nullptr) {
         std::vector<juce::Component *> outGroup = {
             &outStrip->getMarkerButton(), &outStrip->getTimerEditor(), &outStrip->getResetButton(),
-            &owner.getSilenceDetector().getOutSilenceThresholdEditor(),
+            &outStrip->getThresholdEditor(),
             &outStrip->getAutoCutButton()};
         drawGroupOutline(outGroup);
     }

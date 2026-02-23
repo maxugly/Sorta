@@ -12,7 +12,6 @@
 #include "Presenters/BoundaryLogicPresenter.h"
 #include "UI/Components/TransportButton.h"
 #include "Utils/Config.h"
-#include "Workers/SilenceDetector.h"
 
 /**
  * @ingroup UI
@@ -26,8 +25,7 @@ class MarkerStrip : public juce::Component {
   public:
     enum class MarkerType { In, Out };
 
-    MarkerStrip(MarkerType type, AudioPlayer &player, SessionState &state,
-                SilenceDetector &detector);
+    MarkerStrip(MarkerType type, AudioPlayer &player, SessionState &state);
     ~MarkerStrip() override = default;
 
     void resized() override;
@@ -62,7 +60,6 @@ class MarkerStrip : public juce::Component {
     MarkerType markerType;
     AudioPlayer &audioPlayer;
     SessionState &sessionState;
-    SilenceDetector &silenceDetector;
     BoundaryLogicPresenter *boundaryLogicPresenter = nullptr;
 
     TransportButton markerButton;

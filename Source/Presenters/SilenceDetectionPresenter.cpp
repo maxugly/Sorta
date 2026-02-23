@@ -7,7 +7,6 @@
 #include "Core/SilenceAnalysisWorker.h"
 #include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
-#include "Workers/SilenceDetector.h"
 
 SilenceDetectionPresenter::SilenceDetectionPresenter(ControlPanel &ownerPanel,
                                                      SessionState &sessionStateIn,

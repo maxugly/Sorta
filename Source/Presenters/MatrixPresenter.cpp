@@ -13,7 +13,6 @@
 #include "Presenters/StatsPresenter.h"
 #include "Presenters/PresenterCore.h"
 #include "Core/WaveformManager.h"
-#include "Workers/SilenceDetector.h"
 #include "Utils/Config.h"
 #include "UI/FocusManager.h"
 #include "UI/Views/VolumeView.h"
@@ -40,7 +39,6 @@ void MatrixPresenter::playbackTimerTick() {
     auto& waveformMouseHandler = owner.getWaveformMouseHandler();
     auto& markerMouseHandler = owner.getMarkerMouseHandler();
     auto& timerManager = owner.getPlaybackTimerManager();
-    auto& silenceDetector = owner.getSilenceDetector();
     auto* sdp = owner.getSilenceDetectionPresenter();
 
     // 1-31: Existing logic
@@ -78,8 +76,8 @@ void MatrixPresenter::playbackTimerTick() {
     state.ledColors.push_back((inStrip && inStrip->getTimerEditor().hasKeyboardFocus(false)) ? active : inactive);
     state.ledColors.push_back((outStrip && outStrip->getTimerEditor().hasKeyboardFocus(false)) ? active : inactive);
 
-    state.ledColors.push_back(silenceDetector.getInSilenceThresholdEditor().hasKeyboardFocus(false) ? active : inactive);
-    state.ledColors.push_back(silenceDetector.getOutSilenceThresholdEditor().hasKeyboardFocus(false) ? active : inactive);
+    state.ledColors.push_back((inStrip && inStrip->getThresholdEditor().hasKeyboardFocus(false)) ? active : inactive);
+    state.ledColors.push_back((outStrip && outStrip->getThresholdEditor().hasKeyboardFocus(false)) ? active : inactive);
     state.ledColors.push_back(active); // Light 31 (Original Flag)
 
     // 32. Volume Flame Indicator

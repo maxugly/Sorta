@@ -10,16 +10,16 @@
 
 class CutLayerView;
 class ControlPanel;
-class SilenceDetector;
 class InteractionCoordinator;
 
 class CutPresenter : public SessionState::Listener,
                      public PlaybackTimerManager::Listener {
   public:
-    CutPresenter(ControlPanel &controlPanel, SessionState &sessionState,
-                 CutLayerView &cutLayerView, SilenceDetector &silenceDetector,
-                 InteractionCoordinator &interactionCoordinator,
-                 PlaybackTimerManager &playbackTimerManager);
+    CutPresenter(ControlPanel &controlPanel, SessionState &sessionStateIn,
+                 CutLayerView &cutLayerViewIn,
+                 InteractionCoordinator &interactionCoordinatorIn,
+                 PlaybackTimerManager &playbackTimerManagerIn);
+
 
     ~CutPresenter() override;
 
@@ -48,11 +48,11 @@ class CutPresenter : public SessionState::Listener,
   private:
     void refreshMarkersVisibility();
     void pushStateToView();
+private:
+  SessionState &sessionState;
+  CutLayerView &cutLayerView;
+  InteractionCoordinator &interactionCoordinator;
 
-    SessionState &sessionState;
-    CutLayerView &cutLayerView;
-    SilenceDetector &silenceDetector;
-    InteractionCoordinator &interactionCoordinator;
     PlaybackTimerManager &playbackTimerManager;
 
     std::unique_ptr<MarkerMouseHandler> markerMouseHandler;

@@ -11,13 +11,11 @@
 
 class ControlPanel;
 
-class SilenceDetector;
-
 class SilenceThresholdPresenter final : private juce::TextEditor::Listener,
                                         public juce::MouseListener,
                                         private juce::Timer {
   public:
-    SilenceThresholdPresenter(SilenceDetector &detectorIn, ControlPanel &ownerPanel);
+    SilenceThresholdPresenter(ControlPanel &ownerPanel, juce::TextEditor &inEditor, juce::TextEditor &outEditor);
 
     ~SilenceThresholdPresenter() override;
 
@@ -40,13 +38,13 @@ class SilenceThresholdPresenter final : private juce::TextEditor::Listener,
     void updateThresholdFromEditorIfValid(juce::TextEditor &editor);
 
     void restoreEditorToCurrentValue(juce::TextEditor &editor);
-    bool isInEditor(const juce::TextEditor &editor) const noexcept;
     bool isValidPercentage(int value) const noexcept {
         return value >= 1 && value <= 99;
     }
 
-    SilenceDetector &detector;
     ControlPanel &owner;
+    juce::TextEditor &inThresholdEditor;
+    juce::TextEditor &outThresholdEditor;
 
     struct PendingThreshold {
         float value{0.0f};

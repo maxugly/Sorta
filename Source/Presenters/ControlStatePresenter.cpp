@@ -10,7 +10,6 @@
 #include "UI/ControlPanel.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/ZoomView.h"
-#include "Workers/SilenceDetector.h"
 
 ControlStatePresenter::ControlStatePresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {
     owner.getSessionState().addListener(this);
@@ -45,15 +44,13 @@ void ControlStatePresenter::updateUIFromState() {
     if (owner.getOutStrip() != nullptr)
         owner.getOutStrip()->updateAutoCutState(autoCut.outActive);
 
-    owner.getSilenceDetector().setIsAutoCutInActive(autoCut.inActive);
-    owner.getSilenceDetector().setIsAutoCutOutActive(autoCut.outActive);
-
     const int inPercent = static_cast<int>(autoCut.thresholdIn * 100.0f);
     const int outPercent = static_cast<int>(autoCut.thresholdOut * 100.0f);
-    owner.getSilenceDetector().getInSilenceThresholdEditor().setText(juce::String(inPercent),
-                                                           juce::dontSendNotification);
-    owner.getSilenceDetector().getOutSilenceThresholdEditor().setText(juce::String(outPercent),
-                                                            juce::dontSendNotification);
+
+    if (owner.getInStrip() != nullptr)
+        owner.getInStrip()->getThresholdEditor().setText(juce::String(inPercent), juce::dontSendNotification);
+    if (owner.getOutStrip() != nullptr)
+        owner.getOutStrip()->getThresholdEditor().setText(juce::String(outPercent), juce::dontSendNotification);
 
     refreshStates();
 
@@ -76,9 +73,6 @@ void ControlStatePresenter::cutPreferenceChanged(const MainDomain::CutPreference
         owner.getInStrip()->updateAutoCutState(prefs.autoCut.inActive);
     if (owner.getOutStrip() != nullptr)
         owner.getOutStrip()->updateAutoCutState(prefs.autoCut.outActive);
-
-    owner.getSilenceDetector().setIsAutoCutInActive(prefs.autoCut.inActive);
-    owner.getSilenceDetector().setIsAutoCutOutActive(prefs.autoCut.outActive);
 
     refreshStates();
     owner.repaint();
@@ -156,7 +150,7 @@ void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, boo
     }
 
     if (owner.inStrip != nullptr)
-        owner.inStrip->updateAutoCutState(owner.getSilenceDetector().getIsAutoCutInActive());
+        owner.inStrip->updateAutoCutState(owner.getSessionState().getCutPrefs().autoCut.inActive);
     if (owner.outStrip != nullptr)
-        owner.outStrip->updateAutoCutState(owner.getSilenceDetector().getIsAutoCutOutActive());
+        owner.outStrip->updateAutoCutState(owner.getSessionState().getCutPrefs().autoCut.outActive);
 }

@@ -11,7 +11,6 @@
 #include "UI/Views/WaveformView.h"
 #include "UI/Views/CutLayerView.h"
 #include "Utils/Config.h"
-#include "Workers/SilenceDetector.h"
 
 ControlButtonsPresenter::ControlButtonsPresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {
 }

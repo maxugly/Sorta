@@ -19,7 +19,6 @@ class FocusManager;
 #include "UI/Handlers/WaveformMouseHandler.h"
 #include "UI/LookAndFeel/ModernLookAndFeel.h"
 #include "Utils/Config.h"
-#include "Workers/SilenceDetector.h"
 #include "Workers/SilenceWorkerClient.h"
 
 #if defined(JUCE_HEADLESS)
@@ -143,13 +142,6 @@ class ControlPanel final : public juce::Component {
     const WaveformMouseHandler &getWaveformMouseHandler() const;
     WaveformMouseHandler &getWaveformMouseHandler();
 
-    SilenceDetector &getSilenceDetector() {
-        return *silenceDetector;
-    }
-    const SilenceDetector &getSilenceDetector() const {
-        return *silenceDetector;
-    }
-
     TransportStrip *getTransportStrip() {
         return topBarView != nullptr ? topBarView->transportStrip.get() : nullptr;
     }
@@ -239,9 +231,6 @@ class ControlPanel final : public juce::Component {
 
     /** @brief Manages high-frequency updates. */
     std::unique_ptr<PlaybackTimerManager> playbackTimerManager;
-
-    /** @brief Handles silence detection logic and background workers. */
-    std::unique_ptr<SilenceDetector> silenceDetector;
 
     /** @brief Calculates and caches component positions. */
     std::unique_ptr<LayoutManager> layoutManager;

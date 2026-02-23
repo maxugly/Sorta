@@ -31,11 +31,11 @@ void MarkerMouseHandler::mouseMove(const juce::MouseEvent &event) {
         hoveredHandle = getHandleAtPosition(event.getPosition());
 
         if (Config::Audio::lockHandlesWhenAutoCutActive) {
-            const auto &sd = owner.getSilenceDetector();
-            if ((hoveredHandle == CutMarkerHandle::In && sd.getIsAutoCutInActive()) ||
-                (hoveredHandle == CutMarkerHandle::Out && sd.getIsAutoCutOutActive()) ||
+            const auto &autoCut = owner.getSessionState().getCutPrefs().autoCut;
+            if ((hoveredHandle == CutMarkerHandle::In && autoCut.inActive) ||
+                (hoveredHandle == CutMarkerHandle::Out && autoCut.outActive) ||
                 (hoveredHandle == CutMarkerHandle::Full &&
-                 (sd.getIsAutoCutInActive() || sd.getIsAutoCutOutActive()))) {
+                 (autoCut.inActive || autoCut.outActive))) {
                 hoveredHandle = CutMarkerHandle::None;
             }
         }
@@ -90,13 +90,13 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
 
     if (event.mods.isLeftButtonDown()) {
         draggedHandle = getHandleAtPosition(event.getPosition());
-        auto &sd = owner.getSilenceDetector();
+        const auto &autoCut = owner.getSessionState().getCutPrefs().autoCut;
 
         if (Config::Audio::lockHandlesWhenAutoCutActive &&
-            ((draggedHandle == CutMarkerHandle::In && sd.getIsAutoCutInActive()) ||
-             (draggedHandle == CutMarkerHandle::Out && sd.getIsAutoCutOutActive()) ||
+            ((draggedHandle == CutMarkerHandle::In && autoCut.inActive) ||
+             (draggedHandle == CutMarkerHandle::Out && autoCut.outActive) ||
              (draggedHandle == CutMarkerHandle::Full &&
-              (sd.getIsAutoCutInActive() || sd.getIsAutoCutOutActive())))) {
+              (autoCut.inActive || autoCut.outActive)))) {
             draggedHandle = CutMarkerHandle::None;
         }
 

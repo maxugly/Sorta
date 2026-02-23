@@ -7,7 +7,6 @@
 #include "UI/ControlPanel.h"
 #include "UI/Handlers/MarkerMouseHandler.h"
 #include "Utils/CoordinateMapper.h"
-#include "Workers/SilenceDetector.h"
 
 CutLayerView::CutLayerView(ControlPanel &ownerIn)
     : owner(ownerIn) {

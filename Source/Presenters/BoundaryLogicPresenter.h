@@ -11,20 +11,21 @@
 #include "Core/SessionState.h"
 
 class ControlPanel;
-class SilenceDetector;
 
 /**
  * @class BoundaryLogicPresenter
+
  * @brief Manages the manual text entry and logic for Cut In/Out boundaries.
  */
-class BoundaryLogicPresenter : private juce::TextEditor::Listener,
-                               public juce::MouseListener,
-                               public PlaybackTimerManager::Listener,
-                               public SessionState::Listener {
+class BoundaryLogicPresenter final : public juce::TextEditor::Listener,
+                                 public juce::MouseListener,
+                                 public SessionState::Listener,
+                                 public PlaybackTimerManager::Listener {
   public:
-    BoundaryLogicPresenter(ControlPanel &ownerPanel, SilenceDetector &detector,
+    BoundaryLogicPresenter(ControlPanel &ownerPanel, 
                            juce::TextEditor &cutIn, juce::TextEditor &cutOut);
     ~BoundaryLogicPresenter() override;
+
 
     void initialiseEditors();
     void refreshLabels();
@@ -55,6 +56,7 @@ class BoundaryLogicPresenter : private juce::TextEditor::Listener,
     void mouseUp(const juce::MouseEvent &event) override;
     void mouseEnter(const juce::MouseEvent &event) override;
     void mouseExit(const juce::MouseEvent &event) override;
+    void mouseMove(const juce::MouseEvent &event) override;
     void mouseWheelMove(const juce::MouseEvent &event,
                         const juce::MouseWheelDetails &wheel) override;
 
@@ -66,11 +68,11 @@ class BoundaryLogicPresenter : private juce::TextEditor::Listener,
     void setCutOutPosition(double positionSeconds);
 
     double getAudioTotalLength() const;
+private:
+  ControlPanel &owner;
+  juce::TextEditor &cutInEditor;
+  juce::TextEditor &cutOutEditor;
 
-    ControlPanel &owner;
-    SilenceDetector &silenceDetector;
-    juce::TextEditor &cutInEditor;
-    juce::TextEditor &cutOutEditor;
 
     bool isEditingIn{false};
     bool isEditingOut{false};

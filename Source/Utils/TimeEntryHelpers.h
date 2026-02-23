@@ -51,6 +51,13 @@ void validateTimeEntry(juce::TextEditor &editor, double totalLength);
  * @return The step size in seconds.
  */
 double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double sampleRate = 0.0);
+
+/**
+ * @brief Returns a zoom factor based on which time segment (HH, MM, SS, ms) is hovered.
+ * @param event The mouse move event.
+ * @return The zoom factor (e.g. 1.0 for HH, 1000.0 for ms).
+ */
+float getZoomFactorForPosition(const juce::MouseEvent &event);
 } // namespace TimeEntryHelpers
 
 #endif

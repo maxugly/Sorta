@@ -8,7 +8,6 @@
 class ControlPanel;
 class AudioPlayer;
 class SessionState;
-class SilenceDetector;
 class InteractionCoordinator;
 
 class MatrixPresenter final : public PlaybackTimerManager::Listener {

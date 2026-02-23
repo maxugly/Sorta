@@ -3,9 +3,8 @@
 #include "Utils/Config.h"
 #include "Utils/TimeUtils.h"
 
-MarkerStrip::MarkerStrip(MarkerType type, AudioPlayer &player, SessionState &state,
-                         SilenceDetector &detector)
-    : markerType(type), audioPlayer(player), sessionState(state), silenceDetector(detector) {
+MarkerStrip::MarkerStrip(MarkerType type, AudioPlayer &player, SessionState &state)
+    : markerType(type), audioPlayer(player), sessionState(state) {
     initialiseComponents();
 }
 
@@ -51,11 +50,8 @@ void MarkerStrip::initialiseComponents() {
     };
 
     // Threshold Editor (percentage input)
-    auto &detectorEditor = (markerType == MarkerType::In)
-                               ? silenceDetector.getInSilenceThresholdEditor()
-                               : silenceDetector.getOutSilenceThresholdEditor();
-    addAndMakeVisible(detectorEditor);
-    detectorEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
+    addAndMakeVisible(thresholdEditor);
+    thresholdEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
 
     // AutoCut Button
     addAndMakeVisible(autoCutButton);
@@ -77,9 +73,6 @@ void MarkerStrip::resized() {
     auto b = getLocalBounds();
     const float unit = Config::UI::WidgetUnit;
     const int spacing = (int)Config::UI::GroupSpacing;
-    auto &detectorEditor = (markerType == MarkerType::In)
-                               ? silenceDetector.getInSilenceThresholdEditor()
-                               : silenceDetector.getOutSilenceThresholdEditor();
 
     const int markerWidth = (int)(Config::UI::CutButtonWidthUnits * unit);
     const int timerWidth = (int)(Config::UI::TimerWidthUnits * unit);
@@ -95,7 +88,7 @@ void MarkerStrip::resized() {
         b.removeFromLeft(spacing);
         resetButton.setBounds(b.removeFromLeft(resetWidth));
         b.removeFromLeft(spacing);
-        detectorEditor.setBounds(b.removeFromLeft(thresholdWidth));
+        thresholdEditor.setBounds(b.removeFromLeft(thresholdWidth));
         b.removeFromLeft(spacing);
         autoCutButton.setBounds(b.removeFromLeft(autoCutWidth));
     } else {
@@ -106,7 +99,7 @@ void MarkerStrip::resized() {
         b.removeFromRight(spacing);
         resetButton.setBounds(b.removeFromRight(resetWidth));
         b.removeFromRight(spacing);
-        detectorEditor.setBounds(b.removeFromRight(thresholdWidth));
+        thresholdEditor.setBounds(b.removeFromRight(thresholdWidth));
         b.removeFromRight(spacing);
         autoCutButton.setBounds(b.removeFromRight(autoCutWidth));
     }

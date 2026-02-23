@@ -102,4 +102,34 @@ double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double s
 
     return step;
 }
+
+float getZoomFactorForPosition(const juce::MouseEvent &event) {
+    auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
+    if (editor == nullptr)
+        return 10.0f;
+
+    const bool isNegative = editor->getText().startsWith("-");
+    const int offset = isNegative ? 1 : 0;
+    const int charIndex = editor->getTextIndexAt(event.getPosition());
+    if (charIndex < 0)
+        return 10.0f;
+
+    const int effectiveIndex = charIndex - offset;
+
+    // Based on TimeUtils::formatTime result: "HH:MM:SS.mmm"
+    // HH: 0-1
+    // MM: 3-4
+    // SS: 6-7
+    // ms: 9-11
+    if (effectiveIndex <= 1)
+        return 1.0f;
+    if (effectiveIndex >= 3 && effectiveIndex <= 4)
+        return 10.0f;
+    if (effectiveIndex >= 6 && effectiveIndex <= 7)
+        return 100.0f;
+    if (effectiveIndex >= 9)
+        return 1000.0f;
+
+    return 10.0f;
+}
 } // namespace TimeEntryHelpers

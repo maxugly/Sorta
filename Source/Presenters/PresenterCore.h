@@ -24,6 +24,7 @@ class PlaybackRepeatController;
 class MatrixPresenter;
 class VolumePresenter;
 class CutPresenter;
+class SilenceThresholdPresenter;
 #include "Presenters/ZoomPresenter.h"
 
 class PresenterCore final {
@@ -46,6 +47,7 @@ class PresenterCore final {
     VolumePresenter& getVolumePresenter() { return *volumePresenter; }
     CutPresenter& getCutPresenter() { return *cutPresenter; }
     const CutPresenter& getCutPresenter() const { return *cutPresenter; }
+    SilenceThresholdPresenter& getSilenceThresholdPresenter() { return *silenceThresholdPresenter; }
 
   private:
     std::unique_ptr<StatsPresenter> statsPresenter;
@@ -62,6 +64,7 @@ class PresenterCore final {
     std::unique_ptr<MatrixPresenter> matrixPresenter;
     std::unique_ptr<VolumePresenter> volumePresenter;
     std::unique_ptr<CutPresenter> cutPresenter;
+    std::unique_ptr<SilenceThresholdPresenter> silenceThresholdPresenter;
 
     ControlPanel &owner;
 

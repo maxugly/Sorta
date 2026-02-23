@@ -3,18 +3,17 @@
 #include "Presenters/CutPresenter.h"
 #include "UI/ControlPanel.h"
 #include "UI/Views/CutLayerView.h"
-#include "Workers/SilenceDetector.h"
 #include "UI/InteractionCoordinator.h"
 #include "Presenters/PlaybackTimerManager.h"
 #include "Core/WaveformManager.h"
 #include "Utils/CoordinateMapper.h"
 
 CutPresenter::CutPresenter(ControlPanel &controlPanel, SessionState &sessionStateIn,
-                           CutLayerView &cutLayerViewIn, SilenceDetector &silenceDetectorIn,
+                           CutLayerView &cutLayerViewIn,
                            InteractionCoordinator &interactionCoordinatorIn,
                            PlaybackTimerManager &playbackTimerManagerIn)
     : sessionState(sessionStateIn), cutLayerView(cutLayerViewIn),
-      silenceDetector(silenceDetectorIn), interactionCoordinator(interactionCoordinatorIn),
+      interactionCoordinator(interactionCoordinatorIn),
       playbackTimerManager(playbackTimerManagerIn) {
     markerMouseHandler = std::make_unique<MarkerMouseHandler>(controlPanel);
     waveformMouseHandler = std::make_unique<WaveformMouseHandler>(controlPanel);
@@ -63,11 +62,11 @@ void CutPresenter::pushStateToView() {
                               juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), bottom));
     };
 
-    auto inY = calcThresholdY(silenceDetector.getCurrentInSilenceThreshold());
+    auto inY = calcThresholdY(sessionState.getCutPrefs().autoCut.thresholdIn);
     state.inThresholdYTop = inY.first;
     state.inThresholdYBottom = inY.second;
 
-    auto outY = calcThresholdY(silenceDetector.getCurrentOutSilenceThreshold());
+    auto outY = calcThresholdY(sessionState.getCutPrefs().autoCut.thresholdOut);
     state.outThresholdYTop = outY.first;
     state.outThresholdYBottom = outY.second;
 
@@ -75,8 +74,8 @@ void CutPresenter::pushStateToView() {
     state.audioLength = (float)audioLength;
     state.glowAlpha = playbackTimerManager.getBreathingPulse();
     state.showEyeCandy = interactionCoordinator.shouldShowEyeCandy();
-    state.isAutoIn = silenceDetector.getIsAutoCutInActive();
-    state.isAutoOut = silenceDetector.getIsAutoCutOutActive();
+    state.isAutoIn = sessionState.getCutPrefs().autoCut.inActive;
+    state.isAutoOut = sessionState.getCutPrefs().autoCut.outActive;
     state.markersVisible = sessionState.getCutPrefs().active;
     state.draggedHandle = markerMouseHandler->getDraggedHandle();
     state.hoveredHandle = markerMouseHandler->getHoveredHandle();

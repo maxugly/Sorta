@@ -81,10 +81,7 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Core/WaveformManager.cpp
             Source/Core/FileMetadata.h
 
-            # Workers
             Source/Workers/SilenceWorkerClient.h
-            Source/Workers/SilenceDetector.h
-            Source/Workers/SilenceDetector.cpp
             Source/Workers/SilenceAnalysisAlgorithms.h
             Source/Workers/SilenceAnalysisAlgorithms.cpp
             Source/Workers/SilenceDetectionLogger.h
