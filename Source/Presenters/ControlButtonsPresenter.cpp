@@ -22,6 +22,10 @@ void ControlButtonsPresenter::initialiseAllButtons() {
     initialiseExitButton();
     initialiseStatsButton();
     initialiseEyeCandyButton();
+    initialisePlayStopButton();
+    initialiseStopButton();
+    initialiseAutoplayButton();
+    initialiseCutButton();
 }
 
 void ControlButtonsPresenter::initialiseOpenButton() {
@@ -122,6 +126,52 @@ void ControlButtonsPresenter::initialiseEyeCandyButton() {
             owner.topBarView->eyeCandyButton.getToggleState());
         owner.repaint();
     };
+}
+
+void ControlButtonsPresenter::initialisePlayStopButton() {
+    if (auto* ts = owner.getTransportStrip()) {
+        ts->getPlayStopButton().onClick = [this] {
+            owner.getAudioPlayer().togglePlayStop();
+        };
+    }
+}
+
+void ControlButtonsPresenter::initialiseStopButton() {
+    if (auto* ts = owner.getTransportStrip()) {
+        ts->getStopButton().onClick = [this] {
+            owner.getAudioPlayer().stopPlaybackAndReset();
+            owner.getSessionState().setAutoPlayActive(false);
+        };
+    }
+}
+
+void ControlButtonsPresenter::initialiseAutoplayButton() {
+    if (auto* ts = owner.getTransportStrip()) {
+        auto& btn = ts->getAutoplayButton();
+        btn.setToggleState(owner.getSessionState().getCutPrefs().autoplay, juce::dontSendNotification);
+        btn.onClick = [this, &btn] {
+            owner.getSessionState().setAutoPlayActive(btn.getToggleState());
+        };
+    }
+}
+
+void ControlButtonsPresenter::initialiseCutButton() {
+    if (auto* ts = owner.getTransportStrip()) {
+        auto& btn = ts->getCutButton();
+        btn.setToggleState(owner.getSessionState().getCutPrefs().active, juce::dontSendNotification);
+        btn.onClick = [this, &btn] {
+            const bool active = btn.getToggleState();
+            owner.getSessionState().setCutActive(active);
+
+            if (active && owner.getAudioPlayer().isPlaying()) {
+                const double pos = owner.getAudioPlayer().getCurrentPosition();
+                const double cutIn = owner.getSessionState().getCutIn();
+                const double cutOut = owner.getSessionState().getCutOut();
+                if (pos < cutIn || pos >= cutOut)
+                    owner.getAudioPlayer().setPlayheadPosition(cutIn);
+            }
+        };
+    }
 }
 
 void ControlButtonsPresenter::refreshStates() {

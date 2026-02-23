@@ -7,8 +7,6 @@
 #include <JuceHeader.h>
 #endif
 
-#include "Core/AudioPlayer.h"
-#include "Core/SessionState.h"
 #include "Utils/Config.h"
 
 /**
@@ -20,7 +18,7 @@
  */
 class TransportStrip : public juce::Component {
   public:
-    TransportStrip(AudioPlayer &player, SessionState &state);
+    TransportStrip();
     ~TransportStrip() override = default;
 
     void resized() override;
@@ -47,9 +45,6 @@ class TransportStrip : public juce::Component {
     }
 
   private:
-    AudioPlayer &audioPlayer;
-    SessionState &sessionState;
-
     juce::TextButton playStopButton;
     juce::TextButton stopButton;
     juce::TextButton autoplayButton;

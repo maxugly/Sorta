@@ -16,7 +16,7 @@ TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
     addAndMakeVisible(channelViewButton);
     addAndMakeVisible(eyeCandyButton);
 
-    transportStrip = std::make_unique<TransportStrip>(cp.getAudioPlayer(), cp.getSessionState());
+    transportStrip = std::make_unique<TransportStrip>();
     addAndMakeVisible(transportStrip.get());
 
     volumeView = std::make_unique<VolumeView>();

@@ -2,8 +2,7 @@
 #include "Core/AppEnums.h"
 #include "Utils/Config.h"
 
-TransportStrip::TransportStrip(AudioPlayer &player, SessionState &state)
-    : audioPlayer(player), sessionState(state) {
+TransportStrip::TransportStrip() {
     initialiseButtons();
 }
 
@@ -12,17 +11,12 @@ void TransportStrip::initialiseButtons() {
     addAndMakeVisible(playStopButton);
     playStopButton.setButtonText(Config::Labels::playButton);
     playStopButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
-    playStopButton.onClick = [this] { audioPlayer.togglePlayStop(); };
     playStopButton.setEnabled(false);
 
     // Stop Button
     addAndMakeVisible(stopButton);
     stopButton.setButtonText(Config::Labels::stopButton);
     stopButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
-    stopButton.onClick = [this] {
-        audioPlayer.stopPlaybackAndReset();
-        sessionState.setAutoPlayActive(false);
-    };
     stopButton.setEnabled(false);
 
     // Autoplay Button
@@ -30,10 +24,6 @@ void TransportStrip::initialiseButtons() {
     autoplayButton.setButtonText(Config::Labels::autoplayButton);
     autoplayButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     autoplayButton.setClickingTogglesState(true);
-    autoplayButton.setToggleState(sessionState.getCutPrefs().autoplay, juce::dontSendNotification);
-    autoplayButton.onClick = [this] {
-        sessionState.setAutoPlayActive(autoplayButton.getToggleState());
-    };
 
     // Repeat Button
     addAndMakeVisible(repeatButton);
@@ -45,20 +35,6 @@ void TransportStrip::initialiseButtons() {
     cutButton.setButtonText(Config::Labels::cutButton);
     cutButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
     cutButton.setClickingTogglesState(true);
-    cutButton.setToggleState(sessionState.getCutPrefs().active, juce::dontSendNotification);
-    cutButton.onClick = [this] {
-        const bool active = cutButton.getToggleState();
-        sessionState.setCutActive(active);
-
-        // If enabling cut mode while playing, we might need to jump to cut in
-        if (active && audioPlayer.isPlaying()) {
-            const double pos = audioPlayer.getCurrentPosition();
-            const double cutIn = sessionState.getCutIn();
-            const double cutOut = sessionState.getCutOut();
-            if (pos < cutIn || pos >= cutOut)
-                audioPlayer.setPlayheadPosition(cutIn);
-        }
-    };
 }
 
 void TransportStrip::resized() {
