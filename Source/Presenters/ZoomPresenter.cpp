@@ -108,19 +108,19 @@ void ZoomPresenter::playbackTimerTick() {
             state.cutOutPixelX = mapToPopup(owner.getSessionState().getCutOut());
             state.currentPositionPixelX = mapToPopup(audioPlayer.getCurrentPosition());
         }
+
+        const auto mods = juce::ModifierKeys::getCurrentModifiers();
+        const bool isShift = mods.isShiftDown() && !mods.isCtrlDown();
+        const bool isAlt = mods.isAltDown();
+        const bool isCtrlShift = mods.isCtrlDown() && mods.isShiftDown();
+        const bool isDefault = !isShift && !isAlt && !isCtrlShift;
+
+        state.hudLines.push_back({Config::Labels::zoomPrefix + juce::String(owner.getSessionState().getZoomFactor(), 1) + "x", true});
+        state.hudLines.push_back({Config::Labels::stepDefault, isDefault});
+        state.hudLines.push_back({Config::Labels::stepShift, isShift});
+        state.hudLines.push_back({Config::Labels::stepAlt, isAlt});
+        state.hudLines.push_back({Config::Labels::stepCtrlShift, isCtrlShift});
     }
-
-    const auto mods = juce::ModifierKeys::getCurrentModifiers();
-    const bool isShift = mods.isShiftDown() && !mods.isCtrlDown();
-    const bool isAlt = mods.isAltDown();
-    const bool isCtrlShift = mods.isCtrlDown() && mods.isShiftDown();
-    const bool isDefault = !isShift && !isAlt && !isCtrlShift;
-
-    state.hudLines.push_back({Config::Labels::zoomPrefix + juce::String(owner.getSessionState().getZoomFactor(), 1) + "x", true});
-    state.hudLines.push_back({Config::Labels::stepDefault, isDefault});
-    state.hudLines.push_back({Config::Labels::stepShift, isShift});
-    state.hudLines.push_back({Config::Labels::stepAlt, isAlt});
-    state.hudLines.push_back({Config::Labels::stepCtrlShift, isCtrlShift});
 
     zoomView.updateState(state);
 }
