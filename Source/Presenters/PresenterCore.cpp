@@ -26,11 +26,8 @@
 #include "UI/Views/CutLayerView.h"
 
 PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
-    playbackRepeatController = std::make_unique<PlaybackRepeatController>(owner.getAudioPlayer(), owner);
+    playbackRepeatController = std::make_unique<PlaybackRepeatController>(owner.getAudioPlayer(), owner.getSessionState());
     
-    // We need to notify the timer manager about the repeat controller
-    owner.getPlaybackTimerManager().setRepeatController(playbackRepeatController.get());
-
     statsPresenter = std::make_unique<StatsPresenter>(owner);
     silenceDetectionPresenter = std::make_unique<SilenceDetectionPresenter>(owner, owner.getSessionState(), owner.getAudioPlayer());
     

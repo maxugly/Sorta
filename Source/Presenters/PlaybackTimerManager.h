@@ -56,13 +56,8 @@ class PlaybackTimerManager final : public juce::Timer {
     PlaybackTimerManager(SessionState &sessionStateIn, AudioPlayer &audioPlayerIn,
                          InteractionCoordinator &coordinatorIn);
 
-    /** @brief Destructor. stops the timer. */
+    /** @brief stops the timer. */
     ~PlaybackTimerManager() override;
-
-    /** @brief Sets the repeat controller to be ticked by this manager. */
-    void setRepeatController(PlaybackRepeatController *controller) {
-        m_repeatController = controller;
-    }
 
     /** @brief Sets the provider for the active zoom point. */
     void setZoomPointProvider(std::function<AppEnums::ActiveZoomPoint()> provider) {
@@ -97,7 +92,6 @@ class PlaybackTimerManager final : public juce::Timer {
     SessionState &sessionState;
     AudioPlayer &audioPlayer;
     InteractionCoordinator &interactionCoordinator;
-    PlaybackRepeatController *m_repeatController = nullptr;
     std::function<AppEnums::ActiveZoomPoint()> m_zoomPointProvider;
 
     juce::ListenerList<Listener> listeners;

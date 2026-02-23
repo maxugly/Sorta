@@ -1,7 +1,6 @@
 #include "Presenters/PlaybackTimerManager.h"
 #include "Core/AudioPlayer.h"
 #include "Core/SessionState.h"
-#include "Presenters/PlaybackRepeatController.h"
 #include "UI/InteractionCoordinator.h"
 #include "Utils/Config.h"
 #include "Utils/UIAnimationHelper.h"
@@ -55,9 +54,6 @@ void PlaybackTimerManager::timerCallback() {
             }
         }
     }
-
-    if (m_repeatController != nullptr)
-        m_repeatController->tick();
 
     // Update master animation clock
     const float duration = Config::Animation::masterPhaseDurationSeconds;

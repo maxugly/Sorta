@@ -9,19 +9,24 @@
 #include <JuceHeader.h>
 #endif
 
+#include "Core/SessionState.h"
+
 class AudioPlayer;
 
-class ControlPanel;
-
-class PlaybackRepeatController final {
+class PlaybackRepeatController final : public SessionState::Listener,
+                                       public juce::ChangeListener {
   public:
-    PlaybackRepeatController(AudioPlayer &audioPlayerIn, ControlPanel &controlPanelIn);
+    PlaybackRepeatController(AudioPlayer &audioPlayerIn, SessionState &sessionStateIn);
+    ~PlaybackRepeatController() override;
 
-    void tick();
+    void cutPreferenceChanged(const MainDomain::CutPreferences &) override;
+    void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
   private:
+    void checkStateTransitions(bool autoPlayPreference, bool isPlaying);
+
     AudioPlayer &audioPlayer;
-    ControlPanel &controlPanel;
+    SessionState &sessionState;
     bool lastIsPlaying = false;
     bool lastAutoPlayPreference = false;
 };

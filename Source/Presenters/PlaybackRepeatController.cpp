@@ -3,18 +3,28 @@
 #include "Presenters/PlaybackRepeatController.h"
 
 #include "Core/AudioPlayer.h"
-#include "UI/ControlPanel.h"
 
 PlaybackRepeatController::PlaybackRepeatController(AudioPlayer &audioPlayerIn,
-                                                   ControlPanel &controlPanelIn)
-    : audioPlayer(audioPlayerIn), controlPanel(controlPanelIn) {
+                                                   SessionState &sessionStateIn)
+    : audioPlayer(audioPlayerIn), sessionState(sessionStateIn) {
+    sessionState.addListener(this);
+    audioPlayer.addChangeListener(this);
 }
 
-void PlaybackRepeatController::tick() {
-    auto &sessionState = controlPanel.getSessionState();
-    const bool autoPlayPreference = sessionState.getCutPrefs().autoplay;
-    const bool isPlaying = audioPlayer.isPlaying();
+PlaybackRepeatController::~PlaybackRepeatController() {
+    audioPlayer.removeChangeListener(this);
+    sessionState.removeListener(this);
+}
 
+void PlaybackRepeatController::cutPreferenceChanged(const MainDomain::CutPreferences &) {
+    checkStateTransitions(sessionState.getCutPrefs().autoplay, audioPlayer.isPlaying());
+}
+
+void PlaybackRepeatController::changeListenerCallback(juce::ChangeBroadcaster *) {
+    checkStateTransitions(sessionState.getCutPrefs().autoplay, audioPlayer.isPlaying());
+}
+
+void PlaybackRepeatController::checkStateTransitions(bool autoPlayPreference, bool isPlaying) {
     // Only take action if the preference has changed OR if playback state changed
     if (autoPlayPreference != lastAutoPlayPreference || isPlaying != lastIsPlaying) {
         if (autoPlayPreference && !lastAutoPlayPreference && !isPlaying) {
