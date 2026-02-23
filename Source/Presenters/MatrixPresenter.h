@@ -13,9 +13,7 @@ class InteractionCoordinator;
 
 class MatrixPresenter final : public PlaybackTimerManager::Listener {
   public:
-    MatrixPresenter(ControlPanel& cp, AudioPlayer& player, SessionState& state,
-                    SilenceDetector& detector, InteractionCoordinator& coordinator,
-                    MatrixView& view);
+    explicit MatrixPresenter(ControlPanel& cp);
     ~MatrixPresenter() override;
 
     void playbackTimerTick() override;
@@ -23,11 +21,6 @@ class MatrixPresenter final : public PlaybackTimerManager::Listener {
 
   private:
     ControlPanel& owner;
-    AudioPlayer& audioPlayer;
-    SessionState& sessionState;
-    SilenceDetector& silenceDetector;
-    InteractionCoordinator& interactionCoordinator;
-    MatrixView& matrixView;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MatrixPresenter)
 };

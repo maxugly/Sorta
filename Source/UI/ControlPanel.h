@@ -209,8 +209,8 @@ class ControlPanel final : public juce::Component {
     RepeatButtonPresenter &getRepeatButtonPresenter() {
         return presenterCore->getRepeatButtonPresenter();
     }
-    MatrixView* getMatrixView() {
-        return matrixView.get();
+    MatrixView& getMatrixView() {
+        return *matrixView;
     }
     PlaybackTextPresenter &getPlaybackTextPresenter() {
         return presenterCore->getPlaybackTextPresenter();
