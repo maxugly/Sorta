@@ -17,6 +17,9 @@ void MarkerStrip::initialiseComponents() {
         if (onMarkerRightClick)
             onMarkerRightClick();
     };
+    markerButton.getProperties().set("GroupPosition", markerType == MarkerType::In
+                                                           ? (int)AppEnums::GroupPosition::Left
+                                                           : (int)AppEnums::GroupPosition::Right);
 
     // Timer Editor
     addAndMakeVisible(timerEditor);
