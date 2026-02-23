@@ -14,9 +14,11 @@
 PlaybackTextPresenter::PlaybackTextPresenter(ControlPanel &ownerPanel)
 
     : owner(ownerPanel) {
+    owner.getSessionState().addListener(this);
 }
 
 PlaybackTextPresenter::~PlaybackTextPresenter() {
+    owner.getSessionState().removeListener(this);
     owner.getPlaybackTimerManager().removeListener(this);
     if (owner.playbackTimeView != nullptr) {
         owner.playbackTimeView->getElapsedEditor().removeListener(this);

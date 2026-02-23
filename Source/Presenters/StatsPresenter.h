@@ -10,6 +10,7 @@
 #endif
 
 #include "Utils/Config.h"
+#include "Core/SessionState.h"
 
 class ControlPanel;
 
@@ -64,11 +65,11 @@ class StatsOverlay : public juce::Component {
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(StatsOverlay)
 };
 
-class StatsPresenter final {
+class StatsPresenter final : public SessionState::Listener {
   public:
     explicit StatsPresenter(ControlPanel &owner);
 
-    ~StatsPresenter() = default;
+    ~StatsPresenter() override;
 
     void updateStats();
 
@@ -89,6 +90,9 @@ class StatsPresenter final {
     juce::TextEditor &getDisplay();
 
     void setDisplayEnabled(bool shouldEnable);
+
+    // SessionState::Listener
+    void fileChanged(const juce::String &filePath) override;
 
   private:
     juce::String buildStatsString() const;

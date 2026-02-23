@@ -19,6 +19,16 @@ StatsPresenter::StatsPresenter(ControlPanel &ownerIn) : owner(ownerIn) {
     statsOverlay.setVisible(false);
 
     statsOverlay.onHeightChanged = [this](int newHeight) { currentHeight = newHeight; };
+    owner.getSessionState().addListener(this);
+}
+
+StatsPresenter::~StatsPresenter() {
+    owner.getSessionState().removeListener(this);
+}
+
+void StatsPresenter::fileChanged(const juce::String &filePath) {
+    juce::ignoreUnused(filePath);
+    updateStats();
 }
 
 void StatsPresenter::updateStats() {

@@ -30,6 +30,11 @@ void ControlStatePresenter::refreshStates() {
     owner.getRepeatButtonPresenter().cutPreferenceChanged(owner.getSessionState().getCutPrefs());
 }
 
+void ControlStatePresenter::fileChanged(const juce::String &filePath) {
+    juce::ignoreUnused(filePath);
+    updateUIFromState();
+}
+
 void ControlStatePresenter::updateUIFromState() {
     const auto &prefs = owner.getSessionState().getCutPrefs();
     const auto &autoCut = prefs.autoCut;

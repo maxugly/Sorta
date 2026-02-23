@@ -23,6 +23,7 @@ class ControlStatePresenter final : public SessionState::Listener {
     void updateUIFromState();
 
     // SessionState::Listener overrides
+    void fileChanged(const juce::String &filePath) override;
     void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
     void cutInChanged(double value) override;
     void cutOutChanged(double value) override;

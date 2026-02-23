@@ -41,6 +41,10 @@ class BoundaryLogicPresenter final : public juce::TextEditor::Listener,
     }
 
     // SessionState::Listener
+    void fileChanged(const juce::String &filePath) override {
+        juce::ignoreUnused(filePath);
+        refreshLabels();
+    }
     void cutInChanged(double) override { ensureCutOrder(); }
     void cutOutChanged(double) override { ensureCutOrder(); }
 

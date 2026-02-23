@@ -10,11 +10,13 @@
 #endif
 
 #include "Presenters/PlaybackTimerManager.h"
+#include "Core/SessionState.h"
 
 class ControlPanel;
 
 class PlaybackTextPresenter : public juce::TextEditor::Listener,
                               public juce::MouseListener,
+                              public SessionState::Listener,
                               public PlaybackTimerManager::Listener {
   public:
     explicit PlaybackTextPresenter(ControlPanel &ownerPanel);
@@ -31,6 +33,12 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
     }
     void animationUpdate(float breathingPulse) override {
         juce::ignoreUnused(breathingPulse);
+    }
+
+    // SessionState::Listener
+    void fileChanged(const juce::String &filePath) override {
+        juce::ignoreUnused(filePath);
+        updateEditors();
     }
 
   private:

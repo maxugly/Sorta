@@ -80,11 +80,6 @@ void MainComponent::openButtonClicked() {
                 if (auto* ptv = controlPanel->getPlaybackTimeView())
                     ptv->setTotalTimeStaticString(
                         TimeUtils::formatTime(audioPlayer->getThumbnail().getTotalLength()));
-
-                controlPanel->getBoundaryLogicPresenter().refreshLabels();
-                controlPanel->getPlaybackTextPresenter().updateEditors();
-                controlPanel->getPresenterCore().getControlStatePresenter().refreshStates();
-                controlPanel->getPresenterCore().getStatsPresenter().updateStats();
             } else {
                 controlPanel->getPresenterCore().getStatsPresenter().setDisplayText(
                     result.getErrorMessage(), Config::Colors::statsErrorText);
