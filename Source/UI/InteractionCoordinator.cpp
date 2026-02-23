@@ -2,6 +2,14 @@
 #include <algorithm>
 #include <cmath>
 
+void InteractionCoordinator::addListener(Listener *l) {
+    listeners.add(l);
+}
+
+void InteractionCoordinator::removeListener(Listener *l) {
+    listeners.remove(l);
+}
+
 double InteractionCoordinator::getSnappedTime(double rawTime, double sampleRate) const {
     if (sampleRate <= 0.0)
         return rawTime;

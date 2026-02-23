@@ -8,22 +8,22 @@
 #include "Utils/Config.h"
 
 CutButtonPresenter::CutButtonPresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {
-    owner.getPlaybackTimerManager().addListener(this);
+    owner.getInteractionCoordinator().addListener(this);
 }
 
 CutButtonPresenter::~CutButtonPresenter() {
-    owner.getPlaybackTimerManager().removeListener(this);
+    owner.getInteractionCoordinator().removeListener(this);
 }
 
-void CutButtonPresenter::playbackTimerTick() {
-    const auto currentMode = owner.getInteractionCoordinator().getPlacementMode();
-    if (currentMode != lastPlacementMode) {
-        updateColours();
-        lastPlacementMode = currentMode;
-    }
+void CutButtonPresenter::placementModeChanged(AppEnums::PlacementMode newMode) {
+    juce::ignoreUnused(newMode);
+    updateColours();
+    owner.repaint();
 }
 
-void CutButtonPresenter::animationUpdate(float) {
+void CutButtonPresenter::eyeCandyChanged(bool shouldShow) {
+    juce::ignoreUnused(shouldShow);
+    owner.repaint();
 }
 
 void CutButtonPresenter::updateColours() {

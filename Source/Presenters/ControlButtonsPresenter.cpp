@@ -127,7 +127,6 @@ void ControlButtonsPresenter::initialiseEyeCandyButton() {
         if (owner.topBarView == nullptr) return;
         owner.getInteractionCoordinator().setShouldShowEyeCandy(
             owner.topBarView->eyeCandyButton.getToggleState());
-        owner.repaint();
     };
 }
 
@@ -189,8 +188,6 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
         };
         inStrip->getMarkerButton().onRightClick = [this] {
             owner.getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutIn);
-            owner.getPresenterCore().getCutButtonPresenter().updateColours();
-            owner.repaint();
         };
         inStrip->getResetButton().onClick = [this] {
             owner.getPresenterCore().getCutResetPresenter().resetIn();
@@ -206,8 +203,6 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
         };
         outStrip->getMarkerButton().onRightClick = [this] {
             owner.getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutOut);
-            owner.getPresenterCore().getCutButtonPresenter().updateColours();
-            owner.repaint();
         };
         outStrip->getResetButton().onClick = [this] {
             owner.getPresenterCore().getCutResetPresenter().resetOut();

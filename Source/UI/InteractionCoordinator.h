@@ -19,8 +19,18 @@
  */
 class InteractionCoordinator {
   public:
+    class Listener {
+      public:
+        virtual ~Listener() = default;
+        virtual void placementModeChanged(AppEnums::PlacementMode newMode) = 0;
+        virtual void eyeCandyChanged(bool shouldShow) = 0;
+    };
+
     InteractionCoordinator() = default;
     ~InteractionCoordinator() = default;
+
+    void addListener(Listener *l);
+    void removeListener(Listener *l);
 
     /** @brief Sets the currently active zoom point (In, Out, or None). */
     void setActiveZoomPoint(AppEnums::ActiveZoomPoint point) {
@@ -80,6 +90,7 @@ class InteractionCoordinator {
     /** @brief Sets whether eye candy should be shown. */
     void setShouldShowEyeCandy(bool shouldShow) {
         m_showEyeCandy = shouldShow;
+        listeners.call(&Listener::eyeCandyChanged, m_showEyeCandy);
     }
 
     /** @brief Returns the current placement mode. */
@@ -90,6 +101,7 @@ class InteractionCoordinator {
     /** @brief Sets the current placement mode. */
     void setPlacementMode(AppEnums::PlacementMode mode) {
         m_placementMode = mode;
+        listeners.call(&Listener::placementModeChanged, m_placementMode);
     }
 
     /** @brief Snaps a raw time to relevant boundaries (e.g. zero-crossings or samples). */
@@ -104,6 +116,7 @@ class InteractionCoordinator {
                                  double duration) const;
 
   private:
+    juce::ListenerList<Listener> listeners;
     AppEnums::ActiveZoomPoint m_activeZoomPoint = AppEnums::ActiveZoomPoint::None;
     AppEnums::ActiveZoomPoint m_manualZoomPoint = AppEnums::ActiveZoomPoint::None;
     bool m_needsJumpToCutIn = false;

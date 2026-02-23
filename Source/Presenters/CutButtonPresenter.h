@@ -9,20 +9,20 @@
 #include <JuceHeader.h>
 #endif
 
-#include "Presenters/PlaybackTimerManager.h"
+#include "UI/InteractionCoordinator.h"
 
 class ControlPanel;
 
-class CutButtonPresenter : public PlaybackTimerManager::Listener {
+class CutButtonPresenter : public InteractionCoordinator::Listener {
   public:
     explicit CutButtonPresenter(ControlPanel &ownerPanel);
     ~CutButtonPresenter() override;
 
     void updateColours();
 
-    // PlaybackTimerManager::Listener
-    void playbackTimerTick() override;
-    void animationUpdate(float breathingPulse) override;
+    // InteractionCoordinator::Listener
+    void placementModeChanged(AppEnums::PlacementMode newMode) override;
+    void eyeCandyChanged(bool shouldShow) override;
 
   private:
     ControlPanel &owner;
