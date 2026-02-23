@@ -10,61 +10,42 @@
 #endif
 
 #include "Core/AppEnums.h"
-#include "Presenters/PlaybackTimerManager.h"
 #include "Utils/Config.h"
-
-#include "UI/InteractionCoordinator.h"
-
-class SessionState;
-
-class SilenceDetector;
-
-class MarkerMouseHandler;
-
-class WaveformManager;
+#include "UI/Handlers/MarkerMouseHandler.h"
 
 class ControlPanel;
 
-class CutLayerView : public juce::Component,
-                     public juce::ChangeListener,
-                     public PlaybackTimerManager::Listener {
+struct CutLayerState {
+    double cutInSeconds{0.0};
+    double cutOutSeconds{0.0};
+    double audioLength{0.0};
+    float inThreshold{0.0f};
+    float outThreshold{0.0f};
+    float glowAlpha{0.0f};
+    bool showEyeCandy{false};
+    bool isAutoIn{false};
+    bool isAutoOut{false};
+    bool markersVisible{false};
+    MarkerMouseHandler::CutMarkerHandle draggedHandle{MarkerMouseHandler::CutMarkerHandle::None};
+    MarkerMouseHandler::CutMarkerHandle hoveredHandle{MarkerMouseHandler::CutMarkerHandle::None};
+    AppEnums::ChannelViewMode channelMode{AppEnums::ChannelViewMode::Mono};
+};
+
+class CutLayerView : public juce::Component {
   public:
-    CutLayerView(ControlPanel &owner, SessionState &sessionState, SilenceDetector &silenceDetector,
-                 WaveformManager &waveformManager, InteractionCoordinator &coordinator,
-                 std::function<float()> glowAlphaProvider);
+    explicit CutLayerView(ControlPanel &owner);
 
     ~CutLayerView() override;
 
-    void setMarkerMouseHandler(MarkerMouseHandler &handler) {
-        markerMouseHandler = &handler;
-    }
+    void updateState(const CutLayerState& newState);
 
-    void setMarkersVisible(bool visible) {
-        markersVisible = visible;
-        repaint();
-    }
-
-    void setChannelMode(AppEnums::ChannelViewMode mode);
+    ControlPanel& getOwner() { return owner; }
 
     void paint(juce::Graphics &g) override;
 
-    void changeListenerCallback(juce::ChangeBroadcaster *source) override;
-
-    void playbackTimerTick() override {
-    }
-    void animationUpdate(float breathingPulse) override;
-
   private:
     ControlPanel &owner;
-    SessionState &sessionState;
-    SilenceDetector &silenceDetector;
-    InteractionCoordinator &interactionCoordinator;
-    MarkerMouseHandler *markerMouseHandler = nullptr;
-    WaveformManager &waveformManager;
-    std::function<float()> glowAlphaProvider;
-    bool markersVisible = false;
-
-    AppEnums::ChannelViewMode currentChannelMode = AppEnums::ChannelViewMode::Mono;
+    CutLayerState state;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(CutLayerView)
 };

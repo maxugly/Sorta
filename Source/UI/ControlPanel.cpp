@@ -62,8 +62,10 @@ void ControlPanel::setupViews() {
     addAndMakeVisible(waveformCanvasView.get());
 
     auto& cutLayer = waveformCanvasView->getCutLayerView();
-    cutPresenter = std::make_unique<CutPresenter>(*this, sessionState, cutLayer);
-    cutLayer.setMarkerMouseHandler(getMarkerMouseHandler());
+    cutPresenter = std::make_unique<CutPresenter>(*this, sessionState, cutLayer, 
+                                                  *silenceDetector, *interactionCoordinator, 
+                                                  *playbackTimerManager);
+    cutLayer.updateState({}); // Initial empty state
 
     overlayView = std::make_unique<OverlayView>(*this);
     addAndMakeVisible(overlayView.get());
@@ -102,7 +104,6 @@ void ControlPanel::setupPresenters() {
 void ControlPanel::setupListeners() {
     playbackTimerManager->addListener(&waveformCanvasView->getPlaybackCursorView());
     playbackTimerManager->addListener(&getPresenterCore().getZoomPresenter());
-    playbackTimerManager->addListener(&waveformCanvasView->getCutLayerView());
     playbackTimerManager->addListener(overlayView.get());
     playbackTimerManager->addListener(&getBoundaryLogicPresenter());
     playbackTimerManager->addListener(&getPlaybackTextPresenter());

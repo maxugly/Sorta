@@ -6,15 +6,20 @@
 #include "Core/SessionState.h"
 #include "UI/Handlers/MarkerMouseHandler.h"
 #include "UI/Handlers/WaveformMouseHandler.h"
+#include "Presenters/PlaybackTimerManager.h"
 
 class CutLayerView;
-
 class ControlPanel;
+class SilenceDetector;
+class InteractionCoordinator;
 
-class CutPresenter : public SessionState::Listener {
+class CutPresenter : public SessionState::Listener,
+                     public PlaybackTimerManager::Listener {
   public:
     CutPresenter(ControlPanel &controlPanel, SessionState &sessionState,
-                 CutLayerView &cutLayerView);
+                 CutLayerView &cutLayerView, SilenceDetector &silenceDetector,
+                 InteractionCoordinator &interactionCoordinator,
+                 PlaybackTimerManager &playbackTimerManager);
 
     ~CutPresenter() override;
 
@@ -36,11 +41,20 @@ class CutPresenter : public SessionState::Listener {
 
     void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
 
+    // PlaybackTimerManager::Listener overrides
+    void playbackTimerTick() override;
+    void animationUpdate(float breathingPulse) override;
+
   private:
     void refreshMarkersVisibility();
+    void pushStateToView();
 
     SessionState &sessionState;
     CutLayerView &cutLayerView;
+    SilenceDetector &silenceDetector;
+    InteractionCoordinator &interactionCoordinator;
+    PlaybackTimerManager &playbackTimerManager;
+
     std::unique_ptr<MarkerMouseHandler> markerMouseHandler;
     std::unique_ptr<WaveformMouseHandler> waveformMouseHandler;
 

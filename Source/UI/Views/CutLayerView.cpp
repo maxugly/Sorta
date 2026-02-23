@@ -9,51 +9,26 @@
 #include "Utils/CoordinateMapper.h"
 #include "Workers/SilenceDetector.h"
 
-CutLayerView::CutLayerView(ControlPanel &ownerIn, SessionState &sessionStateIn,
-                           SilenceDetector &silenceDetectorIn, WaveformManager &waveformManagerIn,
-                           InteractionCoordinator &coordinatorIn,
-                           std::function<float()> glowAlphaProviderIn)
-    : owner(ownerIn), sessionState(sessionStateIn), silenceDetector(silenceDetectorIn),
-      waveformManager(waveformManagerIn), interactionCoordinator(coordinatorIn),
-      glowAlphaProvider(std::move(glowAlphaProviderIn)) {
+CutLayerView::CutLayerView(ControlPanel &ownerIn)
+    : owner(ownerIn) {
     setInterceptsMouseClicks(false, false);
-
     setOpaque(false);
-
     setBufferedToImage(true);
-    waveformManager.addChangeListener(this);
 }
 
-CutLayerView::~CutLayerView() {
-    owner.getPlaybackTimerManager().removeListener(this);
-    waveformManager.removeChangeListener(this);
-}
+CutLayerView::~CutLayerView() = default;
 
-void CutLayerView::changeListenerCallback(juce::ChangeBroadcaster *source) {
-    if (source == &waveformManager.getThumbnail())
-
-        repaint();
-}
-
-void CutLayerView::animationUpdate(float breathingPulse) {
-    juce::ignoreUnused(breathingPulse);
-    repaint();
-}
-
-void CutLayerView::setChannelMode(AppEnums::ChannelViewMode mode) {
-    if (currentChannelMode == mode)
-        return;
-    currentChannelMode = mode;
-
+void CutLayerView::updateState(const CutLayerState& newState) {
+    state = newState;
     repaint();
 }
 
 void CutLayerView::paint(juce::Graphics &g) {
-    if (!markersVisible)
+    if (!state.markersVisible)
         return;
 
     const auto bounds = getLocalBounds();
-    const float audioLength = (float)waveformManager.getThumbnail().getTotalLength();
+    const float audioLength = (float)state.audioLength;
     if (audioLength <= 0.0f)
         return;
 
@@ -84,8 +59,8 @@ void CutLayerView::paint(juce::Graphics &g) {
         g.setColour(Config::Colors::thresholdRegion);
         g.fillRect(lineStartX, topThresholdY, currentLineWidth, bottomThresholdY - topThresholdY);
 
-        if (interactionCoordinator.shouldShowEyeCandy()) {
-            const float pulse = glowAlphaProvider();
+        if (state.showEyeCandy) {
+            const float pulse = state.glowAlpha;
             const juce::Colour glowColor =
                 Config::Colors::thresholdLine.withAlpha(0.2f + 0.6f * pulse);
             g.setColour(glowColor);
@@ -100,10 +75,10 @@ void CutLayerView::paint(juce::Graphics &g) {
         g.drawHorizontalLine((int)bottomThresholdY, lineStartX, lineEndX);
     };
 
-    const double cutIn = sessionState.getCutIn();
-    const double cutOut = sessionState.getCutOut();
-    drawThresholdVisualisation(cutIn, silenceDetector.getCurrentInSilenceThreshold());
-    drawThresholdVisualisation(cutOut, silenceDetector.getCurrentOutSilenceThreshold());
+    const double cutIn = state.cutInSeconds;
+    const double cutOut = state.cutOutSeconds;
+    drawThresholdVisualisation(cutIn, state.inThreshold);
+    drawThresholdVisualisation(cutOut, state.outThreshold);
 
     const double actualIn = juce::jmin(cutIn, cutOut);
     const double actualOut = juce::jmax(cutIn, cutOut);
@@ -166,37 +141,30 @@ void CutLayerView::paint(juce::Graphics &g) {
     auto drawCutMarker = [&](float x, MarkerMouseHandler::CutMarkerHandle handleType) {
         juce::Colour markerColor = Config::Colors::cutLine;
 
-        if (handleType == MarkerMouseHandler::CutMarkerHandle::In &&
-            silenceDetector.getIsAutoCutInActive())
+        if (handleType == MarkerMouseHandler::CutMarkerHandle::In && state.isAutoIn)
             markerColor = Config::Colors::cutMarkerAuto;
-        else if (handleType == MarkerMouseHandler::CutMarkerHandle::Out &&
-                 silenceDetector.getIsAutoCutOutActive())
+        else if (handleType == MarkerMouseHandler::CutMarkerHandle::Out && state.isAutoOut)
             markerColor = Config::Colors::cutMarkerAuto;
 
         float thickness = Config::Layout::Glow::cutBoxOutlineThickness;
         bool shouldPulse = false;
 
-        if (markerMouseHandler != nullptr) {
-            shouldPulse = markerMouseHandler->isHandleActive(handleType) ||
-                          markerMouseHandler->getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Full ||
-                          markerMouseHandler->getHoveredHandle() == MarkerMouseHandler::CutMarkerHandle::Full;
+        const bool isDragged = state.draggedHandle == handleType || state.draggedHandle == MarkerMouseHandler::CutMarkerHandle::Full;
+        const bool isHovered = state.hoveredHandle == handleType || state.hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Full;
 
-            if (markerMouseHandler->getDraggedHandle() == handleType ||
-                (handleType != MarkerMouseHandler::CutMarkerHandle::Full &&
-                 markerMouseHandler->getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Full)) {
-                markerColor = Config::Colors::cutMarkerDrag;
-                thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-            } else if (markerMouseHandler->getHoveredHandle() == handleType ||
-                       (handleType != MarkerMouseHandler::CutMarkerHandle::Full &&
-                        markerMouseHandler->getHoveredHandle() == MarkerMouseHandler::CutMarkerHandle::Full)) {
-                markerColor = Config::Colors::cutMarkerHover;
-                thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-            }
+        if (isDragged) {
+            markerColor = Config::Colors::cutMarkerDrag;
+            thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
+            shouldPulse = true;
+        } else if (isHovered) {
+            markerColor = Config::Colors::cutMarkerHover;
+            thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
+            shouldPulse = true;
         }
 
         // Draw Glow if active
-        if (shouldPulse && interactionCoordinator.shouldShowEyeCandy()) {
-            const float pulse = glowAlphaProvider();
+        if (shouldPulse && state.showEyeCandy) {
+            const float pulse = state.glowAlpha;
             const juce::Colour glowColor = Config::Colors::cutLine.withAlpha(
                 Config::Colors::cutLine.getFloatAlpha() * (0.2f + 0.8f * pulse));
             g.setColour(glowColor);
@@ -231,23 +199,19 @@ void CutLayerView::paint(juce::Graphics &g) {
 
     juce::Colour hollowColor = Config::Colors::cutLine;
     float hollowThickness = Config::Layout::Glow::cutBoxOutlineThickness;
-    bool regionActive = false;
+    bool regionActive = state.draggedHandle == MarkerMouseHandler::CutMarkerHandle::Full ||
+                       state.hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Full;
 
-    if (markerMouseHandler != nullptr) {
-        regionActive = markerMouseHandler->getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Full ||
-                       markerMouseHandler->getHoveredHandle() == MarkerMouseHandler::CutMarkerHandle::Full;
-
-        if (markerMouseHandler->getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Full) {
-            hollowColor = Config::Colors::cutMarkerDrag;
-            hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-        } else if (markerMouseHandler->getHoveredHandle() == MarkerMouseHandler::CutMarkerHandle::Full) {
-            hollowColor = Config::Colors::cutMarkerHover;
-            hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-        }
+    if (state.draggedHandle == MarkerMouseHandler::CutMarkerHandle::Full) {
+        hollowColor = Config::Colors::cutMarkerDrag;
+        hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
+    } else if (state.hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Full) {
+        hollowColor = Config::Colors::cutMarkerHover;
+        hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
     }
 
-    if (regionActive && interactionCoordinator.shouldShowEyeCandy())
-        g.setColour(hollowColor.withAlpha(0.5f + 0.5f * glowAlphaProvider()));
+    if (regionActive && state.showEyeCandy)
+        g.setColour(hollowColor.withAlpha(0.5f + 0.5f * state.glowAlpha));
     else
         g.setColour(hollowColor.withAlpha(0.4f));
 
