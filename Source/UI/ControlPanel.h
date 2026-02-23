@@ -81,6 +81,10 @@ class ControlPanel final : public juce::Component {
 
     juce::Rectangle<int> getWaveformBounds() const { return layoutCache.waveformBounds; }
 
+    void injectLogic(InteractionCoordinator& ic, PlaybackTimerManager& ptm, PresenterCore& pc, FocusManager& fm);
+    void setInteractionCoordinator(InteractionCoordinator& ic) { interactionCoordinator = &ic; }
+    void setPlaybackTimerManager(PlaybackTimerManager& ptm) { playbackTimerManager = &ptm; }
+
     AudioPlayer &getAudioPlayer();
     AudioPlayer &getAudioPlayer() const;
     SessionState &getSessionState() { return sessionState; }
@@ -154,13 +158,13 @@ class ControlPanel final : public juce::Component {
     SessionState &sessionState;
     ModernLookAndFeel modernLF;
 
-    std::unique_ptr<PlaybackTimerManager> playbackTimerManager;
+    PlaybackTimerManager* playbackTimerManager{nullptr};
     std::unique_ptr<LayoutManager> layoutManager;
     std::unique_ptr<WaveformCanvasView> waveformCanvasView;
-    std::unique_ptr<PresenterCore> presenterCore;
-    std::unique_ptr<FocusManager> focusManager;
+    PresenterCore* presenterCore{nullptr};
+    FocusManager* focusManager{nullptr};
     std::unique_ptr<OverlayView> overlayView;
-    std::unique_ptr<InteractionCoordinator> interactionCoordinator;
+    InteractionCoordinator* interactionCoordinator{nullptr};
     std::unique_ptr<MatrixView> matrixView;
 
     std::unique_ptr<TopBarView> topBarView;
@@ -170,10 +174,8 @@ class ControlPanel final : public juce::Component {
     LayoutCache layoutCache;
 
     void initialiseLookAndFeel();
-    void setupCoreComponents();
     void setupViews();
     void setupStrips();
-    void setupPresenters();
     void setupListeners();
     void finaliseSetup();
 

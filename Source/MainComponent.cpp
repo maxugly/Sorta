@@ -13,7 +13,17 @@ MainComponent::MainComponent() {
     audioPlayer = std::make_unique<AudioPlayer>(sessionState);
     audioPlayer->addChangeListener(this);
 
+    interactionCoordinator = std::make_unique<InteractionCoordinator>();
+    playbackTimerManager = std::make_unique<PlaybackTimerManager>(sessionState, *audioPlayer, *interactionCoordinator);
+    
     controlPanel = std::make_unique<ControlPanel>(*this, sessionState);
+    controlPanel->setInteractionCoordinator(*interactionCoordinator);
+    controlPanel->setPlaybackTimerManager(*playbackTimerManager);
+    
+    focusManager = std::make_unique<FocusManager>(*controlPanel);
+    presenterCore = std::make_unique<PresenterCore>(*controlPanel);
+    controlPanel->injectLogic(*interactionCoordinator, *playbackTimerManager, *presenterCore, *focusManager);
+    
     addAndMakeVisible(controlPanel.get());
 
     setAudioChannels(0, 2);

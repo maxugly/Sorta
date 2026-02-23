@@ -12,6 +12,10 @@
 #include "Core/AudioPlayer.h"
 #include "Core/SessionState.h"
 #include "UI/ControlPanel.h"
+#include "UI/InteractionCoordinator.h"
+#include "Presenters/PlaybackTimerManager.h"
+#include "Presenters/PresenterCore.h"
+#include "UI/FocusManager.h"
 
 /**
  * @defgroup UI UI Components
@@ -78,6 +82,10 @@ class MainComponent : public juce::AudioAppComponent, public juce::ChangeListene
   private:
     SessionState sessionState;
     std::unique_ptr<AudioPlayer> audioPlayer;
+    std::unique_ptr<InteractionCoordinator> interactionCoordinator;
+    std::unique_ptr<PlaybackTimerManager> playbackTimerManager;
+    std::unique_ptr<PresenterCore> presenterCore;
+    std::unique_ptr<FocusManager> focusManager;
     std::unique_ptr<juce::FileChooser> chooser;
     std::unique_ptr<ControlPanel> controlPanel;
     juce::OpenGLContext openGLContext;

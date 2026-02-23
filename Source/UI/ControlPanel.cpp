@@ -1,5 +1,3 @@
-
-
 /**
  * @file ControlPanel.cpp
  */
@@ -35,25 +33,23 @@
 
 ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionStateIn)
     : owner(ownerComponent), sessionState(sessionStateIn), modernLF(),
-      layoutManager(std::make_unique<LayoutManager>(*this)),
-      focusManager(std::make_unique<FocusManager>(*this)) {
+      layoutManager(std::make_unique<LayoutManager>(*this)) {
     initialiseLookAndFeel();
-    setupCoreComponents();
     setupViews();
     setupStrips();
-    setupPresenters();
-    setupListeners();
-
-    getPresenterCore().getControlStatePresenter().updateUIFromState();
-    finaliseSetup();
 
     setMouseCursor(juce::MouseCursor::CrosshairCursor);
 }
 
-void ControlPanel::setupCoreComponents() {
-    interactionCoordinator = std::make_unique<InteractionCoordinator>();
-    playbackTimerManager = std::make_unique<PlaybackTimerManager>(sessionState, getAudioPlayer(),
-                                                                  *interactionCoordinator);
+void ControlPanel::injectLogic(InteractionCoordinator& ic, PlaybackTimerManager& ptm, PresenterCore& pc, FocusManager& fm) {
+    interactionCoordinator = &ic;
+    playbackTimerManager = &ptm;
+    presenterCore = &pc;
+    focusManager = &fm;
+
+    setupListeners();
+    getPresenterCore().getControlStatePresenter().updateUIFromState();
+    finaliseSetup();
 }
 
 void ControlPanel::setupViews() {
@@ -99,10 +95,6 @@ juce::MouseCursor ControlPanel::getMouseCursor() {
         return juce::MouseCursor::PointingHandCursor;
 
     return juce::MouseCursor::CrosshairCursor;
-}
-
-void ControlPanel::setupPresenters() {
-    presenterCore = std::make_unique<PresenterCore>(*this);
 }
 
 void ControlPanel::setupListeners() {
