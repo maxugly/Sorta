@@ -3,6 +3,8 @@
 #include "UI/ControlPanel.h"
 #include "UI/FocusManager.h"
 #include "Utils/Config.h"
+#include "Utils/CoordinateMapper.h"
+#include "Utils/PlaybackHelpers.h"
 #include "Utils/TimeEntryHelpers.h"
 #include "Utils/TimeUtils.h"
 #include "Workers/SilenceDetector.h"
@@ -60,7 +62,8 @@ void BoundaryLogicPresenter::setCutStartFromSample(int sampleIndex) {
     if (!audioPlayer.getReaderInfo(sampleRate, length) || sampleRate <= 0.0)
         return;
 
-    setCutInPosition((double)sampleIndex / sampleRate);
+    const double pos = static_cast<double>(sampleIndex) / sampleRate;
+    setCutInPosition(pos);
     ensureCutOrder();
     refreshLabels();
     owner.repaint();
@@ -73,7 +76,8 @@ void BoundaryLogicPresenter::setCutEndFromSample(int sampleIndex) {
     if (!audioPlayer.getReaderInfo(sampleRate, length) || sampleRate <= 0.0)
         return;
 
-    setCutOutPosition((double)sampleIndex / sampleRate);
+    const double pos = static_cast<double>(sampleIndex) / sampleRate;
+    setCutOutPosition(pos);
     ensureCutOrder();
     refreshLabels();
     owner.repaint();
@@ -232,7 +236,7 @@ void BoundaryLogicPresenter::syncEditorToPosition(juce::TextEditor &editor,
         (&editor == &cutOutEditor && isEditingOut))
         return;
 
-    juce::String newText = owner.formatTime(positionSeconds);
+    juce::String newText = TimeUtils::formatTime(positionSeconds);
     if (editor.getText() != newText)
         editor.setText(newText, juce::dontSendNotification);
 }
@@ -289,9 +293,10 @@ bool BoundaryLogicPresenter::applyCutOutFromEditor(double newPosition, juce::Tex
 
 void BoundaryLogicPresenter::setCutInPosition(double positionSeconds) {
     const double totalLength = getAudioTotalLength();
-    double newPos = std::clamp(positionSeconds, 0.0, totalLength);
     auto &audioPlayer = owner.getAudioPlayer();
     const double currentOut = audioPlayer.getCutOut();
+
+    double newPos = PlaybackHelpers::constrainPosition(positionSeconds, 0.0, totalLength);
 
     if (!silenceDetector.getIsAutoCutInActive() && newPos >= currentOut &&
         silenceDetector.getIsAutoCutOutActive())
@@ -309,9 +314,10 @@ void BoundaryLogicPresenter::setCutInPosition(double positionSeconds) {
 
 void BoundaryLogicPresenter::setCutOutPosition(double positionSeconds) {
     const double totalLength = getAudioTotalLength();
-    double newPos = std::clamp(positionSeconds, 0.0, totalLength);
     auto &audioPlayer = owner.getAudioPlayer();
     const double currentIn = audioPlayer.getCutIn();
+
+    double newPos = PlaybackHelpers::constrainPosition(positionSeconds, 0.0, totalLength);
 
     if (!silenceDetector.getIsAutoCutOutActive() && newPos <= currentIn &&
         silenceDetector.getIsAutoCutInActive())

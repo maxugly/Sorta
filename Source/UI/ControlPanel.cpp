@@ -265,10 +265,6 @@ juce::TextEditor &ControlPanel::getStatsDisplay() {
     return getPresenterCore().getStatsPresenter().getDisplay();
 }
 
-juce::String ControlPanel::formatTime(double seconds) const {
-    return TimeUtils::formatTime(seconds);
-}
-
 const juce::LookAndFeel &ControlPanel::getLookAndFeel() const {
     return modernLF;
 }

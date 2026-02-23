@@ -9,6 +9,7 @@
 #include "UI/Views/PlaybackCursorGlow.h"
 #include "Utils/Config.h"
 #include "Utils/CoordinateMapper.h"
+#include "Utils/TimeUtils.h"
 
 ZoomView::ZoomView(ControlPanel &ownerIn) : owner(ownerIn) {
     setInterceptsMouseClicks(false, false);
@@ -120,7 +121,7 @@ void ZoomView::paint(juce::Graphics &g) {
                    (int)bottomAmplitudeY, 100, Config::Layout::Text::mouseCursorSize,
                    juce::Justification::left, true);
 
-        const juce::String timeText = owner.formatTime(waveformMouse.getMouseCursorTime());
+        const juce::String timeText = TimeUtils::formatTime(waveformMouse.getMouseCursorTime());
         g.drawText(timeText, localMouseX + Config::Layout::Glow::mouseTextOffset,
                    localMouseY + Config::Layout::Glow::mouseTextOffset, 100,
                    Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);

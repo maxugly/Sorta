@@ -67,7 +67,7 @@ void PlaybackTextPresenter::updateEditors() {
 
     if (!isEditingCutLength && !length.hasKeyboardFocus(true)) {
         double cutLen = std::abs(owner.getSessionState().getCutOut() - owner.getSessionState().getCutIn());
-        juce::String newText = owner.formatTime(cutLen);
+        juce::String newText = TimeUtils::formatTime(cutLen);
         if (length.getText() != newText)
             length.setText(newText, juce::dontSendNotification);
     }
@@ -188,7 +188,7 @@ void PlaybackTextPresenter::syncEditorToPosition(juce::TextEditor &editor, doubl
         return;
     }
 
-    juce::String text = owner.formatTime(positionSeconds);
+    juce::String text = TimeUtils::formatTime(positionSeconds);
     if (isRemaining)
         text = "-" + text;
 

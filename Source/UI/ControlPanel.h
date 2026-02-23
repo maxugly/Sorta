@@ -218,7 +218,6 @@ class ControlPanel final : public juce::Component {
 
     juce::TextEditor &getStatsDisplay();
 
-    juce::String formatTime(double seconds) const;
     const juce::LookAndFeel &getLookAndFeel() const;
     FocusManager &getFocusManager() const {
         return *focusManager;
