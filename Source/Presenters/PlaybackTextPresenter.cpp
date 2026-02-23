@@ -49,6 +49,10 @@ void PlaybackTextPresenter::updateEditors() {
     if (owner.playbackTimeView == nullptr)
         return;
 
+    owner.playbackTimeView->updateTimes(
+        TimeUtils::formatTime(owner.getAudioPlayer().getCurrentPosition()),
+        TimeUtils::formatTime(owner.getAudioPlayer().getThumbnail().getTotalLength()));
+
     auto &elapsed = owner.playbackTimeView->getElapsedEditor();
     auto &remaining = owner.playbackTimeView->getRemainingEditor();
     auto &length = owner.playbackTimeView->getCutLengthEditor();
