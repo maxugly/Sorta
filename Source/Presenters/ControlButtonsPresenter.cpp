@@ -184,7 +184,7 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
     auto& sessionState = owner.getSessionState();
 
     if (inStrip != nullptr) {
-        inStrip->getMarkerButton().onClick = [this, &audioPlayer] {
+        inStrip->getMarkerButton().onLeftClick = [this, &audioPlayer] {
             audioPlayer.setCutIn(audioPlayer.getCurrentPosition());
         };
         inStrip->getMarkerButton().onRightClick = [this] {
@@ -201,7 +201,7 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
     }
 
     if (outStrip != nullptr) {
-        outStrip->getMarkerButton().onClick = [this, &audioPlayer] {
+        outStrip->getMarkerButton().onLeftClick = [this, &audioPlayer] {
             audioPlayer.setCutOut(audioPlayer.getCurrentPosition());
         };
         outStrip->getMarkerButton().onRightClick = [this] {
