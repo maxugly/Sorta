@@ -41,7 +41,11 @@ void WaveformView::paint(juce::Graphics &g) {
     if (audioLength <= 0.0)
         return;
 
-    g.setColour(Config::Colors::waveform);
+    const auto bounds = getLocalBounds().toFloat();
+    juce::ColourGradient gradient(Config::Colors::waveformPeak, bounds.getX(), bounds.getY(),
+                                  Config::Colors::waveformPeak, bounds.getX(), bounds.getBottom(), false);
+    gradient.addColour(0.5, Config::Colors::waveformCore);
+    g.setGradientFill(gradient);
     const int numChannels = thumbnail.getNumChannels();
 
     if (currentChannelMode == AppEnums::ChannelViewMode::Mono || numChannels == 1)

@@ -117,7 +117,10 @@ void ZoomView::paint(juce::Graphics &g) {
         g.setColour(Config::Colors::solidBlack);
         g.fillRect(popupBounds);
 
-        g.setColour(Config::Colors::waveform);
+        juce::ColourGradient gradient(Config::Colors::waveformPeak, (float)popupBounds.getX(), (float)popupBounds.getY(),
+                                      Config::Colors::waveformPeak, (float)popupBounds.getX(), (float)popupBounds.getBottom(), false);
+        gradient.addColour(0.5, Config::Colors::waveformCore);
+        g.setGradientFill(gradient);
         
         if (state.channelMode == AppEnums::ChannelViewMode::Mono || state.numChannels == 1) {
             state.thumbnail->drawChannel(g, popupBounds, startTime,
