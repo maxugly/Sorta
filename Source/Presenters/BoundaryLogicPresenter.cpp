@@ -200,7 +200,7 @@ void BoundaryLogicPresenter::mouseWheelMove(const juce::MouseEvent &event,
     }
 
     if (event.mods.isCtrlDown() && !event.mods.isShiftDown()) {
-        owner.setZoomFactor(owner.getZoomFactor() * (wheel.deltaY > 0 ? 1.1f : 0.9f));
+        owner.getSessionState().setZoomFactor(owner.getSessionState().getZoomFactor() * (wheel.deltaY > 0 ? 1.1f : 0.9f));
         return;
     }
 
@@ -245,7 +245,7 @@ bool BoundaryLogicPresenter::applyCutInFromEditor(double newPosition, juce::Text
     const double totalLength = getAudioTotalLength();
     if (newPosition >= 0.0 && newPosition <= totalLength) {
         setCutInPosition(newPosition);
-        owner.updateCutButtonColors();
+        owner.getPresenterCore().getCutButtonPresenter().updateColours();
         owner.getSessionState().setAutoCutInActive(false);
 
         if (owner.getInteractionCoordinator().getActiveZoomPoint() !=
@@ -272,7 +272,7 @@ bool BoundaryLogicPresenter::applyCutOutFromEditor(double newPosition, juce::Tex
             owner.getAudioPlayer().setPlayheadPosition(owner.getAudioPlayer().getCutIn());
 
         setCutOutPosition(newPosition);
-        owner.updateCutButtonColors();
+        owner.getPresenterCore().getCutButtonPresenter().updateColours();
         owner.getSessionState().setAutoCutOutActive(false);
 
         if (owner.getInteractionCoordinator().getActiveZoomPoint() !=

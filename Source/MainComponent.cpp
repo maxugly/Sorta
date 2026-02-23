@@ -53,7 +53,8 @@ void MainComponent::resized() {
 
 void MainComponent::changeListenerCallback(juce::ChangeBroadcaster *source) {
     if (source == audioPlayer.get()) {
-        controlPanel->updatePlayButtonText(audioPlayer->isPlaying());
+        if (auto* ts = controlPanel->getTransportStrip())
+            ts->updatePlayButtonText(audioPlayer->isPlaying());
 
         repaint();
     }
@@ -71,15 +72,17 @@ void MainComponent::openButtonClicked() {
         if (file.exists()) {
             auto result = audioPlayer->loadFile(file);
             if (result.wasOk()) {
-                controlPanel->setTotalTimeStaticString(
-                    TimeUtils::formatTime(audioPlayer->getThumbnail().getTotalLength()));
+                if (auto* ptv = controlPanel->getPlaybackTimeView())
+                    ptv->setTotalTimeStaticString(
+                        TimeUtils::formatTime(audioPlayer->getThumbnail().getTotalLength()));
 
-                controlPanel->refreshLabels();
-                controlPanel->updateComponentStates();
-                controlPanel->updateStatsFromAudio();
+                controlPanel->getBoundaryLogicPresenter().refreshLabels();
+                controlPanel->getPlaybackTextPresenter().updateEditors();
+                controlPanel->getPresenterCore().getControlStatePresenter().refreshStates();
+                controlPanel->getPresenterCore().getStatsPresenter().updateStats();
             } else {
-                controlPanel->setStatsDisplayText(result.getErrorMessage(),
-                                                  Config::Colors::statsErrorText);
+                controlPanel->getPresenterCore().getStatsPresenter().setDisplayText(
+                    result.getErrorMessage(), Config::Colors::statsErrorText);
             }
         }
 

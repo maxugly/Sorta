@@ -9,7 +9,7 @@ CutButtonPresenter::CutButtonPresenter(ControlPanel &ownerPanel) : owner(ownerPa
 }
 
 void CutButtonPresenter::updateColours() {
-    const auto placementMode = owner.getPlacementMode();
+    const auto placementMode = owner.getInteractionCoordinator().getPlacementMode();
 
     if (owner.inStrip != nullptr)
         owner.inStrip->getMarkerButton().setColour(juce::TextButton::buttonColourId,
@@ -23,5 +23,5 @@ void CutButtonPresenter::updateColours() {
                                                         ? Config::Colors::Button::cutPlacement
                                                         : Config::Colors::Button::cutActive);
 
-    owner.refreshLabels();
+    owner.getBoundaryLogicPresenter().refreshLabels();
 }

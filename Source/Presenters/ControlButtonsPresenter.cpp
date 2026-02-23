@@ -102,8 +102,8 @@ void ControlButtonsPresenter::initialiseStatsButton() {
     btn.setClickingTogglesState(true);
     btn.onClick = [this] {
         if (owner.topBarView == nullptr) return;
-        owner.setShouldShowStats(owner.topBarView->statsButton.getToggleState());
-        owner.updateComponentStates();
+        owner.getPresenterCore().getStatsPresenter().setShouldShowStats(owner.topBarView->statsButton.getToggleState());
+        owner.getPresenterCore().getControlStatePresenter().refreshStates();
     };
 }
 

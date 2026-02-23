@@ -164,7 +164,7 @@ void MarkerMouseHandler::mouseDrag(const juce::MouseEvent &event) {
             }
         }
         owner.getBoundaryLogicPresenter().ensureCutOrder();
-        owner.refreshLabels();
+        owner.getBoundaryLogicPresenter().refreshLabels();
         owner.repaint();
     }
 }

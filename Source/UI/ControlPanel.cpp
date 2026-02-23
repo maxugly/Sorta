@@ -81,8 +81,8 @@ void ControlPanel::setupStrips() {
     inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In, getAudioPlayer(),
                                             sessionState, *silenceDetector);
     inStrip->onMarkerRightClick = [this] {
-        setPlacementMode(AppEnums::PlacementMode::CutIn);
-        updateCutButtonColors();
+        getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutIn);
+        getPresenterCore().getCutButtonPresenter().updateColours();
         repaint();
     };
     addAndMakeVisible(inStrip.get());
@@ -90,8 +90,8 @@ void ControlPanel::setupStrips() {
     outStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::Out, getAudioPlayer(),
                                              sessionState, *silenceDetector);
     outStrip->onMarkerRightClick = [this] {
-        setPlacementMode(AppEnums::PlacementMode::CutOut);
-        updateCutButtonColors();
+        getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutOut);
+        getPresenterCore().getCutButtonPresenter().updateColours();
         repaint();
     };
     addAndMakeVisible(outStrip.get());
@@ -143,7 +143,7 @@ void ControlPanel::invokeOwnerOpenDialog() {
 void ControlPanel::finaliseSetup() {
     getPlaybackTextPresenter().initialiseEditors();
 
-    updateComponentStates();
+    getPresenterCore().getControlStatePresenter().refreshStates();
 }
 
 void ControlPanel::resized() {
@@ -161,46 +161,7 @@ void ControlPanel::paint(juce::Graphics &g) {
     g.fillAll(Config::Colors::Window::background);
 }
 
-void ControlPanel::updatePlayButtonText(bool isPlaying) {
-    if (auto* ts = getTransportStrip())
-        ts->updatePlayButtonText(isPlaying);
-}
 
-void ControlPanel::refreshLabels() {
-    getBoundaryLogicPresenter().refreshLabels();
-    getPlaybackTextPresenter().updateEditors();
-}
-
-void ControlPanel::updateComponentStates() {
-    getPresenterCore().getControlStatePresenter().refreshStates();
-}
-
-void ControlPanel::setStatsDisplayText(const juce::String &text, juce::Colour color) {
-    getPresenterCore().getStatsPresenter().setDisplayText(text, color);
-}
-
-void ControlPanel::logStatusMessage(const juce::String &message, bool isError) {
-    const auto color = isError ? Config::Colors::statsErrorText : Config::Colors::statsText;
-
-    setStatsDisplayText(message, color);
-}
-
-void ControlPanel::updateStatsFromAudio() {
-    getPresenterCore().getStatsPresenter().updateStats();
-}
-
-void ControlPanel::setShouldShowStats(bool shouldShowStatsParam) {
-    getPresenterCore().getStatsPresenter().setShouldShowStats(shouldShowStatsParam);
-}
-
-void ControlPanel::setTotalTimeStaticString(const juce::String &timeString) {
-    if (playbackTimeView != nullptr)
-        playbackTimeView->setTotalTimeStaticString(timeString);
-}
-
-void ControlPanel::updateCutButtonColors() {
-    getPresenterCore().getCutButtonPresenter().updateColours();
-}
 
 AudioPlayer &ControlPanel::getAudioPlayer() {
     return *owner.getAudioPlayer();

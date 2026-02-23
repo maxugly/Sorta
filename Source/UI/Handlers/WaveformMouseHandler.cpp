@@ -72,7 +72,7 @@ void WaveformMouseHandler::mouseDown(const juce::MouseEvent &event) {
                         owner.getSessionState().setAutoCutOutActive(false);
                     }
                     owner.getBoundaryLogicPresenter().ensureCutOrder();
-                    owner.refreshLabels();
+                    owner.getBoundaryLogicPresenter().refreshLabels();
                     owner.repaint();
                     return;
                 } else {
@@ -154,7 +154,7 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
         (isDraggingFlag || coordinator.getPlacementMode() != AppEnums::PlacementMode::None)) {
         if (coordinator.getPlacementMode() != AppEnums::PlacementMode::None) {
             coordinator.setPlacementMode(AppEnums::PlacementMode::None);
-            owner.updateCutButtonColors();
+            owner.getPresenterCore().getCutButtonPresenter().updateColours();
         }
         isDraggingFlag = isScrubbingState = false;
         owner.repaint();
@@ -186,11 +186,11 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
                 owner.getSessionState().setAutoCutOutActive(false);
             }
             owner.getBoundaryLogicPresenter().ensureCutOrder();
-            owner.refreshLabels();
+            owner.getBoundaryLogicPresenter().refreshLabels();
             owner.getAudioPlayer().setPlayheadPosition(owner.getSessionState().getCutIn());
             owner.getInteractionCoordinator().setNeedsJumpToCutIn(false);
             coordinator.setPlacementMode(AppEnums::PlacementMode::None);
-            owner.updateCutButtonColors();
+            owner.getPresenterCore().getCutButtonPresenter().updateColours();
         } else if (mouseDragStartX == event.x) {
             seekToMousePosition(event.x);
         }
@@ -210,7 +210,7 @@ void WaveformMouseHandler::mouseWheelMove(const juce::MouseEvent &event,
         return;
 
     if (event.mods.isCtrlDown() && !event.mods.isShiftDown()) {
-        owner.setZoomFactor(owner.getZoomFactor() * (wheel.deltaY > 0 ? 1.1f : 0.9f));
+        owner.getSessionState().setZoomFactor(owner.getSessionState().getZoomFactor() * (wheel.deltaY > 0 ? 1.1f : 0.9f));
         return;
     }
 
@@ -245,8 +245,8 @@ void WaveformMouseHandler::handleRightClickForCutPlacement(int x) {
             owner.getSessionState().setAutoCutOutActive(false);
         }
         owner.getBoundaryLogicPresenter().ensureCutOrder();
-        owner.updateCutButtonColors();
-        owner.refreshLabels();
+        owner.getPresenterCore().getCutButtonPresenter().updateColours();
+        owner.getBoundaryLogicPresenter().refreshLabels();
     }
 }
 

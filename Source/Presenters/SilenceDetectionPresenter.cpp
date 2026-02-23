@@ -144,11 +144,12 @@ void SilenceDetectionPresenter::setCutEnd(int sampleIndex) {
 }
 
 void SilenceDetectionPresenter::logStatusMessage(const juce::String &message, bool isError) {
-    owner.logStatusMessage(message, isError);
+    const auto color = isError ? Config::Colors::statsErrorText : Config::Colors::statsText;
+    owner.getPresenterCore().getStatsPresenter().setDisplayText(message, color);
 }
 
 bool SilenceDetectionPresenter::isCutModeActive() const {
-    return owner.isCutModeActive();
+    return sessionState.getCutPrefs().active;
 }
 
 bool SilenceDetectionPresenter::isAutoCutInActive() const {

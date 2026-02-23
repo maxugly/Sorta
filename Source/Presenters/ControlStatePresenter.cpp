@@ -24,7 +24,7 @@ void ControlStatePresenter::refreshStates() {
     const bool enabled = owner.getAudioPlayer().getThumbnail().getTotalLength() > 0.0;
 
     updateGeneralButtonStates(enabled);
-    updateCutModeControlStates(owner.isCutModeActive(), enabled);
+    updateCutModeControlStates(owner.getSessionState().getCutPrefs().active, enabled);
 
     owner.getBoundaryLogicPresenter().refreshLabels();
     owner.getPlaybackTextPresenter().updateEditors();
@@ -34,8 +34,6 @@ void ControlStatePresenter::refreshStates() {
 void ControlStatePresenter::updateUIFromState() {
     const auto &prefs = owner.getSessionState().getCutPrefs();
     const auto &autoCut = prefs.autoCut;
-
-    owner.m_isCutModeActive = prefs.active;
 
     if (auto* ts = owner.getTransportStrip()) {
         ts->updateAutoplayState(prefs.autoplay);
@@ -69,8 +67,6 @@ void ControlStatePresenter::updateUIFromState() {
 }
 
 void ControlStatePresenter::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) {
-    owner.m_isCutModeActive = prefs.active;
-
     if (auto* ts = owner.getTransportStrip()) {
         ts->updateAutoplayState(prefs.autoplay);
         ts->updateCutModeState(prefs.active);

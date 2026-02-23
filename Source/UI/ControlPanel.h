@@ -102,58 +102,17 @@ class ControlPanel final : public juce::Component {
 
     ~ControlPanel() override;
 
-    float getZoomFactor() const {
-        return sessionState.getZoomFactor();
-    }
 
-    void setZoomFactor(float factor) {
-        sessionState.setZoomFactor(factor);
-
-        repaint();
-    }
 
     void paint(juce::Graphics &g) override;
 
     void resized() override;
-
-    void updatePlayButtonText(bool isPlaying);
-
-    void refreshLabels();
-
-    void updateComponentStates();
-
-    void updateCutButtonColors();
-
-    void setShouldShowStats(bool shouldShowStats);
-
-    void setTotalTimeStaticString(const juce::String &timeString);
-    void setStatsDisplayText(const juce::String &text,
-                             juce::Colour color = Config::Colors::statsText);
-    void logStatusMessage(const juce::String &message, bool isError = false);
-
-    void updateStatsFromAudio();
 
     juce::TextButton &getAutoCutInButton() {
         return inStrip->getAutoCutButton();
     }
     juce::TextButton &getAutoCutOutButton() {
         return outStrip->getAutoCutButton();
-    }
-
-    AppEnums::PlacementMode getPlacementMode() const {
-        return interactionCoordinator->getPlacementMode();
-    }
-
-    void setPlacementMode(AppEnums::PlacementMode mode) {
-        interactionCoordinator->setPlacementMode(mode);
-    }
-
-    bool shouldAutoplay() const {
-        return sessionState.getCutPrefs().autoplay;
-    }
-
-    bool isCutModeActive() const {
-        return m_isCutModeActive;
     }
 
     juce::Rectangle<int> getWaveformBounds() const {
@@ -298,11 +257,6 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<MarkerStrip> inStrip, outStrip;
 
     LayoutCache layoutCache;
-
-    juce::String cutInDisplayString, cutOutDisplayString;
-    int cutInTextX = 0, cutOutTextX = 0, cutTextY = 0;
-
-    bool m_isCutModeActive = false;
 
     void initialiseLookAndFeel();
 

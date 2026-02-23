@@ -67,7 +67,7 @@ bool KeybindHandler::handleUIToggleKeybinds(const juce::KeyPress &key) {
     const auto keyChar = key.getTextCharacter();
     if (keyChar == 's' || keyChar == 'S') {
         controlPanel.getPresenterCore().getStatsPresenter().toggleVisibility();
-        controlPanel.updateComponentStates();
+        controlPanel.getPresenterCore().getControlStatePresenter().refreshStates();
         return true;
     }
     if (keyChar == 'v' || keyChar == 'V') {
@@ -82,7 +82,7 @@ bool KeybindHandler::handleUIToggleKeybinds(const juce::KeyPress &key) {
     }
     if (keyChar == 'r' || keyChar == 'R') {
         audioPlayer.setRepeating(!audioPlayer.isRepeating());
-        controlPanel.updateComponentStates();
+        controlPanel.getPresenterCore().getControlStatePresenter().refreshStates();
         return true;
     }
     return false;
@@ -90,7 +90,7 @@ bool KeybindHandler::handleUIToggleKeybinds(const juce::KeyPress &key) {
 
 bool KeybindHandler::handleCutKeybinds(const juce::KeyPress &key) {
     const auto keyChar = key.getTextCharacter();
-    if (controlPanel.getPlacementMode() == AppEnums::PlacementMode::None) {
+    if (controlPanel.getInteractionCoordinator().getPlacementMode() == AppEnums::PlacementMode::None) {
         if (keyChar == 'i' || keyChar == 'I') {
             controlPanel.getSessionState().setCutIn(audioPlayer.getCurrentPosition());
             controlPanel.getSessionState().setAutoCutInActive(false);
