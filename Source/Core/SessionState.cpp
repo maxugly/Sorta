@@ -172,6 +172,8 @@ void SessionState::setCurrentFilePath(const juce::String &filePath) {
             cutPrefs.cutOut = juce::jmax(inVal, outVal);
 
             listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
+            listeners.call([this](Listener &l) { l.cutInChanged(cutPrefs.cutIn); });
+            listeners.call([this](Listener &l) { l.cutOutChanged(cutPrefs.cutOut); });
         }
 
         listeners.call([filePath](Listener &l) { l.fileChanged(filePath); });
@@ -193,10 +195,12 @@ void SessionState::setMetadataForFile(const juce::String &filePath,
         const double inVal = juce::jlimit(0.0, totalDuration, newMetadata.cutIn);
         const double outVal = juce::jlimit(0.0, totalDuration, newMetadata.cutOut);
 
-        // Ensure CutIn <= CutOut
+        // Ensure CutIn <= Out
         cutPrefs.cutIn = juce::jmin(inVal, outVal);
         cutPrefs.cutOut = juce::jmax(inVal, outVal);
 
         listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
-    }
-}
+        listeners.call([this](Listener &l) { l.cutInChanged(cutPrefs.cutIn); });
+        listeners.call([this](Listener &l) { l.cutOutChanged(cutPrefs.cutOut); });
+        }
+        }

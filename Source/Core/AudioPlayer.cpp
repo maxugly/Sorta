@@ -26,6 +26,10 @@ AudioPlayer::AudioPlayer(SessionState &state)
     lastAutoCutThresholdOut = sessionState.getCutPrefs().autoCut.thresholdOut;
     lastAutoCutInActive = sessionState.getCutPrefs().autoCut.inActive;
     lastAutoCutOutActive = sessionState.getCutPrefs().autoCut.outActive;
+
+    cachedCutActive = sessionState.getCutPrefs().active;
+    cachedCutIn = sessionState.getCutIn();
+    cachedCutOut = sessionState.getCutOut();
 }
 
 AudioPlayer::~AudioPlayer() {
@@ -67,6 +71,8 @@ juce::Result AudioPlayer::loadFile(const juce::File &file) {
 #if !defined(JUCE_HEADLESS)
             waveformManager.loadFile(file);
 #endif
+            cachedSampleRate = reader->sampleRate;
+            cachedTotalSamples = reader->lengthInSamples;
             readerSource.reset(newSource.release());
         }
         transportSource.setGain(sessionState.getVolume());
@@ -148,21 +154,21 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferTo
         return;
     }
 
-    const auto prefs = sessionState.getCutPrefs();
-    if (!prefs.active) {
+    if (!cachedCutActive) {
         transportSource.getNextAudioBlock(bufferToFill);
         return;
     }
 
-    double sampleRate = 0.0;
-    juce::int64 lengthInSamples = 0;
-    if (!getReaderInfo(sampleRate, lengthInSamples) || sampleRate <= 0.0) {
+    const double sampleRate = cachedSampleRate;
+    const juce::int64 lengthInSamples = cachedTotalSamples;
+
+    if (sampleRate <= 0.0) {
         transportSource.getNextAudioBlock(bufferToFill);
         return;
     }
 
-    const double cutIn = prefs.cutIn;
-    const double cutOut = prefs.cutOut;
+    const double cutIn = cachedCutIn;
+    const double cutOut = std::max(cutIn, (double)cachedCutOut);
     const double startPos = transportSource.getCurrentPosition();
 
     if (startPos >= cutOut) {
@@ -217,6 +223,18 @@ void AudioPlayer::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) 
     lastAutoCutThresholdOut = autoCut.thresholdOut;
     lastAutoCutInActive = autoCut.inActive;
     lastAutoCutOutActive = autoCut.outActive;
+
+    cachedCutActive = prefs.active;
+    cachedCutIn = prefs.cutIn;
+    cachedCutOut = prefs.cutOut;
+}
+
+void AudioPlayer::cutInChanged(double value) {
+    cachedCutIn = value;
+}
+
+void AudioPlayer::cutOutChanged(double value) {
+    cachedCutOut = value;
 }
 
 void AudioPlayer::volumeChanged(float newVolume) {
@@ -250,9 +268,10 @@ void AudioPlayer::setSourceForTesting(juce::PositionableAudioSource *source, dou
 #endif
 
 void AudioPlayer::setPlayheadPosition(double seconds) {
-    double sampleRate = 0.0;
-    juce::int64 lengthInSamples = 0;
-    if (!getReaderInfo(sampleRate, lengthInSamples) || sampleRate <= 0.0)
+    const double sampleRate = cachedSampleRate;
+    const juce::int64 lengthInSamples = cachedTotalSamples;
+
+    if (sampleRate <= 0.0)
         return;
 
     const double totalDuration = (double)lengthInSamples / sampleRate;
@@ -260,10 +279,9 @@ void AudioPlayer::setPlayheadPosition(double seconds) {
     double cutIn = 0.0;
     double cutOut = totalDuration;
 
-    const auto prefs = sessionState.getCutPrefs();
-    if (prefs.active) {
-        cutIn = prefs.cutIn;
-        cutOut = prefs.cutOut;
+    if (cachedCutActive) {
+        cutIn = std::min((double)cachedCutIn, totalDuration);
+        cutOut = std::clamp((double)cachedCutOut, cutIn, totalDuration);
     }
 
     double clampedPos = juce::jlimit(cutIn, cutOut, seconds);

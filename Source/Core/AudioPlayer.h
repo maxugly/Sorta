@@ -18,6 +18,7 @@
 #include "Core/WaveformManager.h"
 #endif
 #include <mutex>
+#include <atomic>
 
 /**
  * @file AudioPlayer.h
@@ -119,6 +120,9 @@ class AudioPlayer : public juce::AudioSource,
 
     void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
 
+    void cutInChanged(double value) override;
+    void cutOutChanged(double value) override;
+
     void volumeChanged(float newVolume) override;
 
     double getCutIn() const {
@@ -165,6 +169,12 @@ class AudioPlayer : public juce::AudioSource,
     bool lastAutoCutInActive{false};
     bool lastAutoCutOutActive{false};
     mutable std::mutex readerMutex;
+
+    std::atomic<bool> cachedCutActive{false};
+    std::atomic<double> cachedCutIn{0.0};
+    std::atomic<double> cachedCutOut{0.0};
+    std::atomic<double> cachedSampleRate{0.0};
+    std::atomic<juce::int64> cachedTotalSamples{0};
 
     bool repeating = false;
 
