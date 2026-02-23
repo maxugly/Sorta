@@ -22,7 +22,7 @@
  * @ingroup UI
  * @brief The root shell component that owns all top-level managers and the visual container.
  */
-class MainComponent : public juce::AudioAppComponent, public juce::ChangeListener {
+class MainComponent : public juce::AudioAppComponent {
   public:
     using PlacementMode = AppEnums::PlacementMode;
 
@@ -34,11 +34,9 @@ class MainComponent : public juce::AudioAppComponent, public juce::ChangeListene
     void releaseResources() override;
     void paint(juce::Graphics &g) override;
     void resized() override;
-    void changeListenerCallback(juce::ChangeBroadcaster *source) override;
     bool keyPressed(const juce::KeyPress &key) override;
 
     void openButtonClicked();
-    void seekToPosition(int x);
 
     AudioPlayer *getAudioPlayer() const { return audioPlayer.get(); }
     InteractionCoordinator& getInteractionCoordinator() { return *interactionCoordinator; }

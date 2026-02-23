@@ -6,6 +6,7 @@
 #include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
+#include "Utils/TimeUtils.h"
 
 LayoutManager::LayoutManager(ControlPanel &controlPanelIn) : controlPanel(controlPanelIn) {
 }
@@ -86,6 +87,9 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, 
         const int textY = controlPanel.layoutCache.bottomRowTopY - Config::Layout::Text::playbackOffsetY;
         controlPanel.playbackTimeView->setBounds(0, textY, fullBounds.getWidth(),
                                                 Config::Layout::Text::playbackHeight);
+        controlPanel.playbackTimeView->updateTimes(
+            TimeUtils::formatTime(controlPanel.getAudioPlayer().getCurrentPosition()),
+            TimeUtils::formatTime(controlPanel.getAudioPlayer().getThumbnail().getTotalLength()));
     }
 }
 

@@ -13,7 +13,7 @@
 
 class ControlPanel;
 
-class ControlStatePresenter final : public SessionState::Listener {
+class ControlStatePresenter final : public SessionState::Listener, public juce::ChangeListener {
   public:
     explicit ControlStatePresenter(ControlPanel &ownerPanel);
     ~ControlStatePresenter() override;
@@ -21,6 +21,8 @@ class ControlStatePresenter final : public SessionState::Listener {
     void refreshStates();
 
     void updateUIFromState();
+
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
 
     // SessionState::Listener overrides
     void fileChanged(const juce::String &filePath) override;

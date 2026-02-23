@@ -29,27 +29,17 @@ PlaybackTimeView::PlaybackTimeView() {
 PlaybackTimeView::~PlaybackTimeView() = default;
 
 void PlaybackTimeView::paint(juce::Graphics &g) {
-    auto* cp = dynamic_cast<ControlPanel*>(getParentComponent());
-    if (cp == nullptr) return;
-
-    if (cp->getAudioPlayer().getThumbnail().getTotalLength() <= 0.0)
-        return;
-
-    auto [leftX, centreX, rightX] = cp->getPlaybackLabelXs();
-    const int margin = Config::Layout::windowBorderMargins;
+    if (totalTimeString.isEmpty()) return;
 
     g.setColour(Config::Colors::playbackText);
     g.setFont((float)Config::Layout::Text::playbackSize);
 
-    juce::String displayStr = " / " + totalTimeStaticStr;
+    juce::String displayStr = " / " + totalTimeString;
+    const int playbackWidth = Config::Layout::Text::playbackWidth;
+    const int textX = (getWidth() / 2);
 
-    // The centreX is relative to ControlPanel. 
-    // We need to draw relative to this component's origin.
-    // centreX - getX() gives the local X position.
-    const int localX = centreX - getX();
-
-    g.drawText(displayStr, localX + (Config::Layout::Text::playbackWidth / 2), 0,
-               Config::Layout::Text::playbackWidth / 2, getHeight(),
+    g.drawText(displayStr, textX + (playbackWidth / 2), 0,
+               playbackWidth / 2, getHeight(),
                juce::Justification::left, false);
 }
 

@@ -13,10 +13,20 @@
 
 ControlStatePresenter::ControlStatePresenter(ControlPanel &ownerPanel) : owner(ownerPanel) {
     owner.getSessionState().addListener(this);
+    owner.getAudioPlayer().addChangeListener(this);
 }
 
 ControlStatePresenter::~ControlStatePresenter() {
+    owner.getAudioPlayer().removeChangeListener(this);
     owner.getSessionState().removeListener(this);
+}
+
+void ControlStatePresenter::changeListenerCallback(juce::ChangeBroadcaster* source) {
+    if (source == &owner.getAudioPlayer()) {
+        if (auto* ts = owner.getTransportStrip())
+            ts->updatePlayButtonText(owner.getAudioPlayer().isPlaying());
+        owner.repaint();
+    }
 }
 
 void ControlStatePresenter::refreshStates() {
