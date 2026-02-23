@@ -3,6 +3,8 @@
 #include "Presenters/CutResetPresenter.h"
 
 #include "Core/AudioPlayer.h"
+#include "Presenters/BoundaryLogicPresenter.h"
+#include "Presenters/CutButtonPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
 #include "Workers/SilenceDetector.h"

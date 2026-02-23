@@ -1,7 +1,6 @@
 
 
 #include "Core/SilenceAnalysisWorker.h"
-#include "Core/AudioPlayer.h"
 #include "Core/FileMetadata.h"
 #include "Core/SessionState.h"
 #include "Workers/SilenceAnalysisAlgorithms.h"
@@ -11,8 +10,9 @@
 #include <cmath>
 #include <mutex>
 
-SilenceAnalysisWorker::SilenceAnalysisWorker(SilenceWorkerClient &owner, SessionState &state)
-    : Thread("SilenceWorker"), client(owner), sessionState(state) {
+SilenceAnalysisWorker::SilenceAnalysisWorker(SilenceWorkerClient &owner, SessionState &state,
+                                               juce::AudioFormatManager &fm)
+    : Thread("SilenceWorker"), client(owner), sessionState(state), formatManager(fm) {
     lifeToken = std::make_shared<bool>(true);
 }
 
@@ -24,15 +24,14 @@ bool SilenceAnalysisWorker::isBusy() const {
     return busy.load() || isThreadRunning();
 }
 
-void SilenceAnalysisWorker::startAnalysis(float thresholdVal, bool isIn) {
+void SilenceAnalysisWorker::startAnalysis(float thresholdVal, bool isIn,
+                                          const juce::String &filePath) {
     if (isBusy())
         return;
 
     threshold.store(thresholdVal);
     detectingIn.store(isIn);
-
-    AudioPlayer &audioPlayer = client.getAudioPlayer();
-    assignedFilePath = audioPlayer.getLoadedFile().getFullPathName();
+    assignedFilePath = filePath;
 
     startThread();
 }
@@ -40,13 +39,12 @@ void SilenceAnalysisWorker::startAnalysis(float thresholdVal, bool isIn) {
 void SilenceAnalysisWorker::run() {
     busy.store(true);
 
-    AudioPlayer &audioPlayer = client.getAudioPlayer();
     const juce::String filePath = assignedFilePath;
 
     juce::File fileToAnalyze(filePath);
 
     std::unique_ptr<juce::AudioFormatReader> localReader(
-        audioPlayer.getFormatManager().createReaderFor(fileToAnalyze));
+        formatManager.createReaderFor(fileToAnalyze));
 
     juce::int64 result = -1;
     bool success = false;
@@ -71,8 +69,6 @@ void SilenceAnalysisWorker::run() {
     juce::MessageManager::callAsync(
         [this, weakToken, result, success, sampleRate, lengthInSamples, filePath]() {
             if (auto token = weakToken.lock()) {
-                AudioPlayer &player = client.getAudioPlayer();
-
                 if (!success || lengthInSamples <= 0) {
                     if (lengthInSamples <= 0 && success)
                         client.logStatusMessage("Error: Audio file has zero length.", true);
@@ -94,9 +90,6 @@ void SilenceAnalysisWorker::run() {
                                 client.logStatusMessage(
                                     juce::String("Silence Boundary (Start) set to sample ") +
                                     juce::String(result));
-
-                                if (client.isCutModeActive())
-                                    player.setPlayheadPosition(resultSeconds);
                             }
                         } else {
                             const juce::int64 tailSamples = (juce::int64)(sampleRate * 0.05);

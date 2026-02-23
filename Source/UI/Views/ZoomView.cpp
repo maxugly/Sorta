@@ -39,7 +39,7 @@ void ZoomView::paint(juce::Graphics &g) {
         juce::Colour currentGlowColor = Config::Colors::mouseAmplitudeGlow;
         float currentGlowThickness = Config::Layout::Glow::thickness;
 
-        const auto placementMode = owner.getPlacementMode();
+        const auto placementMode = owner.getInteractionCoordinator().getPlacementMode();
         if (placementMode == AppEnums::PlacementMode::CutIn ||
             placementMode == AppEnums::PlacementMode::CutOut) {
             currentLineColor = Config::Colors::mousePlacementMode;

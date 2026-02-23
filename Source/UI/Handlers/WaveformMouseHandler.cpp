@@ -4,6 +4,8 @@
 
 #include "UI/Handlers/WaveformMouseHandler.h"
 #include "Core/AudioPlayer.h"
+#include "Presenters/BoundaryLogicPresenter.h"
+#include "Presenters/CutButtonPresenter.h"
 #include "UI/ControlPanel.h"
 #include "UI/FocusManager.h"
 #include "UI/Handlers/MarkerMouseHandler.h"

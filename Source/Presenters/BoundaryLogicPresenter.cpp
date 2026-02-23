@@ -1,5 +1,6 @@
 #include "Presenters/BoundaryLogicPresenter.h"
 #include "Core/AudioPlayer.h"
+#include "Presenters/CutButtonPresenter.h"
 #include "UI/ControlPanel.h"
 #include "UI/FocusManager.h"
 #include "Utils/Config.h"

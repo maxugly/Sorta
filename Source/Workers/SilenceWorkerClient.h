@@ -9,13 +9,9 @@
 #include <JuceHeader.h>
 #endif
 
-class AudioPlayer;
-
 class SilenceWorkerClient {
   public:
     virtual ~SilenceWorkerClient() = default;
-
-    virtual AudioPlayer &getAudioPlayer() = 0;
 
     virtual void logStatusMessage(const juce::String &message, bool isError = false) = 0;
 

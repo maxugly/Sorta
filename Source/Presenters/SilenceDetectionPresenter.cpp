@@ -5,6 +5,7 @@
 #include "Core/AudioPlayer.h"
 #include "Core/SessionState.h"
 #include "Core/SilenceAnalysisWorker.h"
+#include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Workers/SilenceDetector.h"
 
@@ -12,7 +13,7 @@ SilenceDetectionPresenter::SilenceDetectionPresenter(ControlPanel &ownerPanel,
                                                      SessionState &sessionStateIn,
                                                      AudioPlayer &audioPlayerIn)
     : owner(ownerPanel), sessionState(sessionStateIn), audioPlayer(audioPlayerIn),
-      silenceWorker(*this, sessionStateIn) {
+      silenceWorker(*this, sessionStateIn, audioPlayerIn.getFormatManager()) {
     sessionState.addListener(this);
     owner.getPlaybackTimerManager().addListener(this);
 
@@ -114,11 +115,7 @@ void SilenceDetectionPresenter::startSilenceAnalysis(float threshold, bool detec
         // For now, let's at least log it.
         return;
     }
-    silenceWorker.startAnalysis(threshold, detectingIn);
-}
-
-AudioPlayer &SilenceDetectionPresenter::getAudioPlayer() {
-    return audioPlayer;
+    silenceWorker.startAnalysis(threshold, detectingIn, audioPlayer.getLoadedFile().getFullPathName());
 }
 
 void SilenceDetectionPresenter::setCutStart(int sampleIndex) {

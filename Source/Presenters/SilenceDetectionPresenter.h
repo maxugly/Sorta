@@ -52,9 +52,6 @@ class SilenceDetectionPresenter final : public SilenceWorkerClient,
         return silenceWorker.isBusy();
     }
 
-    /** @brief Provides access to the audio engine for analysis workers. */
-    AudioPlayer &getAudioPlayer() override;
-
     /** @brief Sets the cut-in position in samples. */
     void setCutStart(int sampleIndex) override;
 

@@ -161,6 +161,9 @@ class ControlPanel final : public juce::Component {
     MarkerStrip *getOutStrip() {
         return outStrip.get();
     }
+    PlaybackTimeView* getPlaybackTimeView() {
+        return playbackTimeView.get();
+    }
     SilenceDetectionPresenter *getSilenceDetectionPresenter() {
         return presenterCore != nullptr ? &presenterCore->getSilenceDetectionPresenter() : nullptr;
     }

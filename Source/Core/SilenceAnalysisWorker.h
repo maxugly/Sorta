@@ -4,6 +4,7 @@
 #if defined(JUCE_HEADLESS)
 #include <juce_core/juce_core.h>
 #include <juce_events/juce_events.h>
+#include <juce_audio_formats/juce_audio_formats.h>
 #else
 #include <JuceHeader.h>
 #endif
@@ -29,11 +30,12 @@ class SessionState;
  */
 class SilenceAnalysisWorker : public juce::Thread {
   public:
-    explicit SilenceAnalysisWorker(SilenceWorkerClient &client, SessionState &sessionState);
+    explicit SilenceAnalysisWorker(SilenceWorkerClient &client, SessionState &sessionState,
+                                   juce::AudioFormatManager &formatManager);
 
     ~SilenceAnalysisWorker() override;
 
-    void startAnalysis(float threshold, bool detectingIn);
+    void startAnalysis(float threshold, bool detectingIn, const juce::String &filePath);
 
     bool isBusy() const;
 
@@ -46,6 +48,7 @@ class SilenceAnalysisWorker : public juce::Thread {
 
     SilenceWorkerClient &client;
     SessionState &sessionState;
+    juce::AudioFormatManager &formatManager;
     std::atomic<float> threshold{0.0f};
     std::atomic<bool> detectingIn{true};
     std::atomic<bool> busy{false};

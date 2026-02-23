@@ -1,9 +1,11 @@
 #include "Presenters/ControlButtonsPresenter.h"
 
 #include "Presenters/BoundaryLogicPresenter.h"
+#include "Presenters/ControlStatePresenter.h"
 #include "Presenters/CutResetPresenter.h"
 #include "Presenters/RepeatButtonPresenter.h"
 #include "Presenters/SilenceDetectionPresenter.h"
+#include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/WaveformView.h"

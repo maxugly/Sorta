@@ -1,8 +1,13 @@
 
 
 #include "MainComponent.h"
+#include "Presenters/BoundaryLogicPresenter.h"
+#include "Presenters/ControlStatePresenter.h"
+#include "Presenters/PlaybackTextPresenter.h"
+#include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
 #include "UI/KeybindHandler.h"
+#include "UI/Views/PlaybackTimeView.h"
 #include "Utils/Config.h"
 #include "Utils/TimeUtils.h"
 

@@ -55,7 +55,7 @@ void ZoomPresenter::playbackTimerTick() {
         const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
         if (audioLength > 0.0) {
             double zoomCenterTime = owner.getFocusManager().getFocusedTime();
-            double timeRange = audioLength / (double)owner.getZoomFactor();
+            double timeRange = audioLength / (double)owner.getSessionState().getZoomFactor();
             timeRange = juce::jlimit(0.00005, audioLength, timeRange);
 
             const double startTime = zoomCenterTime - (timeRange / 2.0);

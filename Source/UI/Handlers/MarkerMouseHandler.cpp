@@ -4,6 +4,7 @@
 
 #include "UI/Handlers/MarkerMouseHandler.h"
 #include "Core/AudioPlayer.h"
+#include "Presenters/BoundaryLogicPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Utils/CoordinateMapper.h"
 #include "Utils/Config.h"

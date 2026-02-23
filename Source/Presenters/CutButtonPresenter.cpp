@@ -2,6 +2,7 @@
 
 #include "Presenters/CutButtonPresenter.h"
 
+#include "Presenters/BoundaryLogicPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
 

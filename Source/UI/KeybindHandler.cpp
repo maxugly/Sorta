@@ -5,6 +5,7 @@
 #include "Core/AppEnums.h"
 #include "Core/AudioPlayer.h"
 #include "MainComponent.h"
+#include "Presenters/ControlStatePresenter.h"
 #include "Presenters/CutResetPresenter.h"
 #include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
