@@ -118,28 +118,6 @@ void SilenceDetectionPresenter::startSilenceAnalysis(float threshold, bool detec
     silenceWorker.startAnalysis(threshold, detectingIn, audioPlayer.getLoadedFile().getFullPathName());
 }
 
-void SilenceDetectionPresenter::setCutStart(int sampleIndex) {
-    if (!sessionState.getCutPrefs().autoCut.inActive)
-        return;
-
-    double sampleRate = 0.0;
-    juce::int64 length = 0;
-    if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0) {
-        sessionState.setCutIn((double)sampleIndex / sampleRate);
-    }
-}
-
-void SilenceDetectionPresenter::setCutEnd(int sampleIndex) {
-    if (!sessionState.getCutPrefs().autoCut.outActive)
-        return;
-
-    double sampleRate = 0.0;
-    juce::int64 length = 0;
-    if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0) {
-        sessionState.setCutOut((double)sampleIndex / sampleRate);
-    }
-}
-
 void SilenceDetectionPresenter::logStatusMessage(const juce::String &message, bool isError) {
     const auto color = isError ? Config::Colors::statsErrorText : Config::Colors::statsText;
     owner.getPresenterCore().getStatsPresenter().setDisplayText(message, color);

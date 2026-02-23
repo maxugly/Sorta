@@ -56,34 +56,6 @@ void BoundaryLogicPresenter::refreshLabels() {
         syncEditorToPosition(cutOutEditor, currentOut);
 }
 
-void BoundaryLogicPresenter::setCutStartFromSample(int sampleIndex) {
-    AudioPlayer &audioPlayer = owner.getAudioPlayer();
-    double sampleRate = 0.0;
-    juce::int64 length = 0;
-    if (!audioPlayer.getReaderInfo(sampleRate, length) || sampleRate <= 0.0)
-        return;
-
-    const double pos = static_cast<double>(sampleIndex) / sampleRate;
-    setCutInPosition(pos);
-    ensureCutOrder();
-    refreshLabels();
-    owner.repaint();
-}
-
-void BoundaryLogicPresenter::setCutEndFromSample(int sampleIndex) {
-    AudioPlayer &audioPlayer = owner.getAudioPlayer();
-    double sampleRate = 0.0;
-    juce::int64 length = 0;
-    if (!audioPlayer.getReaderInfo(sampleRate, length) || sampleRate <= 0.0)
-        return;
-
-    const double pos = static_cast<double>(sampleIndex) / sampleRate;
-    setCutOutPosition(pos);
-    ensureCutOrder();
-    refreshLabels();
-    owner.repaint();
-}
-
 void BoundaryLogicPresenter::ensureCutOrder() {
     auto &audioPlayer = owner.getAudioPlayer();
     double currentIn = audioPlayer.getCutIn();

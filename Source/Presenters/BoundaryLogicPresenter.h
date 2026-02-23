@@ -27,9 +27,6 @@ class BoundaryLogicPresenter : private juce::TextEditor::Listener,
     void initialiseEditors();
     void refreshLabels();
 
-    void setCutStartFromSample(int sampleIndex);
-    void setCutEndFromSample(int sampleIndex);
-
     void ensureCutOrder();
 
     // PlaybackTimerManager::Listener

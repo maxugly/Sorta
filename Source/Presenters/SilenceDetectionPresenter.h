@@ -52,12 +52,6 @@ class SilenceDetectionPresenter final : public SilenceWorkerClient,
         return silenceWorker.isBusy();
     }
 
-    /** @brief Sets the cut-in position in samples. */
-    void setCutStart(int sampleIndex) override;
-
-    /** @brief Sets the cut-out position in samples. */
-    void setCutEnd(int sampleIndex) override;
-
     /** @brief Logs a status message to the UI (via ControlPanel). */
     void logStatusMessage(const juce::String &message, bool isError = false) override;
 
