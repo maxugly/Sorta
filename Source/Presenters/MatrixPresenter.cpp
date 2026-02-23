@@ -15,6 +15,8 @@
 #include "Core/WaveformManager.h"
 #include "Workers/SilenceDetector.h"
 #include "Utils/Config.h"
+#include "UI/FocusManager.h"
+#include "UI/Views/VolumeView.h"
 
 MatrixPresenter::MatrixPresenter(ControlPanel& cp)
     : owner(cp) {
@@ -138,7 +140,55 @@ void MatrixPresenter::playbackTimerTick() {
     // 47. Out Strip Hovered
     state.ledColors.push_back((owner.getOutStrip() && owner.getOutStrip()->isMouseOver(true)) ? active : inactive);
 
-    // 48. Heartbeat
+    // 48. Worker Scanning Forward
+    state.ledColors.push_back((sdp && sdp->isAnalyzingIn()) ? active : inactive);
+
+    // 49. Worker Scanning Backward
+    state.ledColors.push_back((sdp && sdp->isAnalyzingOut()) ? active : inactive);
+
+    // 50. Focus Engine: Cut In
+    state.ledColors.push_back(owner.getFocusManager().getCurrentTarget() == FocusTarget::CutIn ? active : inactive);
+
+    // 51. Focus Engine: Cut Out
+    state.ledColors.push_back(owner.getFocusManager().getCurrentTarget() == FocusTarget::CutOut ? active : inactive);
+
+    // 52. Focus Engine: Playback
+    state.ledColors.push_back(owner.getFocusManager().getCurrentTarget() == FocusTarget::Playback ? active : inactive);
+
+    // 53. Focus Engine: Mouse Override
+    state.ledColors.push_back(owner.getFocusManager().getCurrentTarget() == FocusTarget::MouseManual ? active : inactive);
+
+    // 54. Hardware: Shift
+    state.ledColors.push_back(juce::ModifierKeys::getCurrentModifiers().isShiftDown() ? active : inactive);
+
+    // 55. Hardware: Ctrl
+    state.ledColors.push_back(juce::ModifierKeys::getCurrentModifiers().isCtrlDown() ? active : inactive);
+
+    // 56. Hardware: Alt
+    state.ledColors.push_back(juce::ModifierKeys::getCurrentModifiers().isAltDown() ? active : inactive);
+
+    // 57. Classic UI Mode
+    state.ledColors.push_back(sessionState.getViewMode() == AppEnums::ViewMode::Classic ? active : inactive);
+
+    // 58. Mono Render Mode
+    state.ledColors.push_back(sessionState.getChannelViewMode() == AppEnums::ChannelViewMode::Mono ? active : inactive);
+
+    // 59. Volume Knob Hovered
+    state.ledColors.push_back((owner.getTopBarView() && owner.getTopBarView()->getVolumeView().isMouseOver(true)) ? active : inactive);
+
+    // 60. Matrix Itself Hovered
+    state.ledColors.push_back(matrixView.isMouseOver(true) ? active : inactive);
+
+    // 61. Audio RAM Buffer Full
+    state.ledColors.push_back(audioPlayer.getThumbnail().isFullyLoaded() ? active : inactive);
+
+    // 62. Playhead at Absolute Zero
+    state.ledColors.push_back(audioPlayer.getCurrentPosition() == 0.0 ? active : inactive);
+
+    // 63. Entire File Selected
+    state.ledColors.push_back((sessionState.getCutIn() == 0.0 && sessionState.getCutOut() >= sessionState.getTotalDuration() && sessionState.getTotalDuration() > 0.0) ? active : inactive);
+
+    // 64. Heartbeat
     state.ledColors.push_back(Config::Colors::Matrix::ledPulse.withAlpha(timerManager.getBreathingPulse()));
 
     matrixView.updateState(state);

@@ -52,6 +52,9 @@ class SilenceDetectionPresenter final : public SilenceWorkerClient,
         return silenceWorker.isBusy();
     }
 
+    bool isAnalyzingIn() const { return silenceWorker.isBusy() && silenceWorker.isDetectingIn(); }
+    bool isAnalyzingOut() const { return silenceWorker.isBusy() && !silenceWorker.isDetectingIn(); }
+
     /** @brief Logs a status message to the UI (via ControlPanel). */
     void logStatusMessage(const juce::String &message, bool isError = false) override;
 
