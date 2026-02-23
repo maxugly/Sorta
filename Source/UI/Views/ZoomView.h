@@ -15,6 +15,11 @@
 
 class ControlPanel;
 
+struct ZoomHudLine {
+    juce::String text;
+    bool isActive{false};
+};
+
 struct ZoomViewState {
     int mouseX{-1};
     int mouseY{-1};
@@ -44,6 +49,7 @@ struct ZoomViewState {
     bool shouldShowEyeCandy{false};
     double mouseTime{0.0};
     juce::AudioThumbnail* thumbnail{nullptr};
+    std::vector<ZoomHudLine> hudLines;
 };
 
 class ZoomView : public juce::Component {

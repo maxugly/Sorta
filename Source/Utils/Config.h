@@ -95,6 +95,12 @@ extern const juce::Colour volumeKnobFill;
 extern const juce::Colour volumeKnobTrack;
 extern const juce::Colour volumeKnobPointer;
 
+struct ZoomHud {
+    static const juce::Colour background;
+    static const juce::Colour textActive;
+    static const juce::Colour textInactive;
+};
+
 struct VolumeFlame {
     static const juce::Colour low;
     static const juce::Colour mid;
@@ -189,6 +195,9 @@ struct Layout {
     struct Zoom {
         static constexpr float popupScale = 0.8f;
         static constexpr float borderThickness = 3.0f;
+        static constexpr int hudPadding = 10;
+        static constexpr int hudFontSize = 18;
+        static constexpr int hudLineSpacing = 22;
     };
 
     struct Matrix {
@@ -244,6 +253,11 @@ extern const juce::String autoCutOutButton;
 extern const juce::String cutButton;
 extern const juce::String silenceThresholdInTooltip;
 extern const juce::String silenceThresholdOutTooltip;
+extern const juce::String zoomPrefix;
+extern const juce::String stepDefault;
+extern const juce::String stepShift;
+extern const juce::String stepAlt;
+extern const juce::String stepCtrlShift;
 } // namespace Labels
 
 } // namespace Config

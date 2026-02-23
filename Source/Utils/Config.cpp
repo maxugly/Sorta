@@ -52,6 +52,10 @@ const juce::Colour zoomPopupTrackingLine = juce::Colours::dodgerblue;
 const juce::Colour zoomPopupPlaybackLine = juce::Colours::lime;
 const juce::Colour zoomPopupZeroLine = juce::Colours::grey.withAlpha(0.3f);
 
+const juce::Colour Colors::ZoomHud::background = juce::Colours::black.withAlpha(0.6f);
+const juce::Colour Colors::ZoomHud::textActive = juce::Colours::lime;
+const juce::Colour Colors::ZoomHud::textInactive = juce::Colours::lightgrey;
+
 const juce::Colour volumeKnobFill = juce::Colours::orange;
 const juce::Colour volumeKnobTrack = juce::Colours::darkgrey;
 const juce::Colour volumeKnobPointer = juce::Colours::white;
@@ -87,6 +91,11 @@ const juce::String autoCutOutButton = "[AC Out]";
 const juce::String cutButton = "[Cut]";
 const juce::String silenceThresholdInTooltip = "Silence Threshold In";
 const juce::String silenceThresholdOutTooltip = "Silence Threshold Out";
+const juce::String zoomPrefix = "Zoom: ";
+const juce::String stepDefault = "Step: 1.0s (Default)";
+const juce::String stepShift = "Step: 0.1s (Shift)";
+const juce::String stepAlt = "Step: 10.0s (Alt)";
+const juce::String stepCtrlShift = "Step: Sample (Ctrl+Shift)";
 } // namespace Labels
 
 } // namespace Config

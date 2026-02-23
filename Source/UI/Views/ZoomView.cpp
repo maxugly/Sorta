@@ -188,4 +188,23 @@ void ZoomView::paint(juce::Graphics &g) {
         g.setColour(Config::Colors::zoomPopupBorder);
         g.drawRect(popupBounds.toFloat(), Config::Layout::Zoom::borderThickness);
     }
+
+    if (!state.hudLines.empty()) {
+        const int hudX = getWidth() - 200 - Config::Layout::Zoom::hudPadding;
+        const int hudY = Config::Layout::Zoom::hudPadding;
+        const int hudWidth = 200;
+        const int hudHeight = (int)state.hudLines.size() * Config::Layout::Zoom::hudLineSpacing + Config::Layout::Zoom::hudPadding;
+
+        g.setColour(Config::Colors::ZoomHud::background);
+        g.fillRoundedRectangle((float)hudX, (float)hudY, (float)hudWidth, (float)hudHeight, 4.0f);
+
+        g.setFont((float)Config::Layout::Zoom::hudFontSize);
+        for (size_t i = 0; i < state.hudLines.size(); ++i) {
+            g.setColour(state.hudLines[i].isActive ? Config::Colors::ZoomHud::textActive : Config::Colors::ZoomHud::textInactive);
+            g.drawText(state.hudLines[i].text, hudX + Config::Layout::Zoom::hudPadding,
+                       hudY + Config::Layout::Zoom::hudPadding + (int)i * Config::Layout::Zoom::hudLineSpacing,
+                       hudWidth - 2 * Config::Layout::Zoom::hudPadding, Config::Layout::Zoom::hudLineSpacing,
+                       juce::Justification::left, true);
+        }
+    }
 }
