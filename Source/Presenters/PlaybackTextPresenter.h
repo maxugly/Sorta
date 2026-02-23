@@ -25,15 +25,6 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
 
     void updateEditors();
 
-    void render(juce::Graphics &g) const;
-
-    void setTotalTimeStaticString(const juce::String &text) {
-        totalTimeStaticStr = text;
-    }
-    const juce::String &getTotalTimeStaticString() const {
-        return totalTimeStaticStr;
-    }
-
     // PlaybackTimerManager::Listener
     void playbackTimerTick() override {
         updateEditors();

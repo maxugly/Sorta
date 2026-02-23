@@ -84,7 +84,7 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, 
 
 void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {
     const int margin = Config::Layout::windowBorderMargins;
-    if (controlPanel.currentMode == AppEnums::ViewMode::Overlay) {
+    if (controlPanel.getSessionState().getViewMode() == AppEnums::ViewMode::Overlay) {
         controlPanel.layoutCache.waveformBounds = controlPanel.getLocalBounds();
     } else {
         controlPanel.layoutCache.waveformBounds = bounds.reduced(margin);

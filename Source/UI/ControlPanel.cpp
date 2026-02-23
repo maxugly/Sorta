@@ -159,7 +159,6 @@ void ControlPanel::resized() {
 
 void ControlPanel::paint(juce::Graphics &g) {
     g.fillAll(Config::Colors::Window::background);
-    getPlaybackTextPresenter().render(g);
 }
 
 void ControlPanel::updatePlayButtonText(bool isPlaying) {
@@ -174,42 +173,6 @@ void ControlPanel::refreshLabels() {
 
 void ControlPanel::updateComponentStates() {
     getPresenterCore().getControlStatePresenter().refreshStates();
-}
-
-void ControlPanel::toggleViewMode() {
-    currentMode = (currentMode == AppEnums::ViewMode::Classic) ? AppEnums::ViewMode::Overlay
-                                                              : AppEnums::ViewMode::Classic;
-
-    if (topBarView != nullptr) {
-        topBarView->modeButton.setToggleState(currentMode == AppEnums::ViewMode::Overlay,
-                                              juce::dontSendNotification);
-        topBarView->modeButton.setButtonText(currentMode == AppEnums::ViewMode::Classic
-                                                 ? Config::Labels::viewModeClassic
-                                                 : Config::Labels::viewModeOverlay);
-    }
-
-    resized();
-    repaint();
-}
-
-void ControlPanel::toggleChannelViewMode() {
-    currentChannelViewMode = (currentChannelViewMode == AppEnums::ChannelViewMode::Mono)
-                                 ? AppEnums::ChannelViewMode::Stereo
-                                 : AppEnums::ChannelViewMode::Mono;
-
-    if (topBarView != nullptr) {
-        topBarView->channelViewButton.setToggleState(
-            currentChannelViewMode == AppEnums::ChannelViewMode::Stereo, juce::dontSendNotification);
-        topBarView->channelViewButton.setButtonText(
-            currentChannelViewMode == AppEnums::ChannelViewMode::Mono
-                ? Config::Labels::channelViewMono
-                : Config::Labels::channelViewStereo);
-    }
-
-    if (waveformCanvasView != nullptr)
-        waveformCanvasView->getWaveformView().setChannelMode(currentChannelViewMode);
-
-    repaint();
 }
 
 void ControlPanel::setStatsDisplayText(const juce::String &text, juce::Colour color) {
@@ -231,7 +194,8 @@ void ControlPanel::setShouldShowStats(bool shouldShowStatsParam) {
 }
 
 void ControlPanel::setTotalTimeStaticString(const juce::String &timeString) {
-    getPlaybackTextPresenter().setTotalTimeStaticString(timeString);
+    if (playbackTimeView != nullptr)
+        playbackTimeView->setTotalTimeStaticString(timeString);
 }
 
 void ControlPanel::updateCutButtonColors() {

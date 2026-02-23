@@ -103,11 +103,11 @@ class ControlPanel final : public juce::Component {
     ~ControlPanel() override;
 
     float getZoomFactor() const {
-        return m_zoomFactor;
+        return sessionState.getZoomFactor();
     }
 
     void setZoomFactor(float factor) {
-        m_zoomFactor = juce::jlimit(1.0f, 1000000.0f, factor);
+        sessionState.setZoomFactor(factor);
 
         repaint();
     }
@@ -124,10 +124,6 @@ class ControlPanel final : public juce::Component {
 
     void updateCutButtonColors();
 
-    void toggleViewMode();
-
-    void toggleChannelViewMode();
-
     void setShouldShowStats(bool shouldShowStats);
 
     void setTotalTimeStaticString(const juce::String &timeString);
@@ -135,14 +131,14 @@ class ControlPanel final : public juce::Component {
                              juce::Colour color = Config::Colors::statsText);
     void logStatusMessage(const juce::String &message, bool isError = false);
 
+    void updateStatsFromAudio();
+
     juce::TextButton &getAutoCutInButton() {
         return inStrip->getAutoCutButton();
     }
     juce::TextButton &getAutoCutOutButton() {
         return outStrip->getAutoCutButton();
     }
-
-    void updateStatsFromAudio();
 
     AppEnums::PlacementMode getPlacementMode() const {
         return interactionCoordinator->getPlacementMode();
@@ -178,7 +174,7 @@ class ControlPanel final : public juce::Component {
     }
 
     AppEnums::ChannelViewMode getChannelViewMode() const {
-        return currentChannelViewMode;
+        return sessionState.getChannelViewMode();
     }
 
     const MarkerMouseHandler &getMarkerMouseHandler() const;
@@ -196,6 +192,9 @@ class ControlPanel final : public juce::Component {
 
     TransportStrip *getTransportStrip() {
         return topBarView != nullptr ? topBarView->transportStrip.get() : nullptr;
+    }
+    TopBarView* getTopBarView() {
+        return topBarView.get();
     }
     MarkerStrip *getInStrip() {
         return inStrip.get();
@@ -300,14 +299,10 @@ class ControlPanel final : public juce::Component {
 
     LayoutCache layoutCache;
 
-    AppEnums::ViewMode currentMode = AppEnums::ViewMode::Classic;
-    AppEnums::ChannelViewMode currentChannelViewMode = AppEnums::ChannelViewMode::Mono;
-
     juce::String cutInDisplayString, cutOutDisplayString;
     int cutInTextX = 0, cutOutTextX = 0, cutTextY = 0;
 
     bool m_isCutModeActive = false;
-    float m_zoomFactor = 10.0f;
 
     void initialiseLookAndFeel();
 

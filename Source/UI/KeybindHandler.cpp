@@ -71,11 +71,13 @@ bool KeybindHandler::handleUIToggleKeybinds(const juce::KeyPress &key) {
         return true;
     }
     if (keyChar == 'v' || keyChar == 'V') {
-        controlPanel.toggleViewMode();
+        if (auto* tb = controlPanel.getTopBarView())
+            tb->modeButton.triggerClick();
         return true;
     }
     if (keyChar == 'c' || keyChar == 'C') {
-        controlPanel.toggleChannelViewMode();
+        if (auto* tb = controlPanel.getTopBarView())
+            tb->channelViewButton.triggerClick();
         return true;
     }
     if (keyChar == 'r' || keyChar == 'R') {

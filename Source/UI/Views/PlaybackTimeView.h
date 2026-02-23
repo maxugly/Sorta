@@ -19,7 +19,13 @@ class PlaybackTimeView final : public juce::Component {
     PlaybackTimeView();
     ~PlaybackTimeView() override;
 
+    void paint(juce::Graphics &g) override;
     void resized() override;
+
+    void setTotalTimeStaticString(const juce::String& text) {
+        totalTimeStaticStr = text;
+        repaint();
+    }
 
     juce::TextEditor& getElapsedEditor() { return elapsedTimeEditor; }
     juce::TextEditor& getRemainingEditor() { return remainingTimeEditor; }
@@ -29,6 +35,7 @@ class PlaybackTimeView final : public juce::Component {
     juce::TextEditor elapsedTimeEditor;
     juce::TextEditor remainingTimeEditor;
     juce::TextEditor cutLengthEditor;
+    juce::String totalTimeStaticStr;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaybackTimeView)
 };

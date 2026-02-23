@@ -5,8 +5,9 @@
 #include "Presenters/RepeatButtonPresenter.h"
 #include "Presenters/SilenceDetectionPresenter.h"
 #include "UI/ControlPanel.h"
-#include "UI/Views/CutLayerView.h"
+#include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/WaveformView.h"
+#include "UI/Views/CutLayerView.h"
 #include "Utils/Config.h"
 #include "Workers/SilenceDetector.h"
 
@@ -36,7 +37,23 @@ void ControlButtonsPresenter::initialiseModeButton() {
     btn.setButtonText(Config::Labels::viewModeClassic);
     btn.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
     btn.setClickingTogglesState(true);
-    btn.onClick = [this] { owner.toggleViewMode(); };
+    btn.onClick = [this] { 
+        auto& session = owner.getSessionState();
+        auto newMode = (session.getViewMode() == AppEnums::ViewMode::Classic) 
+                       ? AppEnums::ViewMode::Overlay 
+                       : AppEnums::ViewMode::Classic;
+        session.setViewMode(newMode);
+
+        if (owner.topBarView != nullptr) {
+            owner.topBarView->modeButton.setToggleState(newMode == AppEnums::ViewMode::Overlay,
+                                                  juce::dontSendNotification);
+            owner.topBarView->modeButton.setButtonText(newMode == AppEnums::ViewMode::Classic
+                                                     ? Config::Labels::viewModeClassic
+                                                     : Config::Labels::viewModeOverlay);
+        }
+        owner.resized();
+        owner.repaint();
+    };
 }
 
 void ControlButtonsPresenter::initialiseChannelViewButton() {
@@ -46,7 +63,27 @@ void ControlButtonsPresenter::initialiseChannelViewButton() {
     btn.getProperties().set("GroupPosition",
                                                 (int)AppEnums::GroupPosition::Right);
     btn.setClickingTogglesState(true);
-    btn.onClick = [this] { owner.toggleChannelViewMode(); };
+    btn.onClick = [this] { 
+        auto& session = owner.getSessionState();
+        auto newMode = (session.getChannelViewMode() == AppEnums::ChannelViewMode::Mono)
+                       ? AppEnums::ChannelViewMode::Stereo
+                       : AppEnums::ChannelViewMode::Mono;
+        session.setChannelViewMode(newMode);
+
+        if (owner.topBarView != nullptr) {
+            owner.topBarView->channelViewButton.setToggleState(
+                newMode == AppEnums::ChannelViewMode::Stereo, juce::dontSendNotification);
+            owner.topBarView->channelViewButton.setButtonText(
+                newMode == AppEnums::ChannelViewMode::Mono
+                    ? Config::Labels::channelViewMono
+                    : Config::Labels::channelViewStereo);
+        }
+
+        if (owner.waveformCanvasView != nullptr)
+            owner.waveformCanvasView->getWaveformView().setChannelMode(newMode);
+
+        owner.repaint();
+    };
 }
 
 void ControlButtonsPresenter::initialiseExitButton() {

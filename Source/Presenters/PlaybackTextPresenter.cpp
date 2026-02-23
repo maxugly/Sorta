@@ -73,23 +73,6 @@ void PlaybackTextPresenter::updateEditors() {
     }
 }
 
-void PlaybackTextPresenter::render(juce::Graphics &g) const {
-    if (owner.getAudioPlayer().getThumbnail().getTotalLength() <= 0.0)
-        return;
-
-    const int textY = owner.getBottomRowTopY() - Config::Layout::Text::playbackOffsetY;
-    auto [leftX, centreX, rightX] = owner.getPlaybackLabelXs();
-
-    g.setColour(Config::Colors::playbackText);
-    g.setFont((float)Config::Layout::Text::playbackSize);
-
-    juce::String totalTimeStr = " / " + getTotalTimeStaticString();
-
-    g.drawText(totalTimeStr, centreX + (Config::Layout::Text::playbackWidth / 2), textY,
-               Config::Layout::Text::playbackWidth / 2, Config::Layout::Text::playbackHeight,
-               juce::Justification::left, false);
-}
-
 void PlaybackTextPresenter::textEditorTextChanged(juce::TextEditor &editor) {
     if (owner.playbackTimeView == nullptr) return;
     if (&editor == &owner.playbackTimeView->getElapsedEditor())

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/FileMetadata.h"
+#include "Core/AppEnums.h"
 #include "MainDomain.h"
 #include <juce_core/juce_core.h>
 #include <map>
@@ -76,12 +77,27 @@ class SessionState {
     void setCurrentFilePath(const juce::String &filePath);
     juce::String getCurrentFilePath() const;
 
+    float getZoomFactor() const { return m_zoomFactor; }
+    void setZoomFactor(float factor) {
+        m_zoomFactor = juce::jlimit(1.0f, 1000000.0f, factor);
+    }
+
+    AppEnums::ViewMode getViewMode() const { return currentMode; }
+    void setViewMode(AppEnums::ViewMode mode) { currentMode = mode; }
+
+    AppEnums::ChannelViewMode getChannelViewMode() const { return currentChannelViewMode; }
+    void setChannelViewMode(AppEnums::ChannelViewMode mode) { currentChannelViewMode = mode; }
+
   private:
     MainDomain::CutPreferences cutPrefs;
     juce::String currentFilePath;
     double totalDuration{0.0};
     std::map<juce::String, FileMetadata> metadataCache;
     juce::ListenerList<Listener> listeners;
+
+    float m_zoomFactor{10.0f};
+    AppEnums::ViewMode currentMode{AppEnums::ViewMode::Classic};
+    AppEnums::ChannelViewMode currentChannelViewMode{AppEnums::ChannelViewMode::Mono};
 
     mutable juce::CriticalSection stateLock;
 };
