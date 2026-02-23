@@ -13,10 +13,6 @@ void MarkerStrip::initialiseComponents() {
     addAndMakeVisible(markerButton);
     markerButton.setButtonText(markerType == MarkerType::In ? Config::Labels::cutInButton
                                                            : Config::Labels::cutOutButton);
-    markerButton.onRightClick = [this] {
-        if (onMarkerRightClick)
-            onMarkerRightClick();
-    };
     markerButton.getProperties().set("GroupPosition", markerType == MarkerType::In
                                                            ? (int)AppEnums::GroupPosition::Left
                                                            : (int)AppEnums::GroupPosition::Right);

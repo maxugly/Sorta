@@ -37,8 +37,6 @@ class MarkerStrip : public juce::Component {
         boundaryLogicPresenter = p;
     }
 
-    std::function<void()> onMarkerRightClick;
-
     TransportButton &getMarkerButton() {
         return markerButton;
     }

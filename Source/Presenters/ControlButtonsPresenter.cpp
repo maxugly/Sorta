@@ -2,6 +2,7 @@
 
 #include "Presenters/BoundaryLogicPresenter.h"
 #include "Presenters/ControlStatePresenter.h"
+#include "Presenters/CutButtonPresenter.h"
 #include "Presenters/CutResetPresenter.h"
 #include "Presenters/RepeatButtonPresenter.h"
 #include "Presenters/SilenceDetectionPresenter.h"
@@ -186,6 +187,11 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
         inStrip->getMarkerButton().onClick = [this, &audioPlayer] {
             audioPlayer.setCutIn(audioPlayer.getCurrentPosition());
         };
+        inStrip->getMarkerButton().onRightClick = [this] {
+            owner.getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutIn);
+            owner.getPresenterCore().getCutButtonPresenter().updateColours();
+            owner.repaint();
+        };
         inStrip->getResetButton().onClick = [this] {
             owner.getPresenterCore().getCutResetPresenter().resetIn();
         };
@@ -197,6 +203,11 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
     if (outStrip != nullptr) {
         outStrip->getMarkerButton().onClick = [this, &audioPlayer] {
             audioPlayer.setCutOut(audioPlayer.getCurrentPosition());
+        };
+        outStrip->getMarkerButton().onRightClick = [this] {
+            owner.getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutOut);
+            owner.getPresenterCore().getCutButtonPresenter().updateColours();
+            owner.repaint();
         };
         outStrip->getResetButton().onClick = [this] {
             owner.getPresenterCore().getCutResetPresenter().resetOut();

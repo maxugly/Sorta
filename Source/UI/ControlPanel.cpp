@@ -75,19 +75,9 @@ void ControlPanel::setupViews() {
 
 void ControlPanel::setupStrips() {
     inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In);
-    inStrip->onMarkerRightClick = [this] {
-        getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutIn);
-        getPresenterCore().getCutButtonPresenter().updateColours();
-        repaint();
-    };
     addAndMakeVisible(inStrip.get());
 
     outStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::Out);
-    outStrip->onMarkerRightClick = [this] {
-        getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutOut);
-        getPresenterCore().getCutButtonPresenter().updateColours();
-        repaint();
-    };
     addAndMakeVisible(outStrip.get());
 }
 
@@ -116,6 +106,9 @@ void ControlPanel::setupListeners() {
 
     inStrip->setPresenter(&getBoundaryLogicPresenter());
     outStrip->setPresenter(&getBoundaryLogicPresenter());
+
+    addMouseListener(&getMarkerMouseHandler(), true);
+    addMouseListener(&getWaveformMouseHandler(), true);
 }
 
 ControlPanel::~ControlPanel() {
@@ -190,36 +183,4 @@ juce::TextEditor &ControlPanel::getStatsDisplay() {
 
 const juce::LookAndFeel &ControlPanel::getLookAndFeel() const {
     return modernLF;
-}
-
-void ControlPanel::mouseMove(const juce::MouseEvent &event) {
-    getMarkerMouseHandler().mouseMove(event);
-    getWaveformMouseHandler().mouseMove(event);
-}
-
-void ControlPanel::mouseDown(const juce::MouseEvent &event) {
-    getMarkerMouseHandler().mouseDown(event);
-    getWaveformMouseHandler().mouseDown(event);
-}
-
-void ControlPanel::mouseDrag(const juce::MouseEvent &event) {
-    getMarkerMouseHandler().mouseDrag(event);
-    getWaveformMouseHandler().mouseDrag(event);
-}
-
-void ControlPanel::mouseUp(const juce::MouseEvent &event) {
-    getMarkerMouseHandler().mouseUp(event);
-    getWaveformMouseHandler().mouseUp(event);
-}
-
-void ControlPanel::mouseExit(const juce::MouseEvent &event) {
-    getMarkerMouseHandler().mouseExit(event);
-    getWaveformMouseHandler().mouseExit(event);
-}
-
-void ControlPanel::mouseWheelMove(const juce::MouseEvent &event,
-                                  const juce::MouseWheelDetails &wheel) {
-    if (wheel.deltaY == 0.0f)
-        return;
-    getWaveformMouseHandler().mouseWheelMove(event, wheel);
 }

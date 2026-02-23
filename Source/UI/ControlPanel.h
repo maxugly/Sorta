@@ -126,14 +126,6 @@ class ControlPanel final : public juce::Component {
     const juce::LookAndFeel &getLookAndFeel() const;
     FocusManager &getFocusManager() const { return *focusManager; }
 
-    void mouseMove(const juce::MouseEvent &event) override;
-    void mouseDown(const juce::MouseEvent &event) override;
-    void mouseDrag(const juce::MouseEvent &event) override;
-    void mouseUp(const juce::MouseEvent &event) override;
-    void mouseExit(const juce::MouseEvent &event) override;
-    void mouseWheelMove(const juce::MouseEvent &event,
-                        const juce::MouseWheelDetails &wheel) override;
-
     PlaybackTimerManager &getPlaybackTimerManager() { return *playbackTimerManager; }
     PresenterCore &getPresenterCore() { return *presenterCore; }
     const PresenterCore &getPresenterCore() const { return *presenterCore; }
