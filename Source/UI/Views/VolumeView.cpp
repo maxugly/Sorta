@@ -15,25 +15,24 @@ class KnobLookAndFeel : public juce::LookAndFeel_V4 {
         auto rw = radius * 2.0f;
         auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
 
-        // 1. Draw Knob Body (the circular part)
+        // 1. Draw Knob Body
         g.setColour(Config::Colors::Button::outline.withAlpha(0.3f));
         g.fillEllipse(rx, ry, rw, rw);
         
-        // 2. Draw Track (the full circle outline)
+        // 2. Draw Track
         g.setColour(slider.findColour(juce::Slider::rotarySliderOutlineColourId));
         g.drawEllipse(rx, ry, rw, rw, outlineThickness);
 
-        // 3. Draw Filled Area (the arc from start to current position)
+        // 3. Draw Filled Area
         juce::Path valueArc;
         valueArc.addCentredArc(centreX, centreY, radius, radius, 0.0f, rotaryStartAngle, angle, true);
         g.setColour(slider.findColour(juce::Slider::rotarySliderFillColourId));
         g.strokePath(valueArc, juce::PathStrokeType(outlineThickness * 2.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
 
-        // 4. Draw Pointer/Notch
+        // 4. Draw Pointer
         juce::Path p;
         auto pointerLength = radius * 0.4f;
         auto pointerThickness = 3.0f;
-        // Pointer at the edge
         p.addRoundedRectangle(-pointerThickness * 0.5f, -radius, pointerThickness, pointerLength, 1.0f);
         p.applyTransform(juce::AffineTransform::rotation(angle).translated(centreX, centreY));
 
@@ -58,7 +57,6 @@ VolumeView::VolumeView() {
 
 void VolumeView::resized() {
     auto b = getLocalBounds();
-    // Fill the whole height (32px) and center horizontally in the 80px container
     volumeKnob.setBounds(b.withSizeKeepingCentre(b.getHeight(), b.getHeight()));
 }
 

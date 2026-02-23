@@ -80,8 +80,17 @@ void MatrixPresenter::playbackTimerTick() {
     state.ledColors.push_back(silenceDetector.getOutSilenceThresholdEditor().hasKeyboardFocus(false) ? active : inactive);
     state.ledColors.push_back(active); // Light 31 (Original Flag)
 
-    // 32. Anchor
-    state.ledColors.push_back(active);
+    // 32. Volume Flame Indicator
+    float vol = sessionState.getVolume();
+    juce::Colour flameColor;
+    if (vol < 0.33f) {
+        flameColor = juce::Colours::red.interpolatedWith(juce::Colours::orange, vol / 0.33f);
+    } else if (vol < 0.66f) {
+        flameColor = juce::Colours::orange.interpolatedWith(juce::Colours::blue, (vol - 0.33f) / 0.33f);
+    } else {
+        flameColor = juce::Colours::blue.interpolatedWith(juce::Colours::white, (vol - 0.66f) / 0.34f);
+    }
+    state.ledColors.push_back(flameColor);
 
     // 33. Stats Overlay Active
     state.ledColors.push_back(owner.getPresenterCore().getStatsPresenter().isShowingStats() ? active : inactive);
