@@ -77,8 +77,7 @@ void ControlPanel::setupViews() {
 }
 
 void ControlPanel::setupStrips() {
-    inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In, getAudioPlayer(),
-                                            sessionState);
+    inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In);
     inStrip->onMarkerRightClick = [this] {
         getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutIn);
 
@@ -86,8 +85,7 @@ void ControlPanel::setupStrips() {
     };
     addAndMakeVisible(inStrip.get());
 
-    outStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::Out, getAudioPlayer(),
-                                             sessionState);
+    outStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::Out);
     outStrip->onMarkerRightClick = [this] {
         getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutOut);
 

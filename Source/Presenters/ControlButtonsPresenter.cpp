@@ -7,6 +7,7 @@
 #include "Presenters/SilenceDetectionPresenter.h"
 #include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
+#include "UI/Components/MarkerStrip.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/WaveformView.h"
 #include "UI/Views/CutLayerView.h"
@@ -26,6 +27,7 @@ void ControlButtonsPresenter::initialiseAllButtons() {
     initialiseStopButton();
     initialiseAutoplayButton();
     initialiseCutButton();
+    initialiseMarkerButtons();
 }
 
 void ControlButtonsPresenter::initialiseOpenButton() {
@@ -170,6 +172,37 @@ void ControlButtonsPresenter::initialiseCutButton() {
                 if (pos < cutIn || pos >= cutOut)
                     owner.getAudioPlayer().setPlayheadPosition(cutIn);
             }
+        };
+    }
+}
+
+void ControlButtonsPresenter::initialiseMarkerButtons() {
+    auto* inStrip = owner.getInStrip();
+    auto* outStrip = owner.getOutStrip();
+    auto& audioPlayer = owner.getAudioPlayer();
+    auto& sessionState = owner.getSessionState();
+
+    if (inStrip != nullptr) {
+        inStrip->getMarkerButton().onLeftClick = [this, &audioPlayer] {
+            audioPlayer.setCutIn(audioPlayer.getCurrentPosition());
+        };
+        inStrip->getResetButton().onClick = [this] {
+            owner.getPresenterCore().getCutResetPresenter().resetIn();
+        };
+        inStrip->getAutoCutButton().onClick = [this, inStrip, &sessionState] {
+            sessionState.setAutoCutInActive(inStrip->getAutoCutButton().getToggleState());
+        };
+    }
+
+    if (outStrip != nullptr) {
+        outStrip->getMarkerButton().onLeftClick = [this, &audioPlayer] {
+            audioPlayer.setCutOut(audioPlayer.getCurrentPosition());
+        };
+        outStrip->getResetButton().onClick = [this] {
+            owner.getPresenterCore().getCutResetPresenter().resetOut();
+        };
+        outStrip->getAutoCutButton().onClick = [this, outStrip, &sessionState] {
+            sessionState.setAutoCutOutActive(outStrip->getAutoCutButton().getToggleState());
         };
     }
 }

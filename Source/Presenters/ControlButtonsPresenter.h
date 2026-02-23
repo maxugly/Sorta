@@ -29,6 +29,7 @@ class ControlButtonsPresenter final {
     void initialiseEyeCandyButton();
     void initialiseAutoplayButton();
     void initialiseCutButton();
+    void initialiseMarkerButtons();
 
   private:
     ControlPanel &owner;

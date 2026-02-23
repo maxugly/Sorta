@@ -4,6 +4,7 @@
 #include "Utils/TimeUtils.h"
 
 #include "Core/AudioPlayer.h"
+#include "Presenters/BoundaryLogicPresenter.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
 #include "Utils/TimeEntryHelpers.h"

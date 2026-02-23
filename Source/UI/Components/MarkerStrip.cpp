@@ -3,8 +3,8 @@
 #include "Utils/Config.h"
 #include "Utils/TimeUtils.h"
 
-MarkerStrip::MarkerStrip(MarkerType type, AudioPlayer &player, SessionState &state)
-    : markerType(type), audioPlayer(player), sessionState(state) {
+MarkerStrip::MarkerStrip(MarkerType type)
+    : markerType(type) {
     initialiseComponents();
 }
 
@@ -12,42 +12,24 @@ void MarkerStrip::initialiseComponents() {
     // Marker Button (In/Out)
     addAndMakeVisible(markerButton);
     markerButton.setButtonText(markerType == MarkerType::In ? Config::Labels::cutInButton
-                                                            : Config::Labels::cutOutButton);
-    markerButton.getProperties().set("GroupPosition", (int)(markerType == MarkerType::In
-                                                                ? AppEnums::GroupPosition::Left
-                                                                : AppEnums::GroupPosition::Right));
-    markerButton.onLeftClick = [this] {
-        if (markerType == MarkerType::In)
-            sessionState.setCutIn(audioPlayer.getCurrentPosition());
-        else
-            sessionState.setCutOut(audioPlayer.getCurrentPosition());
-
-        updateAutoCutState(false);
-    };
-    markerButton.onRightClick = [this] {
-        if (onMarkerRightClick)
-            onMarkerRightClick();
-    };
+                                                           : Config::Labels::cutOutButton);
 
     // Timer Editor
     addAndMakeVisible(timerEditor);
-    // Style will be applied by BoundaryLogicPresenter::initialiseEditors()
+    timerEditor.setReadOnly(false);
+    timerEditor.setJustification(juce::Justification::centred);
+    timerEditor.setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
+    timerEditor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+    timerEditor.setFont(juce::Font(juce::FontOptions(Config::Layout::Text::playbackSize)));
+    timerEditor.setInputRestrictions(12, "0123456789:.");
+    timerEditor.setMultiLine(false);
+    timerEditor.setReturnKeyStartsNewLine(false);
     timerEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
 
     // Reset Button
     addAndMakeVisible(resetButton);
     resetButton.setButtonText(Config::Labels::clearButton);
     resetButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
-    resetButton.setColour(juce::TextButton::buttonColourId, Config::Colors::Button::clear);
-    resetButton.onClick = [this] {
-        if (markerType == MarkerType::In) {
-            sessionState.setCutIn(0.0);
-            sessionState.setAutoCutInActive(false);
-        } else {
-            sessionState.setCutOut(audioPlayer.getThumbnail().getTotalLength());
-            sessionState.setAutoCutOutActive(false);
-        }
-    };
 
     // Threshold Editor (percentage input)
     addAndMakeVisible(thresholdEditor);
@@ -57,16 +39,10 @@ void MarkerStrip::initialiseComponents() {
     addAndMakeVisible(autoCutButton);
     autoCutButton.setButtonText(markerType == MarkerType::In ? Config::Labels::autoCutInButton
                                                              : Config::Labels::autoCutOutButton);
-    autoCutButton.getProperties().set("GroupPosition", (int)(markerType == MarkerType::In
-                                                                 ? AppEnums::GroupPosition::Right
-                                                                 : AppEnums::GroupPosition::Left));
     autoCutButton.setClickingTogglesState(true);
-    autoCutButton.onClick = [this] {
-        if (markerType == MarkerType::In)
-            sessionState.setAutoCutInActive(autoCutButton.getToggleState());
-        else
-            sessionState.setAutoCutOutActive(autoCutButton.getToggleState());
-    };
+    autoCutButton.getProperties().set("GroupPosition", markerType == MarkerType::In
+                                                           ? (int)AppEnums::GroupPosition::Right
+                                                           : (int)AppEnums::GroupPosition::Left);
 }
 
 void MarkerStrip::resized() {
@@ -93,20 +69,21 @@ void MarkerStrip::resized() {
         autoCutButton.setBounds(b.removeFromLeft(autoCutWidth));
     } else {
         // [AutoCut(L), Threshold, Reset, Timer, Out(R)]
-        markerButton.setBounds(b.removeFromRight(markerWidth));
-        b.removeFromRight(spacing);
-        timerEditor.setBounds(b.removeFromRight(timerWidth));
-        b.removeFromRight(spacing);
-        resetButton.setBounds(b.removeFromRight(resetWidth));
-        b.removeFromRight(spacing);
-        thresholdEditor.setBounds(b.removeFromRight(thresholdWidth));
-        b.removeFromRight(spacing);
-        autoCutButton.setBounds(b.removeFromRight(autoCutWidth));
+        autoCutButton.setBounds(b.removeFromLeft(autoCutWidth));
+        b.removeFromLeft(spacing);
+        thresholdEditor.setBounds(b.removeFromLeft(thresholdWidth));
+        b.removeFromLeft(spacing);
+        resetButton.setBounds(b.removeFromLeft(resetWidth));
+        b.removeFromLeft(spacing);
+        timerEditor.setBounds(b.removeFromLeft(timerWidth));
+        b.removeFromLeft(spacing);
+        markerButton.setBounds(b.removeFromLeft(markerWidth));
     }
 }
 
 void MarkerStrip::updateTimerText(const juce::String &text) {
-    timerEditor.setText(text, juce::dontSendNotification);
+    if (timerEditor.getText() != text)
+        timerEditor.setText(text, juce::dontSendNotification);
 }
 
 void MarkerStrip::updateAutoCutState(bool isActive) {
