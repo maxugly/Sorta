@@ -63,11 +63,8 @@ void CutLayerView::paint(juce::Graphics &g) {
     drawThresholdVisualisation(state.inPixelX, state.inThresholdYTop, state.inThresholdYBottom);
     drawThresholdVisualisation(state.outPixelX, state.outThresholdYTop, state.outThresholdYBottom);
 
-    const float inX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.inPixelX);
-    const float outX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.outPixelX);
-
-    const float actualInX = juce::jmin(inX, outX);
-    const float actualOutX = juce::jmax(inX, outX);
+    const float actualInX = state.actualInX;
+    const float actualOutX = state.actualOutX;
 
     const float fadeLength = state.fadeWidthPixels;
     const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;
@@ -115,30 +112,7 @@ void CutLayerView::paint(juce::Graphics &g) {
         g.fillRect(fadeAreaRight);
     }
 
-    auto drawCutMarker = [&](float x, MarkerMouseHandler::CutMarkerHandle handleType) {
-        juce::Colour markerColor = Config::Colors::cutLine;
-
-        if (handleType == MarkerMouseHandler::CutMarkerHandle::In && state.isAutoIn)
-            markerColor = Config::Colors::cutMarkerAuto;
-        else if (handleType == MarkerMouseHandler::CutMarkerHandle::Out && state.isAutoOut)
-            markerColor = Config::Colors::cutMarkerAuto;
-
-        float thickness = Config::Layout::Glow::cutBoxOutlineThickness;
-        bool shouldPulse = false;
-
-        const bool isDragged = state.draggedHandle == handleType || state.draggedHandle == MarkerMouseHandler::CutMarkerHandle::Full;
-        const bool isHovered = state.hoveredHandle == handleType || state.hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Full;
-
-        if (isDragged) {
-            markerColor = Config::Colors::cutMarkerDrag;
-            thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-            shouldPulse = true;
-        } else if (isHovered) {
-            markerColor = Config::Colors::cutMarkerHover;
-            thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-            shouldPulse = true;
-        }
-
+    auto drawCutMarker = [&](float x, juce::Colour markerColor, float thickness, bool shouldPulse) {
         // Draw Glow if active
         if (shouldPulse && state.showEyeCandy) {
             const float pulse = state.glowAlpha;
@@ -172,39 +146,26 @@ void CutLayerView::paint(juce::Graphics &g) {
                    (float)bounds.getHeight() - (2.0f * boxHeight));
     };
 
-    drawCutMarker(state.inPixelX, MarkerMouseHandler::CutMarkerHandle::In);
-    drawCutMarker(state.outPixelX, MarkerMouseHandler::CutMarkerHandle::Out);
+    drawCutMarker(state.inPixelX, state.inMarkerColor, state.inMarkerThickness, state.inMarkerShouldPulse);
+    drawCutMarker(state.outPixelX, state.outMarkerColor, state.outMarkerThickness, state.outMarkerShouldPulse);
 
-    juce::Colour hollowColor = Config::Colors::cutLine;
-    float hollowThickness = Config::Layout::Glow::cutBoxOutlineThickness;
-    bool regionActive = state.draggedHandle == MarkerMouseHandler::CutMarkerHandle::Full ||
-                       state.hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Full;
-
-    if (state.draggedHandle == MarkerMouseHandler::CutMarkerHandle::Full) {
-        hollowColor = Config::Colors::cutMarkerDrag;
-        hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-    } else if (state.hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Full) {
-        hollowColor = Config::Colors::cutMarkerHover;
-        hollowThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-    }
-
-    if (regionActive && state.showEyeCandy)
-        g.setColour(hollowColor.withAlpha(0.5f + 0.5f * state.glowAlpha));
+    if (state.regionShouldPulse && state.showEyeCandy)
+        g.setColour(state.regionOutlineColor.withAlpha(0.5f + 0.5f * state.glowAlpha));
     else
-        g.setColour(hollowColor.withAlpha(0.4f));
+        g.setColour(state.regionOutlineColor.withAlpha(0.4f));
 
     const float halfBoxWidth = Config::Layout::Glow::cutMarkerBoxWidth / 2.0f;
     const float startX = actualInX + halfBoxWidth;
     const float endX = actualOutX - halfBoxWidth;
 
     if (startX < endX) {
-        g.drawLine(startX, (float)bounds.getY(), endX, (float)bounds.getY(), hollowThickness);
+        g.drawLine(startX, (float)bounds.getY(), endX, (float)bounds.getY(), state.regionOutlineThickness);
         g.drawLine(startX, (float)bounds.getY() + boxHeight, endX, (float)bounds.getY() + boxHeight,
-                   hollowThickness);
+                   state.regionOutlineThickness);
         g.drawLine(startX, (float)bounds.getBottom() - Config::Layout::buttonOutlineThickness,
                    endX, (float)bounds.getBottom() - Config::Layout::buttonOutlineThickness,
-                   hollowThickness);
+                   state.regionOutlineThickness);
         g.drawLine(startX, (float)bounds.getBottom() - boxHeight, endX,
-                   (float)bounds.getBottom() - boxHeight, hollowThickness);
+                   (float)bounds.getBottom() - boxHeight, state.regionOutlineThickness);
     }
 }

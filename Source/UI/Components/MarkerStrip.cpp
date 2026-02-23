@@ -13,6 +13,10 @@ void MarkerStrip::initialiseComponents() {
     addAndMakeVisible(markerButton);
     markerButton.setButtonText(markerType == MarkerType::In ? Config::Labels::cutInButton
                                                            : Config::Labels::cutOutButton);
+    markerButton.onRightClick = [this] {
+        if (onMarkerRightClick)
+            onMarkerRightClick();
+    };
 
     // Timer Editor
     addAndMakeVisible(timerEditor);

@@ -53,6 +53,12 @@ void CutPresenter::pushStateToView() {
     state.inPixelX = (float)bounds.getX() + CoordinateMapper::secondsToPixels(cutIn, viewWidth, audioLength);
     state.outPixelX = (float)bounds.getX() + CoordinateMapper::secondsToPixels(cutOut, viewWidth, audioLength);
 
+    const float inX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.inPixelX);
+    const float outX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.outPixelX);
+
+    state.actualInX = juce::jmin(inX, outX);
+    state.actualOutX = juce::jmax(inX, outX);
+
     auto calcThresholdY = [&](float threshold) {
         const float centerY = (float)bounds.getCentreY();
         const float halfHeight = (float)bounds.getHeight() / 2.0f;
@@ -74,12 +80,57 @@ void CutPresenter::pushStateToView() {
     state.audioLength = (float)audioLength;
     state.glowAlpha = playbackTimerManager.getBreathingPulse();
     state.showEyeCandy = interactionCoordinator.shouldShowEyeCandy();
-    state.isAutoIn = sessionState.getCutPrefs().autoCut.inActive;
-    state.isAutoOut = sessionState.getCutPrefs().autoCut.outActive;
     state.markersVisible = sessionState.getCutPrefs().active;
-    state.draggedHandle = markerMouseHandler->getDraggedHandle();
-    state.hoveredHandle = markerMouseHandler->getHoveredHandle();
     state.channelMode = cutLayerView.getOwner().getChannelViewMode();
+
+    auto calcMarkerProps = [&](MarkerMouseHandler::CutMarkerHandle handle, bool isAuto) {
+        juce::Colour color = Config::Colors::cutLine;
+        if (isAuto) color = Config::Colors::cutMarkerAuto;
+
+        float thickness = Config::Layout::Glow::cutBoxOutlineThickness;
+        bool pulse = false;
+
+        const auto dragged = markerMouseHandler->getDraggedHandle();
+        const auto hovered = markerMouseHandler->getHoveredHandle();
+
+        const bool isInteracting = (dragged == handle || dragged == MarkerMouseHandler::CutMarkerHandle::Full ||
+                                   (dragged == MarkerMouseHandler::CutMarkerHandle::None &&
+                                    (hovered == handle || hovered == MarkerMouseHandler::CutMarkerHandle::Full)));
+
+        if (isInteracting) {
+            color = (dragged != MarkerMouseHandler::CutMarkerHandle::None) ? Config::Colors::cutMarkerDrag : Config::Colors::cutMarkerHover;
+            thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
+            pulse = true;
+        }
+
+        return std::make_tuple(color, thickness, pulse);
+    };
+
+    auto inProps = calcMarkerProps(MarkerMouseHandler::CutMarkerHandle::In, sessionState.getCutPrefs().autoCut.inActive);
+    state.inMarkerColor = std::get<0>(inProps);
+    state.inMarkerThickness = std::get<1>(inProps);
+    state.inMarkerShouldPulse = std::get<2>(inProps);
+
+    auto outProps = calcMarkerProps(MarkerMouseHandler::CutMarkerHandle::Out, sessionState.getCutPrefs().autoCut.outActive);
+    state.outMarkerColor = std::get<0>(outProps);
+    state.outMarkerThickness = std::get<1>(outProps);
+    state.outMarkerShouldPulse = std::get<2>(outProps);
+
+    const auto dragged = markerMouseHandler->getDraggedHandle();
+    const auto hovered = markerMouseHandler->getHoveredHandle();
+    const bool regionInteracting = (dragged == MarkerMouseHandler::CutMarkerHandle::Full ||
+                                   (dragged == MarkerMouseHandler::CutMarkerHandle::None &&
+                                    hovered == MarkerMouseHandler::CutMarkerHandle::Full));
+
+    state.regionOutlineColor = Config::Colors::cutLine;
+    state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThickness;
+    state.regionShouldPulse = false;
+
+    if (regionInteracting) {
+        state.regionOutlineColor = (dragged == MarkerMouseHandler::CutMarkerHandle::Full) ? Config::Colors::cutMarkerDrag : Config::Colors::cutMarkerHover;
+        state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
+        state.regionShouldPulse = true;
+    }
 
     cutLayerView.updateState(state);
 }

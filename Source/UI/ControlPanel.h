@@ -74,6 +74,7 @@ class ControlPanel final : public juce::Component {
 
     void paint(juce::Graphics &g) override;
     void resized() override;
+    juce::MouseCursor getMouseCursor() override;
 
     juce::TextButton &getAutoCutInButton() { return inStrip->getAutoCutButton(); }
     juce::TextButton &getAutoCutOutButton() { return outStrip->getAutoCutButton(); }

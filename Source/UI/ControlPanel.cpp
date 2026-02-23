@@ -80,7 +80,7 @@ void ControlPanel::setupStrips() {
     inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In);
     inStrip->onMarkerRightClick = [this] {
         getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutIn);
-
+        getPresenterCore().getCutButtonPresenter().updateColours();
         repaint();
     };
     addAndMakeVisible(inStrip.get());
@@ -88,10 +88,17 @@ void ControlPanel::setupStrips() {
     outStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::Out);
     outStrip->onMarkerRightClick = [this] {
         getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutOut);
-
+        getPresenterCore().getCutButtonPresenter().updateColours();
         repaint();
     };
     addAndMakeVisible(outStrip.get());
+}
+
+juce::MouseCursor ControlPanel::getMouseCursor() {
+    if (getInteractionCoordinator().getPlacementMode() != AppEnums::PlacementMode::None)
+        return juce::MouseCursor::PointingHandCursor;
+
+    return juce::MouseCursor::CrosshairCursor;
 }
 
 void ControlPanel::setupPresenters() {
