@@ -16,14 +16,13 @@
 
 class ControlPanel;
 
-class AudioPlayer;
-
 class SilenceDetectionPresenter final : public SilenceWorkerClient,
-                                        public SessionState::Listener,
-                                        public PlaybackTimerManager::Listener {
+                                         public SessionState::Listener,
+                                         public PlaybackTimerManager::Listener {
   public:
-    SilenceDetectionPresenter(ControlPanel &ownerPanel, SessionState &sessionState,
-                              AudioPlayer &audioPlayer);
+    explicit SilenceDetectionPresenter(ControlPanel &ownerPanel,
+                                       SessionState &sessionStateIn,
+                                       AudioPlayer &audioPlayerIn);
     ~SilenceDetectionPresenter() override;
 
     /** @brief Called when the playback timer ticks at 60Hz. */

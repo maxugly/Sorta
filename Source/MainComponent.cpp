@@ -13,15 +13,25 @@ MainComponent::MainComponent() {
     audioPlayer = std::make_unique<AudioPlayer>(sessionState);
     audioPlayer->addChangeListener(this);
 
+    // 1. Instantiate managers that don't depend on ControlPanel
     interactionCoordinator = std::make_unique<InteractionCoordinator>();
     playbackTimerManager = std::make_unique<PlaybackTimerManager>(sessionState, *audioPlayer, *interactionCoordinator);
     
+    // 2. Instantiate the visual container
     controlPanel = std::make_unique<ControlPanel>(*this, sessionState);
+    
+    // 3. Partial injection to allow presenters to access core logic during construction
     controlPanel->setInteractionCoordinator(*interactionCoordinator);
     controlPanel->setPlaybackTimerManager(*playbackTimerManager);
-    
+
+    // 4. Instantiate managers that DO depend on ControlPanel
     focusManager = std::make_unique<FocusManager>(*controlPanel);
+    controlPanel->setFocusManager(*focusManager);
+    
     presenterCore = std::make_unique<PresenterCore>(*controlPanel);
+    controlPanel->setPresenterCore(*presenterCore);
+    
+    // 5. Finalise setup now that all dependencies are present
     controlPanel->injectLogic(*interactionCoordinator, *playbackTimerManager, *presenterCore, *focusManager);
     
     addAndMakeVisible(controlPanel.get());

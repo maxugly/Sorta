@@ -56,7 +56,8 @@ class OverlayView;
 /**
  * @file ControlPanel.h
  * @ingroup UI
- * @brief The main container for UI controls and waveform visualization.
+ * @brief The visual container for UI controls and waveform visualization.
+ * @details This component no longer owns its logic managers; they are injected by MainComponent.
  */
 class ControlPanel final : public juce::Component {
   public:
@@ -72,6 +73,12 @@ class ControlPanel final : public juce::Component {
     explicit ControlPanel(MainComponent &owner, SessionState &sessionStateIn);
     ~ControlPanel() override;
 
+    void injectLogic(InteractionCoordinator& ic, PlaybackTimerManager& ptm, PresenterCore& pc, FocusManager& fm);
+    void setInteractionCoordinator(InteractionCoordinator& ic) { interactionCoordinator = &ic; }
+    void setPlaybackTimerManager(PlaybackTimerManager& ptm) { playbackTimerManager = &ptm; }
+    void setPresenterCore(PresenterCore& pc) { presenterCore = &pc; }
+    void setFocusManager(FocusManager& fm) { focusManager = &fm; }
+
     void paint(juce::Graphics &g) override;
     void resized() override;
     juce::MouseCursor getMouseCursor() override;
@@ -80,10 +87,6 @@ class ControlPanel final : public juce::Component {
     juce::TextButton &getAutoCutOutButton() { return outStrip->getAutoCutButton(); }
 
     juce::Rectangle<int> getWaveformBounds() const { return layoutCache.waveformBounds; }
-
-    void injectLogic(InteractionCoordinator& ic, PlaybackTimerManager& ptm, PresenterCore& pc, FocusManager& fm);
-    void setInteractionCoordinator(InteractionCoordinator& ic) { interactionCoordinator = &ic; }
-    void setPlaybackTimerManager(PlaybackTimerManager& ptm) { playbackTimerManager = &ptm; }
 
     AudioPlayer &getAudioPlayer();
     AudioPlayer &getAudioPlayer() const;
@@ -158,13 +161,15 @@ class ControlPanel final : public juce::Component {
     SessionState &sessionState;
     ModernLookAndFeel modernLF;
 
+    // Injected Logic Managers (Raw pointers)
+    InteractionCoordinator* interactionCoordinator{nullptr};
     PlaybackTimerManager* playbackTimerManager{nullptr};
-    std::unique_ptr<LayoutManager> layoutManager;
-    std::unique_ptr<WaveformCanvasView> waveformCanvasView;
     PresenterCore* presenterCore{nullptr};
     FocusManager* focusManager{nullptr};
+
+    std::unique_ptr<LayoutManager> layoutManager;
+    std::unique_ptr<WaveformCanvasView> waveformCanvasView;
     std::unique_ptr<OverlayView> overlayView;
-    InteractionCoordinator* interactionCoordinator{nullptr};
     std::unique_ptr<MatrixView> matrixView;
 
     std::unique_ptr<TopBarView> topBarView;
