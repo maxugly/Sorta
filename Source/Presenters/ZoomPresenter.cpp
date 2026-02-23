@@ -47,8 +47,10 @@ void ZoomPresenter::playbackTimerTick() {
     state.isDraggingCutOut = markerMouse.getDraggedHandle() == MarkerMouseHandler::CutMarkerHandle::Out;
 
     if (currentMouseX != -1) {
-        state.mouseX = currentMouseX - zoomView.getX();
-        state.mouseY = currentMouseY - zoomView.getY();
+        // currentMouseX/Y are relative to ControlPanel.
+        // zoomView is a child of waveformCanvasView which is a child of ControlPanel.
+        state.mouseX = currentMouseX - owner.waveformCanvasView->getX() - zoomView.getX();
+        state.mouseY = currentMouseY - owner.waveformCanvasView->getY() - zoomView.getY();
         state.mouseTime = mouse.getMouseCursorTime();
         state.mouseTimeText = TimeUtils::formatTime(state.mouseTime);
 
