@@ -19,7 +19,10 @@ struct ZoomViewState {
     int mouseX{-1};
     int mouseY{-1};
     juce::String mouseTimeText;
-    float amplitude{0.0f};
+    float amplitudeY{0.0f};
+    float bottomAmplitudeY{0.0f};
+    juce::String amplitudeText;
+    juce::String negAmplitudeText;
     bool isZooming{false};
     juce::Rectangle<int> popupBounds;
     double startTime{0.0};

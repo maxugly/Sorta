@@ -11,13 +11,11 @@ WaveformCanvasView::WaveformCanvasView(ControlPanel& owner) {
 
     waveformView = std::make_unique<WaveformView>(owner.getAudioPlayer().getWaveformManager());
     addAndMakeVisible(waveformView.get());
+    waveformView->setInterceptsMouseClicks(false, false);
 
     cutLayerView = std::make_unique<CutLayerView>(owner);
-    
-    // Note: markerMouseHandler must be set by ControlPanel after this is created
-    // because it depends on cutPresenter which depends on cutLayerView.
-    
     addAndMakeVisible(cutLayerView.get());
+    cutLayerView->setInterceptsMouseClicks(false, false);
 
     playbackCursorView = std::make_unique<PlaybackCursorView>(owner);
     addAndMakeVisible(playbackCursorView.get());

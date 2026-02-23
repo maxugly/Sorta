@@ -1,5 +1,3 @@
-
-
 #ifndef AUDIOFILER_TRANSPORTBUTTON_H
 #define AUDIOFILER_TRANSPORTBUTTON_H
 
@@ -19,7 +17,10 @@ class TransportButton final : public juce::TextButton {
     TransportButton(const juce::String &name = {});
 
   private:
+    void mouseDown(const juce::MouseEvent &event) override;
     void mouseUp(const juce::MouseEvent &event) override;
+
+    bool lastClickWasRight{false};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TransportButton)
 };

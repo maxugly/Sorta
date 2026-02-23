@@ -62,7 +62,15 @@ void ZoomPresenter::playbackTimerTick() {
                 audioPlayer.getWaveformManager().getThumbnail().getApproximateMinMax(
                     state.mouseTime, state.mouseTime + (1.0 / sampleRate), 0,
                     minVal, maxVal);
-                state.amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
+                const float amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
+                const auto waveformBounds = owner.getWaveformBounds();
+                const float centerY = (float)waveformBounds.getHeight() / 2.0f;
+                state.amplitudeY = centerY - (amplitude * waveformBounds.getHeight() *
+                                              Config::Layout::Waveform::heightScale);
+                state.bottomAmplitudeY = centerY + (amplitude * waveformBounds.getHeight() *
+                                                    Config::Layout::Waveform::heightScale);
+                state.amplitudeText = juce::String(amplitude, 2);
+                state.negAmplitudeText = juce::String(-amplitude, 2);
             }
         }
     }

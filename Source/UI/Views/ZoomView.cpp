@@ -57,12 +57,9 @@ void ZoomView::paint(juce::Graphics &g) {
         g.fillRect(waveformBounds.getX(), localMouseY - Config::Layout::Glow::mouseHighlightOffset,
                    waveformBounds.getWidth(), Config::Layout::Glow::mouseHighlightSize);
 
-        const float amplitude = state.amplitude;
         const float centerY = (float)waveformBounds.getCentreY();
-        const float amplitudeY = centerY - (amplitude * waveformBounds.getHeight() *
-                                            Config::Layout::Waveform::heightScale);
-        const float bottomAmplitudeY = centerY + (amplitude * waveformBounds.getHeight() *
-                                                  Config::Layout::Waveform::heightScale);
+        const float amplitudeY = state.amplitudeY;
+        const float bottomAmplitudeY = state.bottomAmplitudeY;
 
         juce::ColourGradient amplitudeGlowGradient(
             currentGlowColor.withAlpha(0.0f), (float)localMouseX, amplitudeY,
@@ -90,10 +87,10 @@ void ZoomView::paint(juce::Graphics &g) {
 
         g.setColour(Config::Colors::playbackText);
         g.setFont(Config::Layout::Text::mouseCursorSize);
-        g.drawText(juce::String(amplitude, 2), localMouseX + Config::Layout::Glow::mouseTextOffset,
+        g.drawText(state.amplitudeText, localMouseX + Config::Layout::Glow::mouseTextOffset,
                    (int)amplitudeY - Config::Layout::Text::mouseCursorSize, 100,
                    Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
-        g.drawText(juce::String(-amplitude, 2), localMouseX + Config::Layout::Glow::mouseTextOffset,
+        g.drawText(state.negAmplitudeText, localMouseX + Config::Layout::Glow::mouseTextOffset,
                    (int)bottomAmplitudeY, 100, Config::Layout::Text::mouseCursorSize,
                    juce::Justification::left, true);
 
