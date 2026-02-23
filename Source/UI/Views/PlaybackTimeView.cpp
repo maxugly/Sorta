@@ -35,11 +35,14 @@ void PlaybackTimeView::paint(juce::Graphics &g) {
     g.setFont((float)Config::Layout::Text::playbackSize);
 
     juce::String displayStr = " / " + totalTimeString;
+    const int margin = Config::Layout::windowBorderMargins;
     const int playbackWidth = Config::Layout::Text::playbackWidth;
-    const int textX = (getWidth() / 2);
+    
+    // Total time belongs immediately after the Elapsed Time Editor (left side)
+    const int textX = margin + playbackWidth;
 
-    g.drawText(displayStr, textX + (playbackWidth / 2), 0,
-               playbackWidth / 2, getHeight(),
+    g.drawText(displayStr, textX, 0,
+               playbackWidth, getHeight(),
                juce::Justification::left, false);
 }
 
