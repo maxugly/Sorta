@@ -109,6 +109,10 @@ struct VolumeFlame {
     static const juce::Colour peak;
 };
 
+struct HintVox {
+    static const juce::Colour text;
+};
+
 struct Matrix {
     static const juce::Colour ledActive;
     static const juce::Colour ledInactive;
@@ -235,6 +239,7 @@ constexpr bool lockHandlesWhenAutoCutActive = false;
 } // namespace Audio
 
 namespace Labels {
+extern const juce::String defaultHint;
 extern const juce::String openButton;
 extern const juce::String playButton;
 extern const juce::String stopButton;

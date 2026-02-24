@@ -124,6 +124,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/VolumePresenter.cpp
             Source/Presenters/KeybindPresenter.h
             Source/Presenters/KeybindPresenter.cpp
+            Source/Presenters/HintPresenter.h
+            Source/Presenters/HintPresenter.cpp
 
             # UI
             Source/UI/ControlPanel.h
@@ -168,6 +170,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Views/MatrixView.cpp
             Source/UI/Views/VolumeView.h
             Source/UI/Views/VolumeView.cpp
+            Source/UI/Views/HintView.h
+            Source/UI/Views/HintView.cpp
 
             # UI/LookAndFeel
             Source/UI/LookAndFeel/ModernLookAndFeel.h

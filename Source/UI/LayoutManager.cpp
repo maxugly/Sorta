@@ -69,10 +69,18 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, 
     
     const int sqSize = Config::Layout::Matrix::squareSize;
     const int rows = Config::Layout::Matrix::rows;
-    // 64 LEDs total, so 16 columns of 4 rows.
-    const int cols = 16; 
-    auto matrixBounds = bottomRow.removeFromLeft(cols * sqSize).withHeight(rows * sqSize);
-    controlPanel.getMatrixView().setBounds(matrixBounds.withY(bottomRow.getCentreY() - matrixBounds.getHeight() / 2));
+    const int cols = 16;
+
+    // --- Matrix View (Left Group) ---
+    const int padding = 16; 
+    const int height = (int)Config::UI::WidgetHeight;
+    auto matrixBounds = bottomRow.removeFromLeft((cols * sqSize) + padding).withHeight(height);
+    controlPanel.getMatrixView().setBounds(matrixBounds.withY(bottomRow.getCentreY() - height / 2));
+
+    // --- NEW: Hint View (Right Group) ---
+    const int hintWidth = 150; // Width of the FL Studio text box
+    auto hintBounds = bottomRow.removeFromLeft(hintWidth).withHeight(height);
+    controlPanel.getHintView().setBounds(hintBounds.withY(bottomRow.getCentreY() - height / 2));
 
     controlPanel.layoutCache.bottomRowTopY = bottomRow.getY();
     controlPanel.layoutCache.contentAreaBounds = bounds.reduced(margin);

@@ -71,6 +71,9 @@ void ControlPanel::setupViews() {
 
     matrixView = std::make_unique<MatrixView>();
     addAndMakeVisible(matrixView.get());
+
+    hintView = std::make_unique<HintView>();
+    addAndMakeVisible(hintView.get());
 }
 
 void ControlPanel::setupStrips() {

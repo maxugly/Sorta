@@ -21,6 +21,7 @@
 #include "Presenters/CutPresenter.h"
 #include "Presenters/SilenceThresholdPresenter.h"
 #include "Presenters/KeybindPresenter.h"
+#include "Presenters/HintPresenter.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/CutLayerView.h"
@@ -63,6 +64,8 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
 
     if (auto* tbv = owner.getTopBarView())
         volumePresenter = std::make_unique<VolumePresenter>(tbv->getVolumeView(), owner.getSessionState());
+
+    hintPresenter = std::make_unique<HintPresenter>(owner, owner.getHintView());
 }
 
 PresenterCore::~PresenterCore() = default;

@@ -26,6 +26,7 @@ class VolumePresenter;
 class CutPresenter;
 class SilenceThresholdPresenter;
 class KeybindPresenter;
+#include "Presenters/HintPresenter.h"
 #include "Presenters/ZoomPresenter.h"
 
 class PresenterCore final {
@@ -68,6 +69,7 @@ class PresenterCore final {
     std::unique_ptr<CutPresenter> cutPresenter;
     std::unique_ptr<SilenceThresholdPresenter> silenceThresholdPresenter;
     std::unique_ptr<KeybindPresenter> keybindPresenter;
+    std::unique_ptr<HintPresenter> hintPresenter;
 
     ControlPanel &owner;
 

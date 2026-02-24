@@ -5,6 +5,7 @@
 #include "Presenters/PresenterCore.h"
 #include "UI/InteractionCoordinator.h"
 #include "UI/Views/MatrixView.h"
+#include "UI/Views/HintView.h"
 
 class FocusManager;
 #include "Core/AppEnums.h"
@@ -132,6 +133,7 @@ class ControlPanel final : public juce::Component {
     BoundaryLogicPresenter &getBoundaryLogicPresenter() { return presenterCore->getBoundaryLogicPresenter(); }
     RepeatButtonPresenter &getRepeatButtonPresenter() { return presenterCore->getRepeatButtonPresenter(); }
     MatrixView& getMatrixView() { return *matrixView; }
+    HintView& getHintView() { return *hintView; }
     PlaybackTextPresenter &getPlaybackTextPresenter() { return presenterCore->getPlaybackTextPresenter(); }
 
     void invokeOwnerOpenDialog();
@@ -163,6 +165,7 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<WaveformCanvasView> waveformCanvasView;
     std::unique_ptr<OverlayView> overlayView;
     std::unique_ptr<MatrixView> matrixView;
+    std::unique_ptr<HintView> hintView;
 
     std::unique_ptr<TopBarView> topBarView;
     std::unique_ptr<PlaybackTimeView> playbackTimeView;

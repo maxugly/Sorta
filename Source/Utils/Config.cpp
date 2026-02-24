@@ -66,6 +66,8 @@ const juce::Colour Colors::VolumeFlame::mid = juce::Colours::orange;
 const juce::Colour Colors::VolumeFlame::high = juce::Colours::orange.brighter(0.3f);
 const juce::Colour Colors::VolumeFlame::peak = juce::Colours::white;
 
+const juce::Colour Colors::HintVox::text = juce::Colours::lightgrey;
+
 const juce::Colour Colors::Matrix::ledActive = juce::Colours::lime;
 const juce::Colour Colors::Matrix::ledInactive = juce::Colours::darkgrey;
 const juce::Colour Colors::Matrix::ledPulse = juce::Colours::orange;
@@ -73,6 +75,7 @@ const juce::Colour Colors::Matrix::ledPulse = juce::Colours::orange;
 } // namespace Colors
 
 namespace Labels {
+const juce::String defaultHint = "Ready.";
 const juce::String openButton = "[D]ir";
 const juce::String playButton = juce::CharPointer_UTF8("\xe2\x96\xb6");
 const juce::String stopButton = juce::CharPointer_UTF8("\xe2\x8f\xb8");
