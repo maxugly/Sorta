@@ -66,10 +66,6 @@ class ControlPanel final : public juce::Component {
     struct LayoutCache {
         juce::Rectangle<int> waveformBounds;
         juce::Rectangle<int> contentAreaBounds;
-        int bottomRowTopY{0};
-        int playbackLeftTextX{0};
-        int playbackCenterTextX{0};
-        int playbackRightTextX{0};
     };
 
     explicit ControlPanel(MainComponent &owner, SessionState &sessionStateIn);
@@ -117,12 +113,7 @@ class ControlPanel final : public juce::Component {
         return presenterCore != nullptr ? &presenterCore->getSilenceDetectionPresenter() : nullptr;
     }
 
-    int getBottomRowTopY() const { return layoutCache.bottomRowTopY; }
 
-    std::tuple<int, int, int> getPlaybackLabelXs() const {
-        return {layoutCache.playbackLeftTextX, layoutCache.playbackCenterTextX,
-                layoutCache.playbackRightTextX};
-    }
 
     juce::TextEditor &getStatsDisplay();
 

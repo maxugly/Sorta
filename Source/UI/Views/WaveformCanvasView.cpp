@@ -23,7 +23,6 @@ WaveformCanvasView::WaveformCanvasView(ControlPanel& owner) {
 
     zoomView = std::make_unique<ZoomView>(owner);
     addAndMakeVisible(zoomView.get());
-    zoomView->setVisible(true);
 }
 
 WaveformCanvasView::~WaveformCanvasView() = default;

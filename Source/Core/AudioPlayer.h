@@ -141,9 +141,6 @@ class AudioPlayer : public juce::AudioSource,
         sessionState.setCutOut(positionSeconds);
     }
 
-    std::mutex &getReaderMutex() {
-        return readerMutex;
-    }
 
     bool getReaderInfo(double &sampleRateOut, juce::int64 &lengthInSamplesOut) const;
 

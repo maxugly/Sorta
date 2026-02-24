@@ -15,7 +15,6 @@ class SilenceWorkerClient {
 
     virtual void logStatusMessage(const juce::String &message, bool isError = false) = 0;
 
-    virtual bool isCutModeActive() const = 0;
 
     virtual bool isAutoCutInActive() const = 0;
 
