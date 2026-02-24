@@ -14,6 +14,7 @@
 #include "Presenters/PlaybackRepeatController.h"
 #include "Presenters/PlaybackTextPresenter.h"
 #include "Presenters/PlaybackTimerManager.h"
+#include "Presenters/MatrixPresenter.h"
 #include "Presenters/RepeatButtonPresenter.h"
 #include "Presenters/SilenceDetectionPresenter.h"
 #include "Presenters/StatsPresenter.h"
@@ -141,6 +142,7 @@ void ControlPanel::finaliseSetup() {
     getPlaybackTextPresenter().initialiseEditors();
 
     getPresenterCore().getControlStatePresenter().refreshStates();
+    getPresenterCore().getMatrixPresenter().fullMatrixUpdate();
 }
 
 void ControlPanel::resized() {

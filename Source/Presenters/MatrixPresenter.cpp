@@ -20,13 +20,20 @@
 MatrixPresenter::MatrixPresenter(ControlPanel& cp)
     : owner(cp) {
     owner.getPlaybackTimerManager().addListener(this);
+    owner.getSessionState().addListener(this);
+    owner.getInteractionCoordinator().addListener(this);
+    owner.getAudioPlayer().addChangeListener(this);
+    // Removed immediate fullMatrixUpdate() to prevent crash during presenter construction
 }
 
 MatrixPresenter::~MatrixPresenter() {
     owner.getPlaybackTimerManager().removeListener(this);
+    owner.getSessionState().removeListener(this);
+    owner.getInteractionCoordinator().removeListener(this);
+    owner.getAudioPlayer().removeChangeListener(this);
 }
 
-void MatrixPresenter::playbackTimerTick() {
+void MatrixPresenter::fullMatrixUpdate() {
     auto& matrixView = owner.getMatrixView();
 
     MatrixViewState state;
@@ -190,8 +197,18 @@ void MatrixPresenter::playbackTimerTick() {
     // 64. Heartbeat
     state.ledColors.push_back(Config::Colors::Matrix::ledPulse.withAlpha(timerManager.getBreathingPulse()));
 
-    matrixView.updateState(state);
+    cachedState = state;
+    matrixView.updateState(cachedState);
 }
 
-void MatrixPresenter::animationUpdate(float) {
+void MatrixPresenter::playbackTimerTick() {
+    // Intentionally empty. Observer Law: No polling for state changes.
+}
+
+void MatrixPresenter::animationUpdate(float breathingPulse) {
+    if (cachedState.ledColors.size() == 64) {
+        // Only update the 64th LED (Heartbeat) at 60Hz directly in the cache
+        cachedState.ledColors[20] = Config::Colors::Matrix::ledPulse.withAlpha(breathingPulse);
+        owner.getMatrixView().updateState(cachedState);
+    }
 }
