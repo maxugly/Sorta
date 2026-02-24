@@ -65,11 +65,8 @@ class BoundaryLogicPresenter final : public juce::TextEditor::Listener,
                         const juce::MouseWheelDetails &wheel) override;
 
     void syncEditorToPosition(juce::TextEditor &editor, double positionSeconds);
-    bool applyCutInFromEditor(double newPosition, juce::TextEditor &editor);
-    bool applyCutOutFromEditor(double newPosition, juce::TextEditor &editor);
-
-    void setCutInPosition(double positionSeconds);
-    void setCutOutPosition(double positionSeconds);
+    bool applyCutFromEditor(juce::TextEditor &editor, double newPosition);
+    void setCutPosition(bool isIn, double positionSeconds);
 
     double getAudioTotalLength() const;
 private:

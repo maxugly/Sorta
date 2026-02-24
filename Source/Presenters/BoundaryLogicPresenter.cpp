@@ -82,17 +82,10 @@ void BoundaryLogicPresenter::textEditorTextChanged(juce::TextEditor &editor) {
 }
 
 void BoundaryLogicPresenter::textEditorReturnKeyPressed(juce::TextEditor &editor) {
-    if (&editor == &cutInEditor)
-        isEditingIn = false;
-    if (&editor == &cutOutEditor)
-        isEditingOut = false;
+    if (&editor == &cutInEditor) isEditingIn = false;
+    if (&editor == &cutOutEditor) isEditingOut = false;
 
-    const double newPosition = TimeUtils::parseTime(editor.getText());
-    if (&editor == &cutInEditor)
-        applyCutInFromEditor(newPosition, editor);
-    else if (&editor == &cutOutEditor)
-        applyCutOutFromEditor(newPosition, editor);
-
+    applyCutFromEditor(editor, TimeUtils::parseTime(editor.getText()));
     editor.giveAwayKeyboardFocus();
 }
 
@@ -112,17 +105,10 @@ void BoundaryLogicPresenter::textEditorEscapeKeyPressed(juce::TextEditor &editor
 }
 
 void BoundaryLogicPresenter::textEditorFocusLost(juce::TextEditor &editor) {
-    if (&editor == &cutInEditor)
-        isEditingIn = false;
-    if (&editor == &cutOutEditor)
-        isEditingOut = false;
+    if (&editor == &cutInEditor) isEditingIn = false;
+    if (&editor == &cutOutEditor) isEditingOut = false;
 
-    const double newPosition = TimeUtils::parseTime(editor.getText());
-    if (&editor == &cutInEditor)
-        applyCutInFromEditor(newPosition, editor);
-    else if (&editor == &cutOutEditor)
-        applyCutOutFromEditor(newPosition, editor);
-
+    applyCutFromEditor(editor, TimeUtils::parseTime(editor.getText()));
     owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
 }
 
@@ -190,21 +176,16 @@ void BoundaryLogicPresenter::mouseWheelMove(const juce::MouseEvent &event,
     juce::int64 length = 0;
     owner.getAudioPlayer().getReaderInfo(sampleRate, length);
 
-    if (editor == &cutInEditor) {
-        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::In);
-        const double currentIn = owner.getAudioPlayer().getCutIn();
-        const double newIn = TimeEntryHelpers::handleTimeStep(event, wheel, currentIn, sampleRate);
-        setCutInPosition(newIn);
-        owner.getSessionState().setAutoCutInActive(false);
-        owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
-    } else if (editor == &cutOutEditor) {
-        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
-        const double currentOut = owner.getAudioPlayer().getCutOut();
-        const double newOut = TimeEntryHelpers::handleTimeStep(event, wheel, currentOut, sampleRate);
-        setCutOutPosition(newOut);
-        owner.getSessionState().setAutoCutOutActive(false);
-        owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
-    }
+    const bool isIn = (editor == &cutInEditor);
+    owner.getInteractionCoordinator().setManualZoomPoint(isIn ? AppEnums::ActiveZoomPoint::In : AppEnums::ActiveZoomPoint::Out);
+    const double currentPos = isIn ? owner.getAudioPlayer().getCutIn() : owner.getAudioPlayer().getCutOut();
+    const double newPos = TimeEntryHelpers::handleTimeStep(event, wheel, currentPos, sampleRate);
+
+    setCutPosition(isIn, newPos);
+    if (isIn) owner.getSessionState().setAutoCutInActive(false);
+    else owner.getSessionState().setAutoCutOutActive(false);
+
+    owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
 
     ensureCutOrder();
     refreshLabels();
@@ -222,40 +203,20 @@ void BoundaryLogicPresenter::syncEditorToPosition(juce::TextEditor &editor,
         editor.setText(newText, juce::dontSendNotification);
 }
 
-bool BoundaryLogicPresenter::applyCutInFromEditor(double newPosition, juce::TextEditor &editor) {
+bool BoundaryLogicPresenter::applyCutFromEditor(juce::TextEditor &editor, double newPosition) {
     const double totalLength = getAudioTotalLength();
+    const bool isIn = (&editor == &cutInEditor);
+
     if (newPosition >= 0.0 && newPosition <= totalLength) {
-        setCutInPosition(newPosition);
-        owner.getSessionState().setAutoCutInActive(false);
-
-        if (owner.getInteractionCoordinator().getActiveZoomPoint() !=
-            AppEnums::ActiveZoomPoint::None)
-            owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
-
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
-        refreshLabels();
-        owner.repaint();
-        return true;
-    }
-
-    syncEditorToPosition(editor, owner.getAudioPlayer().getCutIn());
-    editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorError);
-    owner.repaint();
-    return false;
-}
-
-bool BoundaryLogicPresenter::applyCutOutFromEditor(double newPosition, juce::TextEditor &editor) {
-    const double totalLength = getAudioTotalLength();
-    if (newPosition >= 0.0 && newPosition <= totalLength) {
-        if (owner.getAudioPlayer().isRepeating() &&
+        if (!isIn && owner.getAudioPlayer().isRepeating() &&
             owner.getAudioPlayer().getCurrentPosition() >= owner.getAudioPlayer().getCutOut())
             owner.getAudioPlayer().setPlayheadPosition(owner.getAudioPlayer().getCutIn());
 
-        setCutOutPosition(newPosition);
-        owner.getSessionState().setAutoCutOutActive(false);
+        setCutPosition(isIn, newPosition);
+        if (isIn) owner.getSessionState().setAutoCutInActive(false);
+        else owner.getSessionState().setAutoCutOutActive(false);
 
-        if (owner.getInteractionCoordinator().getActiveZoomPoint() !=
-            AppEnums::ActiveZoomPoint::None)
+        if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
             owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
 
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
@@ -264,48 +225,35 @@ bool BoundaryLogicPresenter::applyCutOutFromEditor(double newPosition, juce::Tex
         return true;
     }
 
-    syncEditorToPosition(editor, owner.getAudioPlayer().getCutOut());
+    syncEditorToPosition(editor, isIn ? owner.getAudioPlayer().getCutIn() : owner.getAudioPlayer().getCutOut());
     editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorError);
     owner.repaint();
     return false;
 }
 
-void BoundaryLogicPresenter::setCutInPosition(double positionSeconds) {
+void BoundaryLogicPresenter::setCutPosition(bool isIn, double positionSeconds) {
     const double totalLength = getAudioTotalLength();
     auto &audioPlayer = owner.getAudioPlayer();
-    const double currentOut = audioPlayer.getCutOut();
+    const double otherPos = isIn ? audioPlayer.getCutOut() : audioPlayer.getCutIn();
 
     double newPos = PlaybackHelpers::constrainPosition(positionSeconds, 0.0, totalLength);
 
-    if (!owner.getSessionState().getCutPrefs().autoCut.inActive && newPos >= currentOut &&
-        owner.getSessionState().getCutPrefs().autoCut.outActive)
-        owner.getSessionState().setAutoCutOutActive(false);
+    if (isIn) {
+        if (!owner.getSessionState().getCutPrefs().autoCut.inActive && newPos >= otherPos &&
+            owner.getSessionState().getCutPrefs().autoCut.outActive)
+            owner.getSessionState().setAutoCutOutActive(false);
 
-    audioPlayer.setCutIn(newPos);
+        audioPlayer.setCutIn(newPos);
+        if (owner.getSessionState().getCutPrefs().autoCut.inActive && newPos >= otherPos)
+            setCutPosition(false, totalLength);
+    } else {
+        if (!owner.getSessionState().getCutPrefs().autoCut.outActive && newPos <= otherPos &&
+            owner.getSessionState().getCutPrefs().autoCut.inActive)
+            owner.getSessionState().setAutoCutInActive(false);
 
-    if (owner.getSessionState().getCutPrefs().autoCut.inActive && newPos >= currentOut) {
-        setCutOutPosition(totalLength);
-    }
-
-    audioPlayer.setPlayheadPosition(audioPlayer.getCurrentPosition());
-    ensureCutOrder();
-}
-
-void BoundaryLogicPresenter::setCutOutPosition(double positionSeconds) {
-    const double totalLength = getAudioTotalLength();
-    auto &audioPlayer = owner.getAudioPlayer();
-    const double currentIn = audioPlayer.getCutIn();
-
-    double newPos = PlaybackHelpers::constrainPosition(positionSeconds, 0.0, totalLength);
-
-    if (!owner.getSessionState().getCutPrefs().autoCut.outActive && newPos <= currentIn &&
-        owner.getSessionState().getCutPrefs().autoCut.inActive)
-        owner.getSessionState().setAutoCutInActive(false);
-
-    audioPlayer.setCutOut(newPos);
-
-    if (owner.getSessionState().getCutPrefs().autoCut.outActive && newPos <= currentIn) {
-        setCutInPosition(0.0);
+        audioPlayer.setCutOut(newPos);
+        if (owner.getSessionState().getCutPrefs().autoCut.outActive && newPos <= otherPos)
+            setCutPosition(true, 0.0);
     }
 
     audioPlayer.setPlayheadPosition(audioPlayer.getCurrentPosition());
