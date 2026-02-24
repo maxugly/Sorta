@@ -10,8 +10,6 @@ SilenceThresholdPresenter::SilenceThresholdPresenter(ControlPanel &ownerPanel,
     const auto& autoCut = owner.getSessionState().getCutPrefs().autoCut;
     configureEditor(inThresholdEditor, autoCut.thresholdIn, "In Silence Threshold (%)");
     configureEditor(outThresholdEditor, autoCut.thresholdOut, "Out Silence Threshold (%)");
-
-    startTimer(100);
 }
 
 SilenceThresholdPresenter::~SilenceThresholdPresenter() {
@@ -19,17 +17,6 @@ SilenceThresholdPresenter::~SilenceThresholdPresenter() {
     outThresholdEditor.removeListener(this);
     inThresholdEditor.removeMouseListener(this);
     outThresholdEditor.removeMouseListener(this);
-}
-
-void SilenceThresholdPresenter::timerCallback() {
-    if (pendingIn.active) {
-        owner.getSessionState().setThresholdIn(pendingIn.value);
-        pendingIn.active = false;
-    }
-    if (pendingOut.active) {
-        owner.getSessionState().setThresholdOut(pendingOut.value);
-        pendingOut.active = false;
-    }
 }
 
 void SilenceThresholdPresenter::configureEditor(juce::TextEditor &editor, float initialValue,
@@ -83,19 +70,11 @@ void SilenceThresholdPresenter::applyThresholdFromEditor(juce::TextEditor &edito
     const int val = editor.getText().getIntValue();
     if (isValidPercentage(val)) {
         const float threshold = static_cast<float>(val) / 100.0f;
-        const bool isIn = (&editor == &inThresholdEditor);
-        const float currentThreshold = isIn ? owner.getSessionState().getCutPrefs().autoCut.thresholdIn 
-                                            : owner.getSessionState().getCutPrefs().autoCut.thresholdOut;
-
-        if (std::abs(threshold - currentThreshold) > 0.001f) {
-            if (isIn) {
-                pendingIn.value = threshold;
-                pendingIn.active = true;
-            } else {
-                pendingOut.value = threshold;
-                pendingOut.active = true;
-            }
-        }
+        if (&editor == &inThresholdEditor)
+            owner.getSessionState().setThresholdIn(threshold);
+        else
+            owner.getSessionState().setThresholdOut(threshold);
+            
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
     } else {
         restoreEditorToCurrentValue(editor);
