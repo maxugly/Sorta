@@ -21,10 +21,6 @@ namespace Config {
 namespace UI {
 /** @brief The base thickness of the button border. */
 inline constexpr float ButtonOutlineThickness = 2.0f;
-/** @brief The peak alpha value for the breathing pulse. */
-inline constexpr float ButtonGlowMaxOpacity = 0.8f;
-/** @brief The minimum alpha value for the breathing pulse. */
-inline constexpr float ButtonGlowMinOpacity = 0.1f;
 /** @brief Standard corner rounding for all buttons. */
 inline constexpr float ButtonCornerSize = 6.0f;
 /** @brief Width for Cut In/Out buttons in units. */

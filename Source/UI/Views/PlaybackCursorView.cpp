@@ -63,7 +63,7 @@ void PlaybackCursorView::paint(juce::Graphics &g) {
     const float x = CoordinateMapper::secondsToPixels(
         drawPosition, (float)waveformBounds.getWidth(), audioLength);
 
-    const juce::Colour cursorColor = Config::Colors::playbackCursor.withAlpha(0.8f);
+    const juce::Colour cursorColor = Config::Colors::playbackCursor;
 
     PlaybackCursorGlow::renderGlow(g, juce::roundToInt(x), 0, getHeight(), cursorColor);
 }

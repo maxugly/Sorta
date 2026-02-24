@@ -58,9 +58,9 @@ void WaveformView::paint(juce::Graphics &g) {
             drawWaveform(igBright);
 
             // Bake Dark Waveform
-            juce::ColourGradient darkGrad(Config::Colors::waveformPeak.darker(0.8f), bounds.getX(), bounds.getY(),
-                                          Config::Colors::waveformPeak.darker(0.8f), bounds.getX(), bounds.getBottom(), false);
-            darkGrad.addColour(0.5, Config::Colors::waveformCore.darker(0.8f));
+            juce::ColourGradient darkGrad(Config::Colors::waveformPeak.withBrightness(0.1f), bounds.getX(), bounds.getY(),
+                                          Config::Colors::waveformPeak.withBrightness(0.1f), bounds.getX(), bounds.getBottom(), false);
+            darkGrad.addColour(0.5, Config::Colors::waveformCore.withBrightness(0.1f));
             igDark.setGradientFill(darkGrad);
             drawWaveform(igDark);
         }

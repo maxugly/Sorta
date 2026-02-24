@@ -16,7 +16,7 @@ class KnobLookAndFeel : public juce::LookAndFeel_V4 {
         auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
 
         // 1. Draw Knob Body
-        g.setColour(Config::Colors::Button::outline.withAlpha(0.3f));
+        g.setColour(Config::Colors::Button::base);
         g.fillEllipse(rx, ry, rw, rw);
         
         // 2. Draw Track

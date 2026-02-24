@@ -129,12 +129,12 @@ void ZoomPresenter::playbackTimerTick() {
     if (state.placementMode == AppEnums::PlacementMode::CutIn ||
         state.placementMode == AppEnums::PlacementMode::CutOut) {
         state.cursorLineColor = Config::Colors::mousePlacementMode;
-        state.cursorHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
+        state.cursorHighlightColor = Config::Colors::mousePlacementMode;
         state.cursorGlowColor = Config::Colors::placementModeGlow;
         state.cursorGlowThickness = Config::Layout::Glow::placementModeGlowThickness;
     } else if (state.isZKeyDown) {
         state.cursorLineColor = Config::Colors::mousePlacementMode;
-        state.cursorHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
+        state.cursorHighlightColor = Config::Colors::mousePlacementMode;
     }
     // ---------------------------------------------------
 
