@@ -73,7 +73,6 @@ void WaveformMouseHandler::mouseDown(const juce::MouseEvent &event) {
                         owner.getSessionState().setCutOut(zoomedTime);
                         owner.getSessionState().setAutoCutOutActive(false);
                     }
-                    owner.repaint();
                     return;
                 } else {
                     const auto azp = coordinator.getActiveZoomPoint();
@@ -87,7 +86,6 @@ void WaveformMouseHandler::mouseDown(const juce::MouseEvent &event) {
                         owner.getAudioPlayer().setPlayheadPosition(zoomedTime);
                         isDraggingFlag = isScrubbingState = true;
                         mouseDragStartX = event.x;
-                        owner.repaint();
                         return;
                     }
                 }
@@ -106,7 +104,6 @@ void WaveformMouseHandler::mouseDown(const juce::MouseEvent &event) {
                 isDraggingFlag = isScrubbingState = true;
                 mouseDragStartX = event.x;
                 seekToMousePosition(event.x);
-                owner.repaint();
             }
         }
     } else if (event.mods.isRightButtonDown()) {
@@ -138,13 +135,11 @@ void WaveformMouseHandler::mouseDrag(const juce::MouseEvent &event) {
                     tr.first;
 
         owner.getAudioPlayer().setPlayheadPosition(zt);
-        owner.repaint();
         return;
     }
 
     if (isDraggingFlag && wb.contains(event.getPosition())) {
         seekToMousePosition(event.x);
-        owner.repaint();
     }
 }
 
@@ -157,7 +152,6 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
 
         }
         isDraggingFlag = isScrubbingState = false;
-        owner.repaint();
         return;
     }
 
@@ -218,7 +212,6 @@ void WaveformMouseHandler::mouseWheelMove(const juce::MouseEvent &event,
         step *= 10.0;
     owner.getAudioPlayer().setPlayheadPosition(owner.getAudioPlayer().getCurrentPosition() +
                                                ((wheel.deltaY > 0) ? 1.0 : -1.0) * step);
-    owner.repaint();
 }
 
 void WaveformMouseHandler::handleRightClickForCutPlacement(int x) {
