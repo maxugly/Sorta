@@ -14,6 +14,7 @@ class FocusManager;
 #include "UI/Components/MarkerStrip.h"
 #include "UI/Components/TransportButton.h"
 #include "UI/Components/TransportStrip.h"
+#include "UI/Components/CutLengthStrip.h"
 #include "UI/Views/PlaybackTimeView.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/Handlers/MarkerMouseHandler.h"
@@ -110,6 +111,7 @@ class ControlPanel final : public juce::Component {
     TopBarView* getTopBarView() { return topBarView.get(); }
     MarkerStrip *getInStrip() { return inStrip.get(); }
     MarkerStrip *getOutStrip() { return outStrip.get(); }
+    CutLengthStrip* getCutLengthStrip() { return cutLengthStrip.get(); }
     PlaybackTimeView* getPlaybackTimeView() { return playbackTimeView.get(); }
     SilenceDetectionPresenter *getSilenceDetectionPresenter() {
         return presenterCore != nullptr ? &presenterCore->getSilenceDetectionPresenter() : nullptr;
@@ -170,6 +172,7 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<TopBarView> topBarView;
     std::unique_ptr<PlaybackTimeView> playbackTimeView;
     std::unique_ptr<MarkerStrip> inStrip, outStrip;
+    std::unique_ptr<CutLengthStrip> cutLengthStrip;
 
     LayoutCache layoutCache;
 

@@ -146,6 +146,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Components/TransportStrip.cpp
             Source/UI/Components/MarkerStrip.h
             Source/UI/Components/MarkerStrip.cpp
+            Source/UI/Components/CutLengthStrip.h
+            Source/UI/Components/CutLengthStrip.cpp
 
             # UI/Views
             Source/UI/Views/CutLayerView.h

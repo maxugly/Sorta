@@ -23,7 +23,6 @@ PlaybackTimeView::PlaybackTimeView() {
 
     configure(elapsedTimeEditor, juce::Justification::left);
     configure(remainingTimeEditor, juce::Justification::right);
-    configure(cutLengthEditor, juce::Justification::centred);
 }
 
 PlaybackTimeView::~PlaybackTimeView() = default;
@@ -54,5 +53,4 @@ void PlaybackTimeView::resized() {
 
     elapsedTimeEditor.setBounds(margin, 0, playbackWidth, playbackHeight);
     remainingTimeEditor.setBounds(bounds.getRight() - margin - playbackWidth, 0, playbackWidth, playbackHeight);
-    cutLengthEditor.setBounds((bounds.getWidth() / 2) - (playbackWidth / 2), 0, playbackWidth / 2, playbackHeight);
 }

@@ -79,9 +79,13 @@ void ControlPanel::setupViews() {
 void ControlPanel::setupStrips() {
     inStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::In);
     addAndMakeVisible(inStrip.get());
-
+    
     outStrip = std::make_unique<MarkerStrip>(MarkerStrip::MarkerType::Out);
     addAndMakeVisible(outStrip.get());
+
+    // --- NEW: Instantiate the CutLengthStrip ---
+    cutLengthStrip = std::make_unique<CutLengthStrip>();
+    addAndMakeVisible(cutLengthStrip.get());
 }
 
 juce::MouseCursor ControlPanel::getMouseCursor() {

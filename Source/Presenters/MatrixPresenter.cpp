@@ -67,9 +67,10 @@ void MatrixPresenter::playbackTimerTick() {
     state.ledColors.push_back(sessionState.getChannelViewMode() == AppEnums::ChannelViewMode::Stereo ? active : inactive);
 
     auto* ptv = owner.getPlaybackTimeView();
+    auto* cls = owner.getCutLengthStrip();
     state.ledColors.push_back((ptv && ptv->getElapsedEditor().hasKeyboardFocus(false)) ? active : inactive);
     state.ledColors.push_back((ptv && ptv->getRemainingEditor().hasKeyboardFocus(false)) ? active : inactive);
-    state.ledColors.push_back((ptv && ptv->getCutLengthEditor().hasKeyboardFocus(false)) ? active : inactive);
+    state.ledColors.push_back((cls && cls->getLengthEditor().hasKeyboardFocus(false)) ? active : inactive);
 
     auto* inStrip = owner.getInStrip();
     auto* outStrip = owner.getOutStrip();

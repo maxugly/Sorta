@@ -58,6 +58,12 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int rowHeigh
 
     if (controlPanel.outStrip != nullptr)
         controlPanel.outStrip->setBounds(cutRow.removeFromRight(stripWidth));
+
+    // --- NEW: Center the Cut Length Strip in the remaining space ---
+    if (controlPanel.getCutLengthStrip() != nullptr) {
+        const int lengthWidth = Config::Layout::Text::playbackWidth / 2;
+        controlPanel.getCutLengthStrip()->setBounds(cutRow.withSizeKeepingCentre(lengthWidth, height));
+    }
 }
 
 void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, int rowHeight) {

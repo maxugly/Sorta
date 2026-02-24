@@ -158,8 +158,8 @@ void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, boo
         owner.outStrip->getResetButton().setEnabled(enabled);
     }
 
-    if (owner.playbackTimeView != nullptr) {
-        auto &length = owner.playbackTimeView->getCutLengthEditor();
+    if (owner.getCutLengthStrip() != nullptr) {
+        auto &length = owner.getCutLengthStrip()->getLengthEditor();
         length.setEnabled(enabled && isCutModeActive);
         length.setVisible(isCutModeActive);
     }
