@@ -139,7 +139,7 @@ class ModernLookAndFeel : public juce::LookAndFeel_V4 {
     void drawTextEditorOutline(juce::Graphics &g, int width, int height,
                                juce::TextEditor &textEditor) override {
         if (!textEditor.isEnabled()) {
-            g.setColour(Config::Colors::Button::disabledText.withAlpha(0.5f));
+            g.setColour(Config::Colors::Button::disabledText);
         } else {
             g.setColour(textEditor.findColour(juce::TextEditor::outlineColourId));
         }

@@ -13,8 +13,8 @@ StatsPresenter::StatsPresenter(ControlPanel &ownerIn) : owner(ownerIn) {
     statsDisplay.setReadOnly(true);
     statsDisplay.setMultiLine(true);
     statsDisplay.setWantsKeyboardFocus(false);
-    statsDisplay.setColour(juce::TextEditor::backgroundColourId, juce::Colours::transparentBlack);
-    statsDisplay.setColour(juce::TextEditor::outlineColourId, juce::Colours::transparentBlack);
+    statsDisplay.setColour(juce::TextEditor::backgroundColourId, Config::Colors::Window::background);
+    statsDisplay.setColour(juce::TextEditor::outlineColourId, Config::Colors::Window::background);
     statsDisplay.setColour(juce::TextEditor::textColourId, Config::Colors::statsText);
     statsOverlay.setVisible(false);
 

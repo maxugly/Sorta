@@ -31,7 +31,7 @@ void ZoomView::drawMouseCursor(juce::Graphics& g) {
     if (state.placementMode == AppEnums::PlacementMode::CutIn ||
         state.placementMode == AppEnums::PlacementMode::CutOut) {
         
-        g.setColour(state.cursorGlowColor.withAlpha(Config::Layout::Glow::mouseAlpha));
+        g.setColour(state.cursorGlowColor);
         g.fillRect(localMouseX -
                        (int)(state.cursorGlowThickness * Config::Layout::Glow::offsetFactor) - 1,
                    waveformBounds.getY(),
@@ -54,11 +54,8 @@ void ZoomView::drawMouseCursor(juce::Graphics& g) {
     const float amplitudeY = state.amplitudeY;
     const float bottomAmplitudeY = state.bottomAmplitudeY;
 
-    juce::ColourGradient amplitudeGlowGradient(
-        state.cursorGlowColor.withAlpha(0.0f), (float)localMouseX, amplitudeY,
-        state.cursorGlowColor.withAlpha(Config::Layout::Glow::mouseAmplitudeAlpha),
-        (float)localMouseX, centerY, true);
-    g.setGradientFill(amplitudeGlowGradient);
+    // Replaced the transparent gradient with a solid color fill
+    g.setColour(state.cursorGlowColor);
     g.fillRect(juce::Rectangle<float>(
         (float)localMouseX - Config::Layout::Glow::mouseAmplitudeGlowThickness *
                                  Config::Layout::Glow::offsetFactor,
@@ -146,8 +143,8 @@ void ZoomView::drawZoomPopup(juce::Graphics& g) {
     const float actualInX = juce::jmin(inX, outX);
     const float actualOutX = juce::jmax(inX, outX);
 
-    drawShadow((float)popupBounds.getX(), actualInX, Config::Colors::solidBlack.withAlpha(0.5f));
-    drawShadow(actualOutX, (float)popupBounds.getRight(), Config::Colors::solidBlack.withAlpha(0.5f));
+    drawShadow((float)popupBounds.getX(), actualInX, Config::Colors::solidBlack);
+    drawShadow(actualOutX, (float)popupBounds.getRight(), Config::Colors::solidBlack);
 
     auto drawFineLine = [&](float x, juce::Colour color, float thickness) {
         if (x >= (float)popupBounds.getX() && x <= (float)popupBounds.getRight()) {
@@ -157,22 +154,21 @@ void ZoomView::drawZoomPopup(juce::Graphics& g) {
         }
     };
 
-    drawFineLine(inX, Config::Colors::cutLine.withAlpha(0.8f),
+    drawFineLine(inX, Config::Colors::cutLine,
                  Config::Layout::connectorLineWidth);
-    drawFineLine(outX, Config::Colors::cutLine.withAlpha(0.8f),
+    drawFineLine(outX, Config::Colors::cutLine,
                  Config::Layout::connectorLineWidth);
     drawFineLine(state.currentPositionPixelX,
-                 Config::Colors::playbackCursor.withAlpha(0.8f), 
+                 Config::Colors::playbackCursor, 
                  Config::Layout::buttonOutlineThickness);
 
     if (state.isDraggingCutIn || state.isDraggingCutOut) {
-        const juce::Colour trackingColor =
-            Config::Colors::zoomPopupTrackingLine.withAlpha(0.9f);
+        const juce::Colour trackingColor = Config::Colors::zoomPopupTrackingLine;
         drawFineLine(state.isDraggingCutIn ? inX : outX, trackingColor,
                      Config::Layout::connectorLineWidth);
     } else {
         drawFineLine(state.currentPositionPixelX,
-                     Config::Colors::zoomPopupPlaybackLine.withAlpha(0.8f),
+                     Config::Colors::zoomPopupPlaybackLine,
                      Config::Layout::connectorLineWidth);
     }
 

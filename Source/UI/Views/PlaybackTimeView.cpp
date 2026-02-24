@@ -11,8 +11,8 @@ PlaybackTimeView::PlaybackTimeView() {
         addAndMakeVisible(ed);
         ed.setReadOnly(false);
         ed.setJustification(just);
-        ed.setColour(juce::TextEditor::backgroundColourId, Config::Colors::transparentBlack);
-        ed.setColour(juce::TextEditor::outlineColourId, Config::Colors::transparentBlack);
+        ed.setColour(juce::TextEditor::backgroundColourId, Config::Colors::Window::background);
+        ed.setColour(juce::TextEditor::outlineColourId, Config::Colors::Window::background);
         ed.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
         ed.setFont(juce::Font(juce::FontOptions((float)Config::Layout::Text::playbackSize)));
         ed.applyFontToAllText(ed.getFont());
