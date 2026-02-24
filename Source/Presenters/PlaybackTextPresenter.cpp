@@ -158,17 +158,20 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
         const double base = session.getCutPrefs().active ? cutOut : totalLength;
         owner.getAudioPlayer().setPlayheadPosition(base - newTime);
     } else if (&editor == &owner.getCutLengthStrip()->getLengthEditor()) {
-        double currentIn = owner.getSessionState().getCutIn();
+        const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
+        const auto& prefs = owner.getSessionState().getCutPrefs();
         newTime = juce::jlimit(0.0, totalLength, newTime);
 
-        double proposedOut = currentIn + newTime;
-
-        if (proposedOut > totalLength) {
-            double newIn = totalLength - newTime;
-            owner.getSessionState().setCutIn(newIn);
-            owner.getSessionState().setCutOut(totalLength);
+        if (prefs.outLocked && !prefs.inLocked) {
+            owner.getSessionState().setCutIn(prefs.cutOut - newTime);
         } else {
-            owner.getSessionState().setCutOut(proposedOut);
+            double proposedOut = prefs.cutIn + newTime;
+            if (proposedOut > totalLength) {
+                owner.getSessionState().setCutIn(totalLength - newTime);
+                owner.getSessionState().setCutOut(totalLength);
+            } else {
+                owner.getSessionState().setCutOut(proposedOut);
+            }
         }
 
         owner.getBoundaryLogicPresenter().ensureCutOrder();
@@ -262,14 +265,19 @@ void PlaybackTextPresenter::mouseWheelMove(const juce::MouseEvent &event,
         owner.getAudioPlayer().setPlayheadPosition(total - newVal);
     } else if (editor == &owner.getCutLengthStrip()->getLengthEditor()) {
         const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
+        const auto& prefs = owner.getSessionState().getCutPrefs();
         newVal = juce::jlimit(0.0, totalLength, newVal);
-        double proposedOut = owner.getSessionState().getCutIn() + newVal;
 
-        if (proposedOut > totalLength) {
-            owner.getSessionState().setCutIn(totalLength - newVal);
-            owner.getSessionState().setCutOut(totalLength);
+        if (prefs.outLocked && !prefs.inLocked) {
+            owner.getSessionState().setCutIn(prefs.cutOut - newVal);
         } else {
-            owner.getSessionState().setCutOut(proposedOut);
+            double proposedOut = prefs.cutIn + newVal;
+            if (proposedOut > totalLength) {
+                owner.getSessionState().setCutIn(totalLength - newVal);
+                owner.getSessionState().setCutOut(totalLength);
+            } else {
+                owner.getSessionState().setCutOut(proposedOut);
+            }
         }
 
         owner.getBoundaryLogicPresenter().ensureCutOrder();
