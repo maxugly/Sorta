@@ -14,6 +14,8 @@
 #include <JuceHeader.h>
 #endif
 
+#include "UI/Components/StyledTextEditor.h"
+
 class PlaybackTimeView final : public juce::Component {
   public:
     PlaybackTimeView();
@@ -38,8 +40,8 @@ class PlaybackTimeView final : public juce::Component {
     juce::TextEditor& getRemainingEditor() { return remainingTimeEditor; }
 
   private:
-    juce::TextEditor elapsedTimeEditor;
-    juce::TextEditor remainingTimeEditor;
+    StyledTextEditor elapsedTimeEditor;
+    StyledTextEditor remainingTimeEditor;
     juce::String totalTimeStaticStr;
 
     juce::String currentTimeString;

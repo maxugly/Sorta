@@ -19,14 +19,8 @@ void MarkerStrip::initialiseComponents() {
 
     // Timer Editor
     addAndMakeVisible(timerEditor);
-    timerEditor.setReadOnly(false);
-    timerEditor.setJustification(juce::Justification::centred);
-    timerEditor.setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
-    timerEditor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
-    timerEditor.setFont(juce::Font(juce::FontOptions(Config::Layout::Text::playbackSize)));
+    timerEditor.applyStandardStyle();
     timerEditor.setInputRestrictions(12, "0123456789:.");
-    timerEditor.setMultiLine(false);
-    timerEditor.setReturnKeyStartsNewLine(false);
     timerEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
 
     // Reset Button
@@ -36,6 +30,7 @@ void MarkerStrip::initialiseComponents() {
 
     // Threshold Editor (percentage input)
     addAndMakeVisible(thresholdEditor);
+    thresholdEditor.applyStandardStyle();
     thresholdEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
 
     // AutoCut Button

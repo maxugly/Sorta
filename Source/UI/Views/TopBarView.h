@@ -15,6 +15,7 @@
 #endif
 
 #include <memory>
+#include "UI/Components/TransportButton.h"
 
 class ControlPanel;
 class TransportStrip;
@@ -29,11 +30,11 @@ class TopBarView final : public juce::Component {
 
     VolumeView& getVolumeView() { return *volumeView; }
 
-    juce::TextButton openButton;
-    juce::TextButton modeButton;
-    juce::TextButton exitButton;
-    juce::TextButton statsButton;
-    juce::TextButton channelViewButton;
+    TransportButton openButton;
+    TransportButton modeButton;
+    TransportButton exitButton;
+    TransportButton statsButton;
+    TransportButton channelViewButton;
 
     // We keep transportStrip here to manage the top row layout entirely
     std::unique_ptr<TransportStrip> transportStrip;

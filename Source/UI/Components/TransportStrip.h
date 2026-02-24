@@ -7,6 +7,7 @@
 #include <JuceHeader.h>
 #endif
 
+#include "UI/Components/TransportButton.h"
 #include "Utils/Config.h"
 
 /**
@@ -28,28 +29,28 @@ class TransportStrip : public juce::Component {
     void updateAutoplayState(bool isAutoplayActive);
     void updateRepeatState(bool isRepeating);
 
-    juce::TextButton &getPlayStopButton() {
+    TransportButton &getPlayStopButton() {
         return playStopButton;
     }
-    juce::TextButton &getStopButton() {
+    TransportButton &getStopButton() {
         return stopButton;
     }
-    juce::TextButton &getAutoplayButton() {
+    TransportButton &getAutoplayButton() {
         return autoplayButton;
     }
-    juce::TextButton &getRepeatButton() {
+    TransportButton &getRepeatButton() {
         return repeatButton;
     }
-    juce::TextButton &getCutButton() {
+    TransportButton &getCutButton() {
         return cutButton;
     }
 
   private:
-    juce::TextButton playStopButton;
-    juce::TextButton stopButton;
-    juce::TextButton autoplayButton;
-    juce::TextButton repeatButton;
-    juce::TextButton cutButton;
+    TransportButton playStopButton;
+    TransportButton stopButton;
+    TransportButton autoplayButton;
+    TransportButton repeatButton;
+    TransportButton cutButton;
 
     void initialiseButtons();
 

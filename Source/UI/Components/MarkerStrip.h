@@ -8,6 +8,7 @@
 #endif
 
 #include "UI/Components/TransportButton.h"
+#include "UI/Components/StyledTextEditor.h"
 #include "Utils/Config.h"
 
 class BoundaryLogicPresenter;
@@ -43,13 +44,13 @@ class MarkerStrip : public juce::Component {
     juce::TextEditor &getTimerEditor() {
         return timerEditor;
     }
-    juce::TextButton &getResetButton() {
+    TransportButton &getResetButton() {
         return resetButton;
     }
     juce::TextEditor &getThresholdEditor() {
         return thresholdEditor;
     }
-    juce::TextButton &getAutoCutButton() {
+    TransportButton &getAutoCutButton() {
         return autoCutButton;
     }
     TransportButton &getLockButton() {
@@ -61,10 +62,10 @@ class MarkerStrip : public juce::Component {
     BoundaryLogicPresenter *boundaryLogicPresenter = nullptr;
 
     TransportButton markerButton;
-    juce::TextEditor timerEditor;
-    juce::TextButton resetButton;
-    juce::TextEditor thresholdEditor;
-    juce::TextButton autoCutButton;
+    StyledTextEditor timerEditor;
+    TransportButton resetButton;
+    StyledTextEditor thresholdEditor;
+    TransportButton autoCutButton;
     TransportButton lockButton;
 
     void initialiseComponents();

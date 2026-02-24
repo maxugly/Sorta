@@ -7,22 +7,11 @@
 #include "UI/ControlPanel.h"
 
 PlaybackTimeView::PlaybackTimeView() {
-    auto configure = [&](juce::TextEditor &ed, juce::Justification just) {
-        addAndMakeVisible(ed);
-        ed.setReadOnly(false);
-        ed.setJustification(just);
-        ed.setColour(juce::TextEditor::backgroundColourId, Config::Colors::Window::background);
-        ed.setColour(juce::TextEditor::outlineColourId, Config::Colors::Window::background);
-        ed.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
-        ed.setFont(juce::Font(juce::FontOptions((float)Config::Layout::Text::playbackSize)));
-        ed.applyFontToAllText(ed.getFont());
-        ed.setMultiLine(false);
-        ed.setReturnKeyStartsNewLine(false);
-        ed.setSelectAllWhenFocused(true);
-    };
+    addAndMakeVisible(elapsedTimeEditor);
+    elapsedTimeEditor.applyStandardStyle(juce::Justification::left);
 
-    configure(elapsedTimeEditor, juce::Justification::left);
-    configure(remainingTimeEditor, juce::Justification::right);
+    addAndMakeVisible(remainingTimeEditor);
+    remainingTimeEditor.applyStandardStyle(juce::Justification::right);
 }
 
 PlaybackTimeView::~PlaybackTimeView() = default;

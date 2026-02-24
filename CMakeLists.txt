@@ -152,6 +152,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Components/MarkerStrip.cpp
             Source/UI/Components/CutLengthStrip.h
             Source/UI/Components/CutLengthStrip.cpp
+            Source/UI/Components/StyledTextEditor.h
+            Source/UI/Components/StyledTextEditor.cpp
 
             # UI/Views
             Source/UI/Views/CutLayerView.h
