@@ -45,6 +45,8 @@ void PlaybackTextPresenter::initialiseEditors() {
 
     length.addListener(this);
     length.addMouseListener(this, false);
+
+    updateLengthEditor();
 }
 
 void PlaybackTextPresenter::updateEditors() {
@@ -73,7 +75,13 @@ void PlaybackTextPresenter::updateEditors() {
 
         syncEditorToPosition(remaining, remSeconds, true);
     }
+}
 
+void PlaybackTextPresenter::updateLengthEditor() {
+    if (owner.getCutLengthStrip() == nullptr)
+        return;
+
+    auto &length = owner.getCutLengthStrip()->getLengthEditor();
     if (!isEditingCutLength && !length.hasKeyboardFocus(true)) {
         double cutLen = std::abs(owner.getSessionState().getCutOut() - owner.getSessionState().getCutIn());
         juce::String newText = TimeUtils::formatTime(cutLen);

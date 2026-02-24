@@ -39,9 +39,14 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
     void fileChanged(const juce::String &filePath) override {
         juce::ignoreUnused(filePath);
         updateEditors();
+        updateLengthEditor();
     }
+    void cutInChanged(double) override { updateLengthEditor(); }
+    void cutOutChanged(double) override { updateLengthEditor(); }
+    void cutPreferenceChanged(const MainDomain::CutPreferences&) override { updateLengthEditor(); }
 
   private:
+    void updateLengthEditor();
     void textEditorTextChanged(juce::TextEditor &editor) override;
 
     void textEditorReturnKeyPressed(juce::TextEditor &editor) override;

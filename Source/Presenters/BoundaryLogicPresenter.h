@@ -19,8 +19,7 @@ class ControlPanel;
  */
 class BoundaryLogicPresenter final : public juce::TextEditor::Listener,
                                  public juce::MouseListener,
-                                 public SessionState::Listener,
-                                 public PlaybackTimerManager::Listener {
+                                 public SessionState::Listener {
   public:
     BoundaryLogicPresenter(ControlPanel &ownerPanel, 
                            juce::TextEditor &cutIn, juce::TextEditor &cutOut);
@@ -32,21 +31,22 @@ class BoundaryLogicPresenter final : public juce::TextEditor::Listener,
 
     void ensureCutOrder();
 
-    // PlaybackTimerManager::Listener
-    void playbackTimerTick() override {
-        refreshLabels();
-    }
-    void animationUpdate(float breathingPulse) override {
-        juce::ignoreUnused(breathingPulse);
-    }
-
     // SessionState::Listener
     void fileChanged(const juce::String &filePath) override {
         juce::ignoreUnused(filePath);
         refreshLabels();
     }
-    void cutInChanged(double) override { ensureCutOrder(); }
-    void cutOutChanged(double) override { ensureCutOrder(); }
+    void cutInChanged(double) override { 
+        ensureCutOrder(); 
+        refreshLabels();
+    }
+    void cutOutChanged(double) override { 
+        ensureCutOrder(); 
+        refreshLabels();
+    }
+    void cutPreferenceChanged(const MainDomain::CutPreferences&) override {
+        refreshLabels();
+    }
 
   private:
     // TextEditor::Listener
