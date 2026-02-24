@@ -84,26 +84,26 @@ juce::String StatsPresenter::buildStatsString() const {
 
     if (thumbnail.getTotalLength() > 0.0 &&
         audioPlayer.getReaderInfo(sampleRate, lengthInSamples)) {
-        stats << "File: " << audioPlayer.getLoadedFile().getFileName() << "\n";
-        stats << "Samples Loaded: " << lengthInSamples << "\n";
-        stats << "Sample Rate: " << sampleRate << " Hz\n";
-        stats << "Channels: " << thumbnail.getNumChannels() << "\n";
-        stats << "Length: " << TimeUtils::formatTime(thumbnail.getTotalLength()) << "\n";
+        stats << Config::Labels::statsFile << audioPlayer.getLoadedFile().getFileName() << "\n";
+        stats << Config::Labels::statsSamples << lengthInSamples << "\n";
+        stats << Config::Labels::statsRate << sampleRate << Config::Labels::statsHz << "\n";
+        stats << Config::Labels::statsChannels << thumbnail.getNumChannels() << "\n";
+        stats << Config::Labels::statsLength << TimeUtils::formatTime(thumbnail.getTotalLength()) << "\n";
 
         float minVal = 0.0f;
         float maxVal = 0.0f;
         thumbnail.getApproximateMinMax(0.0, thumbnail.getTotalLength(), 0, minVal, maxVal);
-        stats << "Approx Peak (Ch 0): " << juce::jmax(std::abs(minVal), std::abs(maxVal)) << "\n";
-        stats << "Min: " << minVal << ", Max: " << maxVal << "\n";
+        stats << Config::Labels::statsPeak0 << juce::jmax(std::abs(minVal), std::abs(maxVal)) << "\n";
+        stats << Config::Labels::statsMin << minVal << Config::Labels::statsMax << maxVal << "\n";
 
         if (thumbnail.getNumChannels() > 1) {
             thumbnail.getApproximateMinMax(0.0, thumbnail.getTotalLength(), 1, minVal, maxVal);
-            stats << "Approx Peak (Ch 1): " << juce::jmax(std::abs(minVal), std::abs(maxVal))
+            stats << Config::Labels::statsPeak1 << juce::jmax(std::abs(minVal), std::abs(maxVal))
                   << "\n";
-            stats << "Min: " << minVal << ", Max: " << maxVal << "\n";
+            stats << Config::Labels::statsMin << minVal << Config::Labels::statsMax << maxVal << "\n";
         }
     } else {
-        stats << "No file loaded or error reading audio.";
+        stats << Config::Labels::statsError;
     }
 
     return stats;

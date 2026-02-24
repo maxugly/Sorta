@@ -123,9 +123,6 @@ void SilenceDetectionPresenter::logStatusMessage(const juce::String &message, bo
     owner.getHintView().setHint(message);
 }
 
-bool SilenceDetectionPresenter::isCutModeActive() const {
-    return sessionState.getCutPrefs().active;
-}
 
 bool SilenceDetectionPresenter::isAutoCutInActive() const {
     return sessionState.getCutPrefs().autoCut.inActive;
@@ -135,6 +132,3 @@ bool SilenceDetectionPresenter::isAutoCutOutActive() const {
     return sessionState.getCutPrefs().autoCut.outActive;
 }
 
-bool SilenceDetectionPresenter::hasLoadedAudio() const {
-    return audioPlayer.getThumbnail().getTotalLength() > 0.0;
-}

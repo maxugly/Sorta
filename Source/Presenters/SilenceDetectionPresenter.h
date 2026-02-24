@@ -58,7 +58,6 @@ class SilenceDetectionPresenter final : public SilenceWorkerClient,
     void logStatusMessage(const juce::String &message, bool isError = false) override;
 
     /** @brief Returns true if cut mode is currently active. */
-    bool isCutModeActive() const override;
 
     /** @brief Returns true if auto-cut-in is active. */
     bool isAutoCutInActive() const override;
@@ -67,7 +66,6 @@ class SilenceDetectionPresenter final : public SilenceWorkerClient,
     bool isAutoCutOutActive() const override;
 
   private:
-    bool hasLoadedAudio() const;
 
     ControlPanel &owner;
     SessionState &sessionState;

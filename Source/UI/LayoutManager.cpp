@@ -87,17 +87,17 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, 
     auto hintBounds = bottomRow.removeFromLeft(hintWidth).withHeight(height);
     controlPanel.getHintView().setBounds(hintBounds.withY(bottomRow.getCentreY() - height / 2));
 
-    controlPanel.layoutCache.bottomRowTopY = bottomRow.getY();
+    // removed bottomRowTopY
     controlPanel.layoutCache.contentAreaBounds = bounds.reduced(margin);
 
     const auto fullBounds = controlPanel.getLocalBounds();
-    controlPanel.layoutCache.playbackLeftTextX = fullBounds.getX() + margin;
-    controlPanel.layoutCache.playbackCenterTextX =
-        (fullBounds.getWidth() / 2) - (playbackWidth / 2);
-    controlPanel.layoutCache.playbackRightTextX = fullBounds.getRight() - margin - playbackWidth;
+    // removed playbackLeftTextX
+    // removed playbackCenterTextX
+        // removed playbackCenterTextX calc
+    // removed playbackRightTextX
 
     if (controlPanel.playbackTimeView != nullptr) {
-        const int textY = controlPanel.layoutCache.bottomRowTopY - Config::Layout::Text::playbackOffsetY;
+        const int textY = bottomRow.getY() - Config::Layout::Text::playbackOffsetY;
         controlPanel.playbackTimeView->setBounds(0, textY, fullBounds.getWidth(),
                                                 Config::Layout::Text::playbackHeight);
     }

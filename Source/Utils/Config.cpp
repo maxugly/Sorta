@@ -102,6 +102,26 @@ const juce::String stepDefault = "Step: 1.0s (Default)";
 const juce::String stepShift = "Step: 0.1s (Shift)";
 const juce::String stepAlt = "Step: 10.0s (Alt)";
 const juce::String stepCtrlShift = "Step: Sample (Ctrl+Shift)";
+const juce::String statsFile = "File: ";
+const juce::String statsSamples = "Samples Loaded: ";
+const juce::String statsRate = "Sample Rate: ";
+const juce::String statsHz = " Hz";
+const juce::String statsChannels = "Channels: ";
+const juce::String statsLength = "Length: ";
+const juce::String statsPeak0 = "Approx Peak (Ch 0): ";
+const juce::String statsPeak1 = "Approx Peak (Ch 1): ";
+const juce::String statsMin = "Min: ";
+const juce::String statsMax = ", Max: ";
+const juce::String statsError = "No file loaded or error reading audio.";
+const juce::String logNoAudio = "No audio loaded to detect silence.";
+const juce::String logScanning = "SilenceDetector: Scanning ";
+const juce::String logSamplesFor = " samples for ";
+const juce::String logBoundary = " Silence Boundary.";
+const juce::String logZeroLength = "SilenceDetector: Audio length is 0, cannot detect Silence Boundaries.";
+const juce::String logStartSet = "Silence Boundary (Start) set to sample ";
+const juce::String logEndSet = "Silence Boundary (End) set to sample ";
+const juce::String logNoSound = "Could not detect any sound at ";
+const juce::String logTooLarge = "SilenceDetector: Audio file is too large for automated Cut Point detection.";
 } // namespace Labels
 
 } // namespace Config

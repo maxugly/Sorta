@@ -266,6 +266,26 @@ extern const juce::String stepDefault;
 extern const juce::String stepShift;
 extern const juce::String stepAlt;
 extern const juce::String stepCtrlShift;
+extern const juce::String statsFile;
+extern const juce::String statsSamples;
+extern const juce::String statsRate;
+extern const juce::String statsHz;
+extern const juce::String statsChannels;
+extern const juce::String statsLength;
+extern const juce::String statsPeak0;
+extern const juce::String statsPeak1;
+extern const juce::String statsMin;
+extern const juce::String statsMax;
+extern const juce::String statsError;
+extern const juce::String logNoAudio;
+extern const juce::String logScanning;
+extern const juce::String logSamplesFor;
+extern const juce::String logBoundary;
+extern const juce::String logZeroLength;
+extern const juce::String logStartSet;
+extern const juce::String logEndSet;
+extern const juce::String logNoSound;
+extern const juce::String logTooLarge;
 } // namespace Labels
 
 } // namespace Config

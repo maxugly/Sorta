@@ -36,7 +36,6 @@ class MarkerMouseHandler : public juce::MouseListener {
     bool isHandleActive(CutMarkerHandle handle) const;
 
     void setDraggedHandle(CutMarkerHandle handle) { draggedHandle = handle; }
-    void setDragStartMouseOffset(double offset) { dragStartMouseOffset = offset; }
 
   private:
     CutMarkerHandle getHandleAtPosition(juce::Point<int> pos) const;
