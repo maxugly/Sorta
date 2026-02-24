@@ -57,6 +57,10 @@ class CutLayerView : public juce::Component {
     void paint(juce::Graphics &g) override;
 
   private:
+    void drawThresholds(juce::Graphics& g);
+    void drawFadeRegions(juce::Graphics& g);
+    void drawMarkersAndRegion(juce::Graphics& g);
+
     ControlPanel &owner;
     CutLayerState state;
 

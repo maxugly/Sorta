@@ -26,10 +26,16 @@ void CutLayerView::paint(juce::Graphics &g) {
     if (!state.markersVisible)
         return;
 
-    const auto bounds = getLocalBounds();
     if (state.audioLength <= 0.0f)
         return;
 
+    drawThresholds(g);
+    drawFadeRegions(g);
+    drawMarkersAndRegion(g);
+}
+
+void CutLayerView::drawThresholds(juce::Graphics& g) {
+    const auto bounds = getLocalBounds();
     auto drawThresholdVisualisation = [&](float xPos, float topThresholdY, float bottomThresholdY) {
         const float halfThresholdLineWidth = Config::Animation::thresholdLineWidth / 2.0f;
         float lineStartX = xPos - halfThresholdLineWidth;
@@ -62,12 +68,13 @@ void CutLayerView::paint(juce::Graphics &g) {
 
     drawThresholdVisualisation(state.inPixelX, state.inThresholdYTop, state.inThresholdYBottom);
     drawThresholdVisualisation(state.outPixelX, state.outThresholdYTop, state.outThresholdYBottom);
+}
 
+void CutLayerView::drawFadeRegions(juce::Graphics& g) {
+    const auto bounds = getLocalBounds();
     const float actualInX = state.actualInX;
     const float actualOutX = state.actualOutX;
-
     const float fadeLength = state.fadeWidthPixels;
-    const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;
 
     const juce::Rectangle<float> leftRegion((float)bounds.getX(), (float)bounds.getY(),
                                             juce::jmax(0.0f, actualInX - (float)bounds.getX()),
@@ -111,6 +118,13 @@ void CutLayerView::paint(juce::Graphics &g) {
         g.setGradientFill(rightFadeGradient);
         g.fillRect(fadeAreaRight);
     }
+}
+
+void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {
+    const auto bounds = getLocalBounds();
+    const float actualInX = state.actualInX;
+    const float actualOutX = state.actualOutX;
+    const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;
 
     auto drawCutMarker = [&](float x, juce::Colour markerColor, float thickness, bool shouldPulse) {
         const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
