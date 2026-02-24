@@ -128,6 +128,7 @@ class ControlPanel final : public juce::Component {
     MatrixView& getMatrixView() { return *matrixView; }
     HintView& getHintView() { return *hintView; }
     PlaybackTextPresenter &getPlaybackTextPresenter() { return presenterCore->getPlaybackTextPresenter(); }
+    WaveformCanvasView* getWaveformCanvasView() { return waveformCanvasView.get(); }
 
     void invokeOwnerOpenDialog();
 

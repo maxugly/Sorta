@@ -53,10 +53,9 @@ void CutLayerView::drawThresholds(juce::Graphics& g) {
 }
 
 void CutLayerView::drawFadeRegions(juce::Graphics& g) {
-    const auto bounds = getLocalBounds().toFloat();
-    g.setColour(Config::Colors::solidBlack);
-    g.fillRect(bounds.withWidth(state.actualInX - bounds.getX()));
-    g.fillRect(bounds.withLeft(state.actualOutX));
+    juce::ignoreUnused(g);
+    // Intentionally left empty. Fade compositing is now handled directly via 
+    // dual-texture hardware clipping in WaveformView::paint().
 }
 
 void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {

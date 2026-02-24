@@ -24,7 +24,6 @@ struct CutLayerState {
     float inThresholdYBottom{0.0f};
     float outThresholdYTop{0.0f};
     float outThresholdYBottom{0.0f};
-    float fadeWidthPixels{0.0f};
     float audioLength{0.0};
     bool markersVisible{false};
     AppEnums::ChannelViewMode channelMode{AppEnums::ChannelViewMode::Mono};
