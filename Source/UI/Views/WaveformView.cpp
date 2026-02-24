@@ -1,8 +1,7 @@
-
-
 #include "UI/Views/WaveformView.h"
 #include "Core/WaveformManager.h"
 #include "Utils/Config.h"
+#include "Utils/CoordinateMapper.h"
 
 WaveformView::WaveformView(WaveformManager &waveformManagerIn)
     : waveformManager(waveformManagerIn) {
@@ -46,10 +45,28 @@ void WaveformView::paint(juce::Graphics &g) {
                                   Config::Colors::waveformPeak, bounds.getX(), bounds.getBottom(), false);
     gradient.addColour(0.5, Config::Colors::waveformCore);
     g.setGradientFill(gradient);
-    const int numChannels = thumbnail.getNumChannels();
+    
+    drawWaveform(g);
+}
 
-    if (currentChannelMode == AppEnums::ChannelViewMode::Mono || numChannels == 1)
-        thumbnail.drawChannel(g, getLocalBounds(), 0.0, audioLength, 0, 1.0f);
-    else
-        thumbnail.drawChannels(g, getLocalBounds(), 0.0, audioLength, 1.0f);
+void WaveformView::drawWaveform(juce::Graphics &g) {
+    const auto &thumbnail = waveformManager.getThumbnail();
+    const auto totalLength = (float)thumbnail.getTotalLength();
+    const auto bounds = getLocalBounds().toFloat();
+    const auto width = bounds.getWidth();
+    const auto centerY = bounds.getCentreY();
+    const auto halfHeight = bounds.getHeight() * 0.5f;
+
+    const float step = (float)Config::Layout::Waveform::pixelsPerSampleLow;
+    for (float x = 0.0f; x < width; x += step) {
+        const double startTime = CoordinateMapper::pixelsToSeconds(x, width, totalLength);
+        const double endTime = CoordinateMapper::pixelsToSeconds(x + step, width, totalLength);
+
+        float minVal = 0.0f, maxVal = 0.0f;
+        thumbnail.getApproximateMinMax(startTime, endTime, 0, minVal, maxVal);
+        const float top = centerY - (maxVal * halfHeight);
+        const float bottom = centerY - (minVal * halfHeight);
+
+        g.fillRect(x, top, step, juce::jmax(1.0f, bottom - top));
+    }
 }

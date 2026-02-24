@@ -43,23 +43,6 @@ void CutLayerView::drawThresholds(juce::Graphics& g) {
 
         lineStartX = juce::jmax(lineStartX, (float)bounds.getX());
         lineEndX = juce::jmin(lineEndX, (float)bounds.getRight());
-        const float currentLineWidth = lineEndX - lineStartX;
-
-        g.setColour(Config::Colors::thresholdRegion);
-        g.fillRect(lineStartX, topThresholdY, currentLineWidth, bottomThresholdY - topThresholdY);
-
-        if (state.showEyeCandy) {
-            const float pulse = state.glowAlpha;
-            const juce::Colour glowColor =
-                Config::Colors::thresholdLine.withAlpha(0.2f + 0.6f * pulse);
-            g.setColour(glowColor);
-
-            // Draw a wider rectangle behind the line for a glow effect
-            g.fillRect(lineStartX, topThresholdY - Config::Layout::outlineThicknessMedium,
-                       currentLineWidth, Config::Layout::buttonCornerRadius);
-            g.fillRect(lineStartX, bottomThresholdY - Config::Layout::outlineThicknessMedium,
-                       currentLineWidth, Config::Layout::buttonCornerRadius);
-        }
 
         g.setColour(Config::Colors::thresholdLine);
         g.drawHorizontalLine((int)topThresholdY, lineStartX, lineEndX);
@@ -71,53 +54,10 @@ void CutLayerView::drawThresholds(juce::Graphics& g) {
 }
 
 void CutLayerView::drawFadeRegions(juce::Graphics& g) {
-    const auto bounds = getLocalBounds();
-    const float actualInX = state.actualInX;
-    const float actualOutX = state.actualOutX;
-    const float fadeLength = state.fadeWidthPixels;
-
-    const juce::Rectangle<float> leftRegion((float)bounds.getX(), (float)bounds.getY(),
-                                            juce::jmax(0.0f, actualInX - (float)bounds.getX()),
-                                            (float)bounds.getHeight());
-    if (leftRegion.getWidth() > 0.0f) {
-        const float actualFade = juce::jmin(fadeLength, leftRegion.getWidth());
-
-        juce::Rectangle<float> solidBlackLeft =
-            leftRegion.withWidth(juce::jmax(0.0f, leftRegion.getWidth() - actualFade));
-        g.setColour(Config::Colors::solidBlack);
-        g.fillRect(solidBlackLeft);
-
-        juce::Rectangle<float> fadeAreaLeft(actualInX - actualFade, (float)bounds.getY(), actualFade,
-                                            (float)bounds.getHeight());
-        juce::ColourGradient leftFadeGradient(Config::Colors::cutRegion, actualInX,
-                                              leftRegion.getCentreY(), Config::Colors::solidBlack,
-                                              actualInX - actualFade, leftRegion.getCentreY(), false);
-        g.setGradientFill(leftFadeGradient);
-        g.fillRect(fadeAreaLeft);
-    }
-
-    const juce::Rectangle<float> rightRegion(actualOutX, (float)bounds.getY(),
-                                             juce::jmax(0.0f, (float)bounds.getRight() - actualOutX),
-                                             (float)bounds.getHeight());
-    if (rightRegion.getWidth() > 0.0f) {
-        const float actualFade = juce::jmin(fadeLength, rightRegion.getWidth());
-
-        float solidBlackStart = actualOutX + actualFade;
-        juce::Rectangle<float> solidBlackRight(
-            solidBlackStart, (float)bounds.getY(),
-            juce::jmax(0.0f, (float)bounds.getRight() - solidBlackStart),
-            (float)bounds.getHeight());
-        g.setColour(Config::Colors::solidBlack);
-        g.fillRect(solidBlackRight);
-
-        juce::Rectangle<float> fadeAreaRight(actualOutX, (float)bounds.getY(), actualFade,
-                                             (float)bounds.getHeight());
-        juce::ColourGradient rightFadeGradient(Config::Colors::cutRegion, actualOutX,
-                                               rightRegion.getCentreY(), Config::Colors::solidBlack,
-                                               actualOutX + actualFade, rightRegion.getCentreY(), false);
-        g.setGradientFill(rightFadeGradient);
-        g.fillRect(fadeAreaRight);
-    }
+    const auto bounds = getLocalBounds().toFloat();
+    g.setColour(Config::Colors::solidBlack);
+    g.fillRect(bounds.withWidth(state.actualInX - bounds.getX()));
+    g.fillRect(bounds.withLeft(state.actualOutX));
 }
 
 void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {
@@ -127,27 +67,10 @@ void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {
     const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;
 
     auto drawCutMarker = [&](float x, juce::Colour markerColor, float thickness, bool shouldPulse) {
+        juce::ignoreUnused(shouldPulse);
         const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
         const float halfBoxWidth = boxWidth / 2.0f;
         const float pillarHeight = (float)bounds.getHeight() * 0.15f;
-
-        // Draw Glow if active
-        if (shouldPulse && state.showEyeCandy) {
-            const float pulse = state.glowAlpha;
-            const juce::Colour glowColor = Config::Colors::cutLine.withAlpha(
-                Config::Colors::cutLine.getFloatAlpha() * (0.2f + 0.8f * pulse));
-            g.setColour(glowColor);
-            g.fillRect(x - (Config::Layout::Glow::cutLineGlowThickness *
-                                Config::Layout::Glow::offsetFactor -
-                            Config::Layout::buttonOutlineThickness * 0.5f),
-                       (float)bounds.getY() + boxHeight, Config::Layout::Glow::cutLineGlowThickness,
-                       (float)bounds.getHeight() - (2.0f * boxHeight));
-        } else {
-            g.setColour(Config::Colors::cutLine.withAlpha(0.3f));
-            g.fillRect(x - Config::Layout::buttonOutlineThickness * 0.5f, (float)bounds.getY() + boxHeight,
-                       Config::Layout::buttonOutlineThickness,
-                       (float)bounds.getHeight() - (2.0f * boxHeight));
-        }
 
         // Top/Bottom Boxes
         g.setColour(markerColor);
@@ -169,11 +92,6 @@ void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {
     drawCutMarker(state.inPixelX, state.inMarkerColor, state.inMarkerThickness, state.inMarkerShouldPulse);
     drawCutMarker(state.outPixelX, state.outMarkerColor, state.outMarkerThickness, state.outMarkerShouldPulse);
 
-    if (state.regionShouldPulse && state.showEyeCandy)
-        g.setColour(state.regionOutlineColor.withAlpha(0.5f + 0.5f * state.glowAlpha));
-    else
-        g.setColour(state.regionOutlineColor.withAlpha(0.4f));
-
     const float halfBoxWidth = Config::Layout::Glow::cutMarkerBoxWidth / 2.0f;
     const float startX = actualInX + halfBoxWidth;
     const float endX = actualOutX - halfBoxWidth;
@@ -181,25 +99,11 @@ void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {
     if (startX < endX) {
         const float hThickness = state.regionOutlineThickness;
         const float w = endX - startX;
-        const float shadowHeight = 1.5f;
         
-        auto drawBarWithShadow = [&](float y) {
-            // Main semi-transparent bar
-            if (state.regionShouldPulse && state.showEyeCandy)
-                g.setColour(state.regionOutlineColor.withAlpha(0.5f + 0.5f * state.glowAlpha));
-            else
-                g.setColour(state.regionOutlineColor.withAlpha(0.4f));
-            
-            g.fillRect(startX, y, w, hThickness);
-
-            // Relative "Shadow/Detail" Line (darker and more opaque)
-            g.setColour(state.regionOutlineColor.darker(0.4f).withAlpha(0.7f));
-            g.fillRect(startX, y + (hThickness - shadowHeight) * 0.5f, w, shadowHeight);
-        };
-
-        drawBarWithShadow((float)bounds.getY());                                // Top edge
-        drawBarWithShadow((float)bounds.getY() + boxHeight - hThickness);       // Box bottom
-        drawBarWithShadow((float)bounds.getBottom() - hThickness);              // Bottom edge
-        drawBarWithShadow((float)bounds.getBottom() - boxHeight);               // Box top
+        g.setColour(state.regionOutlineColor);
+        g.fillRect(startX, (float)bounds.getY(), w, hThickness);
+        g.fillRect(startX, (float)bounds.getY() + boxHeight - hThickness, w, hThickness);
+        g.fillRect(startX, (float)bounds.getBottom() - hThickness, w, hThickness);
+        g.fillRect(startX, (float)bounds.getBottom() - boxHeight, w, hThickness);
     }
 }

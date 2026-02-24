@@ -27,7 +27,7 @@ class WaveformView : public juce::Component, public juce::ChangeListener {
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
   private:
-    void drawWaveform(juce::Graphics &g, const juce::Rectangle<int> &bounds) const;
+    void drawWaveform(juce::Graphics &g);
 
     WaveformManager &waveformManager;
     AppEnums::ChannelViewMode currentChannelMode = AppEnums::ChannelViewMode::Mono;
