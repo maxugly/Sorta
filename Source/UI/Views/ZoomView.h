@@ -50,6 +50,11 @@ struct ZoomViewState {
     double mouseTime{0.0};
     juce::AudioThumbnail* thumbnail{nullptr};
     std::vector<ZoomHudLine> hudLines;
+
+    juce::Colour cursorLineColor;
+    juce::Colour cursorHighlightColor;
+    juce::Colour cursorGlowColor;
+    float cursorGlowThickness{0.0f};
 };
 
 class ZoomView : public juce::Component {
@@ -65,6 +70,10 @@ class ZoomView : public juce::Component {
     }
 
   private:
+    void drawMouseCursor(juce::Graphics& g);
+    void drawZoomPopup(juce::Graphics& g);
+    void drawHud(juce::Graphics& g);
+
     ControlPanel &owner;
     ZoomViewState state;
 

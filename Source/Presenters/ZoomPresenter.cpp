@@ -122,6 +122,24 @@ void ZoomPresenter::playbackTimerTick() {
         state.hudLines.push_back({Config::Labels::stepCtrlShift, isCtrlShift});
     }
 
+    // --- NEW LOGIC: Pre-calculate visual properties ---
+    state.cursorLineColor = Config::Colors::mouseCursorLine;
+    state.cursorHighlightColor = Config::Colors::mouseCursorHighlight;
+    state.cursorGlowColor = Config::Colors::mouseAmplitudeGlow;
+    state.cursorGlowThickness = Config::Layout::Glow::thickness;
+
+    if (state.placementMode == AppEnums::PlacementMode::CutIn ||
+        state.placementMode == AppEnums::PlacementMode::CutOut) {
+        state.cursorLineColor = Config::Colors::mousePlacementMode;
+        state.cursorHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
+        state.cursorGlowColor = Config::Colors::placementModeGlow;
+        state.cursorGlowThickness = Config::Layout::Glow::placementModeGlowThickness;
+    } else if (state.isZKeyDown) {
+        state.cursorLineColor = Config::Colors::mousePlacementMode;
+        state.cursorHighlightColor = Config::Colors::mousePlacementMode.withAlpha(0.4f);
+    }
+    // ---------------------------------------------------
+
     zoomView.updateState(state);
 }
 
