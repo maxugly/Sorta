@@ -63,20 +63,35 @@ class ZoomView : public juce::Component {
     void paint(juce::Graphics &g) override;
 
     void updateState(const ZoomViewState& newState) {
-        bool needsRepaint = false;
-        
-        // Always repaint if core geometry or interactions change
-        if (state.mouseX != newState.mouseX || state.mouseY != newState.mouseY ||
-            state.isZooming != newState.isZooming || 
+        if (state.isZooming != newState.isZooming ||
             state.isZKeyDown != newState.isZKeyDown ||
+            state.placementMode != newState.placementMode ||
             state.currentPositionPixelX != newState.currentPositionPixelX ||
             state.cutInPixelX != newState.cutInPixelX ||
-            state.cutOutPixelX != newState.cutOutPixelX) {
-            needsRepaint = true;
+            state.cutOutPixelX != newState.cutOutPixelX ||
+            state.audioLength != newState.audioLength ||
+            state.channelMode != newState.channelMode) {
+            state = newState;
+            repaint(); 
+            return;
         }
-        
-        state = newState;
-        if (needsRepaint) repaint();
+
+        // Dirty Rectangles: Only erase and redraw the crosshair regions
+        if (state.mouseX != newState.mouseX || state.mouseY != newState.mouseY) {
+            auto invalidateCrosshair = [this](const ZoomViewState& s) {
+                if (s.mouseX == -1) return;
+                repaint(s.mouseX - 20, 0, 150, getHeight()); // Vertical crosshair + text
+                repaint(0, s.mouseY - 10, getWidth(), 20);   // Horizontal crosshair
+                if (s.amplitudeY > 0) {
+                    repaint(0, (int)s.amplitudeY - 20, getWidth(), 40);
+                    repaint(0, (int)s.bottomAmplitudeY - 20, getWidth(), 40);
+                }
+            };
+
+            invalidateCrosshair(state);    // Erase old position
+            invalidateCrosshair(newState); // Redraw new position
+            state = newState;
+        }
     }
 
   private:

@@ -32,6 +32,9 @@ class WaveformView : public juce::Component, public juce::ChangeListener {
     WaveformManager &waveformManager;
     AppEnums::ChannelViewMode currentChannelMode = AppEnums::ChannelViewMode::Mono;
 
+    juce::Image cachedWaveform;
+    bool isCacheDirty{true};
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveformView)
 };
 

@@ -15,34 +15,37 @@ WaveformView::~WaveformView() {
 }
 
 void WaveformView::changeListenerCallback(juce::ChangeBroadcaster *source) {
-    if (source == &waveformManager.getThumbnail())
-
+    if (source == &waveformManager.getThumbnail()) {
+        isCacheDirty = true;
         repaint();
+    }
 }
 
 void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode) {
-    if (currentChannelMode == channelMode)
-        return;
+    if (currentChannelMode == channelMode) return;
     currentChannelMode = channelMode;
-
+    isCacheDirty = true;
     repaint();
 }
 
 void WaveformView::paint(juce::Graphics &g) {
-    g.fillAll(Config::Colors::solidBlack);
+    if (isCacheDirty || cachedWaveform.getWidth() != getWidth() || cachedWaveform.getHeight() != getHeight()) {
+        cachedWaveform = juce::Image(juce::Image::ARGB, juce::jmax(1, getWidth()), juce::jmax(1, getHeight()), true);
+        juce::Graphics ig(cachedWaveform);
 
-    auto &thumbnail = waveformManager.getThumbnail();
-    const auto audioLength = thumbnail.getTotalLength();
-    if (audioLength <= 0.0)
-        return;
-
-    const auto bounds = getLocalBounds().toFloat();
-    juce::ColourGradient gradient(Config::Colors::waveformPeak, bounds.getX(), bounds.getY(),
-                                  Config::Colors::waveformPeak, bounds.getX(), bounds.getBottom(), false);
-    gradient.addColour(0.5, Config::Colors::waveformCore);
-    g.setGradientFill(gradient);
-    
-    drawWaveform(g);
+        ig.fillAll(Config::Colors::solidBlack);
+        auto &thumbnail = waveformManager.getThumbnail();
+        if (thumbnail.getTotalLength() > 0.0) {
+            const auto bounds = getLocalBounds().toFloat();
+            juce::ColourGradient gradient(Config::Colors::waveformPeak, bounds.getX(), bounds.getY(),
+                                          Config::Colors::waveformPeak, bounds.getX(), bounds.getBottom(), false);
+            gradient.addColour(0.5, Config::Colors::waveformCore);
+            ig.setGradientFill(gradient);
+            drawWaveform(ig);
+        }
+        isCacheDirty = false;
+    }
+    g.drawImageAt(cachedWaveform, 0, 0);
 }
 
 void WaveformView::drawWaveform(juce::Graphics &g) {
