@@ -41,6 +41,12 @@ class SessionState {
         virtual void volumeChanged(float newVolume) {
             juce::ignoreUnused(newVolume);
         }
+        virtual void viewModeChanged(AppEnums::ViewMode newMode) {
+            juce::ignoreUnused(newMode);
+        }
+        virtual void channelViewModeChanged(AppEnums::ChannelViewMode newMode) {
+            juce::ignoreUnused(newMode);
+        }
     };
 
     SessionState();
@@ -89,10 +95,10 @@ class SessionState {
     }
 
     AppEnums::ViewMode getViewMode() const { return currentMode; }
-    void setViewMode(AppEnums::ViewMode mode) { currentMode = mode; }
+    void setViewMode(AppEnums::ViewMode mode);
 
     AppEnums::ChannelViewMode getChannelViewMode() const { return currentChannelViewMode; }
-    void setChannelViewMode(AppEnums::ChannelViewMode mode) { currentChannelViewMode = mode; }
+    void setChannelViewMode(AppEnums::ChannelViewMode mode);
 
   private:
     MainDomain::CutPreferences cutPrefs;

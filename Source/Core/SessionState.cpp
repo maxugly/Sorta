@@ -202,5 +202,21 @@ void SessionState::setMetadataForFile(const juce::String &filePath,
         listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
         listeners.call([this](Listener &l) { l.cutInChanged(cutPrefs.cutIn); });
         listeners.call([this](Listener &l) { l.cutOutChanged(cutPrefs.cutOut); });
-        }
-        }
+    }
+}
+
+void SessionState::setViewMode(AppEnums::ViewMode mode) {
+    const juce::ScopedLock lock(stateLock);
+    if (currentMode != mode) {
+        currentMode = mode;
+        listeners.call([mode](Listener &l) { l.viewModeChanged(mode); });
+    }
+}
+
+void SessionState::setChannelViewMode(AppEnums::ChannelViewMode mode) {
+    const juce::ScopedLock lock(stateLock);
+    if (currentChannelViewMode != mode) {
+        currentChannelViewMode = mode;
+        listeners.call([mode](Listener &l) { l.channelViewModeChanged(mode); });
+    }
+}

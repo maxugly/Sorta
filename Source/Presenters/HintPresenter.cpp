@@ -6,9 +6,11 @@ HintPresenter::HintPresenter(ControlPanel& ownerPanel, HintView& view)
     : owner(ownerPanel), hintView(view) {
     // The 'true' flag attaches this listener to ALL child components natively!
     owner.addMouseListener(this, true); 
+    owner.getSessionState().addListener(this);
 }
 
 HintPresenter::~HintPresenter() {
+    owner.getSessionState().removeListener(this);
     owner.removeMouseListener(this);
 }
 
@@ -33,4 +35,12 @@ void HintPresenter::mouseEnter(const juce::MouseEvent& event) {
 
 void HintPresenter::mouseExit(const juce::MouseEvent&) {
     hintView.setHint(Config::Labels::defaultHint);
+}
+
+void HintPresenter::viewModeChanged(AppEnums::ViewMode newMode) {
+    hintView.setHint("View: " + juce::String(newMode == AppEnums::ViewMode::Classic ? "Classic" : "Overlay"));
+}
+
+void HintPresenter::channelViewModeChanged(AppEnums::ChannelViewMode newMode) {
+    hintView.setHint("Channels: " + juce::String(newMode == AppEnums::ChannelViewMode::Stereo ? "Stereo" : "Mono"));
 }
