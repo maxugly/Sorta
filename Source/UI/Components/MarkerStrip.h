@@ -52,6 +52,9 @@ class MarkerStrip : public juce::Component {
     juce::TextButton &getAutoCutButton() {
         return autoCutButton;
     }
+    TransportButton &getLockButton() {
+        return lockButton;
+    }
 
   private:
     MarkerType markerType;
@@ -62,6 +65,7 @@ class MarkerStrip : public juce::Component {
     juce::TextButton resetButton;
     juce::TextEditor thresholdEditor;
     juce::TextButton autoCutButton;
+    TransportButton lockButton;
 
     void initialiseComponents();
 

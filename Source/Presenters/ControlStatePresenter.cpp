@@ -159,9 +159,10 @@ void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, boo
     }
 
     if (owner.getCutLengthStrip() != nullptr) {
-        auto &length = owner.getCutLengthStrip()->getLengthEditor();
-        length.setEnabled(enabled && isCutModeActive);
-        length.setVisible(isCutModeActive);
+        owner.getCutLengthStrip()->setEnabled(isCutModeActive);
+        owner.getCutLengthStrip()->setVisible(isCutModeActive);
+        owner.getCutLengthStrip()->getLengthEditor().setEnabled(enabled);
+        owner.getCutLengthStrip()->getLockButton().setEnabled(enabled);
     }
 
     if (owner.inStrip != nullptr)

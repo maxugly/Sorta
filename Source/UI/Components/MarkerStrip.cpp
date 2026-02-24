@@ -43,9 +43,15 @@ void MarkerStrip::initialiseComponents() {
     autoCutButton.setButtonText(markerType == MarkerType::In ? Config::Labels::autoCutInButton
                                                              : Config::Labels::autoCutOutButton);
     autoCutButton.setClickingTogglesState(true);
-    autoCutButton.getProperties().set("GroupPosition", markerType == MarkerType::In
-                                                           ? (int)AppEnums::GroupPosition::Right
-                                                           : (int)AppEnums::GroupPosition::Left);
+    autoCutButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
+
+    // Lock Button
+    addAndMakeVisible(lockButton);
+    lockButton.setButtonText(Config::Labels::lockUnlocked);
+    lockButton.setClickingTogglesState(true);
+    lockButton.getProperties().set("GroupPosition", markerType == MarkerType::In
+                                                       ? (int)AppEnums::GroupPosition::Right
+                                                       : (int)AppEnums::GroupPosition::Left);
 }
 
 void MarkerStrip::resized() {
@@ -58,9 +64,10 @@ void MarkerStrip::resized() {
     const int resetWidth = (int)(Config::UI::ResetButtonWidthUnits * unit);
     const int thresholdWidth = (int)(Config::UI::ThresholdWidthUnits * unit);
     const int autoCutWidth = (int)(Config::UI::CutButtonWidthUnits * unit);
+    const int lockWidth = (int)(Config::UI::ResetButtonWidthUnits * unit);
 
     if (markerType == MarkerType::In) {
-        // [In(L), Timer, Reset, Threshold, AutoCut(R)]
+        // [In(L), Timer, Reset, Threshold, AutoCut, Lock(R)]
         markerButton.setBounds(b.removeFromLeft(markerWidth));
         b.removeFromLeft(spacing);
         timerEditor.setBounds(b.removeFromLeft(timerWidth));
@@ -70,8 +77,12 @@ void MarkerStrip::resized() {
         thresholdEditor.setBounds(b.removeFromLeft(thresholdWidth));
         b.removeFromLeft(spacing);
         autoCutButton.setBounds(b.removeFromLeft(autoCutWidth));
+        b.removeFromLeft(spacing);
+        lockButton.setBounds(b.removeFromLeft(lockWidth));
     } else {
-        // [AutoCut(L), Threshold, Reset, Timer, Out(R)]
+        // [Lock(L), AutoCut, Threshold, Reset, Timer, Out(R)]
+        lockButton.setBounds(b.removeFromLeft(lockWidth));
+        b.removeFromLeft(spacing);
         autoCutButton.setBounds(b.removeFromLeft(autoCutWidth));
         b.removeFromLeft(spacing);
         thresholdEditor.setBounds(b.removeFromLeft(thresholdWidth));

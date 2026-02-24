@@ -49,9 +49,8 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int rowHeigh
 
     const int stripWidth =
         (int)((Config::UI::CutButtonWidthUnits * 2 + Config::UI::TimerWidthUnits +
-               Config::UI::ResetButtonWidthUnits + Config::UI::ThresholdWidthUnits) *
-              unit) +
-        (spacing * 4);
+               Config::UI::ResetButtonWidthUnits * 2 + Config::UI::ThresholdWidthUnits) *
+              unit) + (spacing * 5);
 
     if (controlPanel.inStrip != nullptr)
         controlPanel.inStrip->setBounds(cutRow.removeFromLeft(stripWidth));

@@ -257,6 +257,8 @@ extern const juce::String autoplayButton;
 extern const juce::String autoCutInButton;
 extern const juce::String autoCutOutButton;
 extern const juce::String cutButton;
+extern const juce::String lockLocked;
+extern const juce::String lockUnlocked;
 extern const juce::String silenceThresholdInTooltip;
 extern const juce::String silenceThresholdOutTooltip;
 extern const juce::String zoomPrefix;
