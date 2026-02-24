@@ -7,6 +7,7 @@
 
 #include "Presenters/BoundaryLogicPresenter.h"
 #include "Presenters/BoundaryLockPresenter.h"
+#include "Presenters/MarkerLockPresenter.h"
 #include "Presenters/ControlButtonsPresenter.h"
 #include "Presenters/ControlStatePresenter.h"
 #include "Presenters/CutButtonPresenter.h"
@@ -45,6 +46,7 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     boundaryLogicPresenter->initialiseEditors();
 
     boundaryLockPresenter = std::make_unique<BoundaryLockPresenter>(owner, owner.getSessionState());
+    markerLockPresenter = std::make_unique<MarkerLockPresenter>(owner, owner.getSessionState());
 
     buttonPresenter = std::make_unique<ControlButtonsPresenter>(owner);
     buttonPresenter->initialiseAllButtons();

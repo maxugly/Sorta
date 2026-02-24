@@ -92,6 +92,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/ControlButtonsPresenter.cpp
             Source/Presenters/BoundaryLockPresenter.h
             Source/Presenters/BoundaryLockPresenter.cpp
+            Source/Presenters/MarkerLockPresenter.h
+            Source/Presenters/MarkerLockPresenter.cpp
             Source/Presenters/ControlStatePresenter.h
             Source/Presenters/ControlStatePresenter.cpp
             Source/Presenters/CutButtonPresenter.h

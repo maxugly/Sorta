@@ -74,6 +74,22 @@ void SessionState::setLengthLocked(bool locked) {
     }
 }
 
+void SessionState::setInLocked(bool locked) {
+    const juce::ScopedLock lock(stateLock);
+    if (cutPrefs.inLocked != locked) {
+        cutPrefs.inLocked = locked;
+        listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
+    }
+}
+
+void SessionState::setOutLocked(bool locked) {
+    const juce::ScopedLock lock(stateLock);
+    if (cutPrefs.outLocked != locked) {
+        cutPrefs.outLocked = locked;
+        listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
+    }
+}
+
 void SessionState::setThresholdIn(float threshold) {
     const juce::ScopedLock lock(stateLock);
     if (cutPrefs.autoCut.thresholdIn != threshold) {
@@ -92,6 +108,7 @@ void SessionState::setThresholdOut(float threshold) {
 
 void SessionState::setCutIn(double value) {
     const juce::ScopedLock lock(stateLock);
+    if (cutPrefs.inLocked) return;
     double clampedValue = juce::jlimit(0.0, totalDuration, value);
 
     if (cutPrefs.lengthLocked) {
@@ -122,6 +139,7 @@ void SessionState::setCutIn(double value) {
 
 void SessionState::setCutOut(double value) {
     const juce::ScopedLock lock(stateLock);
+    if (cutPrefs.outLocked) return;
     double clampedValue = juce::jlimit(0.0, totalDuration, value);
 
     if (cutPrefs.lengthLocked) {
