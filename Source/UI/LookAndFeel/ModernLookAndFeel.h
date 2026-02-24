@@ -128,22 +128,60 @@ class ModernLookAndFeel : public juce::LookAndFeel_V4 {
 
     void fillTextEditorBackground(juce::Graphics &g, int width, int height,
                                   juce::TextEditor &textEditor) override {
+        auto cornerSize = Config::UI::ButtonCornerSize;
+        auto outlineThickness = Config::UI::ButtonOutlineThickness;
+        
+        auto groupPos = (AppEnums::GroupPosition)(int)textEditor.getProperties().getWithDefault(
+            "GroupPosition", (int)AppEnums::GroupPosition::Alone);
+
+        bool tl = false, tr = false, bl = false, br = false;
+        switch (groupPos) {
+        case AppEnums::GroupPosition::Alone:  tl = tr = bl = br = true; break;
+        case AppEnums::GroupPosition::Left:   tl = bl = true; break;
+        case AppEnums::GroupPosition::Right:  tr = br = true; break;
+        case AppEnums::GroupPosition::Middle: break;
+        }
+
+        juce::Path p;
+        auto bounds = textEditor.getLocalBounds().toFloat().reduced(outlineThickness / 2.0f);
+        p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
+                              cornerSize, cornerSize, tl, tr, bl, br);
+
         if (!textEditor.isEnabled()) {
             g.setColour(Config::Colors::Button::disabledBackground);
         } else {
             g.setColour(textEditor.findColour(juce::TextEditor::backgroundColourId));
         }
-        g.fillRect(0, 0, width, height);
+        g.fillPath(p);
     }
 
     void drawTextEditorOutline(juce::Graphics &g, int width, int height,
                                juce::TextEditor &textEditor) override {
+        auto cornerSize = Config::UI::ButtonCornerSize;
+        auto outlineThickness = Config::UI::ButtonOutlineThickness;
+        
+        auto groupPos = (AppEnums::GroupPosition)(int)textEditor.getProperties().getWithDefault(
+            "GroupPosition", (int)AppEnums::GroupPosition::Alone);
+
+        bool tl = false, tr = false, bl = false, br = false;
+        switch (groupPos) {
+        case AppEnums::GroupPosition::Alone:  tl = tr = bl = br = true; break;
+        case AppEnums::GroupPosition::Left:   tl = bl = true; break;
+        case AppEnums::GroupPosition::Right:  tr = br = true; break;
+        case AppEnums::GroupPosition::Middle: break;
+        }
+
+        juce::Path p;
+        auto bounds = textEditor.getLocalBounds().toFloat().reduced(outlineThickness / 2.0f);
+        p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
+                              cornerSize, cornerSize, tl, tr, bl, br);
+
         if (!textEditor.isEnabled()) {
             g.setColour(Config::Colors::Button::disabledText);
         } else {
             g.setColour(textEditor.findColour(juce::TextEditor::outlineColourId));
         }
-        g.drawRect(0, 0, width, height, Config::Layout::Text::editorOutlineThickness);
+        g.strokePath(p, juce::PathStrokeType(outlineThickness));
     }
 
   private:

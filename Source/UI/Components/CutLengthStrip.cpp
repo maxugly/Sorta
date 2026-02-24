@@ -5,6 +5,7 @@
 CutLengthStrip::CutLengthStrip() {
     addAndMakeVisible(lengthEditor);
     lengthEditor.applyStandardStyle();
+    lengthEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
 
     addAndMakeVisible(lockButton);
     lockButton.setButtonText(Config::Labels::lockUnlocked);
@@ -20,17 +21,5 @@ void CutLengthStrip::resized() {
 }
 
 void CutLengthStrip::paint(juce::Graphics& g) {
-    auto bounds = lengthEditor.getBounds().toFloat().reduced(Config::UI::ButtonOutlineThickness / 2.0f);
-    auto cornerSize = Config::UI::ButtonCornerSize;
-    
-    juce::Path p;
-    // Corners: topLeft=true, topRight=false, bottomLeft=true, bottomRight=false (GroupPosition::Left style)
-    p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-                          cornerSize, cornerSize, true, false, true, false);
-                          
-    g.setColour(Config::Colors::Button::base);
-    g.fillPath(p);
-    
-    g.setColour(Config::Colors::Button::outline);
-    g.strokePath(p, juce::PathStrokeType(Config::UI::ButtonOutlineThickness));
+    juce::ignoreUnused(g);
 }
