@@ -47,12 +47,11 @@ class CutPresenter : public SessionState::Listener,
 
     // PlaybackTimerManager::Listener overrides
     void playbackTimerTick() override {}
-    void animationUpdate(float breathingPulse) override;
 
   private:
     void refreshMarkersVisibility();
     void pushStateToView();
-    void updateAnimationState(CutLayerState& state, float breathingPulse);
+    void updateAnimationState(CutLayerState& state);
 private:
   SessionState &sessionState;
   CutLayerView &cutLayerView;

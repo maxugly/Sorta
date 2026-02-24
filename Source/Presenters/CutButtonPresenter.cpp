@@ -21,11 +21,6 @@ void CutButtonPresenter::placementModeChanged(AppEnums::PlacementMode newMode) {
     owner.repaint();
 }
 
-void CutButtonPresenter::eyeCandyChanged(bool shouldShow) {
-    juce::ignoreUnused(shouldShow);
-    owner.repaint();
-}
-
 void CutButtonPresenter::updateColours() {
     const auto placementMode = owner.getInteractionCoordinator().getPlacementMode();
 

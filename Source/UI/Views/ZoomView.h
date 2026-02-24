@@ -32,7 +32,6 @@ struct ZoomViewState {
     juce::Rectangle<int> popupBounds;
     double startTime{0.0};
     double endTime{0.0};
-    float eyeCandyPulse{0.0f};
 
     double audioLength{0.0};
     AppEnums::PlacementMode placementMode{AppEnums::PlacementMode::None};
@@ -46,7 +45,6 @@ struct ZoomViewState {
     
     bool isDraggingCutIn{false};
     bool isDraggingCutOut{false};
-    bool shouldShowEyeCandy{false};
     double mouseTime{0.0};
     juce::AudioThumbnail* thumbnail{nullptr};
     std::vector<ZoomHudLine> hudLines;
@@ -75,13 +73,6 @@ class ZoomView : public juce::Component {
             state.cutInPixelX != newState.cutInPixelX ||
             state.cutOutPixelX != newState.cutOutPixelX) {
             needsRepaint = true;
-        }
-        
-        // Only allow the 60Hz eye-candy pulse to force a repaint IF the view is actually visible
-        if (newState.mouseX != -1 || newState.isZooming) {
-            if (state.eyeCandyPulse != newState.eyeCandyPulse) {
-                needsRepaint = true;
-            }
         }
         
         state = newState;

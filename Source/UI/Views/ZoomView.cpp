@@ -92,11 +92,6 @@ void ZoomView::drawMouseCursor(juce::Graphics& g) {
                localMouseY + Config::Layout::Glow::mouseTextOffset, 100,
                Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
 
-    const juce::Colour glowColor = state.shouldShowEyeCandy
-                                       ? state.cursorLineColor
-                                       : state.cursorLineColor.withAlpha(0.0f);
-    PlaybackCursorGlow::renderGlow(g, localMouseX, waveformBounds.getY(),
-                                   waveformBounds.getBottom(), glowColor);
     g.setColour(state.cursorLineColor);
     g.drawHorizontalLine(localMouseY, (float)waveformBounds.getX(),
                          (float)waveformBounds.getRight());
@@ -154,8 +149,6 @@ void ZoomView::drawZoomPopup(juce::Graphics& g) {
     drawShadow((float)popupBounds.getX(), actualInX, Config::Colors::solidBlack.withAlpha(0.5f));
     drawShadow(actualOutX, (float)popupBounds.getRight(), Config::Colors::solidBlack.withAlpha(0.5f));
 
-    const float pulse = state.eyeCandyPulse;
-
     auto drawFineLine = [&](float x, juce::Colour color, float thickness) {
         if (x >= (float)popupBounds.getX() && x <= (float)popupBounds.getRight()) {
             g.setColour(color);
@@ -164,22 +157,22 @@ void ZoomView::drawZoomPopup(juce::Graphics& g) {
         }
     };
 
-    drawFineLine(inX, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse),
+    drawFineLine(inX, Config::Colors::cutLine.withAlpha(0.8f),
                  Config::Layout::connectorLineWidth);
-    drawFineLine(outX, Config::Colors::cutLine.withAlpha(0.7f + 0.3f * pulse),
+    drawFineLine(outX, Config::Colors::cutLine.withAlpha(0.8f),
                  Config::Layout::connectorLineWidth);
     drawFineLine(state.currentPositionPixelX,
-                 Config::Colors::playbackCursor.withAlpha(0.6f + 0.4f * pulse), 
+                 Config::Colors::playbackCursor.withAlpha(0.8f), 
                  Config::Layout::buttonOutlineThickness);
 
     if (state.isDraggingCutIn || state.isDraggingCutOut) {
         const juce::Colour trackingColor =
-            Config::Colors::zoomPopupTrackingLine.withAlpha(0.8f + 0.2f * pulse);
+            Config::Colors::zoomPopupTrackingLine.withAlpha(0.9f);
         drawFineLine(state.isDraggingCutIn ? inX : outX, trackingColor,
-                     Config::Layout::connectorLineWidth + 0.5f * pulse);
+                     Config::Layout::connectorLineWidth);
     } else {
         drawFineLine(state.currentPositionPixelX,
-                     Config::Colors::zoomPopupPlaybackLine.withAlpha(0.7f + 0.3f * pulse),
+                     Config::Colors::zoomPopupPlaybackLine.withAlpha(0.8f),
                      Config::Layout::connectorLineWidth);
     }
 

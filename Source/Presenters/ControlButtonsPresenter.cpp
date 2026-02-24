@@ -23,7 +23,6 @@ void ControlButtonsPresenter::initialiseAllButtons() {
     initialiseChannelViewButton();
     initialiseExitButton();
     initialiseStatsButton();
-    initialiseEyeCandyButton();
     initialisePlayStopButton();
     initialiseStopButton();
     initialiseAutoplayButton();
@@ -115,21 +114,6 @@ void ControlButtonsPresenter::initialiseStatsButton() {
     };
 }
 
-void ControlButtonsPresenter::initialiseEyeCandyButton() {
-    if (owner.topBarView == nullptr) return;
-    auto& btn = owner.topBarView->eyeCandyButton;
-    btn.setButtonText("*");
-    btn.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Alone);
-    btn.setClickingTogglesState(true);
-    btn.setToggleState(owner.getInteractionCoordinator().shouldShowEyeCandy(),
-                                        juce::dontSendNotification);
-    btn.onClick = [this] {
-        if (owner.topBarView == nullptr) return;
-        owner.getInteractionCoordinator().setShouldShowEyeCandy(
-            owner.topBarView->eyeCandyButton.getToggleState());
-    };
-}
-
 void ControlButtonsPresenter::initialisePlayStopButton() {
     if (auto* ts = owner.getTransportStrip()) {
         ts->getPlayStopButton().onClick = [this] {
@@ -214,7 +198,4 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
 }
 
 void ControlButtonsPresenter::refreshStates() {
-    if (owner.topBarView != nullptr)
-        owner.topBarView->eyeCandyButton.setToggleState(owner.getInteractionCoordinator().shouldShowEyeCandy(),
-                                            juce::dontSendNotification);
 }

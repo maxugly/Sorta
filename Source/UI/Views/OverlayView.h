@@ -27,7 +27,6 @@ class OverlayView : public juce::Component, public PlaybackTimerManager::Listene
     // PlaybackTimerManager::Listener
     void playbackTimerTick() override {
     }
-    void animationUpdate(float breathingPulse) override;
 
   private:
     ControlPanel &owner;

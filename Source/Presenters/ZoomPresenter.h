@@ -27,7 +27,6 @@ class ZoomPresenter final : public PlaybackTimerManager::Listener {
     ~ZoomPresenter() override;
 
     void playbackTimerTick() override;
-    void animationUpdate(float breathingPulse) override;
     void activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) override;
 
   private:

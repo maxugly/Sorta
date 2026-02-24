@@ -52,13 +52,6 @@ void PlaybackCursorView::playbackTimerTick() {
     }
 }
 
-void PlaybackCursorView::animationUpdate(float breathingPulse) {
-    juce::ignoreUnused(breathingPulse);
-    if (lastCursorX >= 0)
-        repaint(lastCursorX - Config::Layout::Glow::glowRadius, 0,
-                Config::Layout::Glow::glowRadius * 2, getHeight());
-}
-
 void PlaybackCursorView::paint(juce::Graphics &g) {
     auto &audioPlayer = owner.getAudioPlayer();
     const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
@@ -70,10 +63,7 @@ void PlaybackCursorView::paint(juce::Graphics &g) {
     const float x = CoordinateMapper::secondsToPixels(
         drawPosition, (float)waveformBounds.getWidth(), audioLength);
 
-    const float pulse = owner.getInteractionCoordinator().shouldShowEyeCandy()
-                            ? owner.getPlaybackTimerManager().getBreathingPulse()
-                            : 0.0f;
-    const juce::Colour cursorColor = Config::Colors::playbackCursor.withAlpha(0.7f + 0.3f * pulse);
+    const juce::Colour cursorColor = Config::Colors::playbackCursor.withAlpha(0.8f);
 
     PlaybackCursorGlow::renderGlow(g, juce::roundToInt(x), 0, getHeight(), cursorColor);
 }

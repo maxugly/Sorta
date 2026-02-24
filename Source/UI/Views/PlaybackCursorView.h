@@ -21,7 +21,6 @@ class PlaybackCursorView : public juce::Component, public PlaybackTimerManager::
     void paint(juce::Graphics &g) override;
 
     void playbackTimerTick() override;
-    void animationUpdate(float breathingPulse) override;
 
   private:
     ControlPanel &owner;

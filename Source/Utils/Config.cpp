@@ -70,7 +70,6 @@ const juce::Colour Colors::HintVox::text = juce::Colours::lightgrey;
 
 const juce::Colour Colors::Matrix::ledActive = juce::Colours::lime;
 const juce::Colour Colors::Matrix::ledInactive = juce::Colours::darkgrey;
-const juce::Colour Colors::Matrix::ledPulse = juce::Colours::orange;
 #endif
 } // namespace Colors
 

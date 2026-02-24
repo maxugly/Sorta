@@ -28,9 +28,6 @@ class SilenceDetectionPresenter final : public SilenceWorkerClient,
     /** @brief Called when the playback timer ticks at 60Hz. */
     void playbackTimerTick() override;
 
-    /** @brief Updates the UI animation state based on the master pulse. */
-    void animationUpdate(float breathingPulse) override;
-
     /** @brief Triggered when the current file in SessionState changes. */
     void fileChanged(const juce::String &filePath) override;
 

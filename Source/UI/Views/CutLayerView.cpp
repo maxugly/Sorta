@@ -12,7 +12,6 @@ CutLayerView::CutLayerView(ControlPanel &ownerIn)
     : owner(ownerIn) {
     setInterceptsMouseClicks(false, false);
     setOpaque(false);
-    setBufferedToImage(true);
 }
 
 CutLayerView::~CutLayerView() = default;

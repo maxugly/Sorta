@@ -26,7 +26,6 @@ class ControlButtonsPresenter final {
 
     void initialiseExitButton();
     void initialiseStatsButton();
-    void initialiseEyeCandyButton();
     void initialiseAutoplayButton();
     void initialiseCutButton();
     void initialiseMarkerButtons();

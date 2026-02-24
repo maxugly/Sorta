@@ -34,14 +34,7 @@ void CutPresenter::cutPreferenceChanged(const MainDomain::CutPreferences &) {
     pushStateToView();
 }
 
-void CutPresenter::animationUpdate(float breathingPulse) {
-    auto state = cutLayerView.getCurrentState();
-    updateAnimationState(state, breathingPulse);
-}
-
-void CutPresenter::updateAnimationState(CutLayerState& state, float breathingPulse) {
-    state.glowAlpha = breathingPulse;
-    
+void CutPresenter::updateAnimationState(CutLayerState& state) {
     // Also update marker interaction states high-frequency
     auto calcMarkerProps = [&](MarkerMouseHandler::CutMarkerHandle handle, bool isAuto) {
         juce::Colour color = Config::Colors::cutLine;
@@ -131,11 +124,10 @@ void CutPresenter::pushStateToView() {
 
     state.fadeWidthPixels = viewWidth * Config::Layout::Waveform::cutRegionFadeProportion;
     state.audioLength = (float)audioLength;
-    state.showEyeCandy = interactionCoordinator.shouldShowEyeCandy();
     state.markersVisible = sessionState.getCutPrefs().active;
     state.channelMode = cutLayerView.getOwner().getChannelViewMode();
 
-    updateAnimationState(state, playbackTimerManager.getBreathingPulse());
+    updateAnimationState(state);
 }
 
 void CutPresenter::refreshMarkersVisibility() {

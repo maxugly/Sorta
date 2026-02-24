@@ -19,7 +19,6 @@ public:
     ~MatrixPresenter() override;
 
     void playbackTimerTick() override;
-    void animationUpdate(float breathingPulse) override;
     void fullMatrixUpdate();
 
     // Event Hooks
@@ -29,7 +28,6 @@ public:
     void viewModeChanged(AppEnums::ViewMode) override { fullMatrixUpdate(); }
     void channelViewModeChanged(AppEnums::ChannelViewMode) override { fullMatrixUpdate(); }
     void placementModeChanged(AppEnums::PlacementMode) override { fullMatrixUpdate(); }
-    void eyeCandyChanged(bool) override { fullMatrixUpdate(); }
     void changeListenerCallback(juce::ChangeBroadcaster*) override { fullMatrixUpdate(); }
 
 private:

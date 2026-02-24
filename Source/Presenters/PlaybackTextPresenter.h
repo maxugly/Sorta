@@ -31,9 +31,6 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
     void playbackTimerTick() override {
         updateEditors();
     }
-    void animationUpdate(float breathingPulse) override {
-        juce::ignoreUnused(breathingPulse);
-    }
 
     // SessionState::Listener
     void fileChanged(const juce::String &filePath) override {

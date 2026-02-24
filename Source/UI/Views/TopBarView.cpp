@@ -14,7 +14,6 @@ TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
     addAndMakeVisible(exitButton);
     addAndMakeVisible(statsButton);
     addAndMakeVisible(channelViewButton);
-    addAndMakeVisible(eyeCandyButton);
 
     transportStrip = std::make_unique<TransportStrip>();
     addAndMakeVisible(transportStrip.get());
@@ -57,8 +56,4 @@ void TopBarView::resized() {
     statsButton.setBounds(topRow.removeFromRight(buttonWidth));
     topRow.removeFromRight(spacing);
     modeButton.setBounds(topRow.removeFromRight(buttonWidth));
-
-    // Eye Candy Toggle (Alone) - Left of View Group
-    topRow.removeFromRight(margin);
-    eyeCandyButton.setBounds(topRow.removeFromRight((int)Config::UI::WidgetUnit));
 }

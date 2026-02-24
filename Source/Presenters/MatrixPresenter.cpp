@@ -64,7 +64,7 @@ void MatrixPresenter::fullMatrixUpdate() {
     state.ledColors.push_back(interactionCoordinator.getPlacementMode() == AppEnums::PlacementMode::CutIn ? active : inactive);
     state.ledColors.push_back(interactionCoordinator.getPlacementMode() == AppEnums::PlacementMode::CutOut ? active : inactive);
     state.ledColors.push_back(interactionCoordinator.getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None ? active : inactive);
-    state.ledColors.push_back(interactionCoordinator.shouldShowEyeCandy() ? active : inactive);
+    state.ledColors.push_back(inactive); // Eye Candy removed
     state.ledColors.push_back(waveformMouseHandler.isScrubbing() ? active : inactive);
     state.ledColors.push_back(waveformMouseHandler.isDragging() ? active : inactive);
     state.ledColors.push_back(markerMouseHandler.getDraggedHandle() != MarkerMouseHandler::CutMarkerHandle::None ? active : inactive);
@@ -194,8 +194,8 @@ void MatrixPresenter::fullMatrixUpdate() {
     // 63. Entire File Selected
     state.ledColors.push_back((sessionState.getCutIn() == 0.0 && sessionState.getCutOut() >= sessionState.getTotalDuration() && sessionState.getTotalDuration() > 0.0) ? active : inactive);
 
-    // 64. Heartbeat
-    state.ledColors.push_back(Config::Colors::Matrix::ledPulse.withAlpha(timerManager.getBreathingPulse()));
+    // 64. Heartbeat removed
+    state.ledColors.push_back(inactive);
 
     cachedState = state;
     matrixView.updateState(cachedState);
@@ -203,12 +203,4 @@ void MatrixPresenter::fullMatrixUpdate() {
 
 void MatrixPresenter::playbackTimerTick() {
     // Intentionally empty. Observer Law: No polling for state changes.
-}
-
-void MatrixPresenter::animationUpdate(float breathingPulse) {
-    if (cachedState.ledColors.size() == 64) {
-        // Only update the 64th LED (Heartbeat) at 60Hz directly in the cache
-        cachedState.ledColors[20] = Config::Colors::Matrix::ledPulse.withAlpha(breathingPulse);
-        owner.getMatrixView().updateState(cachedState);
-    }
 }

@@ -31,9 +31,7 @@ void ZoomPresenter::playbackTimerTick() {
 
     ZoomViewState state;
     state.isZooming = isZooming;
-    state.eyeCandyPulse = timerManager.getBreathingPulse();
     state.isZKeyDown = zDown;
-    state.shouldShowEyeCandy = owner.getInteractionCoordinator().shouldShowEyeCandy();
     state.placementMode = owner.getInteractionCoordinator().getPlacementMode();
     state.channelMode = owner.getChannelViewMode();
 
@@ -141,11 +139,6 @@ void ZoomPresenter::playbackTimerTick() {
     // ---------------------------------------------------
 
     zoomView.updateState(state);
-}
-
-void ZoomPresenter::animationUpdate(float breathingPulse) {
-    juce::ignoreUnused(breathingPulse);
-    playbackTimerTick();
 }
 
 void ZoomPresenter::activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) {

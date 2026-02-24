@@ -31,29 +31,6 @@ SilenceDetectionPresenter::~SilenceDetectionPresenter() {
 void SilenceDetectionPresenter::playbackTimerTick() {
 }
 
-void SilenceDetectionPresenter::animationUpdate(float breathingPulse) {
-    const auto &autoCut = sessionState.getCutPrefs().autoCut;
-
-    auto updateButton = [&](juce::TextButton &btn, bool isActive, bool isBusy) {
-        if (isActive || isBusy) {
-            btn.getProperties().set("isProcessing", true);
-            btn.getProperties().set("pulseAlpha", breathingPulse);
-            btn.repaint();
-        } else {
-            if (btn.getProperties().contains("isProcessing") &&
-                (bool)btn.getProperties()["isProcessing"]) {
-                btn.getProperties().set("isProcessing", false);
-                btn.repaint();
-            }
-        }
-    };
-
-    updateButton(owner.getAutoCutInButton(), autoCut.inActive,
-                 silenceWorker.isBusy() && silenceWorker.isDetectingIn());
-    updateButton(owner.getAutoCutOutButton(), autoCut.outActive,
-                 silenceWorker.isBusy() && !silenceWorker.isDetectingIn());
-}
-
 void SilenceDetectionPresenter::fileChanged(const juce::String &filePath) {
     if (filePath.isEmpty())
         return;

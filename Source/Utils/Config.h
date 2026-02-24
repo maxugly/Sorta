@@ -116,7 +116,6 @@ struct HintVox {
 struct Matrix {
     static const juce::Colour ledActive;
     static const juce::Colour ledInactive;
-    static const juce::Colour ledPulse;
 };
 } // namespace Colors
 
@@ -221,7 +220,6 @@ constexpr float buttonHighlightedBrightness = 0.1f;
 constexpr float buttonPressedDarkness = 0.1f;
 constexpr float mouseAmplitudeLineLength = 50.0f;
 constexpr float thresholdLineWidth = 100.0f;
-constexpr float masterPhaseDurationSeconds = 4.0f;
 } // namespace Animation
 
 namespace Audio {

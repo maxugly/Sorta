@@ -34,7 +34,6 @@ class TopBarView final : public juce::Component {
     juce::TextButton exitButton;
     juce::TextButton statsButton;
     juce::TextButton channelViewButton;
-    juce::TextButton eyeCandyButton;
 
     // We keep transportStrip here to manage the top row layout entirely
     std::unique_ptr<TransportStrip> transportStrip;

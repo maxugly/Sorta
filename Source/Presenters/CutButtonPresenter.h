@@ -22,7 +22,6 @@ class CutButtonPresenter : public InteractionCoordinator::Listener {
 
     // InteractionCoordinator::Listener
     void placementModeChanged(AppEnums::PlacementMode newMode) override;
-    void eyeCandyChanged(bool shouldShow) override;
 
   private:
     ControlPanel &owner;

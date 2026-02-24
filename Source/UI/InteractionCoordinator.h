@@ -23,7 +23,6 @@ class InteractionCoordinator {
       public:
         virtual ~Listener() = default;
         virtual void placementModeChanged(AppEnums::PlacementMode newMode) = 0;
-        virtual void eyeCandyChanged(bool shouldShow) = 0;
     };
 
     InteractionCoordinator() = default;
@@ -82,17 +81,6 @@ class InteractionCoordinator {
         return m_zoomTimeRange;
     }
 
-    /** @brief Returns true if eye candy (connecting lines, etc.) should be shown. */
-    bool shouldShowEyeCandy() const {
-        return m_showEyeCandy;
-    }
-
-    /** @brief Sets whether eye candy should be shown. */
-    void setShouldShowEyeCandy(bool shouldShow) {
-        m_showEyeCandy = shouldShow;
-        listeners.call(&Listener::eyeCandyChanged, m_showEyeCandy);
-    }
-
     /** @brief Returns the current placement mode. */
     AppEnums::PlacementMode getPlacementMode() const {
         return m_placementMode;
@@ -122,7 +110,6 @@ class InteractionCoordinator {
     bool m_needsJumpToCutIn = false;
     juce::Rectangle<int> m_zoomPopupBounds;
     std::pair<double, double> m_zoomTimeRange;
-    bool m_showEyeCandy = false;
     AppEnums::PlacementMode m_placementMode = AppEnums::PlacementMode::None;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InteractionCoordinator)
