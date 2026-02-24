@@ -17,6 +17,7 @@ class PlaybackTextPresenter;
 class RepeatButtonPresenter;
 class BoundaryLogicPresenter;
 class ControlButtonsPresenter;
+class BoundaryLockPresenter;
 class CutButtonPresenter;
 class CutResetPresenter;
 class ControlStatePresenter;
@@ -39,6 +40,7 @@ class PresenterCore final {
     PlaybackTextPresenter& getPlaybackTextPresenter() { return *playbackTextPresenter; }
     RepeatButtonPresenter& getRepeatButtonPresenter() { return *repeatButtonPresenter; }
     BoundaryLogicPresenter& getBoundaryLogicPresenter() { return *boundaryLogicPresenter; }
+    BoundaryLockPresenter& getBoundaryLockPresenter() { return *boundaryLockPresenter; }
     ControlButtonsPresenter& getButtonPresenter() { return *buttonPresenter; }
     CutButtonPresenter& getCutButtonPresenter() { return *cutButtonPresenter; }
     CutResetPresenter& getCutResetPresenter() { return *cutResetPresenter; }
@@ -58,6 +60,7 @@ class PresenterCore final {
     std::unique_ptr<PlaybackTextPresenter> playbackTextPresenter;
     std::unique_ptr<RepeatButtonPresenter> repeatButtonPresenter;
     std::unique_ptr<BoundaryLogicPresenter> boundaryLogicPresenter;
+    std::unique_ptr<BoundaryLockPresenter> boundaryLockPresenter;
     std::unique_ptr<ControlButtonsPresenter> buttonPresenter;
     std::unique_ptr<CutButtonPresenter> cutButtonPresenter;
     std::unique_ptr<CutResetPresenter> cutResetPresenter;

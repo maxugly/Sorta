@@ -90,6 +90,8 @@ if (NOT BUILD_TESTS_ONLY)
             # Presenters
             Source/Presenters/ControlButtonsPresenter.h
             Source/Presenters/ControlButtonsPresenter.cpp
+            Source/Presenters/BoundaryLockPresenter.h
+            Source/Presenters/BoundaryLockPresenter.cpp
             Source/Presenters/ControlStatePresenter.h
             Source/Presenters/ControlStatePresenter.cpp
             Source/Presenters/CutButtonPresenter.h

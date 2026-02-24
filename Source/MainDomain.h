@@ -7,6 +7,7 @@ namespace MainDomain {
 struct CutPreferences {
     bool active{false};
     bool autoplay{false};
+    bool lengthLocked{false};
     double cutIn{0.0};
     double cutOut{0.0};
 

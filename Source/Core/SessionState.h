@@ -68,6 +68,8 @@ class SessionState {
 
     void setAutoCutOutActive(bool active);
 
+    void setLengthLocked(bool locked);
+
     void setThresholdIn(float threshold);
 
     void setThresholdOut(float threshold);
