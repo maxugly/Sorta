@@ -34,55 +34,15 @@ void CutPresenter::cutPreferenceChanged(const MainDomain::CutPreferences &) {
     pushStateToView();
 }
 
-void CutPresenter::playbackTimerTick() {
-    pushStateToView();
+void CutPresenter::animationUpdate(float breathingPulse) {
+    auto state = cutLayerView.getCurrentState();
+    updateAnimationState(state, breathingPulse);
 }
 
-void CutPresenter::animationUpdate(float) {
-    pushStateToView();
-}
-
-void CutPresenter::pushStateToView() {
-    CutLayerState state;
-    const double cutIn = sessionState.getCutIn();
-    const double cutOut = sessionState.getCutOut();
-    const double audioLength = cutLayerView.getOwner().getAudioPlayer().getThumbnail().getTotalLength();
-    const auto bounds = cutLayerView.getLocalBounds();
-    const float viewWidth = (float)bounds.getWidth();
-
-    state.inPixelX = (float)bounds.getX() + CoordinateMapper::secondsToPixels(cutIn, viewWidth, audioLength);
-    state.outPixelX = (float)bounds.getX() + CoordinateMapper::secondsToPixels(cutOut, viewWidth, audioLength);
-
-    const float inX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.inPixelX);
-    const float outX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.outPixelX);
-
-    state.actualInX = juce::jmin(inX, outX);
-    state.actualOutX = juce::jmax(inX, outX);
-
-    auto calcThresholdY = [&](float threshold) {
-        const float centerY = (float)bounds.getCentreY();
-        const float halfHeight = (float)bounds.getHeight() / 2.0f;
-        float top = centerY - (threshold * halfHeight);
-        float bottom = centerY + (threshold * halfHeight);
-        return std::make_pair(juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), top),
-                              juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), bottom));
-    };
-
-    auto inY = calcThresholdY(sessionState.getCutPrefs().autoCut.thresholdIn);
-    state.inThresholdYTop = inY.first;
-    state.inThresholdYBottom = inY.second;
-
-    auto outY = calcThresholdY(sessionState.getCutPrefs().autoCut.thresholdOut);
-    state.outThresholdYTop = outY.first;
-    state.outThresholdYBottom = outY.second;
-
-    state.fadeWidthPixels = viewWidth * Config::Layout::Waveform::cutRegionFadeProportion;
-    state.audioLength = (float)audioLength;
-    state.glowAlpha = playbackTimerManager.getBreathingPulse();
-    state.showEyeCandy = interactionCoordinator.shouldShowEyeCandy();
-    state.markersVisible = sessionState.getCutPrefs().active;
-    state.channelMode = cutLayerView.getOwner().getChannelViewMode();
-
+void CutPresenter::updateAnimationState(CutLayerState& state, float breathingPulse) {
+    state.glowAlpha = breathingPulse;
+    
+    // Also update marker interaction states high-frequency
     auto calcMarkerProps = [&](MarkerMouseHandler::CutMarkerHandle handle, bool isAuto) {
         juce::Colour color = Config::Colors::cutLine;
         if (isAuto) color = Config::Colors::cutMarkerAuto;
@@ -133,6 +93,49 @@ void CutPresenter::pushStateToView() {
     }
 
     cutLayerView.updateState(state);
+}
+
+void CutPresenter::pushStateToView() {
+    CutLayerState state;
+    const double cutIn = sessionState.getCutIn();
+    const double cutOut = sessionState.getCutOut();
+    const double audioLength = cutLayerView.getOwner().getAudioPlayer().getThumbnail().getTotalLength();
+    const auto bounds = cutLayerView.getLocalBounds();
+    const float viewWidth = (float)bounds.getWidth();
+
+    state.inPixelX = (float)bounds.getX() + CoordinateMapper::secondsToPixels(cutIn, viewWidth, audioLength);
+    state.outPixelX = (float)bounds.getX() + CoordinateMapper::secondsToPixels(cutOut, viewWidth, audioLength);
+
+    const float inX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.inPixelX);
+    const float outX = juce::jlimit((float)bounds.getX(), (float)bounds.getRight(), state.outPixelX);
+
+    state.actualInX = juce::jmin(inX, outX);
+    state.actualOutX = juce::jmax(inX, outX);
+
+    auto calcThresholdY = [&](float threshold) {
+        const float centerY = (float)bounds.getCentreY();
+        const float halfHeight = (float)bounds.getHeight() / 2.0f;
+        float top = centerY - (threshold * halfHeight);
+        float bottom = centerY + (threshold * halfHeight);
+        return std::make_pair(juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), top),
+                              juce::jlimit((float)bounds.getY(), (float)bounds.getBottom(), bottom));
+    };
+
+    auto inY = calcThresholdY(sessionState.getCutPrefs().autoCut.thresholdIn);
+    state.inThresholdYTop = inY.first;
+    state.inThresholdYBottom = inY.second;
+
+    auto outY = calcThresholdY(sessionState.getCutPrefs().autoCut.thresholdOut);
+    state.outThresholdYTop = outY.first;
+    state.outThresholdYBottom = outY.second;
+
+    state.fadeWidthPixels = viewWidth * Config::Layout::Waveform::cutRegionFadeProportion;
+    state.audioLength = (float)audioLength;
+    state.showEyeCandy = interactionCoordinator.shouldShowEyeCandy();
+    state.markersVisible = sessionState.getCutPrefs().active;
+    state.channelMode = cutLayerView.getOwner().getChannelViewMode();
+
+    updateAnimationState(state, playbackTimerManager.getBreathingPulse());
 }
 
 void CutPresenter::refreshMarkersVisibility() {

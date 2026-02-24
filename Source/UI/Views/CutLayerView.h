@@ -51,6 +51,7 @@ class CutLayerView : public juce::Component {
     ~CutLayerView() override;
 
     void updateState(const CutLayerState& newState);
+    const CutLayerState& getCurrentState() const { return state; }
 
     ControlPanel& getOwner() { return owner; }
 

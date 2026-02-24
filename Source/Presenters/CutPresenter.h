@@ -9,6 +9,7 @@
 #include "Presenters/PlaybackTimerManager.h"
 
 class CutLayerView;
+struct CutLayerState;
 class ControlPanel;
 class InteractionCoordinator;
 
@@ -40,14 +41,18 @@ class CutPresenter : public SessionState::Listener,
     }
 
     void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
+    void cutInChanged(double value) override { juce::ignoreUnused(value); pushStateToView(); }
+    void cutOutChanged(double value) override { juce::ignoreUnused(value); pushStateToView(); }
+    void fileChanged(const juce::String &filePath) override { juce::ignoreUnused(filePath); pushStateToView(); }
 
     // PlaybackTimerManager::Listener overrides
-    void playbackTimerTick() override;
+    void playbackTimerTick() override {}
     void animationUpdate(float breathingPulse) override;
 
   private:
     void refreshMarkersVisibility();
     void pushStateToView();
+    void updateAnimationState(CutLayerState& state, float breathingPulse);
 private:
   SessionState &sessionState;
   CutLayerView &cutLayerView;
