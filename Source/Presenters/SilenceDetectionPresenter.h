@@ -57,7 +57,6 @@ class SilenceDetectionPresenter final : public SilenceWorkerClient,
     /** @brief Logs a status message to the UI (via ControlPanel). */
     void logStatusMessage(const juce::String &message, bool isError = false) override;
 
-    /** @brief Returns true if cut mode is currently active. */
 
     /** @brief Returns true if auto-cut-in is active. */
     bool isAutoCutInActive() const override;

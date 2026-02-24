@@ -87,14 +87,9 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, 
     auto hintBounds = bottomRow.removeFromLeft(hintWidth).withHeight(height);
     controlPanel.getHintView().setBounds(hintBounds.withY(bottomRow.getCentreY() - height / 2));
 
-    // removed bottomRowTopY
     controlPanel.layoutCache.contentAreaBounds = bounds.reduced(margin);
 
     const auto fullBounds = controlPanel.getLocalBounds();
-    // removed playbackLeftTextX
-    // removed playbackCenterTextX
-        // removed playbackCenterTextX calc
-    // removed playbackRightTextX
 
     if (controlPanel.playbackTimeView != nullptr) {
         const int textY = bottomRow.getY() - Config::Layout::Text::playbackOffsetY;
