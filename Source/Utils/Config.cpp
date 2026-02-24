@@ -75,8 +75,14 @@ const juce::Colour Colors::Matrix::ledPulse = juce::Colours::orange;
 } // namespace Colors
 
 namespace Labels {
+const juce::String appName = "audiofiler";
+const juce::String appVersion = "0.0.001";
 const juce::String defaultHint = "Ready.";
 const juce::String openButton = "[D]ir";
+const juce::String selectAudio = "Select Audio...";
+const juce::String timeSeparator = " / ";
+const juce::String openBracket = " (";
+const juce::String closeBracket = ")";
 const juce::String playButton = juce::CharPointer_UTF8("\xe2\x96\xb6");
 const juce::String stopButton = juce::CharPointer_UTF8("\xe2\x8f\xb8");
 const juce::String viewModeClassic = "[V]iew01";
@@ -122,6 +128,10 @@ const juce::String logStartSet = "Silence Boundary (Start) set to sample ";
 const juce::String logEndSet = "Silence Boundary (End) set to sample ";
 const juce::String logNoSound = "Could not detect any sound at ";
 const juce::String logTooLarge = "SilenceDetector: Audio file is too large for automated Cut Point detection.";
+const juce::String errorZeroLength = "Error: Audio file has zero length.";
+const juce::String errorNoAudio = "No audio loaded.";
+const juce::String scanningCutPoints = "Scanning for Cut Points...";
+const juce::String noSilenceBoundaries = "No Silence Boundaries detected.";
 } // namespace Labels
 
 } // namespace Config

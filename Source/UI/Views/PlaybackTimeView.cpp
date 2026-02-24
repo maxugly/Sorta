@@ -33,7 +33,7 @@ void PlaybackTimeView::paint(juce::Graphics &g) {
     g.setColour(Config::Colors::playbackText);
     g.setFont((float)Config::Layout::Text::playbackSize);
 
-    juce::String displayStr = " / " + totalTimeString;
+    juce::String displayStr = Config::Labels::timeSeparator + totalTimeString;
     const int margin = Config::Layout::windowBorderMargins;
     const int playbackWidth = Config::Layout::Text::playbackWidth;
     

@@ -5,6 +5,8 @@
 #include "Core/SessionState.h"
 #include "Workers/SilenceAnalysisAlgorithms.h"
 #include "Workers/SilenceDetectionLogger.h"
+#include "Utils/Config.h"
+#include "Utils/TimeUtils.h"
 
 #include <algorithm>
 #include <cmath>
@@ -71,11 +73,11 @@ void SilenceAnalysisWorker::run() {
             if (auto token = weakToken.lock()) {
                 if (!success || lengthInSamples <= 0) {
                     if (lengthInSamples <= 0 && success)
-                        client.logStatusMessage("Error: Audio file has zero length.", true);
+                        client.logStatusMessage(Config::Labels::errorZeroLength, true);
                     else
-                        client.logStatusMessage("No audio loaded.", true);
+                        client.logStatusMessage(Config::Labels::errorNoAudio, true);
                 } else {
-                    client.logStatusMessage(juce::String("Scanning for Cut Points..."));
+                    client.logStatusMessage(Config::Labels::scanningCutPoints);
 
                     const bool stillActive = detectingIn.load() ? client.isAutoCutInActive()
                                                                 : client.isAutoCutOutActive();
@@ -87,8 +89,11 @@ void SilenceAnalysisWorker::run() {
                             if (stillActive) {
                                 metadata.cutIn = resultSeconds;
                                 client.logStatusMessage(
-                                    juce::String("Silence Boundary (Start) set to sample ") +
-                                    juce::String(result));
+                                    Config::Labels::logStartSet +
+                                    juce::String(result) +
+                                    Config::Labels::openBracket +
+                                    TimeUtils::formatTime((double)result / (double)sampleRate) +
+                                    Config::Labels::closeBracket);
                             }
                         } else {
                             const juce::int64 tailSamples = (juce::int64)(sampleRate * 0.05);
@@ -99,12 +104,15 @@ void SilenceAnalysisWorker::run() {
                             if (stillActive) {
                                 metadata.cutOut = endSeconds;
                                 client.logStatusMessage(
-                                    juce::String("Silence Boundary (End) set to sample ") +
-                                    juce::String(finalEndPoint));
+                                    Config::Labels::logEndSet +
+                                    juce::String(finalEndPoint) +
+                                    Config::Labels::openBracket +
+                                    TimeUtils::formatTime((double)finalEndPoint / (double)sampleRate) +
+                                    Config::Labels::closeBracket);
                             }
                         }
                     } else {
-                        client.logStatusMessage("No Silence Boundaries detected.");
+                        client.logStatusMessage(Config::Labels::noSilenceBoundaries);
                     }
 
                     if (stillActive) {

@@ -208,6 +208,7 @@ struct Layout {
     struct Matrix {
         static constexpr int squareSize = 6;
         static constexpr int rows = 4;
+        static constexpr int startX = 4;
     };
 
     struct TopBar {
@@ -239,8 +240,14 @@ constexpr bool lockHandlesWhenAutoCutActive = false;
 } // namespace Audio
 
 namespace Labels {
+extern const juce::String appName;
+extern const juce::String appVersion;
 extern const juce::String defaultHint;
 extern const juce::String openButton;
+extern const juce::String selectAudio;
+extern const juce::String timeSeparator;
+extern const juce::String openBracket;
+extern const juce::String closeBracket;
 extern const juce::String playButton;
 extern const juce::String stopButton;
 extern const juce::String viewModeClassic;
@@ -286,6 +293,10 @@ extern const juce::String logStartSet;
 extern const juce::String logEndSet;
 extern const juce::String logNoSound;
 extern const juce::String logTooLarge;
+extern const juce::String errorZeroLength;
+extern const juce::String errorNoAudio;
+extern const juce::String scanningCutPoints;
+extern const juce::String noSilenceBoundaries;
 } // namespace Labels
 
 } // namespace Config

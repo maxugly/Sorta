@@ -8,11 +8,10 @@ class GuiAppApplication : public juce::JUCEApplication {
     }
 
     const juce::String getApplicationName() override {
-        return "audiofiler";
+        return Config::Labels::appName;
     }
-
     const juce::String getApplicationVersion() override {
-        return "0.0.001";
+        return Config::Labels::appVersion;
     }
 
     void initialise(const juce::String &commandLine) override {

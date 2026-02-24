@@ -35,7 +35,7 @@ void MatrixView::paint(juce::Graphics& g) {
     
     const int totalLedWidth = 16 * sqSize;
     const int totalLedHeight = numRows * sqSize;
-    const int startX = 4; // Reduced from centering to fix large left margin
+    const int startX = Config::Layout::Matrix::startX; 
     const int startY = (getHeight() - totalLedHeight) / 2;
     
     // 3. Draw the LEDs

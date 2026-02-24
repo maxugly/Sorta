@@ -22,13 +22,13 @@ void SilenceDetectionLogger::logZeroLength(SilenceWorkerClient &client) {
 void SilenceDetectionLogger::logCutInSet(SilenceWorkerClient &client, juce::int64 sampleIndex,
                                          double sampleRate) {
     client.logStatusMessage(Config::Labels::logStartSet + juce::String(sampleIndex) +
-                            " (" + TimeUtils::formatTime((double)sampleIndex / sampleRate) + ")");
+                            Config::Labels::openBracket + TimeUtils::formatTime((double)sampleIndex / sampleRate) + Config::Labels::closeBracket);
 }
 
 void SilenceDetectionLogger::logCutOutSet(SilenceWorkerClient &client, juce::int64 sampleIndex,
                                           double sampleRate) {
     client.logStatusMessage(Config::Labels::logEndSet + juce::String(sampleIndex) +
-                            " (" + TimeUtils::formatTime((double)sampleIndex / sampleRate) + ")");
+                            Config::Labels::openBracket + TimeUtils::formatTime((double)sampleIndex / sampleRate) + Config::Labels::closeBracket);
 }
 
 void SilenceDetectionLogger::logNoSoundFound(SilenceWorkerClient &client,

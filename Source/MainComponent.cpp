@@ -72,7 +72,7 @@ void MainComponent::resized() {
 
 void MainComponent::openButtonClicked() {
     chooser = std::make_unique<juce::FileChooser>(
-        "Select Audio...", juce::File::getSpecialLocation(juce::File::userHomeDirectory),
+        Config::Labels::selectAudio, juce::File::getSpecialLocation(juce::File::userHomeDirectory),
         audioPlayer->getFormatManager().getWildcardForAllFormats());
 
     auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
