@@ -29,7 +29,9 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
 
     // PlaybackTimerManager::Listener
     void playbackTimerTick() override {
-        updateEditors();
+        if (++tickCounter % 4 == 0) {
+            updateEditors();
+        }
     }
 
     // SessionState::Listener
@@ -69,6 +71,7 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
     bool isEditingElapsed{false};
     bool isEditingRemaining{false};
     bool isEditingCutLength{false};
+    int tickCounter{0};
 
     void mouseDown(const juce::MouseEvent &event) override;
 };

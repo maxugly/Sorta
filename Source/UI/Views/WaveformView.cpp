@@ -6,12 +6,8 @@
 WaveformView::WaveformView(WaveformManager &waveformManagerIn)
     : waveformManager(waveformManagerIn) {
     waveformManager.addChangeListener(this);
-
     setInterceptsMouseClicks(false, false);
-
     setOpaque(true);
-
-    setBufferedToImage(true);
 }
 
 WaveformView::~WaveformView() {
@@ -58,7 +54,10 @@ void WaveformView::drawWaveform(juce::Graphics &g) {
     const auto halfHeight = bounds.getHeight() * 0.5f;
 
     const float step = (float)Config::Layout::Waveform::pixelsPerSampleLow;
-    for (float x = 0.0f; x < width; x += step) {
+    const float startX = (float)g.getClipBounds().getX();
+    const float endX = (float)g.getClipBounds().getRight();
+
+    for (float x = startX; x < endX; x += step) {
         const double startTime = CoordinateMapper::pixelsToSeconds(x, width, totalLength);
         const double endTime = CoordinateMapper::pixelsToSeconds(x + step, width, totalLength);
 
