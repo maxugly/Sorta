@@ -16,8 +16,14 @@ OverlayView::~OverlayView() {
 
 void OverlayView::animationUpdate(float breathingPulse) {
     juce::ignoreUnused(breathingPulse);
-    if (owner.getInteractionCoordinator().shouldShowEyeCandy())
+    
+    // Only trigger the expensive full-screen repaint if Eye Candy is ON 
+    // AND we are actively dragging a marker. Otherwise, the lines will just 
+    // update naturally during normal UI mouse events.
+    if (owner.getInteractionCoordinator().shouldShowEyeCandy() && 
+        owner.getMarkerMouseHandler().getDraggedHandle() != MarkerMouseHandler::CutMarkerHandle::None) {
         repaint();
+    }
 }
 
 void OverlayView::paint(juce::Graphics &g) {

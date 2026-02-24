@@ -28,6 +28,7 @@ class PlaybackTimeView final : public juce::Component {
     }
 
     void updateTimes(const juce::String& current, const juce::String& total) {
+        if (currentTimeString == current && totalTimeString == total) return;
         currentTimeString = current;
         totalTimeString = total;
         repaint();

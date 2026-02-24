@@ -65,8 +65,27 @@ class ZoomView : public juce::Component {
     void paint(juce::Graphics &g) override;
 
     void updateState(const ZoomViewState& newState) {
+        bool needsRepaint = false;
+        
+        // Always repaint if core geometry or interactions change
+        if (state.mouseX != newState.mouseX || state.mouseY != newState.mouseY ||
+            state.isZooming != newState.isZooming || 
+            state.isZKeyDown != newState.isZKeyDown ||
+            state.currentPositionPixelX != newState.currentPositionPixelX ||
+            state.cutInPixelX != newState.cutInPixelX ||
+            state.cutOutPixelX != newState.cutOutPixelX) {
+            needsRepaint = true;
+        }
+        
+        // Only allow the 60Hz eye-candy pulse to force a repaint IF the view is actually visible
+        if (newState.mouseX != -1 || newState.isZooming) {
+            if (state.eyeCandyPulse != newState.eyeCandyPulse) {
+                needsRepaint = true;
+            }
+        }
+        
         state = newState;
-        repaint();
+        if (needsRepaint) repaint();
     }
 
   private:
