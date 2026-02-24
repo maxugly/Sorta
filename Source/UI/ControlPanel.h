@@ -114,7 +114,6 @@ class ControlPanel final : public juce::Component {
     }
 
 
-    }
 
     juce::TextEditor &getStatsDisplay();
 
