@@ -28,55 +28,25 @@ void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode) {
     repaint();
 }
 
-void WaveformView::setActiveRegion(float startX, float endX) {
-    if (activeStartX == startX && activeEndX == endX) return;
-    activeStartX = startX;
-    activeEndX = endX;
-    repaint();
-}
-
 void WaveformView::paint(juce::Graphics &g) {
-    if (isCacheDirty || cachedWaveformBright.getWidth() != getWidth() || cachedWaveformBright.getHeight() != getHeight()) {
-        cachedWaveformBright = juce::Image(juce::Image::ARGB, juce::jmax(1, getWidth()), juce::jmax(1, getHeight()), true);
-        cachedWaveformDark = juce::Image(juce::Image::ARGB, juce::jmax(1, getWidth()), juce::jmax(1, getHeight()), true);
+    if (isCacheDirty || cachedWaveform.getWidth() != getWidth() || cachedWaveform.getHeight() != getHeight()) {
+        cachedWaveform = juce::Image(juce::Image::ARGB, juce::jmax(1, getWidth()), juce::jmax(1, getHeight()), true);
+        juce::Graphics ig(cachedWaveform);
 
-        juce::Graphics igBright(cachedWaveformBright);
-        juce::Graphics igDark(cachedWaveformDark);
-
-        igBright.fillAll(Config::Colors::solidBlack);
-        igDark.fillAll(Config::Colors::solidBlack);
-
+        ig.fillAll(Config::Colors::solidBlack);
         auto &thumbnail = waveformManager.getThumbnail();
+        
         if (thumbnail.getTotalLength() > 0.0) {
             const auto bounds = getLocalBounds().toFloat();
-
-            // Bake Bright Waveform
-            juce::ColourGradient brightGrad(Config::Colors::waveformPeak, bounds.getX(), bounds.getY(),
-                                            Config::Colors::waveformPeak, bounds.getX(), bounds.getBottom(), false);
-            brightGrad.addColour(0.5, Config::Colors::waveformCore);
-            igBright.setGradientFill(brightGrad);
-            drawWaveform(igBright);
-
-            // Bake Dark Waveform
-            juce::ColourGradient darkGrad(Config::Colors::waveformPeak.withBrightness(0.1f), bounds.getX(), bounds.getY(),
-                                          Config::Colors::waveformPeak.withBrightness(0.1f), bounds.getX(), bounds.getBottom(), false);
-            darkGrad.addColour(0.5, Config::Colors::waveformCore.withBrightness(0.1f));
-            igDark.setGradientFill(darkGrad);
-            drawWaveform(igDark);
+            juce::ColourGradient gradient(Config::Colors::waveformPeak, bounds.getX(), bounds.getY(),
+                                          Config::Colors::waveformPeak, bounds.getX(), bounds.getBottom(), false);
+            gradient.addColour(0.5, Config::Colors::waveformCore);
+            ig.setGradientFill(gradient);
+            drawWaveform(ig);
         }
         isCacheDirty = false;
     }
-
-    // 1. Blast the dark waveform across the entire view
-    g.drawImageAt(cachedWaveformDark, 0, 0);
-
-    // 2. Hardware-clip and blast the bright waveform strictly inside the Cut Region bounds
-    if (activeStartX < activeEndX) {
-        g.saveState();
-        g.reduceClipRegion((int)activeStartX, 0, (int)(activeEndX - activeStartX), getHeight());
-        g.drawImageAt(cachedWaveformBright, 0, 0);
-        g.restoreState();
-    }
+    g.drawImageAt(cachedWaveform, 0, 0);
 }
 
 void WaveformView::drawWaveform(juce::Graphics &g) {

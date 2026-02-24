@@ -26,18 +26,13 @@ class WaveformView : public juce::Component, public juce::ChangeListener {
 
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
-    void setActiveRegion(float startX, float endX);
-
   private:
     void drawWaveform(juce::Graphics &g);
 
     WaveformManager &waveformManager;
     AppEnums::ChannelViewMode currentChannelMode = AppEnums::ChannelViewMode::Mono;
 
-    juce::Image cachedWaveformBright;
-    juce::Image cachedWaveformDark;
-    float activeStartX{0.0f};
-    float activeEndX{0.0f};
+    juce::Image cachedWaveform;
     bool isCacheDirty{true};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveformView)

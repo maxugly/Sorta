@@ -107,15 +107,6 @@ void CutPresenter::pushStateToView() {
     state.actualInX = juce::jmin(inX, outX);
     state.actualOutX = juce::jmax(inX, outX);
 
-    if (auto* canvas = cutLayerView.getOwner().getWaveformCanvasView()) {
-        auto& waveformView = canvas->getWaveformView();
-        if (state.markersVisible) {
-            waveformView.setActiveRegion(state.actualInX, state.actualOutX);
-        } else {
-            waveformView.setActiveRegion(0.0f, viewWidth);
-        }
-    }
-
     auto calcThresholdY = [&](float threshold) {
         const float centerY = (float)bounds.getCentreY();
         const float halfHeight = (float)bounds.getHeight() / 2.0f;

@@ -53,9 +53,19 @@ void CutLayerView::drawThresholds(juce::Graphics& g) {
 }
 
 void CutLayerView::drawFadeRegions(juce::Graphics& g) {
-    juce::ignoreUnused(g);
-    // Intentionally left empty. Fade compositing is now handled directly via 
-    // dual-texture hardware clipping in WaveformView::paint().
+    g.setColour(Config::Colors::solidBlack);
+    const float actualInX = state.actualInX;
+    const float actualOutX = state.actualOutX;
+    const auto bounds = getLocalBounds().toFloat();
+    
+    // Blackout left of In marker
+    if (actualInX > bounds.getX()) {
+        g.fillRect(bounds.getX(), bounds.getY(), actualInX - bounds.getX(), bounds.getHeight());
+    }
+    // Blackout right of Out marker
+    if (actualOutX < bounds.getRight()) {
+        g.fillRect(actualOutX, bounds.getY(), bounds.getRight() - actualOutX, bounds.getHeight());
+    }
 }
 
 void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {
