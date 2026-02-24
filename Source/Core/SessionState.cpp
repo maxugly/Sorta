@@ -92,51 +92,61 @@ void SessionState::setThresholdOut(float threshold) {
 
 void SessionState::setCutIn(double value) {
     const juce::ScopedLock lock(stateLock);
-
-    // Clamp to [0, totalDuration]
     double clampedValue = juce::jlimit(0.0, totalDuration, value);
 
     if (cutPrefs.lengthLocked) {
         const double length = cutPrefs.cutOut - cutPrefs.cutIn;
         clampedValue = juce::jlimit(0.0, totalDuration - length, clampedValue);
         cutPrefs.cutOut = clampedValue + length;
+        cutPrefs.cutIn = clampedValue;
+        
+        if (!currentFilePath.isEmpty()) {
+            metadataCache[currentFilePath].cutIn = cutPrefs.cutIn;
+            metadataCache[currentFilePath].cutOut = cutPrefs.cutOut;
+        }
+
+        listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
+        listeners.call([this](Listener &l) { l.cutInChanged(cutPrefs.cutIn); });
         listeners.call([this](Listener &l) { l.cutOutChanged(cutPrefs.cutOut); });
     } else {
-        // Boundary Rule: CutIn <= CutOut
         clampedValue = juce::jmin(clampedValue, cutPrefs.cutOut);
-    }
-
-    if (cutPrefs.cutIn != clampedValue) {
-        cutPrefs.cutIn = clampedValue;
-        if (!currentFilePath.isEmpty())
-            metadataCache[currentFilePath].cutIn = clampedValue;
-        listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
-        listeners.call([clampedValue](Listener &l) { l.cutInChanged(clampedValue); });
+        if (cutPrefs.cutIn != clampedValue) {
+            cutPrefs.cutIn = clampedValue;
+            if (!currentFilePath.isEmpty())
+                metadataCache[currentFilePath].cutIn = clampedValue;
+            listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
+            listeners.call([clampedValue](Listener &l) { l.cutInChanged(clampedValue); });
+        }
     }
 }
 
 void SessionState::setCutOut(double value) {
     const juce::ScopedLock lock(stateLock);
-
-    // Clamp to [0, totalDuration]
     double clampedValue = juce::jlimit(0.0, totalDuration, value);
 
     if (cutPrefs.lengthLocked) {
         const double length = cutPrefs.cutOut - cutPrefs.cutIn;
         clampedValue = juce::jlimit(length, totalDuration, clampedValue);
         cutPrefs.cutIn = clampedValue - length;
-        listeners.call([this](Listener &l) { l.cutInChanged(cutPrefs.cutIn); });
-    } else {
-        // Boundary Rule: CutOut >= CutIn
-        clampedValue = juce::jmax(clampedValue, cutPrefs.cutIn);
-    }
-
-    if (cutPrefs.cutOut != clampedValue) {
         cutPrefs.cutOut = clampedValue;
-        if (!currentFilePath.isEmpty())
-            metadataCache[currentFilePath].cutOut = clampedValue;
+
+        if (!currentFilePath.isEmpty()) {
+            metadataCache[currentFilePath].cutIn = cutPrefs.cutIn;
+            metadataCache[currentFilePath].cutOut = cutPrefs.cutOut;
+        }
+
         listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
-        listeners.call([clampedValue](Listener &l) { l.cutOutChanged(clampedValue); });
+        listeners.call([this](Listener &l) { l.cutInChanged(cutPrefs.cutIn); });
+        listeners.call([this](Listener &l) { l.cutOutChanged(cutPrefs.cutOut); });
+    } else {
+        clampedValue = juce::jmax(clampedValue, cutPrefs.cutIn);
+        if (cutPrefs.cutOut != clampedValue) {
+            cutPrefs.cutOut = clampedValue;
+            if (!currentFilePath.isEmpty())
+                metadataCache[currentFilePath].cutOut = clampedValue;
+            listeners.call([this](Listener &l) { l.cutPreferenceChanged(cutPrefs); });
+            listeners.call([clampedValue](Listener &l) { l.cutOutChanged(clampedValue); });
+        }
     }
 }
 

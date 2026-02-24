@@ -44,7 +44,7 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
         owner, owner.getInStrip()->getTimerEditor(), owner.getOutStrip()->getTimerEditor());
     boundaryLogicPresenter->initialiseEditors();
 
-    boundaryLockPresenter = std::make_unique<BoundaryLockPresenter>(owner);
+    boundaryLockPresenter = std::make_unique<BoundaryLockPresenter>(owner, owner.getSessionState());
 
     buttonPresenter = std::make_unique<ControlButtonsPresenter>(owner);
     buttonPresenter->initialiseAllButtons();
