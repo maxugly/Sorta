@@ -35,7 +35,7 @@ class StatsOverlay : public juce::Component {
 
         auto handleArea =
             getLocalBounds().removeFromBottom(Config::Layout::Stats::handleAreaHeight);
-        g.setColour(juce::Colours::white.withAlpha(Config::Layout::Stats::handleAlpha));
+        g.setColour(Config::Colors::Button::text);
 
         g.fillRect(handleArea
                        .withSizeKeepingCentre(Config::Layout::Stats::handleWidth,

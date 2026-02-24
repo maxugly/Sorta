@@ -14,7 +14,7 @@ const juce::Colour transparentWhite = juce::Colours::black;
 
 const juce::Colour Button::base{0xff5a5a5a};
 const juce::Colour Button::on{juce::Colours::orange}; 
-const juce::Colour Button::text{0xFFFFFFFF};
+const juce::Colour Button::text{0xFF34FA11};
 const juce::Colour Button::outline{0xff808080};
 const juce::Colour Button::disabledBackground{0xff2a2a2a};
 const juce::Colour Button::disabledText{0xff4a4a4a};
@@ -24,7 +24,7 @@ const juce::Colour Button::cutPlacement{0xffff1493};
 const juce::Colour Button::cutActive{juce::Colours::darkorange}; 
 
 const juce::Colour playbackText = juce::Colour(0xFF34FA11);
-const juce::Colour textEditorBackground = juce::Colours::grey;
+const juce::Colour textEditorBackground = juce::Colour(0xff333333);
 const juce::Colour textEditorError = juce::Colours::red;
 const juce::Colour textEditorWarning = juce::Colours::orange;
 const juce::Colour textEditorOutOfRange = juce::Colours::orange;
@@ -43,7 +43,7 @@ const juce::Colour mousePlacementMode = juce::Colours::deeppink;
 const juce::Colour thresholdLine = juce::Colour(0xffe600e6);
 const juce::Colour thresholdRegion = juce::Colours::red;
 const juce::Colour statsBackground = juce::Colours::black;
-const juce::Colour statsText = juce::Colours::white;
+const juce::Colour statsText = juce::Colour(0xFF34FA11);
 const juce::Colour statsErrorText = juce::Colours::red;
 const juce::Colour mouseAmplitudeGlow = juce::Colours::yellow;
 const juce::Colour placementModeGlow = juce::Colours::red;
