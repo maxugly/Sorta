@@ -35,6 +35,7 @@ void WaveformView::paint(juce::Graphics &g) {
 
         ig.fillAll(Config::Colors::solidBlack);
         auto &thumbnail = waveformManager.getThumbnail();
+        
         if (thumbnail.getTotalLength() > 0.0) {
             const auto bounds = getLocalBounds().toFloat();
             juce::ColourGradient gradient(Config::Colors::waveformPeak, bounds.getX(), bounds.getY(),
@@ -55,17 +56,16 @@ void WaveformView::drawWaveform(juce::Graphics &g) {
     const auto width = bounds.getWidth();
     const auto centerY = bounds.getCentreY();
     const auto halfHeight = bounds.getHeight() * 0.5f;
-
     const float step = (float)Config::Layout::Waveform::pixelsPerSampleLow;
-    const float startX = (float)g.getClipBounds().getX();
-    const float endX = (float)g.getClipBounds().getRight();
 
-    for (float x = startX; x < endX; x += step) {
+    // Draw the full width into the cache
+    for (float x = 0.0f; x < width; x += step) {
         const double startTime = CoordinateMapper::pixelsToSeconds(x, width, totalLength);
         const double endTime = CoordinateMapper::pixelsToSeconds(x + step, width, totalLength);
 
         float minVal = 0.0f, maxVal = 0.0f;
         thumbnail.getApproximateMinMax(startTime, endTime, 0, minVal, maxVal);
+
         const float top = centerY - (maxVal * halfHeight);
         const float bottom = centerY - (minVal * halfHeight);
 

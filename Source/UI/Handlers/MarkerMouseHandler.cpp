@@ -76,7 +76,6 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
                             owner.getSessionState().setAutoCutInActive(false);
                         else
                             owner.getSessionState().setAutoCutOutActive(false);
-                        owner.repaint();
                         return;
                     }
                 }
@@ -111,7 +110,6 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
                 dragStartMouseOffset =
                     getMouseTime(event.x, wb, audioLength) - owner.getSessionState().getCutIn();
             }
-            owner.repaint();
         }
     }
 }
@@ -164,7 +162,6 @@ void MarkerMouseHandler::mouseDrag(const juce::MouseEvent &event) {
                     owner.getAudioPlayer().setCutOut(mt);
             }
         }
-        owner.repaint();
     }
 }
 

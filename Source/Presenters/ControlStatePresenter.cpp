@@ -95,12 +95,10 @@ void ControlStatePresenter::cutPreferenceChanged(const MainDomain::CutPreference
 
 void ControlStatePresenter::cutInChanged(double value) {
     juce::ignoreUnused(value);
-    owner.repaint();
 }
 
 void ControlStatePresenter::cutOutChanged(double value) {
     juce::ignoreUnused(value);
-    owner.repaint();
 }
 
 void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
