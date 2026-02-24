@@ -56,7 +56,9 @@ void WaveformView::drawWaveform(juce::Graphics &g) {
     const auto width = bounds.getWidth();
     const auto centerY = bounds.getCentreY();
     const auto halfHeight = bounds.getHeight() * 0.5f;
-    const float step = (float)Config::Layout::Waveform::pixelsPerSampleLow;
+    
+    // Changed from Low (4) to High (1)
+    const float step = (float)Config::Layout::Waveform::pixelsPerSampleHigh; 
 
     // Draw the full width into the cache
     for (float x = 0.0f; x < width; x += step) {

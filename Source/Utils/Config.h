@@ -172,6 +172,7 @@ struct Layout {
         static constexpr float heightScale = 0.5f;
         static constexpr int pixelsPerSampleLow = 4;
         static constexpr int pixelsPerSampleMedium = 2;
+        static constexpr int pixelsPerSampleHigh = 1;
     };
 
     struct Glow {
