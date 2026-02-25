@@ -46,7 +46,7 @@ class CutPresenter : public SessionState::Listener,
     void fileChanged(const juce::String &filePath) override { juce::ignoreUnused(filePath); pushStateToView(); }
 
     // PlaybackTimerManager::Listener overrides
-    void playbackTimerTick() override {}
+    void playbackTimerTick() override;
 
   private:
     void refreshMarkersVisibility();

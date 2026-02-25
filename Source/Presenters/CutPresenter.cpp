@@ -36,26 +36,32 @@ void CutPresenter::cutPreferenceChanged(const MainDomain::CutPreferences &) {
     pushStateToView();
 }
 
+void CutPresenter::playbackTimerTick() {
+    pushStateToView();
+}
+
 void CutPresenter::updateAnimationState(CutLayerState& state) {
     // Also update marker interaction states high-frequency
     auto calcMarkerProps = [&](MarkerMouseHandler::CutMarkerHandle handle, bool isAuto) {
-        juce::Colour color = Config::Colors::cutLine;
-        if (isAuto) color = Config::Colors::cutMarkerAuto;
-
+        juce::Colour color = isAuto ? Config::Colors::cutMarkerAuto : Config::Colors::cutLine;
         float thickness = Config::Layout::Glow::cutBoxOutlineThickness;
         bool pulse = false;
 
         const auto dragged = markerMouseHandler->getDraggedHandle();
         const auto hovered = markerMouseHandler->getHoveredHandle();
 
-        const bool isInteracting = (dragged == handle || dragged == MarkerMouseHandler::CutMarkerHandle::Full ||
-                                   (dragged == MarkerMouseHandler::CutMarkerHandle::None &&
-                                    (hovered == handle || hovered == MarkerMouseHandler::CutMarkerHandle::Full)));
-
-        if (isInteracting) {
-            color = (dragged != MarkerMouseHandler::CutMarkerHandle::None) ? Config::Colors::cutMarkerDrag : Config::Colors::cutMarkerHover;
+        // Exact same logic as buttons: you are either being dragged (Down) or hovered (Over).
+        // If we are dragging something, ONLY that thing gets the drag color.
+        // If we are not dragging, ONLY the thing being hovered gets the hover color.
+        
+        if (dragged != MarkerMouseHandler::CutMarkerHandle::None) {
+            if (dragged == handle) {
+                color = Config::Colors::cutMarkerDrag;
+                thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
+            }
+        } else if (hovered == handle) {
+            color = Config::Colors::cutMarkerHover;
             thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-            pulse = true;
         }
 
         return std::make_tuple(color, thickness, pulse);
@@ -73,18 +79,17 @@ void CutPresenter::updateAnimationState(CutLayerState& state) {
 
     const auto dragged = markerMouseHandler->getDraggedHandle();
     const auto hovered = markerMouseHandler->getHoveredHandle();
-    const bool regionInteracting = (dragged == MarkerMouseHandler::CutMarkerHandle::Full ||
-                                   (dragged == MarkerMouseHandler::CutMarkerHandle::None &&
-                                    hovered == MarkerMouseHandler::CutMarkerHandle::Full));
-
+    
     state.regionOutlineColor = Config::Colors::cutLine;
     state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThickness;
     state.regionShouldPulse = false;
 
-    if (regionInteracting) {
-        state.regionOutlineColor = (dragged == MarkerMouseHandler::CutMarkerHandle::Full) ? Config::Colors::cutMarkerDrag : Config::Colors::cutMarkerHover;
+    if (dragged == MarkerMouseHandler::CutMarkerHandle::Full) {
+        state.regionOutlineColor = Config::Colors::cutMarkerDrag;
         state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-        state.regionShouldPulse = true;
+    } else if (dragged == MarkerMouseHandler::CutMarkerHandle::None && hovered == MarkerMouseHandler::CutMarkerHandle::Full) {
+        state.regionOutlineColor = Config::Colors::cutMarkerHover;
+        state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
     }
 
     cutLayerView.updateState(state);

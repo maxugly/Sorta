@@ -26,6 +26,15 @@ double MarkerMouseHandler::getMouseTime(int x, const juce::Rectangle<int> &bound
 }
 
 void MarkerMouseHandler::mouseMove(const juce::MouseEvent &event) {
+    refreshHoverState(event);
+}
+
+void MarkerMouseHandler::refreshHoverState(const juce::MouseEvent &event) {
+    if (event.mods.isAnyMouseButtonDown()) {
+        hoveredHandle = CutMarkerHandle::None;
+        return;
+    }
+
     const auto waveformBounds = owner.getWaveformBounds();
     if (waveformBounds.contains(event.getPosition())) {
         hoveredHandle = getHandleAtPosition(event.getPosition());
@@ -115,6 +124,7 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
 }
 
 void MarkerMouseHandler::mouseDrag(const juce::MouseEvent &event) {
+    refreshHoverState(event);
     if (!event.mods.isLeftButtonDown())
         return;
     const auto wb = owner.getWaveformBounds();
@@ -165,8 +175,9 @@ void MarkerMouseHandler::mouseDrag(const juce::MouseEvent &event) {
     }
 }
 
-void MarkerMouseHandler::mouseUp(const juce::MouseEvent &) {
+void MarkerMouseHandler::mouseUp(const juce::MouseEvent &event) {
     draggedHandle = CutMarkerHandle::None;
+    refreshHoverState(event);
 }
 
 void MarkerMouseHandler::mouseExit(const juce::MouseEvent &) {

@@ -38,6 +38,7 @@ class MarkerMouseHandler : public juce::MouseListener {
     void setDraggedHandle(CutMarkerHandle handle) { draggedHandle = handle; }
 
   private:
+    void refreshHoverState(const juce::MouseEvent &event);
     CutMarkerHandle getHandleAtPosition(juce::Point<int> pos) const;
     double getMouseTime(int x, const juce::Rectangle<int> &bounds, double duration) const;
 
