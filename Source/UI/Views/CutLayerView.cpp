@@ -17,8 +17,37 @@ CutLayerView::CutLayerView(ControlPanel &ownerIn)
 CutLayerView::~CutLayerView() = default;
 
 void CutLayerView::updateState(const CutLayerState& newState) {
+    // 1. Full repaint for major structural changes
+    if (state.markersVisible != newState.markersVisible ||
+        state.audioLength != newState.audioLength ||
+        state.channelMode != newState.channelMode ||
+        state.inThresholdYTop != newState.inThresholdYTop ||
+        state.outThresholdYTop != newState.outThresholdYTop) {
+        state = newState;
+        repaint();
+        return;
+    }
+
+    // 2. Dirty Rectangle: Cut In Marker & Left Fade Region
+    if (state.inPixelX != newState.inPixelX ||
+        state.inMarkerColor != newState.inMarkerColor ||
+        state.regionOutlineColor != newState.regionOutlineColor) {
+        const float minX = juce::jmin(state.inPixelX, newState.inPixelX);
+        const float maxX = juce::jmax(state.inPixelX, newState.inPixelX);
+        const float padding = Config::Layout::Glow::cutMarkerBoxWidth + Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
+        repaint((int)(minX - padding), 0, (int)(maxX - minX + padding * 2.0f), getHeight());
+    }
+
+    // 3. Dirty Rectangle: Cut Out Marker & Right Fade Region
+    if (state.outPixelX != newState.outPixelX ||
+        state.outMarkerColor != newState.outMarkerColor) {
+        const float minX = juce::jmin(state.outPixelX, newState.outPixelX);
+        const float maxX = juce::jmax(state.outPixelX, newState.outPixelX);
+        const float padding = Config::Layout::Glow::cutMarkerBoxWidth + Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
+        repaint((int)(minX - padding), 0, (int)(maxX - minX + padding * 2.0f), getHeight());
+    }
+
     state = newState;
-    repaint();
 }
 
 void CutLayerView::paint(juce::Graphics &g) {
