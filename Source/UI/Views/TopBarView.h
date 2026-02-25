@@ -16,6 +16,8 @@
 
 #include <memory>
 #include "UI/Components/TransportButton.h"
+#include "UI/Views/MatrixView.h"
+#include "UI/Views/HintView.h"
 
 class ControlPanel;
 class TransportStrip;
@@ -29,6 +31,8 @@ class TopBarView final : public juce::Component {
     void resized() override;
 
     VolumeView& getVolumeView() { return *volumeView; }
+    MatrixView& getMatrixView() { return *matrixView; }
+    HintView& getHintView() { return *hintView; }
 
     TransportButton openButton;
     TransportButton modeButton;
@@ -39,6 +43,8 @@ class TopBarView final : public juce::Component {
     // We keep transportStrip here to manage the top row layout entirely
     std::unique_ptr<TransportStrip> transportStrip;
     std::unique_ptr<VolumeView> volumeView;
+    std::unique_ptr<MatrixView> matrixView;
+    std::unique_ptr<HintView> hintView;
 
   private:
     ControlPanel &controlPanel;

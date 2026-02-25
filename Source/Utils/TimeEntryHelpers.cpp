@@ -25,8 +25,8 @@ void handleTimeSegmentHighlight(const juce::MouseEvent &event) {
         newRange = juce::Range<int>(3 + offset, 5 + offset);
     else if (effectiveIndex >= 6 && effectiveIndex <= 7)
         newRange = juce::Range<int>(6 + offset, 8 + offset);
-    else if (effectiveIndex >= 9 && effectiveIndex <= 11)
-        newRange = juce::Range<int>(9 + offset, 12 + offset);
+    else if (effectiveIndex >= 9 && effectiveIndex <= 13)
+        newRange = juce::Range<int>(9 + offset, 14 + offset);
     else
         return;
 
@@ -56,8 +56,8 @@ double handleTimeStep(const juce::MouseEvent &event, const juce::MouseWheelDetai
     return currentVal + (direction * step);
 }
 
-void validateTimeEntry(juce::TextEditor &editor, double totalLength) {
-    const double newPosition = TimeUtils::parseTime(editor.getText());
+void validateTimeEntry(juce::TextEditor &editor, double totalLength, double sampleRate) {
+    const double newPosition = TimeUtils::parseTime(editor.getText(), sampleRate);
 
     if (newPosition >= 0.0 && newPosition <= totalLength) {
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
@@ -69,8 +69,8 @@ void validateTimeEntry(juce::TextEditor &editor, double totalLength) {
 }
 
 double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double sampleRate) {
-    double step = Config::Audio::cutStepMilliseconds;
-    bool isMillis = false;
+    double step = (sampleRate > 0.0) ? (1.0 / sampleRate) : 0.0001;
+    bool isSamples = false;
 
     if (charIndex >= 0 && charIndex <= 1)
         step = Config::Audio::cutStepHours;
@@ -79,13 +79,13 @@ double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double s
     else if (charIndex >= 6 && charIndex <= 7)
         step = Config::Audio::cutStepSeconds;
     else if (charIndex >= 9)
-        isMillis = true;
+        isSamples = true;
 
-    if (isMillis) {
+    if (isSamples) {
         if (mods.isCtrlDown() && mods.isShiftDown()) {
-            step = (sampleRate > 0.0) ? (1.0 / sampleRate) : 0.0001;
+            step *= 0.1; // Sub-sample precision if supported? 
         } else if (mods.isShiftDown()) {
-            step = Config::Audio::cutStepMillisecondsFine;
+            step *= 1.0; // Already 1 sample
         }
     } else {
         double multiplier = 1.0;
@@ -116,11 +116,7 @@ float getZoomFactorForPosition(const juce::MouseEvent &event) {
 
     const int effectiveIndex = charIndex - offset;
 
-    // Based on TimeUtils::formatTime result: "HH:MM:SS.mmm"
-    // HH: 0-1
-    // MM: 3-4
-    // SS: 6-7
-    // ms: 9-11
+    // Based on TimeUtils::formatTime result: "HH:MM:SS:sssss"
     if (effectiveIndex <= 1)
         return 1.0f;
     if (effectiveIndex >= 3 && effectiveIndex <= 4)
@@ -128,7 +124,7 @@ float getZoomFactorForPosition(const juce::MouseEvent &event) {
     if (effectiveIndex >= 6 && effectiveIndex <= 7)
         return 100.0f;
     if (effectiveIndex >= 9)
-        return 1000.0f;
+        return 10000.0f;
 
     return 10.0f;
 }

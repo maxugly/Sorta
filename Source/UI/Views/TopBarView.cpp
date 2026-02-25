@@ -20,6 +20,12 @@ TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
 
     volumeView = std::make_unique<VolumeView>();
     addAndMakeVisible(volumeView.get());
+
+    matrixView = std::make_unique<MatrixView>();
+    addAndMakeVisible(matrixView.get());
+
+    hintView = std::make_unique<HintView>();
+    addAndMakeVisible(hintView.get());
 }
 
 TopBarView::~TopBarView() = default;
@@ -41,10 +47,25 @@ void TopBarView::resized() {
     }
     topRow.removeFromLeft(margin);
 
+    // Group: [Volume | Matrix | Hint]
     if (volumeView != nullptr) {
         const int knobSize = Config::Layout::TopBar::volumeKnobSize;
         volumeView->setBounds(topRow.removeFromLeft(knobSize));
     }
+    
+    if (matrixView != nullptr) {
+        const int sqSize = Config::Layout::Matrix::squareSize;
+        const int cols = 16;
+        const int padding = 8;
+        const int matrixWidth = (cols * sqSize) + padding;
+        matrixView->setBounds(topRow.removeFromLeft(matrixWidth));
+    }
+
+    if (hintView != nullptr) {
+        const int hintWidth = 150;
+        hintView->setBounds(topRow.removeFromLeft(hintWidth));
+    }
+
     topRow.removeFromLeft(margin);
 
     exitButton.setBounds(topRow.removeFromRight(buttonWidth));

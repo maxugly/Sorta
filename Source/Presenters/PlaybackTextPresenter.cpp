@@ -53,13 +53,23 @@ void PlaybackTextPresenter::updateEditors() {
     if (owner.playbackTimeView == nullptr || owner.getCutLengthStrip() == nullptr)
         return;
 
+    double sampleRate = 0.0;
+    juce::int64 dummyLength = 0;
+    owner.getAudioPlayer().getReaderInfo(sampleRate, dummyLength);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
+    auto totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
     owner.playbackTimeView->updateTimes(
-        TimeUtils::formatTime(owner.getAudioPlayer().getCurrentPosition()),
-        TimeUtils::formatTime(owner.getAudioPlayer().getThumbnail().getTotalLength()));
+        TimeUtils::formatTime(owner.getAudioPlayer().getCurrentPosition(), sampleRate),
+        TimeUtils::formatTime(totalLength, sampleRate));
 
     auto &elapsed = owner.playbackTimeView->getElapsedEditor();
+    auto &total = owner.playbackTimeView->getTotalTimeEditor();
     auto &remaining = owner.playbackTimeView->getRemainingEditor();
     auto &length = owner.getCutLengthStrip()->getLengthEditor();
+
+    if (total.getText() != TimeUtils::formatTime(totalLength, sampleRate))
+        total.setText(TimeUtils::formatTime(totalLength, sampleRate), juce::dontSendNotification);
 
     if (!isEditingElapsed && !elapsed.hasKeyboardFocus(true))
         syncEditorToPosition(elapsed, owner.getAudioPlayer().getCurrentPosition());
@@ -81,10 +91,15 @@ void PlaybackTextPresenter::updateLengthEditor() {
     if (owner.getCutLengthStrip() == nullptr)
         return;
 
+    double sampleRate = 0.0;
+    juce::int64 dummyLength = 0;
+    owner.getAudioPlayer().getReaderInfo(sampleRate, dummyLength);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
     auto &length = owner.getCutLengthStrip()->getLengthEditor();
     if (!isEditingCutLength && !length.hasKeyboardFocus(true)) {
         double cutLen = std::abs(owner.getSessionState().getCutOut() - owner.getSessionState().getCutIn());
-        juce::String newText = TimeUtils::formatTime(cutLen);
+        juce::String newText = TimeUtils::formatTime(cutLen, sampleRate);
         if (length.getText() != newText)
             length.setText(newText, juce::dontSendNotification);
     }
@@ -99,9 +114,14 @@ void PlaybackTextPresenter::textEditorTextChanged(juce::TextEditor &editor) {
     else if (&editor == &owner.getCutLengthStrip()->getLengthEditor())
         isEditingCutLength = true;
 
+    double sampleRate = 0.0;
+    juce::int64 length = 0;
+    owner.getAudioPlayer().getReaderInfo(sampleRate, length);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
     const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
 
-    TimeEntryHelpers::validateTimeEntry(editor, totalLength);
+    TimeEntryHelpers::validateTimeEntry(editor, totalLength, sampleRate);
 }
 
 void PlaybackTextPresenter::textEditorReturnKeyPressed(juce::TextEditor &editor) {
@@ -144,7 +164,13 @@ void PlaybackTextPresenter::textEditorFocusLost(juce::TextEditor &editor) {
 
 void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
     if (owner.playbackTimeView == nullptr || owner.getCutLengthStrip() == nullptr) return;
-    double newTime = TimeUtils::parseTime(editor.getText());
+
+    double sampleRate = 0.0;
+    juce::int64 dummyLength = 0;
+    owner.getAudioPlayer().getReaderInfo(sampleRate, dummyLength);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
+    double newTime = TimeUtils::parseTime(editor.getText(), sampleRate);
     if (newTime < 0.0)
         return;
 
@@ -191,7 +217,12 @@ void PlaybackTextPresenter::syncEditorToPosition(juce::TextEditor &editor, doubl
         return;
     }
 
-    juce::String text = TimeUtils::formatTime(positionSeconds);
+    double sampleRate = 0.0;
+    juce::int64 dummyLength = 0;
+    owner.getAudioPlayer().getReaderInfo(sampleRate, dummyLength);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
+    juce::String text = TimeUtils::formatTime(positionSeconds, sampleRate);
     if (isRemaining)
         text = "-" + text;
 
@@ -247,13 +278,14 @@ void PlaybackTextPresenter::mouseWheelMove(const juce::MouseEvent &event,
         (editor == &owner.getCutLengthStrip()->getLengthEditor() && isEditingCutLength))
         return;
 
-    double currentVal = TimeUtils::parseTime(editor->getText());
-    if (currentVal < 0.0)
-        currentVal = 0.0;
-
     double sampleRate = 0.0;
     juce::int64 length = 0;
     owner.getAudioPlayer().getReaderInfo(sampleRate, length);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
+    double currentVal = TimeUtils::parseTime(editor->getText(), sampleRate);
+    if (currentVal < 0.0)
+        currentVal = 0.0;
 
     double newVal = TimeEntryHelpers::handleTimeStep(event, wheel, currentVal, sampleRate);
     newVal = juce::jmax(0.0, newVal);

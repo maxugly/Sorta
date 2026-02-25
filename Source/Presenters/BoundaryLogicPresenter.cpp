@@ -78,14 +78,24 @@ void BoundaryLogicPresenter::textEditorTextChanged(juce::TextEditor &editor) {
         owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
     }
 
-    TimeEntryHelpers::validateTimeEntry(editor, getAudioTotalLength());
+    double sampleRate = 0.0;
+    juce::int64 length = 0;
+    owner.getAudioPlayer().getReaderInfo(sampleRate, length);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
+    TimeEntryHelpers::validateTimeEntry(editor, getAudioTotalLength(), sampleRate);
 }
 
 void BoundaryLogicPresenter::textEditorReturnKeyPressed(juce::TextEditor &editor) {
     if (&editor == &cutInEditor) isEditingIn = false;
     if (&editor == &cutOutEditor) isEditingOut = false;
 
-    applyCutFromEditor(editor, TimeUtils::parseTime(editor.getText()));
+    double sampleRate = 0.0;
+    juce::int64 length = 0;
+    owner.getAudioPlayer().getReaderInfo(sampleRate, length);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
+    applyCutFromEditor(editor, TimeUtils::parseTime(editor.getText(), sampleRate));
     editor.giveAwayKeyboardFocus();
 }
 
@@ -108,7 +118,12 @@ void BoundaryLogicPresenter::textEditorFocusLost(juce::TextEditor &editor) {
     if (&editor == &cutInEditor) isEditingIn = false;
     if (&editor == &cutOutEditor) isEditingOut = false;
 
-    applyCutFromEditor(editor, TimeUtils::parseTime(editor.getText()));
+    double sampleRate = 0.0;
+    juce::int64 length = 0;
+    owner.getAudioPlayer().getReaderInfo(sampleRate, length);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
+    applyCutFromEditor(editor, TimeUtils::parseTime(editor.getText(), sampleRate));
     owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
 }
 
@@ -198,7 +213,12 @@ void BoundaryLogicPresenter::syncEditorToPosition(juce::TextEditor &editor,
         (&editor == &cutOutEditor && isEditingOut))
         return;
 
-    juce::String newText = TimeUtils::formatTime(positionSeconds);
+    double sampleRate = 0.0;
+    juce::int64 length = 0;
+    owner.getAudioPlayer().getReaderInfo(sampleRate, length);
+    if (sampleRate <= 0) sampleRate = 44100.0;
+
+    juce::String newText = TimeUtils::formatTime(positionSeconds, sampleRate);
     if (editor.getText() != newText)
         editor.setText(newText, juce::dontSendNotification);
 }

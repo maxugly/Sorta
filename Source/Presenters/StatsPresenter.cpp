@@ -88,7 +88,7 @@ juce::String StatsPresenter::buildStatsString() const {
         stats << Config::Labels::statsSamples << lengthInSamples << "\n";
         stats << Config::Labels::statsRate << sampleRate << Config::Labels::statsHz << "\n";
         stats << Config::Labels::statsChannels << thumbnail.getNumChannels() << "\n";
-        stats << Config::Labels::statsLength << TimeUtils::formatTime(thumbnail.getTotalLength()) << "\n";
+        stats << Config::Labels::statsLength << TimeUtils::formatTime(thumbnail.getTotalLength(), sampleRate) << "\n";
 
         float minVal = 0.0f;
         float maxVal = 0.0f;

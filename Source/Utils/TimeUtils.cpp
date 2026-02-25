@@ -2,25 +2,32 @@
 
 #include "Utils/TimeUtils.h"
 
-juce::String TimeUtils::formatTime(double seconds) {
+juce::String TimeUtils::formatTime(double seconds, double sampleRate) {
     if (seconds < 0)
         seconds = 0;
 
-    long long totalMilliseconds = (long long)(seconds * 1000.0 + 0.0001);
+    if (sampleRate <= 0)
+        sampleRate = 44100.0;
 
-    int hours = (int)(totalMilliseconds / 3600000);
-    totalMilliseconds %= 3600000;
+    auto totalSamples = (long long)(seconds * sampleRate + 0.0001);
+    auto samplesPerSecond = (long long)sampleRate;
 
-    int minutes = (int)(totalMilliseconds / 60000);
-    totalMilliseconds %= 60000;
+    int hours = (int)(totalSamples / (samplesPerSecond * 3600));
+    totalSamples %= (samplesPerSecond * 3600);
 
-    int secs = (int)(totalMilliseconds / 1000);
-    int milliseconds = (int)(totalMilliseconds % 1000);
+    int minutes = (int)(totalSamples / (samplesPerSecond * 60));
+    totalSamples %= (samplesPerSecond * 60);
 
-    return juce::String::formatted("%02d:%02d:%02d:%03d", hours, minutes, secs, milliseconds);
+    int secs = (int)(totalSamples / samplesPerSecond);
+    int samples = (int)(totalSamples % samplesPerSecond);
+
+    return juce::String::formatted("%02d:%02d:%02d:%05d", hours, minutes, secs, samples);
 }
 
-double TimeUtils::parseTime(const juce::String &timeString) {
+double TimeUtils::parseTime(const juce::String &timeString, double sampleRate) {
+    if (sampleRate <= 0)
+        sampleRate = 44100.0;
+
     juce::String cleanTime = timeString.startsWithChar('-') ? timeString.substring(1) : timeString;
 
     auto parts = juce::StringArray::fromTokens(cleanTime, ":", "");
@@ -28,5 +35,5 @@ double TimeUtils::parseTime(const juce::String &timeString) {
         return -1.0;
 
     return parts[0].getIntValue() * 3600.0 + parts[1].getIntValue() * 60.0 +
-           parts[2].getIntValue() + parts[3].getIntValue() / 1000.0;
+           parts[2].getIntValue() + (double)parts[3].getLargeIntValue() / sampleRate;
 }

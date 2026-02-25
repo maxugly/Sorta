@@ -37,8 +37,7 @@ double handleTimeStep(const juce::MouseEvent &event, const juce::MouseWheelDetai
  * @param editor The TextEditor to validate.
  * @param totalLength The maximum allowed time in seconds.
  */
-void validateTimeEntry(juce::TextEditor &editor, double totalLength);
-
+void validateTimeEntry(juce::TextEditor &editor, double totalLength, double sampleRate);
 /**
  * @brief Calculates the time step size based on cursor position and modifier keys.
  * @details Used for "scrubbing" time values with the mouse wheel or arrow keys.

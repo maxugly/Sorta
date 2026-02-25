@@ -38,10 +38,12 @@ class PlaybackTimeView final : public juce::Component {
 
     juce::TextEditor& getElapsedEditor() { return elapsedTimeEditor; }
     juce::TextEditor& getRemainingEditor() { return remainingTimeEditor; }
+    juce::TextEditor& getTotalTimeEditor() { return totalTimeEditor; }
 
   private:
     StyledTextEditor elapsedTimeEditor;
     StyledTextEditor remainingTimeEditor;
+    StyledTextEditor totalTimeEditor;
     juce::String totalTimeStaticStr;
 
     juce::String currentTimeString;

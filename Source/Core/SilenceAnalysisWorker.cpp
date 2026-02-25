@@ -92,7 +92,7 @@ void SilenceAnalysisWorker::run() {
                                     Config::Labels::logStartSet +
                                     juce::String(result) +
                                     Config::Labels::openBracket +
-                                    TimeUtils::formatTime((double)result / (double)sampleRate) +
+                                    TimeUtils::formatTime((double)result / (double)sampleRate, (double)sampleRate) +
                                     Config::Labels::closeBracket);
                             }
                         } else {
@@ -107,7 +107,7 @@ void SilenceAnalysisWorker::run() {
                                     Config::Labels::logEndSet +
                                     juce::String(finalEndPoint) +
                                     Config::Labels::openBracket +
-                                    TimeUtils::formatTime((double)finalEndPoint / (double)sampleRate) +
+                                    TimeUtils::formatTime((double)finalEndPoint / (double)sampleRate, (double)sampleRate) +
                                     Config::Labels::closeBracket);
                             }
                         }

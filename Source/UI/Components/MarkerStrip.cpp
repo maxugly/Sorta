@@ -20,7 +20,7 @@ void MarkerStrip::initialiseComponents() {
     // Timer Editor
     addAndMakeVisible(timerEditor);
     timerEditor.applyStandardStyle();
-    timerEditor.setInputRestrictions(12, "0123456789:.");
+    timerEditor.setInputRestrictions(14, "0123456789:.");
     timerEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
 
     // Reset Button

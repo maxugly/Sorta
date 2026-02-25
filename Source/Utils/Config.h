@@ -25,8 +25,8 @@ inline constexpr float ButtonOutlineThickness = 2.0f;
 inline constexpr float ButtonCornerSize = 6.0f;
 /** @brief Width for Cut In/Out buttons in units. */
 inline constexpr float CutButtonWidthUnits = 2.5f;
-/** @brief Width for Time Editors (Timers) in units. */
-inline constexpr float TimerWidthUnits = 5.5f;
+/** @brief Width for Time Editors (Timers) in units. (220px / 32.0) */
+inline constexpr float TimerWidthUnits = 6.875f;
 /** @brief Width for Reset buttons in units. */
 inline constexpr float ResetButtonWidthUnits = 1.5f;
 /** @brief Width for Threshold editors in units. */
@@ -138,7 +138,7 @@ struct Layout {
     };
 
     struct Text {
-        static constexpr int playbackWidth = 520;
+        static constexpr int playbackWidth = 220;
         static constexpr int playbackHeight = 30;
         static constexpr int playbackOffsetY = 25;
         static constexpr int playbackSize = 30;

@@ -125,8 +125,8 @@ class ControlPanel final : public juce::Component {
     const PresenterCore &getPresenterCore() const { return *presenterCore; }
     BoundaryLogicPresenter &getBoundaryLogicPresenter() { return presenterCore->getBoundaryLogicPresenter(); }
     RepeatButtonPresenter &getRepeatButtonPresenter() { return presenterCore->getRepeatButtonPresenter(); }
-    MatrixView& getMatrixView() { return *matrixView; }
-    HintView& getHintView() { return *hintView; }
+    MatrixView& getMatrixView() { return topBarView->getMatrixView(); }
+    HintView& getHintView() { return topBarView->getHintView(); }
     PlaybackTextPresenter &getPlaybackTextPresenter() { return presenterCore->getPlaybackTextPresenter(); }
     WaveformCanvasView* getWaveformCanvasView() { return waveformCanvasView.get(); }
 
@@ -158,8 +158,6 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<LayoutManager> layoutManager;
     std::unique_ptr<WaveformCanvasView> waveformCanvasView;
     std::unique_ptr<OverlayView> overlayView;
-    std::unique_ptr<MatrixView> matrixView;
-    std::unique_ptr<HintView> hintView;
 
     std::unique_ptr<TopBarView> topBarView;
     std::unique_ptr<PlaybackTimeView> playbackTimeView;

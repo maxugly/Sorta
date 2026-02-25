@@ -64,9 +64,14 @@ void VolumeView::paint(juce::Graphics &g) {
     auto bounds = getLocalBounds().toFloat().reduced(Config::UI::ButtonOutlineThickness / 2.0f);
     auto cornerSize = Config::UI::ButtonCornerSize;
 
+    juce::Path p;
+    // GroupPosition::Left style: rounded left, sharp right
+    p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
+                          cornerSize, cornerSize, true, false, true, false);
+
     g.setColour(Config::Colors::Button::base);
-    g.fillRoundedRectangle(bounds, cornerSize);
+    g.fillPath(p);
 
     g.setColour(Config::Colors::Button::outline);
-    g.drawRoundedRectangle(bounds, cornerSize, Config::UI::ButtonOutlineThickness);
+    g.strokePath(p, juce::PathStrokeType(Config::UI::ButtonOutlineThickness));
 }

@@ -1,4 +1,3 @@
-
 #include "Presenters/ZoomPresenter.h"
 #include "Core/AudioPlayer.h"
 #include "Core/SessionState.h"
@@ -50,26 +49,28 @@ void ZoomPresenter::playbackTimerTick() {
         state.mouseX = currentMouseX - owner.waveformCanvasView->getX() - zoomView.getX();
         state.mouseY = currentMouseY - owner.waveformCanvasView->getY() - zoomView.getY();
         state.mouseTime = mouse.getMouseCursorTime();
-        state.mouseTimeText = TimeUtils::formatTime(state.mouseTime);
+
+        double sampleRate = 0.0;
+        juce::int64 length = 0;
+        owner.getAudioPlayer().getReaderInfo(sampleRate, length);
+        if (sampleRate <= 0) sampleRate = 44100.0;
+
+        state.mouseTimeText = TimeUtils::formatTime(state.mouseTime, sampleRate);
 
         if (state.numChannels > 0) {
-            double sampleRate = 0.0;
-            juce::int64 length = 0;
-            if (audioPlayer.getReaderInfo(sampleRate, length) && sampleRate > 0.0) {
-                float minVal = 0.0f, maxVal = 0.0f;
-                audioPlayer.getWaveformManager().getThumbnail().getApproximateMinMax(
-                    state.mouseTime, state.mouseTime + (1.0 / sampleRate), 0,
-                    minVal, maxVal);
-                const float amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
-                const auto waveformBounds = owner.getWaveformBounds();
-                const float centerY = (float)waveformBounds.getHeight() / 2.0f;
-                state.amplitudeY = centerY - (amplitude * waveformBounds.getHeight() *
-                                              Config::Layout::Waveform::heightScale);
-                state.bottomAmplitudeY = centerY + (amplitude * waveformBounds.getHeight() *
-                                                    Config::Layout::Waveform::heightScale);
-                state.amplitudeText = juce::String(amplitude, 2);
-                state.negAmplitudeText = juce::String(-amplitude, 2);
-            }
+            float minVal = 0.0f, maxVal = 0.0f;
+            audioPlayer.getWaveformManager().getThumbnail().getApproximateMinMax(
+                state.mouseTime, state.mouseTime + (1.0 / sampleRate), 0,
+                minVal, maxVal);
+            const float amplitude = juce::jmax(std::abs(minVal), std::abs(maxVal));
+            const auto waveformBounds = owner.getWaveformBounds();
+            const float centerY = (float)waveformBounds.getHeight() / 2.0f;
+            state.amplitudeY = centerY - (amplitude * waveformBounds.getHeight() *
+                                          Config::Layout::Waveform::heightScale);
+            state.bottomAmplitudeY = centerY + (amplitude * waveformBounds.getHeight() *
+                                                Config::Layout::Waveform::heightScale);
+            state.amplitudeText = juce::String(amplitude, 2);
+            state.negAmplitudeText = juce::String(-amplitude, 2);
         }
     }
 

@@ -60,33 +60,16 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int rowHeigh
 
     // --- NEW: Center the Cut Length Strip in the remaining space ---
     if (controlPanel.getCutLengthStrip() != nullptr) {
-        const int lengthWidth = Config::Layout::Text::playbackWidth / 2;
+        const int lengthWidth = 220 + (int)Config::UI::WidgetUnit;
         controlPanel.getCutLengthStrip()->setBounds(cutRow.withSizeKeepingCentre(lengthWidth, height));
     }
 }
 
 void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, int rowHeight) {
     const int margin = Config::Layout::windowBorderMargins;
-    const int buttonWidth = Config::Layout::buttonWidth;
-    const int playbackWidth = Config::Layout::Text::playbackWidth;
 
     auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(margin);
     
-    const int sqSize = Config::Layout::Matrix::squareSize;
-    const int rows = Config::Layout::Matrix::rows;
-    const int cols = 16;
-
-    // --- Matrix View (Left Group) ---
-    const int padding = 16; 
-    const int height = (int)Config::UI::WidgetHeight;
-    auto matrixBounds = bottomRow.removeFromLeft((cols * sqSize) + padding).withHeight(height);
-    controlPanel.getMatrixView().setBounds(matrixBounds.withY(bottomRow.getCentreY() - height / 2));
-
-    // --- NEW: Hint View (Right Group) ---
-    const int hintWidth = 150; // Width of the FL Studio text box
-    auto hintBounds = bottomRow.removeFromLeft(hintWidth).withHeight(height);
-    controlPanel.getHintView().setBounds(hintBounds.withY(bottomRow.getCentreY() - height / 2));
-
     controlPanel.layoutCache.contentAreaBounds = bounds.reduced(margin);
 
     const auto fullBounds = controlPanel.getLocalBounds();

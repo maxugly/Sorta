@@ -14,14 +14,14 @@ void MatrixView::updateState(const MatrixViewState& newState) {
 }
 
 void MatrixView::paint(juce::Graphics& g) {
-    // 1. Draw the Button Background (GroupPosition::Left style)
+    // 1. Draw the Button Background (GroupPosition::Middle style)
     auto bounds = getLocalBounds().toFloat().reduced(Config::UI::ButtonOutlineThickness / 2.0f);
     auto cornerSize = Config::UI::ButtonCornerSize;
     
     juce::Path p;
-    // Corners: topLeft=true, topRight=false, bottomLeft=true, bottomRight=false
+    // Corners: sharp all (Middle)
     p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-                          cornerSize, cornerSize, true, false, true, false);
+                          cornerSize, cornerSize, false, false, false, false);
                           
     g.setColour(Config::Colors::Button::base);
     g.fillPath(p);
