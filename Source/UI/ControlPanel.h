@@ -6,6 +6,7 @@
 #include "UI/InteractionCoordinator.h"
 #include "UI/Views/MatrixView.h"
 #include "UI/Views/HintView.h"
+#include "UI/Views/FpsView.h"
 
 class FocusManager;
 #include "Core/AppEnums.h"
@@ -129,6 +130,7 @@ class ControlPanel final : public juce::Component {
     HintView& getHintView() { return topBarView->getHintView(); }
     PlaybackTextPresenter &getPlaybackTextPresenter() { return presenterCore->getPlaybackTextPresenter(); }
     WaveformCanvasView* getWaveformCanvasView() { return waveformCanvasView.get(); }
+    FpsView& getFpsView() { return *fpsView; }
 
     void invokeOwnerOpenDialog();
 
@@ -158,6 +160,7 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<LayoutManager> layoutManager;
     std::unique_ptr<WaveformCanvasView> waveformCanvasView;
     std::unique_ptr<OverlayView> overlayView;
+    std::unique_ptr<FpsView> fpsView;
 
     std::unique_ptr<TopBarView> topBarView;
     std::unique_ptr<PlaybackTimeView> playbackTimeView;

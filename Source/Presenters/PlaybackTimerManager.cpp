@@ -9,11 +9,20 @@ PlaybackTimerManager::PlaybackTimerManager(SessionState &sessionStateIn, AudioPl
                                            InteractionCoordinator &coordinatorIn)
     : sessionState(sessionStateIn), audioPlayer(audioPlayerIn),
       interactionCoordinator(coordinatorIn) {
-    startTimerHz(60);
+    // juce::Timer removed
 }
+
 PlaybackTimerManager::~PlaybackTimerManager() {
-    stopTimer();
+    // juce::Timer removed
 }
+
+#if !defined(JUCE_HEADLESS)
+void PlaybackTimerManager::attachToVBlank(juce::Component* component) {
+    vblankAttachment = std::make_unique<juce::VBlankAttachment>(component, [this]() {
+        onVBlank();
+    });
+}
+#endif
 
 void PlaybackTimerManager::addListener(Listener *l) {
     const juce::ScopedLock lock(listenerLock);
@@ -25,7 +34,7 @@ void PlaybackTimerManager::removeListener(Listener *l) {
     listeners.remove(l);
 }
 
-void PlaybackTimerManager::timerCallback() {
+void PlaybackTimerManager::onVBlank() {
     const bool isZDown =
         juce::KeyPress::isKeyCurrentlyDown('z') || juce::KeyPress::isKeyCurrentlyDown('Z');
 

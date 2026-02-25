@@ -25,68 +25,51 @@ class InteractionCoordinator;
  *
  * @ingroup Logic
  */
-class PlaybackTimerManager final : public juce::Timer {
-  public:
-    /**
-     * @class Listener
-     * @brief Interface for components that need high-frequency updates.
-     */
+class PlaybackTimerManager final {
+public:
     class Listener {
-      public:
+    public:
         virtual ~Listener() = default;
-
-        /** @brief Called at a 60Hz frequency to trigger UI updates. */
         virtual void playbackTimerTick() = 0;
-
-        /** @brief Called when the active zoom point changes (e.g., via 'Z' key). */
         virtual void activeZoomPointChanged(AppEnums::ActiveZoomPoint newPoint) {
             juce::ignoreUnused(newPoint);
         }
     };
 
-    /**
-     * @brief Constructor.
-     * @param sessionStateIn Reference to the central application state.
-     * @param audioPlayerIn Reference to the audio engine.
-     * @param coordinatorIn Reference to the interaction coordinator.
-     */
     PlaybackTimerManager(SessionState &sessionStateIn, AudioPlayer &audioPlayerIn,
                          InteractionCoordinator &coordinatorIn);
+    ~PlaybackTimerManager();
 
-    /** @brief stops the timer. */
-    ~PlaybackTimerManager() override;
+#if !defined(JUCE_HEADLESS)
+    void attachToVBlank(juce::Component* component);
+#endif
 
-    /** @brief Sets the provider for the active zoom point. */
     void setZoomPointProvider(std::function<AppEnums::ActiveZoomPoint()> provider) {
         m_zoomPointProvider = std::move(provider);
     }
 
-    /** @brief Registers a listener for timer ticks. */
     void addListener(Listener *l);
-
-    /** @brief Unregisters a listener. */
     void removeListener(Listener *l);
 
-    /** @brief Returns true if the 'z' key is currently held down. */
     bool isZKeyDown() const {
         return m_isZKeyDown;
     }
 
-    /** @brief Internal timer callback. */
-    void timerCallback() override;
+    void onVBlank();
 
-  private:
+private:
     SessionState &sessionState;
     AudioPlayer &audioPlayer;
     InteractionCoordinator &interactionCoordinator;
     std::function<AppEnums::ActiveZoomPoint()> m_zoomPointProvider;
-
     juce::ListenerList<Listener> listeners;
     juce::CriticalSection listenerLock;
-
     bool m_isZKeyDown = false;
+
+#if !defined(JUCE_HEADLESS)
+    std::unique_ptr<juce::VBlankAttachment> vblankAttachment;
+#endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaybackTimerManager)
 };
-
 #endif

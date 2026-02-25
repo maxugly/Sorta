@@ -24,6 +24,7 @@
 #include "Presenters/SilenceThresholdPresenter.h"
 #include "Presenters/KeybindPresenter.h"
 #include "Presenters/HintPresenter.h"
+#include "Presenters/FpsPresenter.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/CutLayerView.h"
@@ -71,6 +72,7 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
         volumePresenter = std::make_unique<VolumePresenter>(tbv->getVolumeView(), owner.getSessionState());
 
     hintPresenter = std::make_unique<HintPresenter>(owner, owner.getHintView());
+    fpsPresenter = std::make_unique<FpsPresenter>(owner, owner.getFpsView());
 }
 
 PresenterCore::~PresenterCore() = default;

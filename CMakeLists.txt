@@ -130,6 +130,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/KeybindPresenter.cpp
             Source/Presenters/HintPresenter.h
             Source/Presenters/HintPresenter.cpp
+            Source/Presenters/FpsPresenter.h
+            Source/Presenters/FpsPresenter.cpp
 
             # UI
             Source/UI/ControlPanel.h
@@ -180,6 +182,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Views/VolumeView.cpp
             Source/UI/Views/HintView.h
             Source/UI/Views/HintView.cpp
+            Source/UI/Views/FpsView.h
+            Source/UI/Views/FpsView.cpp
 
             # UI/LookAndFeel
             Source/UI/LookAndFeel/ModernLookAndFeel.h

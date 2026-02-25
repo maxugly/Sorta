@@ -52,6 +52,9 @@ void ControlPanel::injectLogic(InteractionCoordinator& ic, PlaybackTimerManager&
     setupListeners();
     getPresenterCore().getControlStatePresenter().updateUIFromState();
     finaliseSetup();
+#if !defined(JUCE_HEADLESS)
+    playbackTimerManager->attachToVBlank(this);
+#endif
 }
 
 void ControlPanel::setupViews() {
@@ -69,6 +72,10 @@ void ControlPanel::setupViews() {
 
     playbackTimeView = std::make_unique<PlaybackTimeView>();
     addAndMakeVisible(playbackTimeView.get());
+
+    fpsView = std::make_unique<FpsView>();
+    addAndMakeVisible(fpsView.get());
+    fpsView->toFront(false);
 }
 
 void ControlPanel::setupStrips() {
@@ -113,10 +120,6 @@ void ControlPanel::setupListeners() {
 }
 
 ControlPanel::~ControlPanel() {
-    if (playbackTimerManager != nullptr) {
-        playbackTimerManager->stopTimer();
-    }
-
     setLookAndFeel(nullptr);
 }
 
@@ -147,6 +150,13 @@ void ControlPanel::resized() {
 
     if (overlayView != nullptr)
         overlayView->setBounds(getLocalBounds());
+
+    if (fpsView != nullptr) {
+        fpsView->setBounds(getLocalBounds().getRight() - Config::Layout::Fps::width - Config::Layout::Fps::margin,
+                           Config::Layout::Fps::margin,
+                           Config::Layout::Fps::width,
+                           Config::Layout::Fps::height);
+    }
 }
 
 void ControlPanel::paint(juce::Graphics &g) {

@@ -73,6 +73,8 @@ extern const juce::Colour cutLine;
 extern const juce::Colour cutMarkerAuto;
 extern const juce::Colour cutMarkerHover;
 extern const juce::Colour cutMarkerDrag;
+extern const juce::Colour fpsBackground;
+extern const juce::Colour fpsText;
 extern const juce::Colour mouseCursorLine;
 extern const juce::Colour mouseCursorHighlight;
 extern const juce::Colour mouseAmplitudeLine;
@@ -208,6 +210,13 @@ struct Layout {
 
     struct TopBar {
         static constexpr int volumeKnobSize = 80;
+    };
+
+    struct Fps {
+        static constexpr int width = 125; // Widened to fit frame time
+        static constexpr int height = 24;
+        static constexpr int margin = 10;
+        static constexpr float cornerRadius = 4.0f;
     };
 };
 
