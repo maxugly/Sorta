@@ -63,12 +63,10 @@ class ZoomView : public juce::Component {
     void paint(juce::Graphics &g) override;
 
     void updateState(const ZoomViewState& newState) {
+        // 1. Only do a full repaint for major mode changes
         if (state.isZooming != newState.isZooming ||
             state.isZKeyDown != newState.isZKeyDown ||
             state.placementMode != newState.placementMode ||
-            state.currentPositionPixelX != newState.currentPositionPixelX ||
-            state.cutInPixelX != newState.cutInPixelX ||
-            state.cutOutPixelX != newState.cutOutPixelX ||
             state.audioLength != newState.audioLength ||
             state.channelMode != newState.channelMode) {
             state = newState;
@@ -76,7 +74,15 @@ class ZoomView : public juce::Component {
             return;
         }
 
-        // Dirty Rectangles: Only erase and redraw the crosshair regions
+        // 2. Dirty Rectangles: Only repaint the popup box if inner lines move
+        if (state.currentPositionPixelX != newState.currentPositionPixelX ||
+            state.cutInPixelX != newState.cutInPixelX ||
+            state.cutOutPixelX != newState.cutOutPixelX) {
+            if (state.isZooming) repaint(state.popupBounds);
+            if (newState.isZooming) repaint(newState.popupBounds);
+        }
+
+        // 3. Dirty Rectangles: Only erase and redraw the crosshair regions
         if (state.mouseX != newState.mouseX || state.mouseY != newState.mouseY) {
             auto invalidateCrosshair = [this](const ZoomViewState& s) {
                 if (s.mouseX == -1) return;
@@ -90,8 +96,9 @@ class ZoomView : public juce::Component {
 
             invalidateCrosshair(state);    // Erase old position
             invalidateCrosshair(newState); // Redraw new position
-            state = newState;
         }
+        
+        state = newState;
     }
 
   private:

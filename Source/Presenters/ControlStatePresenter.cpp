@@ -25,7 +25,6 @@ void ControlStatePresenter::changeListenerCallback(juce::ChangeBroadcaster* sour
     if (source == &owner.getAudioPlayer()) {
         if (auto* ts = owner.getTransportStrip())
             ts->updatePlayButtonText(owner.getAudioPlayer().isPlaying());
-        owner.repaint();
     }
 }
 
@@ -90,7 +89,6 @@ void ControlStatePresenter::cutPreferenceChanged(const MainDomain::CutPreference
         owner.getOutStrip()->updateAutoCutState(prefs.autoCut.outActive);
 
     refreshStates();
-    owner.repaint();
 }
 
 void ControlStatePresenter::cutInChanged(double value) {
