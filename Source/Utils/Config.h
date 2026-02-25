@@ -18,6 +18,8 @@
  */
 namespace Config {
 
+void loadFromFile(const juce::File& configFile);
+
 namespace UI {
 /** @brief The base thickness of the button border. */
 inline constexpr float ButtonOutlineThickness = 2.0f;
@@ -41,7 +43,7 @@ inline constexpr float GroupSpacing = 1.0f;
 
 namespace Colors {
 struct Window {
-    static const juce::Colour background;
+    static juce::Colour background;
 };
 
 extern const juce::Colour transparentBlack;
@@ -119,8 +121,8 @@ struct Matrix {
 
 struct Layout {
     struct Window {
-        static constexpr int width = 1080;
-        static constexpr int height = 800;
+        static int width;
+        static int height;
     };
     static constexpr int windowBorderMargins = 15;
     static constexpr int buttonHeight = 30;
