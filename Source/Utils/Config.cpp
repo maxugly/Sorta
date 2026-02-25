@@ -6,7 +6,7 @@ namespace Config {
 
 namespace Colors {
 #if !defined(JUCE_HEADLESS)
-const juce::Colour Window::background{juce::Colours::black};
+juce::Colour Window::background{juce::Colours::black};
 
 const juce::Colour transparentBlack = juce::Colours::black;
 const juce::Colour solidBlack = juce::Colours::black;
@@ -133,5 +133,28 @@ const juce::String errorNoAudio = "No audio loaded.";
 const juce::String scanningCutPoints = "Scanning for Cut Points...";
 const juce::String noSilenceBoundaries = "No Silence Boundaries detected.";
 } // namespace Labels
+
+int Layout::Window::width = 1080;
+int Layout::Window::height = 800;
+
+void loadFromFile(const juce::File& configFile) {
+    if (!configFile.existsAsFile()) return;
+
+    auto parsedJson = juce::JSON::parse(configFile);
+    if (parsedJson.isObject()) {
+        auto* obj = parsedJson.getDynamicObject();
+
+        if (obj->hasProperty("windowWidth"))
+            Layout::Window::width = obj->getProperty("windowWidth");
+
+        if (obj->hasProperty("windowHeight"))
+            Layout::Window::height = obj->getProperty("windowHeight");
+
+#if !defined(JUCE_HEADLESS)
+        if (obj->hasProperty("windowBackgroundHex"))
+            Colors::Window::background = juce::Colour::fromString(obj->getProperty("windowBackgroundHex").toString());
+#endif
+    }
+}
 
 } // namespace Config

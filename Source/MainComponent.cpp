@@ -10,6 +10,9 @@
 #include "Utils/TimeUtils.h"
 
 MainComponent::MainComponent() {
+    juce::File configFile = juce::File::getSpecialLocation(juce::File::userHomeDirectory).getChildFile(".config/audiofiler.conf");
+    Config::loadFromFile(configFile);
+
     audioPlayer = std::make_unique<AudioPlayer>(sessionState);
 
     // 1. Instantiate managers that don't depend on ControlPanel
