@@ -148,34 +148,37 @@ int Layout::buttonWidth = 80;
 int Layout::clearButtonWidth = 25;
 float Layout::buttonCornerRadius = 5.0f;
 
-void loadFromFile(const juce::File& configFile) {
-    if (!configFile.existsAsFile()) return;
-    
-    auto parsedJson = juce::JSON::parse(configFile);
-    if (parsedJson.isObject()) {
+void initializeConfigs() {
+    auto configDir = juce::File::getSpecialLocation(juce::File::userHomeDirectory).getChildFile(".config/audiofiler");
+    if (!configDir.exists()) configDir.createDirectory();
+
+    auto settingsFile = configDir.getChildFile("settings.conf");
+    auto themeFile = configDir.getChildFile("theme.conf");
+    auto languageFile = configDir.getChildFile("language.conf");
+
+    // --- Helper: Parsing Logic ---
+    auto parseFile = [&](const juce::File& file) {
+        if (!file.existsAsFile()) return;
+        auto parsedJson = juce::JSON::parse(file);
+        if (!parsedJson.isObject()) return;
         auto* obj = parsedJson.getDynamicObject();
         
-        auto setInt = [&](const char* prop, int& target) { if (obj->hasProperty(prop)) target = obj->getProperty(prop); };
-        auto setFloat = [&](const char* prop, float& target) { if (obj->hasProperty(prop)) target = obj->getProperty(prop); };
-        auto setCol = [&](const char* prop, juce::Colour& target) { 
-            if (obj->hasProperty(prop)) target = juce::Colour::fromString(obj->getProperty(prop).toString()); 
-        };
-        auto setStr = [&](const char* prop, juce::String& target) { 
-            if (obj->hasProperty(prop)) target = obj->getProperty(prop).toString(); 
+        auto setInt = [&](const char* p, int& t) { if (obj->hasProperty(p)) t = obj->getProperty(p); };
+        auto setFloat = [&](const char* p, float& t) { if (obj->hasProperty(p)) t = obj->getProperty(p); };
+        auto setStr = [&](const char* p, juce::String& t) { if (obj->hasProperty(p)) t = obj->getProperty(p).toString(); };
+        auto setCol = [&](const char* p, juce::Colour& t) { 
+            if (obj->hasProperty(p)) t = juce::Colour::fromString(obj->getProperty(p).toString()); 
         };
 
         setInt("windowWidth", Layout::Window::width);
         setInt("windowHeight", Layout::Window::height);
-        
         setFloat("waveformHeightScale", Layout::Waveform::heightScale);
         setInt("waveformPixelsPerSampleLow", Layout::Waveform::pixelsPerSampleLow);
         setInt("waveformPixelsPerSampleMedium", Layout::Waveform::pixelsPerSampleMedium);
         setInt("waveformPixelsPerSampleHigh", Layout::Waveform::pixelsPerSampleHigh);
-        
         setFloat("glowThickness", Layout::Glow::thickness);
         setFloat("cutLineGlowThickness", Layout::Glow::cutLineGlowThickness);
         setFloat("cutMarkerWidthThin", Layout::Glow::cutMarkerWidthThin);
-
         setInt("buttonHeight", Layout::buttonHeight);
         setInt("buttonWidth", Layout::buttonWidth);
         setFloat("buttonCornerRadius", Layout::buttonCornerRadius);
@@ -202,7 +205,6 @@ void loadFromFile(const juce::File& configFile) {
         setCol("cutMarkerAutoHex", Colors::cutMarkerAuto);
         setCol("cutMarkerHoverHex", Colors::cutMarkerHover);
         setCol("cutMarkerDragHex", Colors::cutMarkerDrag);
-
         setCol("buttonBaseHex", Colors::Button::base);
         setCol("buttonOnHex", Colors::Button::on);
         setCol("buttonTextHex", Colors::Button::text);
@@ -216,7 +218,40 @@ void loadFromFile(const juce::File& configFile) {
         setCol("playbackTextHex", Colors::playbackText);
         setCol("textEditorBackgroundHex", Colors::textEditorBackground);
 #endif
+    };
+
+    // --- Helper: Auto-Generation ---
+    if (!settingsFile.existsAsFile()) {
+        juce::DynamicObject::Ptr obj = new juce::DynamicObject();
+        obj->setProperty("windowWidth", Layout::Window::width);
+        obj->setProperty("windowHeight", Layout::Window::height);
+        obj->setProperty("buttonHeight", Layout::buttonHeight);
+        obj->setProperty("buttonWidth", Layout::buttonWidth);
+        settingsFile.replaceWithText(juce::JSON::toString(obj.get(), false));
     }
+
+    if (!themeFile.existsAsFile()) {
+        juce::DynamicObject::Ptr obj = new juce::DynamicObject();
+#if !defined(JUCE_HEADLESS)
+        obj->setProperty("windowBackgroundHex", Colors::Window::background.toDisplayString(true));
+        obj->setProperty("waveformPeakHex", Colors::waveformPeak.toDisplayString(true));
+        obj->setProperty("waveformCoreHex", Colors::waveformCore.toDisplayString(true));
+        obj->setProperty("buttonBaseHex", Colors::Button::base.toDisplayString(true));
+#endif
+        themeFile.replaceWithText(juce::JSON::toString(obj.get(), false));
+    }
+
+    if (!languageFile.existsAsFile()) {
+        juce::DynamicObject::Ptr obj = new juce::DynamicObject();
+        obj->setProperty("labelOpenButton", Labels::openButton);
+        obj->setProperty("labelExitButton", Labels::exitButton);
+        obj->setProperty("labelCutButton", Labels::cutButton);
+        languageFile.replaceWithText(juce::JSON::toString(obj.get(), false));
+    }
+
+    parseFile(settingsFile);
+    parseFile(themeFile);
+    parseFile(languageFile);
 }
 
 } // namespace Config

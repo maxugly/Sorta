@@ -10,8 +10,7 @@
 #include "Utils/TimeUtils.h"
 
 MainComponent::MainComponent() {
-    juce::File configFile = juce::File::getSpecialLocation(juce::File::userHomeDirectory).getChildFile(".config/audiofiler.conf");
-    Config::loadFromFile(configFile);
+    Config::initializeConfigs();
 
     audioPlayer = std::make_unique<AudioPlayer>(sessionState);
 
