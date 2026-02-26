@@ -171,6 +171,7 @@ void loadTheme(const juce::File& themeFile) {
                                      (juce::uint8)(255 - primary.getBlue()));
 
         Colors::Window::background = darker.darker(0.8f);
+        Colors::solidBlack = Colors::Window::background.brighter(0.05f);
         Colors::Button::base = primary;
         Colors::Button::outline = lighter;
         Colors::Button::disabledBackground = darker;
@@ -211,6 +212,7 @@ void loadTheme(const juce::File& themeFile) {
     // -----------------------------
 
     setCol("windowBackgroundHex", Colors::Window::background);
+    setCol("waveformBackgroundHex", Colors::solidBlack);
     setCol("waveformPeakHex", Colors::waveformPeak);
     setCol("waveformCoreHex", Colors::waveformCore);
     setCol("playbackCursorHex", Colors::playbackCursor);
