@@ -133,11 +133,21 @@ void ControlPanel::initialiseLookAndFeel() {
     modernLF.setColour(juce::ComboBox::outlineColourId, Config::Colors::Button::outline);
     modernLF.setColour(juce::ComboBox::textColourId, Config::Colors::Button::text);
     modernLF.setColour(juce::ComboBox::arrowColourId, Config::Colors::Button::text);
+
+    modernLF.setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
+    modernLF.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+    modernLF.setColour(juce::TextEditor::outlineColourId, Config::Colors::Button::outline);
 }
 
 void ControlPanel::refreshThemeLive() {
     initialiseLookAndFeel();
     if (waveformCanvasView) waveformCanvasView->getWaveformView().clearCaches();
+    
+    auto& stats = getPresenterCore().getStatsPresenter();
+    stats.getDisplay().setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
+    stats.getDisplay().setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+    stats.updateStats();
+
     sendLookAndFeelChange();
     repaint();
 }

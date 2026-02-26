@@ -23,8 +23,6 @@ void SilenceThresholdPresenter::configureEditor(juce::TextEditor &editor, float 
                                                const juce::String &tooltip) {
     editor.setReadOnly(false);
     editor.setJustification(juce::Justification::centred);
-    editor.setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
-    editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
     editor.setFont(juce::Font(juce::FontOptions(Config::Layout::Text::playbackSize * 0.8f)));
     editor.setInputRestrictions(2, "0123456789");
     editor.setTooltip(tooltip);
