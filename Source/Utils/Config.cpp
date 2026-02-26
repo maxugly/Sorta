@@ -193,7 +193,13 @@ void loadTheme(const juce::File& themeFile) {
         auto secondary = juce::Colour::fromString(obj->getProperty("secondaryColorHex").toString());
 
         Colors::waveformPeak = secondary;
-        Colors::waveformCore = secondary.darker(0.8f);
+        if (obj->hasProperty("primaryColorHex")) {
+            auto primary = juce::Colour::fromString(obj->getProperty("primaryColorHex").toString());
+            // Fade from the secondary peak down into a slightly darkened primary core
+            Colors::waveformCore = primary.darker(0.2f); 
+        } else {
+            Colors::waveformCore = secondary.darker(0.8f);
+        }
         Colors::playbackCursor = secondary.brighter(0.4f);
         
         Colors::Button::text = secondary;
