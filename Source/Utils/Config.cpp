@@ -209,6 +209,11 @@ void loadTheme(const juce::File& themeFile) {
         Colors::mouseAmplitudeGlow = secondary;
         Colors::zoomPopupPlaybackLine = secondary;
     }
+
+    if (obj->hasProperty("tertiaryColorHex")) {
+        auto tertiary = juce::Colour::fromString(obj->getProperty("tertiaryColorHex").toString());
+        Colors::Button::text = tertiary;
+    }
     // -----------------------------
 
     setCol("windowBackgroundHex", Colors::Window::background);
