@@ -12,19 +12,19 @@ const juce::Colour transparentBlack = juce::Colours::black;
 const juce::Colour solidBlack = juce::Colours::black;
 const juce::Colour transparentWhite = juce::Colours::black;
 
-const juce::Colour Button::base{0xff5a5a5a};
-const juce::Colour Button::on{juce::Colours::orange}; 
-const juce::Colour Button::text{0xFF34FA11};
-const juce::Colour Button::outline{0xff808080};
-const juce::Colour Button::disabledBackground{0xff2a2a2a};
-const juce::Colour Button::disabledText{0xff4a4a4a};
-const juce::Colour Button::exit{juce::Colours::darkred};
-const juce::Colour Button::clear{juce::Colours::red};
-const juce::Colour Button::cutPlacement{0xffff1493};
-const juce::Colour Button::cutActive{juce::Colours::darkorange}; 
+juce::Colour Button::base{0xff5a5a5a};
+juce::Colour Button::on{juce::Colours::orange}; 
+juce::Colour Button::text{0xFF34FA11};
+juce::Colour Button::outline{0xff808080};
+juce::Colour Button::disabledBackground{0xff2a2a2a};
+juce::Colour Button::disabledText{0xff4a4a4a};
+juce::Colour Button::exit{juce::Colours::darkred};
+juce::Colour Button::clear{juce::Colours::red};
+juce::Colour Button::cutPlacement{0xffff1493};
+juce::Colour Button::cutActive{juce::Colours::darkorange}; 
 
-const juce::Colour playbackText = juce::Colour(0xFF34FA11);
-const juce::Colour textEditorBackground = juce::Colour(0xff333333);
+juce::Colour playbackText = juce::Colour(0xFF34FA11);
+juce::Colour textEditorBackground = juce::Colour(0xff333333);
 const juce::Colour textEditorError = juce::Colours::red;
 const juce::Colour textEditorWarning = juce::Colours::orange;
 const juce::Colour textEditorOutOfRange = juce::Colours::orange;
@@ -143,6 +143,10 @@ int Layout::Waveform::pixelsPerSampleHigh = 1;
 float Layout::Glow::thickness = 4.0f;
 float Layout::Glow::cutLineGlowThickness = 4.0f;
 float Layout::Glow::cutMarkerWidthThin = 1.0f;
+int Layout::buttonHeight = 30;
+int Layout::buttonWidth = 80;
+int Layout::clearButtonWidth = 25;
+float Layout::buttonCornerRadius = 5.0f;
 
 void loadFromFile(const juce::File& configFile) {
     if (!configFile.existsAsFile()) return;
@@ -169,6 +173,10 @@ void loadFromFile(const juce::File& configFile) {
         setFloat("cutLineGlowThickness", Layout::Glow::cutLineGlowThickness);
         setFloat("cutMarkerWidthThin", Layout::Glow::cutMarkerWidthThin);
 
+        setInt("buttonHeight", Layout::buttonHeight);
+        setInt("buttonWidth", Layout::buttonWidth);
+        setFloat("buttonCornerRadius", Layout::buttonCornerRadius);
+
 #if !defined(JUCE_HEADLESS)
         setCol("windowBackgroundHex", Colors::Window::background);
         setCol("waveformPeakHex", Colors::waveformPeak);
@@ -179,6 +187,19 @@ void loadFromFile(const juce::File& configFile) {
         setCol("cutMarkerAutoHex", Colors::cutMarkerAuto);
         setCol("cutMarkerHoverHex", Colors::cutMarkerHover);
         setCol("cutMarkerDragHex", Colors::cutMarkerDrag);
+
+        setCol("buttonBaseHex", Colors::Button::base);
+        setCol("buttonOnHex", Colors::Button::on);
+        setCol("buttonTextHex", Colors::Button::text);
+        setCol("buttonOutlineHex", Colors::Button::outline);
+        setCol("buttonDisabledBackgroundHex", Colors::Button::disabledBackground);
+        setCol("buttonDisabledTextHex", Colors::Button::disabledText);
+        setCol("buttonExitHex", Colors::Button::exit);
+        setCol("buttonClearHex", Colors::Button::clear);
+        setCol("buttonCutPlacementHex", Colors::Button::cutPlacement);
+        setCol("buttonCutActiveHex", Colors::Button::cutActive);
+        setCol("playbackTextHex", Colors::playbackText);
+        setCol("textEditorBackgroundHex", Colors::textEditorBackground);
 #endif
     }
 }
