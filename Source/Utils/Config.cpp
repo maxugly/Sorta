@@ -28,14 +28,14 @@ const juce::Colour textEditorBackground = juce::Colour(0xff333333);
 const juce::Colour textEditorError = juce::Colours::red;
 const juce::Colour textEditorWarning = juce::Colours::orange;
 const juce::Colour textEditorOutOfRange = juce::Colours::orange;
-const juce::Colour waveformPeak = juce::Colours::cyan;
-const juce::Colour waveformCore = juce::Colour(0xff483d8b);
-const juce::Colour playbackCursor = juce::Colours::lime;
-const juce::Colour cutRegion = juce::Colours::darkorange;
-const juce::Colour cutLine = juce::Colours::orange;
-const juce::Colour cutMarkerAuto = juce::Colours::orange;
-const juce::Colour cutMarkerHover = juce::Colours::orange;
-const juce::Colour cutMarkerDrag = juce::Colours::green;
+juce::Colour waveformPeak = juce::Colours::cyan;
+juce::Colour waveformCore = juce::Colour(0xff483d8b);
+juce::Colour playbackCursor = juce::Colours::lime;
+juce::Colour cutRegion = juce::Colours::darkorange;
+juce::Colour cutLine = juce::Colours::orange;
+juce::Colour cutMarkerAuto = juce::Colours::orange;
+juce::Colour cutMarkerHover = juce::Colours::orange;
+juce::Colour cutMarkerDrag = juce::Colours::green;
 const juce::Colour fpsBackground = juce::Colours::black;
 const juce::Colour fpsText = juce::Colours::lime;
 const juce::Colour mouseCursorLine = juce::Colours::white;
@@ -136,6 +136,13 @@ const juce::String noSilenceBoundaries = "No Silence Boundaries detected.";
 
 int Layout::Window::width = 1080;
 int Layout::Window::height = 800;
+float Layout::Waveform::heightScale = 0.5f;
+int Layout::Waveform::pixelsPerSampleLow = 4;
+int Layout::Waveform::pixelsPerSampleMedium = 2;
+int Layout::Waveform::pixelsPerSampleHigh = 1;
+float Layout::Glow::thickness = 4.0f;
+float Layout::Glow::cutLineGlowThickness = 4.0f;
+float Layout::Glow::cutMarkerWidthThin = 1.0f;
 
 void loadFromFile(const juce::File& configFile) {
     if (!configFile.existsAsFile()) return;
@@ -144,15 +151,34 @@ void loadFromFile(const juce::File& configFile) {
     if (parsedJson.isObject()) {
         auto* obj = parsedJson.getDynamicObject();
         
-        if (obj->hasProperty("windowWidth")) 
-            Layout::Window::width = obj->getProperty("windowWidth");
-            
-        if (obj->hasProperty("windowHeight")) 
-            Layout::Window::height = obj->getProperty("windowHeight");
-            
+        auto setInt = [&](const char* prop, int& target) { if (obj->hasProperty(prop)) target = obj->getProperty(prop); };
+        auto setFloat = [&](const char* prop, float& target) { if (obj->hasProperty(prop)) target = obj->getProperty(prop); };
+        auto setCol = [&](const char* prop, juce::Colour& target) { 
+            if (obj->hasProperty(prop)) target = juce::Colour::fromString(obj->getProperty(prop).toString()); 
+        };
+
+        setInt("windowWidth", Layout::Window::width);
+        setInt("windowHeight", Layout::Window::height);
+        
+        setFloat("waveformHeightScale", Layout::Waveform::heightScale);
+        setInt("waveformPixelsPerSampleLow", Layout::Waveform::pixelsPerSampleLow);
+        setInt("waveformPixelsPerSampleMedium", Layout::Waveform::pixelsPerSampleMedium);
+        setInt("waveformPixelsPerSampleHigh", Layout::Waveform::pixelsPerSampleHigh);
+        
+        setFloat("glowThickness", Layout::Glow::thickness);
+        setFloat("cutLineGlowThickness", Layout::Glow::cutLineGlowThickness);
+        setFloat("cutMarkerWidthThin", Layout::Glow::cutMarkerWidthThin);
+
 #if !defined(JUCE_HEADLESS)
-        if (obj->hasProperty("windowBackgroundHex")) 
-            Colors::Window::background = juce::Colour::fromString(obj->getProperty("windowBackgroundHex").toString());
+        setCol("windowBackgroundHex", Colors::Window::background);
+        setCol("waveformPeakHex", Colors::waveformPeak);
+        setCol("waveformCoreHex", Colors::waveformCore);
+        setCol("playbackCursorHex", Colors::playbackCursor);
+        setCol("cutRegionHex", Colors::cutRegion);
+        setCol("cutLineHex", Colors::cutLine);
+        setCol("cutMarkerAutoHex", Colors::cutMarkerAuto);
+        setCol("cutMarkerHoverHex", Colors::cutMarkerHover);
+        setCol("cutMarkerDragHex", Colors::cutMarkerDrag);
 #endif
     }
 }

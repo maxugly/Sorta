@@ -67,14 +67,14 @@ extern const juce::Colour textEditorBackground;
 extern const juce::Colour textEditorError;
 extern const juce::Colour textEditorWarning;
 extern const juce::Colour textEditorOutOfRange;
-extern const juce::Colour waveformPeak;
-extern const juce::Colour waveformCore;
-extern const juce::Colour playbackCursor;
-extern const juce::Colour cutRegion;
-extern const juce::Colour cutLine;
-extern const juce::Colour cutMarkerAuto;
-extern const juce::Colour cutMarkerHover;
-extern const juce::Colour cutMarkerDrag;
+extern juce::Colour waveformPeak;
+extern juce::Colour waveformCore;
+extern juce::Colour playbackCursor;
+extern juce::Colour cutRegion;
+extern juce::Colour cutLine;
+extern juce::Colour cutMarkerAuto;
+extern juce::Colour cutMarkerHover;
+extern juce::Colour cutMarkerDrag;
 extern const juce::Colour fpsBackground;
 extern const juce::Colour fpsText;
 extern const juce::Colour mouseCursorLine;
@@ -168,10 +168,10 @@ struct Layout {
     };
 
     struct Waveform {
-        static constexpr float heightScale = 0.5f;
-        static constexpr int pixelsPerSampleLow = 4;
-        static constexpr int pixelsPerSampleMedium = 2;
-        static constexpr int pixelsPerSampleHigh = 1;
+        static float heightScale;
+        static int pixelsPerSampleLow;
+        static int pixelsPerSampleMedium;
+        static int pixelsPerSampleHigh;
     };
 
     struct Glow {
@@ -183,12 +183,12 @@ struct Layout {
         static constexpr float mouseAmplitudeAlpha = 0.7f;
         static constexpr int glowRadius = 15;
         static constexpr int mouseTextOffset = 5;
-        static constexpr float thickness = 4.0f;
+        static float thickness;
         static constexpr float mouseAmplitudeGlowThickness = 3.0f;
         static constexpr float placementModeGlowThickness = 3.0f;
         static constexpr float thresholdGlowThickness = 3.0f;
-        static constexpr float cutLineGlowThickness = 4.0f;
-        static constexpr float cutMarkerWidthThin = 1.0f;
+        static float cutLineGlowThickness;
+        static float cutMarkerWidthThin;
         static constexpr float cutBoxOutlineThickness = 5.5f;
         static constexpr float cutBoxOutlineThicknessInteracting = 10.0f;
         static constexpr float cutMarkerBoxWidth = 30.0f;
