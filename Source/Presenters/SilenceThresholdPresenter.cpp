@@ -35,7 +35,7 @@ void SilenceThresholdPresenter::configureEditor(juce::TextEditor &editor, float 
 void SilenceThresholdPresenter::textEditorTextChanged(juce::TextEditor &editor) {
     const int val = editor.getText().getIntValue();
     if (isValidPercentage(val)) {
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+        editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
     } else {
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorError);
     }
@@ -73,7 +73,7 @@ void SilenceThresholdPresenter::applyThresholdFromEditor(juce::TextEditor &edito
         else
             owner.getSessionState().setThresholdOut(threshold);
             
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+        editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
     } else {
         restoreEditorToCurrentValue(editor);
     }
@@ -89,5 +89,5 @@ void SilenceThresholdPresenter::restoreEditorToCurrentValue(juce::TextEditor &ed
     const float currentThreshold = isIn ? owner.getSessionState().getCutPrefs().autoCut.thresholdIn 
                                         : owner.getSessionState().getCutPrefs().autoCut.thresholdOut;
     editor.setText(juce::String(juce::roundToInt(currentThreshold * 100.0f)), juce::dontSendNotification);
-    editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+    editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
 }

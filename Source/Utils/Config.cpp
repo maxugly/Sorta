@@ -24,6 +24,8 @@ juce::Colour Button::cutPlacement{0xffff1493};
 juce::Colour Button::cutActive{juce::Colours::darkorange}; 
 
 juce::Colour playbackText = juce::Colour(0xFF34FA11);
+juce::Colour cutText = juce::Colours::orange;
+juce::Colour totalTimeText = juce::Colours::darkorange;
 juce::Colour textEditorBackground = juce::Colour(0xff333333);
 juce::Colour textEditorError = juce::Colours::red;
 juce::Colour textEditorWarning = juce::Colours::orange;
@@ -99,6 +101,8 @@ juce::String autoplayButton = "[A]utoPlay";
 juce::String autoCutInButton = "[AC In]";
 juce::String autoCutOutButton = "[AC Out]";
 juce::String cutButton = "[Cut]";
+juce::String themeUp = juce::CharPointer_UTF8("\xe2\x96\xb4");
+juce::String themeDown = juce::CharPointer_UTF8("\xe2\x96\xbe");
 juce::String lockLocked = juce::CharPointer_UTF8("\xef\x80\xa3");
 juce::String lockUnlocked = juce::CharPointer_UTF8("\xef\x81\x91");
 juce::String silenceThresholdInTooltip = "Silence Threshold In";
@@ -205,6 +209,10 @@ void loadTheme(const juce::File& themeFile) {
         Colors::Button::text = secondary;
         Colors::Button::on = secondary;
         Colors::playbackText = secondary;
+        Colors::cutText = secondary;
+        Colors::totalTimeText = secondary.darker(0.4f);
+        Colors::HintVox::text = secondary.brighter(0.2f);
+
         Colors::cutLine = secondary;
         Colors::cutMarkerAuto = secondary;
         Colors::Matrix::ledActive = secondary;
@@ -219,6 +227,13 @@ void loadTheme(const juce::File& themeFile) {
     if (obj->hasProperty("tertiaryColorHex")) {
         auto tertiary = juce::Colour::fromString(obj->getProperty("tertiaryColorHex").toString());
         Colors::Button::text = tertiary;
+    }
+
+    if (obj->hasProperty("quaternaryColorHex")) {
+        auto quaternary = juce::Colour::fromString(obj->getProperty("quaternaryColorHex").toString());
+        Colors::cutText = quaternary;
+        Colors::totalTimeText = quaternary.darker(0.4f);
+        Colors::HintVox::text = quaternary.brighter(0.2f);
     }
     // -----------------------------
 

@@ -64,6 +64,8 @@ struct Button {
     static juce::Colour cutActive;
 };
 extern juce::Colour playbackText;
+extern juce::Colour cutText;
+extern juce::Colour totalTimeText;
 extern juce::Colour textEditorBackground;
 extern juce::Colour textEditorError;
 extern juce::Colour textEditorWarning;
@@ -277,6 +279,8 @@ extern juce::String autoplayButton;
 extern juce::String autoCutInButton;
 extern juce::String autoCutOutButton;
 extern juce::String cutButton;
+extern juce::String themeUp;
+extern juce::String themeDown;
 extern juce::String lockLocked;
 extern juce::String lockUnlocked;
 extern juce::String silenceThresholdInTooltip;

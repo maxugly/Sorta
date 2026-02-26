@@ -148,6 +148,23 @@ void ControlPanel::refreshThemeLive() {
     stats.getDisplay().setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
     stats.updateStats();
 
+    if (playbackTimeView) {
+        playbackTimeView->getElapsedEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+        playbackTimeView->getRemainingEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+        playbackTimeView->getTotalTimeEditor().setColour(juce::TextEditor::textColourId, Config::Colors::totalTimeText);
+    }
+    if (inStrip) {
+        inStrip->getTimerEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+        inStrip->getThresholdEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+    }
+    if (outStrip) {
+        outStrip->getTimerEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+        outStrip->getThresholdEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+    }
+    if (cutLengthStrip) {
+        cutLengthStrip->getLengthEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+    }
+
     sendLookAndFeelChange();
     repaint();
 }
@@ -161,6 +178,7 @@ void ControlPanel::finaliseSetup() {
 
     getPresenterCore().getControlStatePresenter().refreshStates();
     getPresenterCore().getMatrixPresenter().fullMatrixUpdate();
+    refreshThemeLive();
 }
 
 void ControlPanel::resized() {

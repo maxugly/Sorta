@@ -60,7 +60,7 @@ void validateTimeEntry(juce::TextEditor &editor, double totalLength, double samp
     const double newPosition = TimeUtils::parseTime(editor.getText(), sampleRate);
 
     if (newPosition >= 0.0 && newPosition <= totalLength) {
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+        editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
     } else if (newPosition == -1.0) {
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorError);
     } else {

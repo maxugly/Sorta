@@ -6,6 +6,8 @@ ThemePresenter::ThemePresenter(ControlPanel& cp) : owner(cp) {
     if (auto* tbv = owner.getTopBarView()) {
         tbv->themeSelector.addListener(this);
         scanThemes();
+        tbv->themeUpButton.onClick = [this] { cycleTheme(-1); };
+        tbv->themeDownButton.onClick = [this] { cycleTheme(1); };
     }
 }
 
@@ -37,5 +39,14 @@ void ThemePresenter::comboBoxChanged(juce::ComboBox* comboBox) {
                 owner.refreshThemeLive();
             }
         }
+    }
+}
+
+void ThemePresenter::cycleTheme(int delta) {
+    if (themeFiles.isEmpty()) return;
+    if (auto* tbv = owner.getTopBarView()) {
+        int currentIndex = tbv->themeSelector.getSelectedItemIndex();
+        int nextIndex = (currentIndex + delta + themeFiles.size()) % themeFiles.size();
+        tbv->themeSelector.setSelectedItemIndex(nextIndex, juce::sendNotification);
     }
 }

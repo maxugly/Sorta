@@ -29,7 +29,7 @@ void BoundaryLogicPresenter::initialiseEditors() {
         editor.setJustification(juce::Justification::centred);
         editor.setColour(juce::TextEditor::backgroundColourId,
                          Config::Colors::textEditorBackground);
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+        editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
         editor.setFont(juce::Font(juce::FontOptions(Config::Layout::Text::playbackSize)));
         editor.setMultiLine(false);
         editor.setReturnKeyStartsNewLine(false);
@@ -110,7 +110,7 @@ void BoundaryLogicPresenter::textEditorEscapeKeyPressed(juce::TextEditor &editor
     else if (&editor == &cutOutEditor)
         syncEditorToPosition(editor, owner.getAudioPlayer().getCutOut());
 
-    editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+    editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
     editor.giveAwayKeyboardFocus();
 }
 
@@ -239,7 +239,7 @@ bool BoundaryLogicPresenter::applyCutFromEditor(juce::TextEditor &editor, double
         if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
             owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
 
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+        editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
         refreshLabels();
         owner.repaint();
         return true;

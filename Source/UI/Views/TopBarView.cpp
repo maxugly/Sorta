@@ -29,6 +29,11 @@ TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
 
     addAndMakeVisible(themeSelector);
     themeSelector.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
+
+    addAndMakeVisible(themeUpButton);
+    addAndMakeVisible(themeDownButton);
+    themeUpButton.setButtonText(Config::Labels::themeUp);
+    themeDownButton.setButtonText(Config::Labels::themeDown);
 }
 
 TopBarView::~TopBarView() = default;
@@ -70,6 +75,8 @@ void TopBarView::resized() {
     }
 
     themeSelector.setBounds(topRow.removeFromLeft(120));
+    themeUpButton.setBounds(topRow.removeFromLeft(buttonWidth / 2));
+    themeDownButton.setBounds(topRow.removeFromLeft(buttonWidth / 2));
 
     topRow.removeFromLeft(margin);
 

@@ -15,6 +15,7 @@ class ThemePresenter final : public juce::ComboBox::Listener {
     juce::Array<juce::File> themeFiles;
 
     void scanThemes();
+    void cycleTheme(int delta);
 };
 
 #endif
