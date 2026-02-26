@@ -17,10 +17,10 @@ void HintView::paint(juce::Graphics& g) {
     auto bounds = getLocalBounds().toFloat().reduced(Config::UI::ButtonOutlineThickness / 2.0f);
     auto cornerSize = Config::UI::ButtonCornerSize;
     
-    // Draw Button Background (GroupPosition::Right - sharp left, rounded right)
+    // Draw Button Background (GroupPosition::Middle - sharp all)
     juce::Path p;
     p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-                          cornerSize, cornerSize, false, true, false, true);
+                          cornerSize, cornerSize, false, false, false, false);
     
     g.setColour(Config::Colors::Button::base);
     g.fillPath(p);

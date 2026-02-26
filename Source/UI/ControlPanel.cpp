@@ -128,6 +128,18 @@ void ControlPanel::initialiseLookAndFeel() {
     modernLF.setBaseOffColor(Config::Colors::Button::base);
     modernLF.setBaseOnColor(Config::Colors::Button::on);
     modernLF.setTextColor(Config::Colors::Button::text);
+
+    modernLF.setColour(juce::ComboBox::backgroundColourId, Config::Colors::Button::base);
+    modernLF.setColour(juce::ComboBox::outlineColourId, Config::Colors::Button::outline);
+    modernLF.setColour(juce::ComboBox::textColourId, Config::Colors::Button::text);
+    modernLF.setColour(juce::ComboBox::arrowColourId, Config::Colors::Button::text);
+}
+
+void ControlPanel::refreshThemeLive() {
+    initialiseLookAndFeel();
+    if (waveformCanvasView) waveformCanvasView->getWaveformView().clearCaches();
+    sendLookAndFeelChange();
+    repaint();
 }
 
 void ControlPanel::invokeOwnerOpenDialog() {

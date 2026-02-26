@@ -148,12 +148,83 @@ int Layout::buttonWidth = 80;
 int Layout::clearButtonWidth = 25;
 float Layout::buttonCornerRadius = 5.0f;
 
+void loadTheme(const juce::File& themeFile) {
+    if (!themeFile.existsAsFile()) return;
+    auto parsedJson = juce::JSON::parse(themeFile);
+    if (!parsedJson.isObject()) return;
+    auto* obj = parsedJson.getDynamicObject();
+
+    auto setCol = [&](const char* p, juce::Colour& t) { 
+        if (obj->hasProperty(p)) t = juce::Colour::fromString(obj->getProperty(p).toString()); 
+    };
+
+#if !defined(JUCE_HEADLESS)
+    setCol("windowBackgroundHex", Colors::Window::background);
+    setCol("waveformPeakHex", Colors::waveformPeak);
+    setCol("waveformCoreHex", Colors::waveformCore);
+    setCol("playbackCursorHex", Colors::playbackCursor);
+    setCol("cutRegionHex", Colors::cutRegion);
+    setCol("cutLineHex", Colors::cutLine);
+    setCol("cutMarkerAutoHex", Colors::cutMarkerAuto);
+    setCol("cutMarkerHoverHex", Colors::cutMarkerHover);
+    setCol("cutMarkerDragHex", Colors::cutMarkerDrag);
+    setCol("buttonBaseHex", Colors::Button::base);
+    setCol("buttonOnHex", Colors::Button::on);
+    setCol("buttonTextHex", Colors::Button::text);
+    setCol("buttonOutlineHex", Colors::Button::outline);
+    setCol("buttonDisabledBackgroundHex", Colors::Button::disabledBackground);
+    setCol("buttonDisabledTextHex", Colors::Button::disabledText);
+    setCol("buttonExitHex", Colors::Button::exit);
+    setCol("buttonClearHex", Colors::Button::clear);
+    setCol("buttonCutPlacementHex", Colors::Button::cutPlacement);
+    setCol("buttonCutActiveHex", Colors::Button::cutActive);
+    setCol("playbackTextHex", Colors::playbackText);
+    setCol("textEditorBackgroundHex", Colors::textEditorBackground);
+    setCol("textEditorErrorHex", Colors::textEditorError);
+    setCol("textEditorWarningHex", Colors::textEditorWarning);
+    setCol("textEditorOutOfRangeHex", Colors::textEditorOutOfRange);
+    setCol("fpsBackgroundHex", Colors::fpsBackground);
+    setCol("fpsTextHex", Colors::fpsText);
+    setCol("mouseCursorLineHex", Colors::mouseCursorLine);
+    setCol("mouseCursorHighlightHex", Colors::mouseCursorHighlight);
+    setCol("mouseAmplitudeLineHex", Colors::mouseAmplitudeLine);
+    setCol("mousePlacementModeHex", Colors::mousePlacementMode);
+    setCol("thresholdLineHex", Colors::thresholdLine);
+    setCol("thresholdRegionHex", Colors::thresholdRegion);
+    setCol("statsBackgroundHex", Colors::statsBackground);
+    setCol("statsTextHex", Colors::statsText);
+    setCol("statsErrorTextHex", Colors::statsErrorText);
+    setCol("mouseAmplitudeGlowHex", Colors::mouseAmplitudeGlow);
+    setCol("placementModeGlowHex", Colors::placementModeGlow);
+    setCol("zoomPopupBorderHex", Colors::zoomPopupBorder);
+    setCol("zoomPopupTrackingLineHex", Colors::zoomPopupTrackingLine);
+    setCol("zoomPopupPlaybackLineHex", Colors::zoomPopupPlaybackLine);
+    setCol("zoomPopupZeroLineHex", Colors::zoomPopupZeroLine);
+    setCol("zoomHudBackgroundHex", Colors::ZoomHud::background);
+    setCol("zoomHudTextActiveHex", Colors::ZoomHud::textActive);
+    setCol("zoomHudTextInactiveHex", Colors::ZoomHud::textInactive);
+    setCol("volumeKnobFillHex", Colors::volumeKnobFill);
+    setCol("volumeKnobTrackHex", Colors::volumeKnobTrack);
+    setCol("volumeKnobPointerHex", Colors::volumeKnobPointer);
+    setCol("volumeFlameLowHex", Colors::VolumeFlame::low);
+    setCol("volumeFlameMidHex", Colors::VolumeFlame::mid);
+    setCol("volumeFlameHighHex", Colors::VolumeFlame::high);
+    setCol("volumeFlamePeakHex", Colors::VolumeFlame::peak);
+    setCol("hintVoxTextHex", Colors::HintVox::text);
+    setCol("matrixLedActiveHex", Colors::Matrix::ledActive);
+    setCol("matrixLedInactiveHex", Colors::Matrix::ledInactive);
+#endif
+}
+
 void initializeConfigs() {
     auto configDir = juce::File::getSpecialLocation(juce::File::userHomeDirectory).getChildFile(".config/audiofiler");
     if (!configDir.exists()) configDir.createDirectory();
 
+    auto themesDir = configDir.getChildFile("themes");
+    if (!themesDir.exists()) themesDir.createDirectory();
+
     auto settingsFile = configDir.getChildFile("settings.conf");
-    auto themeFile = configDir.getChildFile("theme.conf");
+    auto themeFile = themesDir.getChildFile("default.conf");
     auto languageFile = configDir.getChildFile("language.conf");
     auto advancedFile = configDir.getChildFile("advanced.conf");
 
@@ -168,9 +239,6 @@ void initializeConfigs() {
         auto setFloat = [&](const char* p, float& t) { if (obj->hasProperty(p)) t = obj->getProperty(p); };
         auto setStr = [&](const char* p, juce::String& t) { if (obj->hasProperty(p)) t = obj->getProperty(p).toString(); };
         auto setBool = [&](const char* p, bool& t) { if (obj->hasProperty(p)) t = obj->getProperty(p); };
-        auto setCol = [&](const char* p, juce::Colour& t) { 
-            if (obj->hasProperty(p)) t = juce::Colour::fromString(obj->getProperty(p).toString()); 
-        };
 
         setInt("windowWidth", Layout::Window::width);
         setInt("windowHeight", Layout::Window::height);
@@ -201,63 +269,6 @@ void initializeConfigs() {
         setInt("fpsOverlayX", Advanced::fpsOverlayX);
         setInt("fpsOverlayY", Advanced::fpsOverlayY);
         setStr("fpsOverlayPosition", Advanced::fpsOverlayPosition);
-
-#if !defined(JUCE_HEADLESS)
-        setCol("windowBackgroundHex", Colors::Window::background);
-        setCol("waveformPeakHex", Colors::waveformPeak);
-        setCol("waveformCoreHex", Colors::waveformCore);
-        setCol("playbackCursorHex", Colors::playbackCursor);
-        setCol("cutRegionHex", Colors::cutRegion);
-        setCol("cutLineHex", Colors::cutLine);
-        setCol("cutMarkerAutoHex", Colors::cutMarkerAuto);
-        setCol("cutMarkerHoverHex", Colors::cutMarkerHover);
-        setCol("cutMarkerDragHex", Colors::cutMarkerDrag);
-        setCol("buttonBaseHex", Colors::Button::base);
-        setCol("buttonOnHex", Colors::Button::on);
-        setCol("buttonTextHex", Colors::Button::text);
-        setCol("buttonOutlineHex", Colors::Button::outline);
-        setCol("buttonDisabledBackgroundHex", Colors::Button::disabledBackground);
-        setCol("buttonDisabledTextHex", Colors::Button::disabledText);
-        setCol("buttonExitHex", Colors::Button::exit);
-        setCol("buttonClearHex", Colors::Button::clear);
-        setCol("buttonCutPlacementHex", Colors::Button::cutPlacement);
-        setCol("buttonCutActiveHex", Colors::Button::cutActive);
-        setCol("playbackTextHex", Colors::playbackText);
-        setCol("textEditorBackgroundHex", Colors::textEditorBackground);
-        setCol("textEditorErrorHex", Colors::textEditorError);
-        setCol("textEditorWarningHex", Colors::textEditorWarning);
-        setCol("textEditorOutOfRangeHex", Colors::textEditorOutOfRange);
-        setCol("fpsBackgroundHex", Colors::fpsBackground);
-        setCol("fpsTextHex", Colors::fpsText);
-        setCol("mouseCursorLineHex", Colors::mouseCursorLine);
-        setCol("mouseCursorHighlightHex", Colors::mouseCursorHighlight);
-        setCol("mouseAmplitudeLineHex", Colors::mouseAmplitudeLine);
-        setCol("mousePlacementModeHex", Colors::mousePlacementMode);
-        setCol("thresholdLineHex", Colors::thresholdLine);
-        setCol("thresholdRegionHex", Colors::thresholdRegion);
-        setCol("statsBackgroundHex", Colors::statsBackground);
-        setCol("statsTextHex", Colors::statsText);
-        setCol("statsErrorTextHex", Colors::statsErrorText);
-        setCol("mouseAmplitudeGlowHex", Colors::mouseAmplitudeGlow);
-        setCol("placementModeGlowHex", Colors::placementModeGlow);
-        setCol("zoomPopupBorderHex", Colors::zoomPopupBorder);
-        setCol("zoomPopupTrackingLineHex", Colors::zoomPopupTrackingLine);
-        setCol("zoomPopupPlaybackLineHex", Colors::zoomPopupPlaybackLine);
-        setCol("zoomPopupZeroLineHex", Colors::zoomPopupZeroLine);
-        setCol("zoomHudBackgroundHex", Colors::ZoomHud::background);
-        setCol("zoomHudTextActiveHex", Colors::ZoomHud::textActive);
-        setCol("zoomHudTextInactiveHex", Colors::ZoomHud::textInactive);
-        setCol("volumeKnobFillHex", Colors::volumeKnobFill);
-        setCol("volumeKnobTrackHex", Colors::volumeKnobTrack);
-        setCol("volumeKnobPointerHex", Colors::volumeKnobPointer);
-        setCol("volumeFlameLowHex", Colors::VolumeFlame::low);
-        setCol("volumeFlameMidHex", Colors::VolumeFlame::mid);
-        setCol("volumeFlameHighHex", Colors::VolumeFlame::high);
-        setCol("volumeFlamePeakHex", Colors::VolumeFlame::peak);
-        setCol("hintVoxTextHex", Colors::HintVox::text);
-        setCol("matrixLedActiveHex", Colors::Matrix::ledActive);
-        setCol("matrixLedInactiveHex", Colors::Matrix::ledInactive);
-#endif
     };
 
     // --- Helper: Auto-Generation ---
@@ -349,7 +360,7 @@ void initializeConfigs() {
     }
 
     parseFile(settingsFile);
-    parseFile(themeFile);
+    loadTheme(themeFile);
     parseFile(languageFile);
     parseFile(advancedFile);
 }

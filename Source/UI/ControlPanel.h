@@ -133,6 +133,8 @@ class ControlPanel final : public juce::Component {
     FpsView& getFpsView() { return *fpsView; }
 
     void invokeOwnerOpenDialog();
+    void initialiseLookAndFeel();
+    void refreshThemeLive();
 
   private:
     friend class LayoutManager;
@@ -169,7 +171,6 @@ class ControlPanel final : public juce::Component {
 
     LayoutCache layoutCache;
 
-    void initialiseLookAndFeel();
     void setupViews();
     void setupStrips();
     void setupListeners();

@@ -39,6 +39,7 @@ class TopBarView final : public juce::Component {
     TransportButton exitButton;
     TransportButton statsButton;
     TransportButton channelViewButton;
+    juce::ComboBox themeSelector;
 
     // We keep transportStrip here to manage the top row layout entirely
     std::unique_ptr<TransportStrip> transportStrip;

@@ -19,6 +19,7 @@
 namespace Config {
 
 void initializeConfigs();
+void loadTheme(const juce::File& themeFile);
 
 namespace UI {
 /** @brief The base thickness of the button border. */

@@ -132,6 +132,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/HintPresenter.cpp
             Source/Presenters/FpsPresenter.h
             Source/Presenters/FpsPresenter.cpp
+            Source/Presenters/ThemePresenter.h
+            Source/Presenters/ThemePresenter.cpp
 
             # UI
             Source/UI/ControlPanel.h

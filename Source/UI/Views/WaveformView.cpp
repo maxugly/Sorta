@@ -28,6 +28,11 @@ void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode) {
     repaint();
 }
 
+void WaveformView::clearCaches() {
+    isCacheDirty = true;
+    repaint();
+}
+
 void WaveformView::paint(juce::Graphics &g) {
     if (isCacheDirty || cachedWaveform.getWidth() != getWidth() || cachedWaveform.getHeight() != getHeight()) {
         cachedWaveform = juce::Image(juce::Image::ARGB, juce::jmax(1, getWidth()), juce::jmax(1, getHeight()), true);

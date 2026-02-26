@@ -26,6 +26,9 @@ TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
 
     hintView = std::make_unique<HintView>();
     addAndMakeVisible(hintView.get());
+
+    addAndMakeVisible(themeSelector);
+    themeSelector.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
 }
 
 TopBarView::~TopBarView() = default;
@@ -65,6 +68,8 @@ void TopBarView::resized() {
         const int hintWidth = 150;
         hintView->setBounds(topRow.removeFromLeft(hintWidth));
     }
+
+    themeSelector.setBounds(topRow.removeFromLeft(120));
 
     topRow.removeFromLeft(margin);
 

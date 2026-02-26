@@ -29,6 +29,7 @@ class CutPresenter;
 class SilenceThresholdPresenter;
 class KeybindPresenter;
 class FpsPresenter;
+class ThemePresenter;
 #include "Presenters/HintPresenter.h"
 #include "Presenters/ZoomPresenter.h"
 
@@ -57,6 +58,7 @@ class PresenterCore final {
     SilenceThresholdPresenter& getSilenceThresholdPresenter() { return *silenceThresholdPresenter; }
     KeybindPresenter& getKeybindPresenter() { return *keybindPresenter; }
     FpsPresenter& getFpsPresenter() { return *fpsPresenter; }
+    ThemePresenter& getThemePresenter() { return *themePresenter; }
 
   private:
     std::unique_ptr<StatsPresenter> statsPresenter;
@@ -79,6 +81,7 @@ class PresenterCore final {
     std::unique_ptr<KeybindPresenter> keybindPresenter;
     std::unique_ptr<HintPresenter> hintPresenter;
     std::unique_ptr<FpsPresenter> fpsPresenter;
+    std::unique_ptr<ThemePresenter> themePresenter;
 
     ControlPanel &owner;
 

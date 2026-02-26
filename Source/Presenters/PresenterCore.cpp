@@ -25,6 +25,7 @@
 #include "Presenters/KeybindPresenter.h"
 #include "Presenters/HintPresenter.h"
 #include "Presenters/FpsPresenter.h"
+#include "Presenters/ThemePresenter.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/CutLayerView.h"
@@ -73,6 +74,7 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
 
     hintPresenter = std::make_unique<HintPresenter>(owner, owner.getHintView());
     fpsPresenter = std::make_unique<FpsPresenter>(owner, owner.getFpsView());
+    themePresenter = std::make_unique<ThemePresenter>(owner);
 }
 
 PresenterCore::~PresenterCore() = default;

@@ -114,6 +114,44 @@ class ModernLookAndFeel : public juce::LookAndFeel_V4 {
                    true);
     }
 
+    void drawComboBox(juce::Graphics &g, int width, int height, bool isButtonDown,
+                      int buttonX, int buttonY, int buttonW, int buttonH,
+                      juce::ComboBox &box) override {
+        auto cornerSize = Config::UI::ButtonCornerSize;
+        auto outlineThickness = Config::UI::ButtonOutlineThickness;
+        auto bounds = box.getLocalBounds().toFloat().reduced(outlineThickness / 2.0f);
+
+        auto groupPos = (AppEnums::GroupPosition)(int)box.getProperties().getWithDefault(
+            "GroupPosition", (int)AppEnums::GroupPosition::Alone);
+
+        bool tl = false, tr = false, bl = false, br = false;
+        switch (groupPos) {
+        case AppEnums::GroupPosition::Alone:  tl = tr = bl = br = true; break;
+        case AppEnums::GroupPosition::Left:   tl = bl = true; break;
+        case AppEnums::GroupPosition::Right:  tr = br = true; break;
+        case AppEnums::GroupPosition::Middle: break;
+        }
+
+        juce::Path p;
+        p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
+                              cornerSize, cornerSize, tl, tr, bl, br);
+
+        g.setColour(box.findColour(juce::ComboBox::backgroundColourId));
+        g.fillPath(p);
+
+        g.setColour(Config::Colors::Button::outline);
+        g.strokePath(p, juce::PathStrokeType(outlineThickness));
+
+        const float arrowX = (float)buttonX + (float)buttonW * 0.5f;
+        const float arrowY = (float)buttonY + (float)buttonH * 0.5f;
+        const float arrowW = (float)juce::jmin(buttonW, buttonH) * 0.5f;
+
+        juce::Path arrowPath;
+        arrowPath.addTriangle(0.0f, 0.0f, arrowW * 0.5f, arrowW * 0.4f, -arrowW * 0.5f, arrowW * 0.4f);
+        g.setColour(box.findColour(juce::ComboBox::arrowColourId).withAlpha(box.isEnabled() ? 1.0f : 0.5f));
+        g.fillPath(arrowPath, juce::AffineTransform::translation(arrowX, arrowY - arrowW * 0.2f));
+    }
+
     void fillTextEditorBackground(juce::Graphics &g, int width, int height,
                                   juce::TextEditor &textEditor) override {
         auto cornerSize = Config::UI::ButtonCornerSize;

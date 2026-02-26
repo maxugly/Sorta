@@ -26,6 +26,8 @@ class WaveformView : public juce::Component, public juce::ChangeListener {
 
     void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
+    void clearCaches();
+
   private:
     void drawWaveform(juce::Graphics &g);
 
