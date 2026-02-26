@@ -159,6 +159,57 @@ void loadTheme(const juce::File& themeFile) {
     };
 
 #if !defined(JUCE_HEADLESS)
+    // --- MACRO THEME GENERATOR ---
+    if (obj->hasProperty("primaryColorHex")) {
+        auto primary = juce::Colour::fromString(obj->getProperty("primaryColorHex").toString());
+        auto darker = primary.darker(0.6f);
+        auto lighter = primary.brighter(0.3f);
+        
+        // MS Paint Invert (255 - R, 255 - G, 255 - B)
+        auto inverted = juce::Colour((juce::uint8)(255 - primary.getRed()), 
+                                     (juce::uint8)(255 - primary.getGreen()), 
+                                     (juce::uint8)(255 - primary.getBlue()));
+
+        Colors::Window::background = darker.darker(0.8f);
+        Colors::Button::base = primary;
+        Colors::Button::outline = lighter;
+        Colors::Button::disabledBackground = darker;
+        Colors::textEditorBackground = darker;
+        Colors::statsBackground = darker;
+        Colors::ZoomHud::background = darker;
+        Colors::volumeKnobTrack = darker;
+        Colors::Matrix::ledInactive = darker;
+        Colors::fpsBackground = darker;
+
+        // Map the MS Paint inversion to Warnings/Exits
+        Colors::Button::exit = inverted;
+        Colors::Button::clear = inverted;
+        Colors::textEditorError = inverted;
+        Colors::statsErrorText = inverted;
+    }
+
+    if (obj->hasProperty("secondaryColorHex")) {
+        auto secondary = juce::Colour::fromString(obj->getProperty("secondaryColorHex").toString());
+
+        Colors::waveformPeak = secondary;
+        Colors::waveformCore = secondary.darker(0.8f);
+        Colors::playbackCursor = secondary.brighter(0.4f);
+        
+        Colors::Button::text = secondary;
+        Colors::Button::on = secondary;
+        Colors::playbackText = secondary;
+        Colors::cutLine = secondary;
+        Colors::cutMarkerAuto = secondary;
+        Colors::Matrix::ledActive = secondary;
+        Colors::volumeKnobFill = secondary;
+        
+        Colors::mouseCursorLine = secondary.brighter(0.5f);
+        Colors::mouseAmplitudeLine = secondary;
+        Colors::mouseAmplitudeGlow = secondary;
+        Colors::zoomPopupPlaybackLine = secondary;
+    }
+    // -----------------------------
+
     setCol("windowBackgroundHex", Colors::Window::background);
     setCol("waveformPeakHex", Colors::waveformPeak);
     setCol("waveformCoreHex", Colors::waveformCore);
