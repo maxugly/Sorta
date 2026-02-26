@@ -46,9 +46,9 @@ struct Window {
     static juce::Colour background;
 };
 
-extern const juce::Colour transparentBlack;
-extern const juce::Colour solidBlack;
-extern const juce::Colour transparentWhite;
+extern juce::Colour transparentBlack;
+extern juce::Colour solidBlack;
+extern juce::Colour transparentWhite;
 
 struct Button {
     static juce::Colour base;
@@ -64,9 +64,9 @@ struct Button {
 };
 extern juce::Colour playbackText;
 extern juce::Colour textEditorBackground;
-extern const juce::Colour textEditorError;
-extern const juce::Colour textEditorWarning;
-extern const juce::Colour textEditorOutOfRange;
+extern juce::Colour textEditorError;
+extern juce::Colour textEditorWarning;
+extern juce::Colour textEditorOutOfRange;
 extern juce::Colour waveformPeak;
 extern juce::Colour waveformCore;
 extern juce::Colour playbackCursor;
@@ -75,47 +75,47 @@ extern juce::Colour cutLine;
 extern juce::Colour cutMarkerAuto;
 extern juce::Colour cutMarkerHover;
 extern juce::Colour cutMarkerDrag;
-extern const juce::Colour fpsBackground;
-extern const juce::Colour fpsText;
-extern const juce::Colour mouseCursorLine;
-extern const juce::Colour mouseCursorHighlight;
-extern const juce::Colour mouseAmplitudeLine;
-extern const juce::Colour mousePlacementMode;
-extern const juce::Colour thresholdLine;
-extern const juce::Colour thresholdRegion;
-extern const juce::Colour statsBackground;
-extern const juce::Colour statsText;
-extern const juce::Colour statsErrorText;
-extern const juce::Colour mouseAmplitudeGlow;
-extern const juce::Colour placementModeGlow;
-extern const juce::Colour zoomPopupBorder;
-extern const juce::Colour zoomPopupTrackingLine;
-extern const juce::Colour zoomPopupPlaybackLine;
-extern const juce::Colour zoomPopupZeroLine;
-extern const juce::Colour volumeKnobFill;
-extern const juce::Colour volumeKnobTrack;
-extern const juce::Colour volumeKnobPointer;
+extern juce::Colour fpsBackground;
+extern juce::Colour fpsText;
+extern juce::Colour mouseCursorLine;
+extern juce::Colour mouseCursorHighlight;
+extern juce::Colour mouseAmplitudeLine;
+extern juce::Colour mousePlacementMode;
+extern juce::Colour thresholdLine;
+extern juce::Colour thresholdRegion;
+extern juce::Colour statsBackground;
+extern juce::Colour statsText;
+extern juce::Colour statsErrorText;
+extern juce::Colour mouseAmplitudeGlow;
+extern juce::Colour placementModeGlow;
+extern juce::Colour zoomPopupBorder;
+extern juce::Colour zoomPopupTrackingLine;
+extern juce::Colour zoomPopupPlaybackLine;
+extern juce::Colour zoomPopupZeroLine;
+extern juce::Colour volumeKnobFill;
+extern juce::Colour volumeKnobTrack;
+extern juce::Colour volumeKnobPointer;
 
 struct ZoomHud {
-    static const juce::Colour background;
-    static const juce::Colour textActive;
-    static const juce::Colour textInactive;
+    static juce::Colour background;
+    static juce::Colour textActive;
+    static juce::Colour textInactive;
 };
 
 struct VolumeFlame {
-    static const juce::Colour low;
-    static const juce::Colour mid;
-    static const juce::Colour high;
-    static const juce::Colour peak;
+    static juce::Colour low;
+    static juce::Colour mid;
+    static juce::Colour high;
+    static juce::Colour peak;
 };
 
 struct HintVox {
-    static const juce::Colour text;
+    static juce::Colour text;
 };
 
 struct Matrix {
-    static const juce::Colour ledActive;
-    static const juce::Colour ledInactive;
+    static juce::Colour ledActive;
+    static juce::Colour ledInactive;
 };
 } // namespace Colors
 
@@ -243,6 +243,13 @@ constexpr float silenceThresholdIn = 0.01f;
 constexpr float silenceThresholdOut = 0.01f;
 constexpr bool lockHandlesWhenAutoCutActive = false;
 } // namespace Audio
+
+namespace Advanced {
+extern bool showFpsOverlay;
+extern int fpsOverlayX;
+extern int fpsOverlayY;
+extern juce::String fpsOverlayPosition;
+} // namespace Advanced
 
 namespace Labels {
 extern juce::String appName;

@@ -152,10 +152,21 @@ void ControlPanel::resized() {
         overlayView->setBounds(getLocalBounds());
 
     if (fpsView != nullptr) {
-        fpsView->setBounds(getLocalBounds().getRight() - Config::Layout::Fps::width - Config::Layout::Fps::margin,
-                           Config::Layout::Fps::margin,
-                           Config::Layout::Fps::width,
-                           Config::Layout::Fps::height);
+        fpsView->setVisible(Config::Advanced::showFpsOverlay);
+        if (Config::Advanced::showFpsOverlay) {
+            int x = Config::Advanced::fpsOverlayX;
+            int y = Config::Advanced::fpsOverlayY;
+            
+            if (Config::Advanced::fpsOverlayPosition == "topC") {
+                x = (getWidth() - Config::Layout::Fps::width) / 2;
+                y = Config::Layout::Fps::margin;
+            } else if (Config::Advanced::fpsOverlayPosition == "btmC") {
+                x = (getWidth() - Config::Layout::Fps::width) / 2;
+                y = getHeight() - Config::Layout::Fps::height - Config::Layout::Fps::margin;
+            }
+            
+            fpsView->setBounds(x, y, Config::Layout::Fps::width, Config::Layout::Fps::height);
+        }
     }
 }
 

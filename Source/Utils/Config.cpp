@@ -8,9 +8,9 @@ namespace Colors {
 #if !defined(JUCE_HEADLESS)
 juce::Colour Window::background{juce::Colours::black};
 
-const juce::Colour transparentBlack = juce::Colours::black;
-const juce::Colour solidBlack = juce::Colours::black;
-const juce::Colour transparentWhite = juce::Colours::black;
+juce::Colour transparentBlack = juce::Colours::black;
+juce::Colour solidBlack = juce::Colours::black;
+juce::Colour transparentWhite = juce::Colours::black;
 
 juce::Colour Button::base{0xff5a5a5a};
 juce::Colour Button::on{juce::Colours::orange}; 
@@ -25,10 +25,10 @@ juce::Colour Button::cutActive{juce::Colours::darkorange};
 
 juce::Colour playbackText = juce::Colour(0xFF34FA11);
 juce::Colour textEditorBackground = juce::Colour(0xff333333);
-const juce::Colour textEditorError = juce::Colours::red;
-const juce::Colour textEditorWarning = juce::Colours::orange;
-const juce::Colour textEditorOutOfRange = juce::Colours::orange;
-juce::Colour waveformPeak = juce::Colours::cyan;
+juce::Colour textEditorError = juce::Colours::red;
+juce::Colour textEditorWarning = juce::Colours::orange;
+juce::Colour textEditorOutOfRange = juce::Colours::orange;
+juce::Colour waveformPeak = juce::Colours::red;
 juce::Colour waveformCore = juce::Colour(0xff483d8b);
 juce::Colour playbackCursor = juce::Colours::lime;
 juce::Colour cutRegion = juce::Colours::darkorange;
@@ -36,41 +36,41 @@ juce::Colour cutLine = juce::Colours::orange;
 juce::Colour cutMarkerAuto = juce::Colours::orange;
 juce::Colour cutMarkerHover = juce::Colours::orange;
 juce::Colour cutMarkerDrag = juce::Colours::green;
-const juce::Colour fpsBackground = juce::Colours::black;
-const juce::Colour fpsText = juce::Colours::lime;
-const juce::Colour mouseCursorLine = juce::Colours::white;
-const juce::Colour mouseCursorHighlight = juce::Colours::darkorange;
-const juce::Colour mouseAmplitudeLine = juce::Colours::orange.brighter(0.5f);
-const juce::Colour mousePlacementMode = juce::Colours::deeppink;
-const juce::Colour thresholdLine = juce::Colour(0xffe600e6);
-const juce::Colour thresholdRegion = juce::Colours::red;
-const juce::Colour statsBackground = juce::Colours::black;
-const juce::Colour statsText = juce::Colour(0xFF34FA11);
-const juce::Colour statsErrorText = juce::Colours::red;
-const juce::Colour mouseAmplitudeGlow = juce::Colours::yellow;
-const juce::Colour placementModeGlow = juce::Colours::red;
-const juce::Colour zoomPopupBorder = juce::Colour(0xff483d8b); // DarkSlateBlue
-const juce::Colour zoomPopupTrackingLine = juce::Colours::orange;
-const juce::Colour zoomPopupPlaybackLine = juce::Colours::lime;
-const juce::Colour zoomPopupZeroLine = juce::Colours::grey;
+juce::Colour fpsBackground = juce::Colours::black;
+juce::Colour fpsText = juce::Colours::lime;
+juce::Colour mouseCursorLine = juce::Colours::white;
+juce::Colour mouseCursorHighlight = juce::Colours::darkorange;
+juce::Colour mouseAmplitudeLine = juce::Colours::orange.brighter(0.5f);
+juce::Colour mousePlacementMode = juce::Colours::deeppink;
+juce::Colour thresholdLine = juce::Colour(0xffe600e6);
+juce::Colour thresholdRegion = juce::Colours::red;
+juce::Colour statsBackground = juce::Colours::black;
+juce::Colour statsText = juce::Colour(0xFF34FA11);
+juce::Colour statsErrorText = juce::Colours::red;
+juce::Colour mouseAmplitudeGlow = juce::Colours::yellow;
+juce::Colour placementModeGlow = juce::Colours::red;
+juce::Colour zoomPopupBorder = juce::Colour(0xff483d8b); // DarkSlateBlue
+juce::Colour zoomPopupTrackingLine = juce::Colours::orange;
+juce::Colour zoomPopupPlaybackLine = juce::Colours::lime;
+juce::Colour zoomPopupZeroLine = juce::Colours::grey;
 
-const juce::Colour Colors::ZoomHud::background = juce::Colours::black;
-const juce::Colour Colors::ZoomHud::textActive = juce::Colours::lime;
-const juce::Colour Colors::ZoomHud::textInactive = juce::Colours::lightgrey;
+juce::Colour Colors::ZoomHud::background = juce::Colours::black;
+juce::Colour Colors::ZoomHud::textActive = juce::Colours::lime;
+juce::Colour Colors::ZoomHud::textInactive = juce::Colours::lightgrey;
 
-const juce::Colour volumeKnobFill = juce::Colours::orange;
-const juce::Colour volumeKnobTrack = juce::Colours::darkgrey;
-const juce::Colour volumeKnobPointer = juce::Colours::white;
+juce::Colour volumeKnobFill = juce::Colours::orange;
+juce::Colour volumeKnobTrack = juce::Colours::darkgrey;
+juce::Colour volumeKnobPointer = juce::Colours::white;
 
-const juce::Colour Colors::VolumeFlame::low = juce::Colours::red;
-const juce::Colour Colors::VolumeFlame::mid = juce::Colours::orange;
-const juce::Colour Colors::VolumeFlame::high = juce::Colours::orange.brighter(0.3f);
-const juce::Colour Colors::VolumeFlame::peak = juce::Colours::white;
+juce::Colour Colors::VolumeFlame::low = juce::Colours::red;
+juce::Colour Colors::VolumeFlame::mid = juce::Colours::orange;
+juce::Colour Colors::VolumeFlame::high = juce::Colours::orange.brighter(0.3f);
+juce::Colour Colors::VolumeFlame::peak = juce::Colours::white;
 
-const juce::Colour Colors::HintVox::text = juce::Colours::lightgrey;
+juce::Colour Colors::HintVox::text = juce::Colours::lightgrey;
 
-const juce::Colour Colors::Matrix::ledActive = juce::Colours::lime;
-const juce::Colour Colors::Matrix::ledInactive = juce::Colours::darkgrey;
+juce::Colour Colors::Matrix::ledActive = juce::Colours::lime;
+juce::Colour Colors::Matrix::ledInactive = juce::Colours::darkgrey;
 #endif
 } // namespace Colors
 
@@ -134,8 +134,8 @@ juce::String scanningCutPoints = "Scanning for Cut Points...";
 juce::String noSilenceBoundaries = "No Silence Boundaries detected.";
 } // namespace Labels
 
-int Layout::Window::width = 1080;
-int Layout::Window::height = 800;
+int Layout::Window::width = 1920;
+int Layout::Window::height = 1080;
 float Layout::Waveform::heightScale = 0.5f;
 int Layout::Waveform::pixelsPerSampleLow = 4;
 int Layout::Waveform::pixelsPerSampleMedium = 2;
@@ -155,6 +155,7 @@ void initializeConfigs() {
     auto settingsFile = configDir.getChildFile("settings.conf");
     auto themeFile = configDir.getChildFile("theme.conf");
     auto languageFile = configDir.getChildFile("language.conf");
+    auto advancedFile = configDir.getChildFile("advanced.conf");
 
     // --- Helper: Parsing Logic ---
     auto parseFile = [&](const juce::File& file) {
@@ -166,6 +167,7 @@ void initializeConfigs() {
         auto setInt = [&](const char* p, int& t) { if (obj->hasProperty(p)) t = obj->getProperty(p); };
         auto setFloat = [&](const char* p, float& t) { if (obj->hasProperty(p)) t = obj->getProperty(p); };
         auto setStr = [&](const char* p, juce::String& t) { if (obj->hasProperty(p)) t = obj->getProperty(p).toString(); };
+        auto setBool = [&](const char* p, bool& t) { if (obj->hasProperty(p)) t = obj->getProperty(p); };
         auto setCol = [&](const char* p, juce::Colour& t) { 
             if (obj->hasProperty(p)) t = juce::Colour::fromString(obj->getProperty(p).toString()); 
         };
@@ -195,6 +197,11 @@ void initializeConfigs() {
         setStr("labelAutoCutOutButton", Labels::autoCutOutButton);
         setStr("labelCutButton", Labels::cutButton);
 
+        setBool("showFpsOverlay", Advanced::showFpsOverlay);
+        setInt("fpsOverlayX", Advanced::fpsOverlayX);
+        setInt("fpsOverlayY", Advanced::fpsOverlayY);
+        setStr("fpsOverlayPosition", Advanced::fpsOverlayPosition);
+
 #if !defined(JUCE_HEADLESS)
         setCol("windowBackgroundHex", Colors::Window::background);
         setCol("waveformPeakHex", Colors::waveformPeak);
@@ -217,6 +224,39 @@ void initializeConfigs() {
         setCol("buttonCutActiveHex", Colors::Button::cutActive);
         setCol("playbackTextHex", Colors::playbackText);
         setCol("textEditorBackgroundHex", Colors::textEditorBackground);
+        setCol("textEditorErrorHex", Colors::textEditorError);
+        setCol("textEditorWarningHex", Colors::textEditorWarning);
+        setCol("textEditorOutOfRangeHex", Colors::textEditorOutOfRange);
+        setCol("fpsBackgroundHex", Colors::fpsBackground);
+        setCol("fpsTextHex", Colors::fpsText);
+        setCol("mouseCursorLineHex", Colors::mouseCursorLine);
+        setCol("mouseCursorHighlightHex", Colors::mouseCursorHighlight);
+        setCol("mouseAmplitudeLineHex", Colors::mouseAmplitudeLine);
+        setCol("mousePlacementModeHex", Colors::mousePlacementMode);
+        setCol("thresholdLineHex", Colors::thresholdLine);
+        setCol("thresholdRegionHex", Colors::thresholdRegion);
+        setCol("statsBackgroundHex", Colors::statsBackground);
+        setCol("statsTextHex", Colors::statsText);
+        setCol("statsErrorTextHex", Colors::statsErrorText);
+        setCol("mouseAmplitudeGlowHex", Colors::mouseAmplitudeGlow);
+        setCol("placementModeGlowHex", Colors::placementModeGlow);
+        setCol("zoomPopupBorderHex", Colors::zoomPopupBorder);
+        setCol("zoomPopupTrackingLineHex", Colors::zoomPopupTrackingLine);
+        setCol("zoomPopupPlaybackLineHex", Colors::zoomPopupPlaybackLine);
+        setCol("zoomPopupZeroLineHex", Colors::zoomPopupZeroLine);
+        setCol("zoomHudBackgroundHex", Colors::ZoomHud::background);
+        setCol("zoomHudTextActiveHex", Colors::ZoomHud::textActive);
+        setCol("zoomHudTextInactiveHex", Colors::ZoomHud::textInactive);
+        setCol("volumeKnobFillHex", Colors::volumeKnobFill);
+        setCol("volumeKnobTrackHex", Colors::volumeKnobTrack);
+        setCol("volumeKnobPointerHex", Colors::volumeKnobPointer);
+        setCol("volumeFlameLowHex", Colors::VolumeFlame::low);
+        setCol("volumeFlameMidHex", Colors::VolumeFlame::mid);
+        setCol("volumeFlameHighHex", Colors::VolumeFlame::high);
+        setCol("volumeFlamePeakHex", Colors::VolumeFlame::peak);
+        setCol("hintVoxTextHex", Colors::HintVox::text);
+        setCol("matrixLedActiveHex", Colors::Matrix::ledActive);
+        setCol("matrixLedInactiveHex", Colors::Matrix::ledInactive);
 #endif
     };
 
@@ -236,7 +276,57 @@ void initializeConfigs() {
         obj->setProperty("windowBackgroundHex", Colors::Window::background.toDisplayString(true));
         obj->setProperty("waveformPeakHex", Colors::waveformPeak.toDisplayString(true));
         obj->setProperty("waveformCoreHex", Colors::waveformCore.toDisplayString(true));
+        obj->setProperty("playbackCursorHex", Colors::playbackCursor.toDisplayString(true));
+        obj->setProperty("cutRegionHex", Colors::cutRegion.toDisplayString(true));
+        obj->setProperty("cutLineHex", Colors::cutLine.toDisplayString(true));
+        obj->setProperty("cutMarkerAutoHex", Colors::cutMarkerAuto.toDisplayString(true));
+        obj->setProperty("cutMarkerHoverHex", Colors::cutMarkerHover.toDisplayString(true));
+        obj->setProperty("cutMarkerDragHex", Colors::cutMarkerDrag.toDisplayString(true));
         obj->setProperty("buttonBaseHex", Colors::Button::base.toDisplayString(true));
+        obj->setProperty("buttonOnHex", Colors::Button::on.toDisplayString(true));
+        obj->setProperty("buttonTextHex", Colors::Button::text.toDisplayString(true));
+        obj->setProperty("buttonOutlineHex", Colors::Button::outline.toDisplayString(true));
+        obj->setProperty("buttonDisabledBackgroundHex", Colors::Button::disabledBackground.toDisplayString(true));
+        obj->setProperty("buttonDisabledTextHex", Colors::Button::disabledText.toDisplayString(true));
+        obj->setProperty("buttonExitHex", Colors::Button::exit.toDisplayString(true));
+        obj->setProperty("buttonClearHex", Colors::Button::clear.toDisplayString(true));
+        obj->setProperty("buttonCutPlacementHex", Colors::Button::cutPlacement.toDisplayString(true));
+        obj->setProperty("buttonCutActiveHex", Colors::Button::cutActive.toDisplayString(true));
+        obj->setProperty("playbackTextHex", Colors::playbackText.toDisplayString(true));
+        obj->setProperty("textEditorBackgroundHex", Colors::textEditorBackground.toDisplayString(true));
+        obj->setProperty("textEditorErrorHex", Colors::textEditorError.toDisplayString(true));
+        obj->setProperty("textEditorWarningHex", Colors::textEditorWarning.toDisplayString(true));
+        obj->setProperty("textEditorOutOfRangeHex", Colors::textEditorOutOfRange.toDisplayString(true));
+        obj->setProperty("fpsBackgroundHex", Colors::fpsBackground.toDisplayString(true));
+        obj->setProperty("fpsTextHex", Colors::fpsText.toDisplayString(true));
+        obj->setProperty("mouseCursorLineHex", Colors::mouseCursorLine.toDisplayString(true));
+        obj->setProperty("mouseCursorHighlightHex", Colors::mouseCursorHighlight.toDisplayString(true));
+        obj->setProperty("mouseAmplitudeLineHex", Colors::mouseAmplitudeLine.toDisplayString(true));
+        obj->setProperty("mousePlacementModeHex", Colors::mousePlacementMode.toDisplayString(true));
+        obj->setProperty("thresholdLineHex", Colors::thresholdLine.toDisplayString(true));
+        obj->setProperty("thresholdRegionHex", Colors::thresholdRegion.toDisplayString(true));
+        obj->setProperty("statsBackgroundHex", Colors::statsBackground.toDisplayString(true));
+        obj->setProperty("statsTextHex", Colors::statsText.toDisplayString(true));
+        obj->setProperty("statsErrorTextHex", Colors::statsErrorText.toDisplayString(true));
+        obj->setProperty("mouseAmplitudeGlowHex", Colors::mouseAmplitudeGlow.toDisplayString(true));
+        obj->setProperty("placementModeGlowHex", Colors::placementModeGlow.toDisplayString(true));
+        obj->setProperty("zoomPopupBorderHex", Colors::zoomPopupBorder.toDisplayString(true));
+        obj->setProperty("zoomPopupTrackingLineHex", Colors::zoomPopupTrackingLine.toDisplayString(true));
+        obj->setProperty("zoomPopupPlaybackLineHex", Colors::zoomPopupPlaybackLine.toDisplayString(true));
+        obj->setProperty("zoomPopupZeroLineHex", Colors::zoomPopupZeroLine.toDisplayString(true));
+        obj->setProperty("zoomHudBackgroundHex", Colors::ZoomHud::background.toDisplayString(true));
+        obj->setProperty("zoomHudTextActiveHex", Colors::ZoomHud::textActive.toDisplayString(true));
+        obj->setProperty("zoomHudTextInactiveHex", Colors::ZoomHud::textInactive.toDisplayString(true));
+        obj->setProperty("volumeKnobFillHex", Colors::volumeKnobFill.toDisplayString(true));
+        obj->setProperty("volumeKnobTrackHex", Colors::volumeKnobTrack.toDisplayString(true));
+        obj->setProperty("volumeKnobPointerHex", Colors::volumeKnobPointer.toDisplayString(true));
+        obj->setProperty("volumeFlameLowHex", Colors::VolumeFlame::low.toDisplayString(true));
+        obj->setProperty("volumeFlameMidHex", Colors::VolumeFlame::mid.toDisplayString(true));
+        obj->setProperty("volumeFlameHighHex", Colors::VolumeFlame::high.toDisplayString(true));
+        obj->setProperty("volumeFlamePeakHex", Colors::VolumeFlame::peak.toDisplayString(true));
+        obj->setProperty("hintVoxTextHex", Colors::HintVox::text.toDisplayString(true));
+        obj->setProperty("matrixLedActiveHex", Colors::Matrix::ledActive.toDisplayString(true));
+        obj->setProperty("matrixLedInactiveHex", Colors::Matrix::ledInactive.toDisplayString(true));
 #endif
         themeFile.replaceWithText(juce::JSON::toString(obj.get(), false));
     }
@@ -249,9 +339,24 @@ void initializeConfigs() {
         languageFile.replaceWithText(juce::JSON::toString(obj.get(), false));
     }
 
+    if (!advancedFile.existsAsFile()) {
+        juce::DynamicObject::Ptr obj = new juce::DynamicObject();
+        obj->setProperty("showFpsOverlay", Advanced::showFpsOverlay);
+        obj->setProperty("fpsOverlayX", Advanced::fpsOverlayX);
+        obj->setProperty("fpsOverlayY", Advanced::fpsOverlayY);
+        obj->setProperty("fpsOverlayPosition", Advanced::fpsOverlayPosition);
+        advancedFile.replaceWithText(juce::JSON::toString(obj.get(), false));
+    }
+
     parseFile(settingsFile);
     parseFile(themeFile);
     parseFile(languageFile);
+    parseFile(advancedFile);
 }
+
+bool Advanced::showFpsOverlay = true;
+int Advanced::fpsOverlayX = 10;
+int Advanced::fpsOverlayY = 10;
+juce::String Advanced::fpsOverlayPosition = "topC";
 
 } // namespace Config
