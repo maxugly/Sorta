@@ -119,8 +119,8 @@ struct Matrix {
 
 struct Layout {
     struct Window {
-        static constexpr int width = 1080;
-        static constexpr int height = 800;
+        static constexpr int width = 1920;
+        static constexpr int height = 1080;
     };
     static constexpr int windowBorderMargins = 15;
     static constexpr int buttonHeight = 30;
