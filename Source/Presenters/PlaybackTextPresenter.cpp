@@ -61,15 +61,16 @@ void PlaybackTextPresenter::updateEditors() {
     auto totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
     owner.playbackTimeView->updateTimes(
         TimeUtils::formatTime(owner.getAudioPlayer().getCurrentPosition(), sampleRate),
-        TimeUtils::formatTime(totalLength, sampleRate));
+        "+" + TimeUtils::formatTime(totalLength, sampleRate));
 
     auto &elapsed = owner.playbackTimeView->getElapsedEditor();
     auto &total = owner.playbackTimeView->getTotalTimeEditor();
     auto &remaining = owner.playbackTimeView->getRemainingEditor();
     auto &length = owner.getCutLengthStrip()->getLengthEditor();
 
-    if (total.getText() != TimeUtils::formatTime(totalLength, sampleRate))
-        total.setText(TimeUtils::formatTime(totalLength, sampleRate), juce::dontSendNotification);
+    juce::String totalTimeFormatted = "+" + TimeUtils::formatTime(totalLength, sampleRate);
+    if (total.getText() != totalTimeFormatted)
+        total.setText(totalTimeFormatted, juce::dontSendNotification);
 
     if (!isEditingElapsed && !elapsed.hasKeyboardFocus(true))
         syncEditorToPosition(elapsed, owner.getAudioPlayer().getCurrentPosition());
@@ -99,7 +100,7 @@ void PlaybackTextPresenter::updateLengthEditor() {
     auto &length = owner.getCutLengthStrip()->getLengthEditor();
     if (!isEditingCutLength && !length.hasKeyboardFocus(true)) {
         double cutLen = std::abs(owner.getSessionState().getCutOut() - owner.getSessionState().getCutIn());
-        juce::String newText = TimeUtils::formatTime(cutLen, sampleRate);
+        juce::String newText = "+" + TimeUtils::formatTime(cutLen, sampleRate);
         if (length.getText() != newText)
             length.setText(newText, juce::dontSendNotification);
     }
@@ -225,6 +226,8 @@ void PlaybackTextPresenter::syncEditorToPosition(juce::TextEditor &editor, doubl
     juce::String text = TimeUtils::formatTime(positionSeconds, sampleRate);
     if (isRemaining)
         text = "-" + text;
+    else
+        text = "+" + text;
 
     if (editor.getText() != text)
         editor.setText(text, juce::dontSendNotification);

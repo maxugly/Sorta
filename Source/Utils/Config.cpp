@@ -8,9 +8,9 @@ namespace Colors {
 #if !defined(JUCE_HEADLESS)
 juce::Colour Window::background{juce::Colours::black};
 
-juce::Colour transparentBlack = juce::Colours::black;
+juce::Colour transparentBlack = juce::Colours::transparentBlack;
 juce::Colour solidBlack = juce::Colours::black;
-juce::Colour transparentWhite = juce::Colours::black;
+juce::Colour transparentWhite = juce::Colours::transparentWhite;
 
 juce::Colour Button::base{0xff5a5a5a};
 juce::Colour Button::on{juce::Colours::orange}; 
@@ -21,11 +21,11 @@ juce::Colour Button::disabledText{0xff4a4a4a};
 juce::Colour Button::exit{juce::Colours::darkred};
 juce::Colour Button::clear{juce::Colours::red};
 juce::Colour Button::cutPlacement{0xffff1493};
-juce::Colour Button::cutActive{juce::Colours::darkorange}; 
+juce::Colour Button::cutActive = juce::Colours::black; 
 
-juce::Colour playbackText = juce::Colour(0xFF34FA11);
-juce::Colour cutText = juce::Colours::orange;
-juce::Colour totalTimeText = juce::Colours::darkorange;
+juce::Colour playbackText = juce::Colours::white;
+juce::Colour cutText = juce::Colours::white;
+juce::Colour totalTimeText = juce::Colours::grey;
 juce::Colour textEditorBackground = juce::Colour(0xff333333);
 juce::Colour textEditorError = juce::Colours::red;
 juce::Colour textEditorWarning = juce::Colours::orange;
@@ -163,80 +163,6 @@ void loadTheme(const juce::File& themeFile) {
     };
 
 #if !defined(JUCE_HEADLESS)
-    // --- MACRO THEME GENERATOR ---
-    if (obj->hasProperty("primaryColorHex")) {
-        auto primary = juce::Colour::fromString(obj->getProperty("primaryColorHex").toString());
-        auto darker = primary.darker(0.6f);
-        auto lighter = primary.brighter(0.3f);
-        
-        // MS Paint Invert (255 - R, 255 - G, 255 - B)
-        auto inverted = juce::Colour((juce::uint8)(255 - primary.getRed()), 
-                                     (juce::uint8)(255 - primary.getGreen()), 
-                                     (juce::uint8)(255 - primary.getBlue()));
-
-        Colors::Window::background = darker.darker(0.8f);
-        Colors::solidBlack = Colors::Window::background.brighter(0.05f);
-        Colors::Button::base = primary;
-        Colors::Button::outline = lighter;
-        Colors::Button::disabledBackground = darker;
-        Colors::textEditorBackground = darker;
-        Colors::statsBackground = darker;
-        Colors::ZoomHud::background = darker;
-        Colors::volumeKnobTrack = darker;
-        Colors::Matrix::ledInactive = darker;
-        Colors::fpsBackground = darker;
-
-        // Map the MS Paint inversion to Warnings/Exits
-        Colors::Button::exit = inverted;
-        Colors::Button::clear = inverted;
-        Colors::textEditorError = inverted;
-        Colors::statsErrorText = inverted;
-    }
-
-    if (obj->hasProperty("secondaryColorHex")) {
-        auto secondary = juce::Colour::fromString(obj->getProperty("secondaryColorHex").toString());
-
-        Colors::waveformPeak = secondary;
-        if (obj->hasProperty("primaryColorHex")) {
-            auto primary = juce::Colour::fromString(obj->getProperty("primaryColorHex").toString());
-            // Fade from the secondary peak down into a slightly darkened primary core
-            Colors::waveformCore = primary.darker(0.2f); 
-        } else {
-            Colors::waveformCore = secondary.darker(0.8f);
-        }
-        Colors::playbackCursor = secondary.brighter(0.4f);
-        
-        Colors::Button::text = secondary;
-        Colors::Button::on = secondary;
-        Colors::playbackText = secondary;
-        Colors::cutText = secondary;
-        Colors::totalTimeText = secondary.darker(0.4f);
-        Colors::HintVox::text = secondary.brighter(0.2f);
-
-        Colors::cutLine = secondary;
-        Colors::cutMarkerAuto = secondary;
-        Colors::Matrix::ledActive = secondary;
-        Colors::volumeKnobFill = secondary;
-        
-        Colors::mouseCursorLine = secondary.brighter(0.5f);
-        Colors::mouseAmplitudeLine = secondary;
-        Colors::mouseAmplitudeGlow = secondary;
-        Colors::zoomPopupPlaybackLine = secondary;
-    }
-
-    if (obj->hasProperty("tertiaryColorHex")) {
-        auto tertiary = juce::Colour::fromString(obj->getProperty("tertiaryColorHex").toString());
-        Colors::Button::text = tertiary;
-    }
-
-    if (obj->hasProperty("quaternaryColorHex")) {
-        auto quaternary = juce::Colour::fromString(obj->getProperty("quaternaryColorHex").toString());
-        Colors::cutText = quaternary;
-        Colors::totalTimeText = quaternary.darker(0.4f);
-        Colors::HintVox::text = quaternary.brighter(0.2f);
-    }
-    // -----------------------------
-
     setCol("windowBackgroundHex", Colors::Window::background);
     setCol("waveformBackgroundHex", Colors::solidBlack);
     setCol("waveformPeakHex", Colors::waveformPeak);
@@ -292,6 +218,83 @@ void loadTheme(const juce::File& themeFile) {
     setCol("hintVoxTextHex", Colors::HintVox::text);
     setCol("matrixLedActiveHex", Colors::Matrix::ledActive);
     setCol("matrixLedInactiveHex", Colors::Matrix::ledInactive);
+
+    // --- MACRO THEME GENERATOR ---
+    if (obj->hasProperty("primaryColorHex")) {
+        auto primary = juce::Colour::fromString(obj->getProperty("primaryColorHex").toString());
+        auto darker = primary.darker(0.6f);
+        auto lighter = primary.brighter(0.3f);
+        
+        // MS Paint Invert (255 - R, 255 - G, 255 - B)
+        auto inverted = juce::Colour((juce::uint8)(255 - primary.getRed()), 
+                                     (juce::uint8)(255 - primary.getGreen()), 
+                                     (juce::uint8)(255 - primary.getBlue()));
+
+        Colors::Window::background = darker.darker(0.8f);
+        Colors::solidBlack = Colors::Window::background.brighter(0.05f);
+        Colors::Button::base = primary;
+        Colors::Button::outline = lighter;
+        Colors::Button::disabledBackground = darker;
+        Colors::textEditorBackground = darker;
+        Colors::statsBackground = darker;
+        Colors::ZoomHud::background = darker;
+        Colors::volumeKnobTrack = darker;
+        Colors::Matrix::ledInactive = darker;
+        Colors::fpsBackground = darker;
+
+        // Map the MS Paint inversion to Warnings/Exits
+        Colors::Button::exit = inverted;
+        Colors::Button::clear = inverted;
+        Colors::textEditorError = inverted;
+        Colors::statsErrorText = inverted;
+    }
+
+    if (obj->hasProperty("secondaryColorHex")) {
+        auto secondary = juce::Colour::fromString(obj->getProperty("secondaryColorHex").toString());
+
+        Colors::waveformPeak = secondary;
+        if (obj->hasProperty("primaryColorHex")) {
+            auto primary = juce::Colour::fromString(obj->getProperty("primaryColorHex").toString());
+            // Fade from the secondary peak down into a slightly darkened primary core
+            Colors::waveformCore = primary.darker(0.2f); 
+        } else {
+            Colors::waveformCore = secondary.darker(0.8f);
+        }
+        Colors::playbackCursor = secondary.brighter(0.4f);
+        
+        Colors::Button::text = secondary;
+        Colors::Button::on = secondary;
+        Colors::playbackText = secondary;
+        Colors::cutText = secondary;
+        Colors::totalTimeText = secondary.darker(0.4f);
+        Colors::HintVox::text = secondary.brighter(0.2f);
+        Colors::Button::text = secondary;
+
+        Colors::cutLine = secondary;
+        Colors::cutMarkerAuto = secondary;
+        Colors::Matrix::ledActive = secondary;
+        Colors::volumeKnobFill = secondary;
+        Colors::Button::cutActive = secondary;
+        
+        Colors::mouseCursorLine = secondary.brighter(0.5f);
+        Colors::mouseAmplitudeLine = secondary;
+        Colors::mouseAmplitudeGlow = secondary;
+        Colors::zoomPopupPlaybackLine = secondary;
+    }
+
+    if (obj->hasProperty("tertiaryColorHex")) {
+        auto tertiary = juce::Colour::fromString(obj->getProperty("tertiaryColorHex").toString());
+        Colors::Button::text = tertiary;
+    }
+
+    if (obj->hasProperty("quaternaryColorHex")) {
+        auto quaternary = juce::Colour::fromString(obj->getProperty("quaternaryColorHex").toString());
+        Colors::cutText = quaternary;
+        Colors::playbackText = quaternary;
+        Colors::totalTimeText = quaternary.darker(0.4f);
+        Colors::HintVox::text = quaternary.brighter(0.2f);
+    }
+    // -----------------------------
 #endif
 }
 

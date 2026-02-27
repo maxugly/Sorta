@@ -28,7 +28,7 @@ double TimeUtils::parseTime(const juce::String &timeString, double sampleRate) {
     if (sampleRate <= 0)
         sampleRate = 44100.0;
 
-    juce::String cleanTime = timeString.startsWithChar('-') ? timeString.substring(1) : timeString;
+    juce::String cleanTime = timeString.trimCharactersAtStart("+-");
 
     auto parts = juce::StringArray::fromTokens(cleanTime, ":", "");
     if (parts.size() != 4)

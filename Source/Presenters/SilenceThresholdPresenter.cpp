@@ -34,10 +34,14 @@ void SilenceThresholdPresenter::configureEditor(juce::TextEditor &editor, float 
 
 void SilenceThresholdPresenter::textEditorTextChanged(juce::TextEditor &editor) {
     const int val = editor.getText().getIntValue();
-    if (isValidPercentage(val)) {
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
-    } else {
+    if (!isValidPercentage(val)) {
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorError);
+    } else {
+        // If it was error, restore it to custom color (when focused)
+        if (editor.getProperties().contains("CustomTextColor")) {
+             auto textColor = juce::Colour::fromString(editor.getProperties()["CustomTextColor"].toString());
+             editor.setColour(juce::TextEditor::textColourId, textColor);
+        }
     }
 }
 
@@ -72,8 +76,6 @@ void SilenceThresholdPresenter::applyThresholdFromEditor(juce::TextEditor &edito
             owner.getSessionState().setThresholdIn(threshold);
         else
             owner.getSessionState().setThresholdOut(threshold);
-            
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
     } else {
         restoreEditorToCurrentValue(editor);
     }
@@ -89,5 +91,4 @@ void SilenceThresholdPresenter::restoreEditorToCurrentValue(juce::TextEditor &ed
     const float currentThreshold = isIn ? owner.getSessionState().getCutPrefs().autoCut.thresholdIn 
                                         : owner.getSessionState().getCutPrefs().autoCut.thresholdOut;
     editor.setText(juce::String(juce::roundToInt(currentThreshold * 100.0f)), juce::dontSendNotification);
-    editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
 }

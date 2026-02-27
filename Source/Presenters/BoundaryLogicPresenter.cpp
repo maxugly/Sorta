@@ -24,21 +24,11 @@ BoundaryLogicPresenter::~BoundaryLogicPresenter() {
 }
 
 void BoundaryLogicPresenter::initialiseEditors() {
-    auto configure = [](juce::TextEditor &editor) {
-        editor.setReadOnly(false);
-        editor.setJustification(juce::Justification::centred);
-        editor.setColour(juce::TextEditor::backgroundColourId,
-                         Config::Colors::textEditorBackground);
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
-        editor.setFont(juce::Font(juce::FontOptions(Config::Layout::Text::playbackSize)));
-        editor.setMultiLine(false);
-        editor.setReturnKeyStartsNewLine(false);
-        editor.setWantsKeyboardFocus(true);
-        editor.setSelectAllWhenFocused(true);
-    };
-
-    configure(cutInEditor);
-    configure(cutOutEditor);
+    if (auto* styledIn = dynamic_cast<StyledTextEditor*>(&cutInEditor))
+        styledIn->applyStandardStyle();
+    
+    if (auto* styledOut = dynamic_cast<StyledTextEditor*>(&cutOutEditor))
+        styledOut->applyStandardStyle();
 }
 
 void BoundaryLogicPresenter::refreshLabels() {
@@ -110,7 +100,6 @@ void BoundaryLogicPresenter::textEditorEscapeKeyPressed(juce::TextEditor &editor
     else if (&editor == &cutOutEditor)
         syncEditorToPosition(editor, owner.getAudioPlayer().getCutOut());
 
-    editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
     editor.giveAwayKeyboardFocus();
 }
 
@@ -218,7 +207,7 @@ void BoundaryLogicPresenter::syncEditorToPosition(juce::TextEditor &editor,
     owner.getAudioPlayer().getReaderInfo(sampleRate, length);
     if (sampleRate <= 0) sampleRate = 44100.0;
 
-    juce::String newText = TimeUtils::formatTime(positionSeconds, sampleRate);
+    juce::String newText = "+" + TimeUtils::formatTime(positionSeconds, sampleRate);
     if (editor.getText() != newText)
         editor.setText(newText, juce::dontSendNotification);
 }
@@ -239,7 +228,6 @@ bool BoundaryLogicPresenter::applyCutFromEditor(juce::TextEditor &editor, double
         if (owner.getInteractionCoordinator().getActiveZoomPoint() != AppEnums::ActiveZoomPoint::None)
             owner.getInteractionCoordinator().setNeedsJumpToCutIn(true);
 
-        editor.setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
         refreshLabels();
         owner.repaint();
         return true;

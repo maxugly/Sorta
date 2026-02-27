@@ -135,7 +135,7 @@ void ControlPanel::initialiseLookAndFeel() {
     modernLF.setColour(juce::ComboBox::arrowColourId, Config::Colors::Button::text);
 
     modernLF.setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
-    modernLF.setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+    modernLF.setColour(juce::TextEditor::textColourId, juce::Colours::transparentBlack);
     modernLF.setColour(juce::TextEditor::outlineColourId, Config::Colors::Button::outline);
 }
 
@@ -145,24 +145,24 @@ void ControlPanel::refreshThemeLive() {
     
     auto& stats = getPresenterCore().getStatsPresenter();
     stats.getDisplay().setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
-    stats.getDisplay().setColour(juce::TextEditor::textColourId, Config::Colors::playbackText);
+    stats.getDisplay().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
     stats.updateStats();
 
     if (playbackTimeView) {
-        playbackTimeView->getElapsedEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
-        playbackTimeView->getRemainingEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
-        playbackTimeView->getTotalTimeEditor().setColour(juce::TextEditor::textColourId, Config::Colors::totalTimeText);
+        playbackTimeView->getElapsedEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
+        playbackTimeView->getRemainingEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
+        playbackTimeView->getTotalTimeEditor().getProperties().set("CustomTextColor", Config::Colors::totalTimeText.toString());
     }
     if (inStrip) {
-        inStrip->getTimerEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
-        inStrip->getThresholdEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+        inStrip->getTimerEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
+        inStrip->getThresholdEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
     }
     if (outStrip) {
-        outStrip->getTimerEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
-        outStrip->getThresholdEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+        outStrip->getTimerEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
+        outStrip->getThresholdEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
     }
     if (cutLengthStrip) {
-        cutLengthStrip->getLengthEditor().setColour(juce::TextEditor::textColourId, Config::Colors::cutText);
+        cutLengthStrip->getLengthEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
     }
 
     sendLookAndFeelChange();
