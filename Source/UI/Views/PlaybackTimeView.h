@@ -36,9 +36,9 @@ class PlaybackTimeView final : public juce::Component {
         repaint();
     }
 
-    juce::TextEditor& getElapsedEditor() { return elapsedTimeEditor; }
-    juce::TextEditor& getRemainingEditor() { return remainingTimeEditor; }
-    juce::TextEditor& getTotalTimeEditor() { return totalTimeEditor; }
+    StyledTextEditor& getElapsedEditor() { return elapsedTimeEditor; }
+    StyledTextEditor& getRemainingEditor() { return remainingTimeEditor; }
+    StyledTextEditor& getTotalTimeEditor() { return totalTimeEditor; }
 
   private:
     StyledTextEditor elapsedTimeEditor;

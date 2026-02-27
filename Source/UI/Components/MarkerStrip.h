@@ -41,13 +41,13 @@ class MarkerStrip : public juce::Component {
     TransportButton &getMarkerButton() {
         return markerButton;
     }
-    juce::TextEditor &getTimerEditor() {
+    StyledTextEditor &getTimerEditor() {
         return timerEditor;
     }
     TransportButton &getResetButton() {
         return resetButton;
     }
-    juce::TextEditor &getThresholdEditor() {
+    StyledTextEditor &getThresholdEditor() {
         return thresholdEditor;
     }
     TransportButton &getAutoCutButton() {

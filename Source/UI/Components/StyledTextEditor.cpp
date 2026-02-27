@@ -3,6 +3,12 @@
 
 StyledTextEditor::StyledTextEditor() : juce::TextEditor(), justification(juce::Justification::centred) {}
 
+void StyledTextEditor::setCustomTextColor(juce::Colour newColor) {
+    customTextColor = newColor;
+    lastText.clear(); // Force layout rebuild
+    repaint();
+}
+
 void StyledTextEditor::applyStandardStyle(juce::Justification j) {
     setReadOnly(false);
     setJustification(j);
@@ -25,33 +31,25 @@ void StyledTextEditor::paint(juce::Graphics& g) {
     // 2. Draw Text
     auto text = getText();
     if (text.isNotEmpty()) {
-        juce::Colour textColor = juce::Colours::white;
-        if (getProperties().contains("CustomTextColor")) {
-            textColor = juce::Colour::fromString(getProperties()["CustomTextColor"].toString());
-        } else {
-            textColor = findColour(juce::TextEditor::textColourId);
+        if (text != lastText || customTextColor != lastColor || getWidth() != lastWidth) {
+            juce::AttributedString as;
+            as.setJustification(getJustification());
+            auto symbolColor = customTextColor.overlaidWith(juce::Colours::white.withAlpha(0.85f));
+            
+            for (int i = 0; i < text.length(); ++i) {
+                auto c = text[i];
+                bool isSymbol = (c == ':' || c == '+' || c == '-');
+                as.append(juce::String::charToString(c), getFont(), isSymbol ? symbolColor : customTextColor);
+            }
+            textLayout.createLayout(as, (float)getWidth());
+            lastText = text;
+            lastColor = customTextColor;
+            lastWidth = getWidth();
         }
 
-        // Make symbols very light version of the text color
-        auto symbolColor = textColor.overlaidWith(juce::Colours::white.withAlpha(0.85f));
-
-        juce::AttributedString as;
-        as.setJustification(getJustification());
-        
-        for (int i = 0; i < text.length(); ++i) {
-            auto c = text[i];
-            bool isSymbol = (c == ':' || c == '+' || c == '-');
-            as.append(juce::String::charToString(c), getFont(), isSymbol ? symbolColor : textColor);
-        }
-
-        juce::TextLayout layout;
-        layout.createLayout(as, (float)getWidth());
-        
-        // Center vertically in the component
-        auto textHeight = layout.getHeight();
+        auto textHeight = textLayout.getHeight();
         float yOffset = ((float)getHeight() - textHeight) / 2.0f;
-        
-        layout.draw(g, juce::Rectangle<float>(0.0f, yOffset, (float)getWidth(), textHeight));
+        textLayout.draw(g, juce::Rectangle<float>(0.0f, yOffset, (float)getWidth(), textHeight));
     }
 
     // 3. Draw Outline
@@ -60,18 +58,12 @@ void StyledTextEditor::paint(juce::Graphics& g) {
 
 void StyledTextEditor::focusGained(FocusChangeType cause) {
     juce::TextEditor::focusGained(cause);
-    
-    // Restore text colour when focused so default JUCE editing works
-    if (getProperties().contains("CustomTextColor")) {
-        auto textColor = juce::Colour::fromString(getProperties()["CustomTextColor"].toString());
-        setColour(juce::TextEditor::textColourId, textColor);
-    }
+    setColour(juce::TextEditor::textColourId, customTextColor);
     repaint();
 }
 
 void StyledTextEditor::focusLost(FocusChangeType cause) {
     juce::TextEditor::focusLost(cause);
-    
     // Make text transparent when not focused to avoid double-drawing with our custom paint()
     setColour(juce::TextEditor::textColourId, juce::Colours::transparentBlack);
     repaint();

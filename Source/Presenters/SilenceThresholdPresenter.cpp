@@ -38,9 +38,8 @@ void SilenceThresholdPresenter::textEditorTextChanged(juce::TextEditor &editor) 
         editor.setColour(juce::TextEditor::textColourId, Config::Colors::textEditorError);
     } else {
         // If it was error, restore it to custom color (when focused)
-        if (editor.getProperties().contains("CustomTextColor")) {
-             auto textColor = juce::Colour::fromString(editor.getProperties()["CustomTextColor"].toString());
-             editor.setColour(juce::TextEditor::textColourId, textColor);
+        if (auto* styledEditor = dynamic_cast<StyledTextEditor*>(&editor)) {
+            editor.setColour(juce::TextEditor::textColourId, styledEditor->getCustomTextColor());
         }
     }
 }

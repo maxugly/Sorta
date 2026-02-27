@@ -145,24 +145,24 @@ void ControlPanel::refreshThemeLive() {
     
     auto& stats = getPresenterCore().getStatsPresenter();
     stats.getDisplay().setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
-    stats.getDisplay().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
+    stats.getDisplay().setColour(juce::TextEditor::textColourId, Config::Colors::statsText);
     stats.updateStats();
 
     if (playbackTimeView) {
-        playbackTimeView->getElapsedEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
-        playbackTimeView->getRemainingEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
-        playbackTimeView->getTotalTimeEditor().getProperties().set("CustomTextColor", Config::Colors::totalTimeText.toString());
+        playbackTimeView->getElapsedEditor().setCustomTextColor(Config::Colors::cutText);
+        playbackTimeView->getRemainingEditor().setCustomTextColor(Config::Colors::cutText);
+        playbackTimeView->getTotalTimeEditor().setCustomTextColor(Config::Colors::totalTimeText);
     }
     if (inStrip) {
-        inStrip->getTimerEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
-        inStrip->getThresholdEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
+        inStrip->getTimerEditor().setCustomTextColor(Config::Colors::cutText);
+        inStrip->getThresholdEditor().setCustomTextColor(Config::Colors::cutText);
     }
     if (outStrip) {
-        outStrip->getTimerEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
-        outStrip->getThresholdEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
+        outStrip->getTimerEditor().setCustomTextColor(Config::Colors::cutText);
+        outStrip->getThresholdEditor().setCustomTextColor(Config::Colors::cutText);
     }
     if (cutLengthStrip) {
-        cutLengthStrip->getLengthEditor().getProperties().set("CustomTextColor", Config::Colors::cutText.toString());
+        cutLengthStrip->getLengthEditor().setCustomTextColor(Config::Colors::cutText);
     }
 
     sendLookAndFeelChange();

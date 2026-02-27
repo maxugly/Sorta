@@ -9,7 +9,7 @@ public:
     CutLengthStrip();
     void paint(juce::Graphics& g) override;
     void resized() override;
-    juce::TextEditor& getLengthEditor() { return lengthEditor; }
+    StyledTextEditor& getLengthEditor() { return lengthEditor; }
     TransportButton& getLockButton() { return lockButton; }
 private:
     StyledTextEditor lengthEditor;
