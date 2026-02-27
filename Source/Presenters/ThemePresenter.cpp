@@ -26,7 +26,16 @@ void ThemePresenter::scanThemes() {
         for (const auto& file : themeFiles) {
             tbv->themeSelector.addItem(file.getFileNameWithoutExtension(), id++);
         }
-        tbv->themeSelector.setText("Select Theme...", juce::dontSendNotification);
+        
+        bool found = false;
+        for (int i = 0; i < tbv->themeSelector.getNumItems(); ++i) {
+            if (themeFiles[i].getFileName() == Config::Advanced::currentTheme) {
+                tbv->themeSelector.setSelectedItemIndex(i, juce::dontSendNotification);
+                found = true;
+                break;
+            }
+        }
+        if (!found) tbv->themeSelector.setText("Select Theme...", juce::dontSendNotification);
     }
 }
 
@@ -36,6 +45,7 @@ void ThemePresenter::comboBoxChanged(juce::ComboBox* comboBox) {
             int index = comboBox->getSelectedItemIndex();
             if (index >= 0 && index < themeFiles.size()) {
                 Config::loadTheme(themeFiles[index]);
+                Config::saveCurrentTheme(themeFiles[index].getFileName());
                 owner.refreshThemeLive();
             }
         }

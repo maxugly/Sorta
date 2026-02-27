@@ -357,6 +357,7 @@ void initializeConfigs() {
         setInt("fpsOverlayX", Advanced::fpsOverlayX);
         setInt("fpsOverlayY", Advanced::fpsOverlayY);
         setStr("fpsOverlayPosition", Advanced::fpsOverlayPosition);
+        setStr("currentTheme", Advanced::currentTheme);
     };
 
     // --- Helper: Auto-Generation ---
@@ -366,6 +367,7 @@ void initializeConfigs() {
         obj->setProperty("windowHeight", Layout::Window::height);
         obj->setProperty("buttonHeight", Layout::buttonHeight);
         obj->setProperty("buttonWidth", Layout::buttonWidth);
+        obj->setProperty("currentTheme", Advanced::currentTheme);
         settingsFile.replaceWithText(juce::JSON::toString(obj.get(), false));
     }
 
@@ -448,7 +450,7 @@ void initializeConfigs() {
     }
 
     parseFile(settingsFile);
-    loadTheme(themeFile);
+    loadTheme(themesDir.getChildFile(Advanced::currentTheme));
     parseFile(languageFile);
     parseFile(advancedFile);
 }
@@ -457,5 +459,30 @@ bool Advanced::showFpsOverlay = true;
 int Advanced::fpsOverlayX = 10;
 int Advanced::fpsOverlayY = 10;
 juce::String Advanced::fpsOverlayPosition = "topC";
+juce::String Advanced::currentTheme = "default.conf";
+
+void saveCurrentTheme(const juce::String& themeName) {
+    Advanced::currentTheme = themeName;
+    auto settingsFile = juce::File::getSpecialLocation(juce::File::userHomeDirectory).getChildFile(".config/audiofiler/settings.conf");
+    
+    juce::DynamicObject::Ptr obj;
+    if (settingsFile.existsAsFile()) {
+        auto parsedJson = juce::JSON::parse(settingsFile);
+        if (parsedJson.isObject()) {
+            obj = parsedJson.getDynamicObject();
+        }
+    }
+
+    if (obj == nullptr) {
+        obj = new juce::DynamicObject();
+        obj->setProperty("windowWidth", Layout::Window::width);
+        obj->setProperty("windowHeight", Layout::Window::height);
+        obj->setProperty("buttonHeight", Layout::buttonHeight);
+        obj->setProperty("buttonWidth", Layout::buttonWidth);
+    }
+    
+    obj->setProperty("currentTheme", themeName);
+    settingsFile.replaceWithText(juce::JSON::toString(obj.get(), false));
+}
 
 } // namespace Config

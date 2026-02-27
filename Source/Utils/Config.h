@@ -20,6 +20,7 @@ namespace Config {
 
 void initializeConfigs();
 void loadTheme(const juce::File& themeFile);
+void saveCurrentTheme(const juce::String& themeName);
 
 namespace UI {
 /** @brief The base thickness of the button border. */
@@ -253,6 +254,7 @@ extern bool showFpsOverlay;
 extern int fpsOverlayX;
 extern int fpsOverlayY;
 extern juce::String fpsOverlayPosition;
+extern juce::String currentTheme;
 } // namespace Advanced
 
 namespace Labels {

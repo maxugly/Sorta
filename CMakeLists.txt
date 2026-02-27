@@ -222,6 +222,7 @@ add_executable(tests
     Source/Core/SilenceAnalysisWorker.cpp
     Source/Workers/SilenceDetectionLogger.cpp
     Tests/SilenceAnalysisTest.cpp
+    Tests/ConfigPersistenceTest.cpp
 )
 
 target_include_directories(tests PRIVATE Source)
