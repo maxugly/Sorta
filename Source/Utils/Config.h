@@ -60,6 +60,7 @@ struct Button {
     static juce::Colour disabledBackground;
     static juce::Colour disabledText;
     static juce::Colour exit;
+    static juce::Colour exitText;
     static juce::Colour clear;
     static juce::Colour cutPlacement;
     static juce::Colour cutActive;

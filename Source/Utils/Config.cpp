@@ -18,7 +18,8 @@ juce::Colour Button::text{0xFF34FA11};
 juce::Colour Button::outline{0xff808080};
 juce::Colour Button::disabledBackground{0xff2a2a2a};
 juce::Colour Button::disabledText{0xff4a4a4a};
-juce::Colour Button::exit{juce::Colours::white};
+juce::Colour Button::exit{juce::Colours::red};
+juce::Colour Button::exitText{juce::Colours::white};
 juce::Colour Button::clear{juce::Colours::red};
 juce::Colour Button::cutPlacement{0xffff1493};
 juce::Colour Button::cutActive = juce::Colours::black; 
@@ -188,7 +189,6 @@ void loadTheme(const juce::File& themeFile) {
         Colors::fpsBackground = darker;
 
         // Map the MS Paint inversion to Warnings/Exits
-        Colors::Button::exit = inverted;
         Colors::Button::clear = inverted;
         Colors::textEditorError = inverted;
         Colors::statsErrorText = inverted;
@@ -261,7 +261,6 @@ void loadTheme(const juce::File& themeFile) {
     setCol("buttonOutlineHex", Colors::Button::outline);
     setCol("buttonDisabledBackgroundHex", Colors::Button::disabledBackground);
     setCol("buttonDisabledTextHex", Colors::Button::disabledText);
-    setCol("buttonExitHex", Colors::Button::exit);
     setCol("buttonClearHex", Colors::Button::clear);
     setCol("buttonCutPlacementHex", Colors::Button::cutPlacement);
     setCol("buttonCutActiveHex", Colors::Button::cutActive);

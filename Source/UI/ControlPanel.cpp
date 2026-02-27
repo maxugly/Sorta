@@ -166,8 +166,8 @@ void ControlPanel::refreshThemeLive() {
     }
 
     if (topBarView) {
-        topBarView->exitButton.setColour(juce::TextButton::textColourOffId, Config::Colors::Button::exit);
-        topBarView->exitButton.setColour(juce::TextButton::textColourOnId, Config::Colors::Button::exit);
+        topBarView->exitButton.setColour(juce::TextButton::textColourOffId, Config::Colors::Button::exitText);
+        topBarView->exitButton.setColour(juce::TextButton::textColourOnId, Config::Colors::Button::exitText);
     }
 
     sendLookAndFeelChange();
