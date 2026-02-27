@@ -165,6 +165,11 @@ void ControlPanel::refreshThemeLive() {
         cutLengthStrip->getLengthEditor().setCustomTextColor(Config::Colors::cutText);
     }
 
+    if (topBarView) {
+        topBarView->exitButton.setColour(juce::TextButton::textColourOffId, Config::Colors::Button::exit);
+        topBarView->exitButton.setColour(juce::TextButton::textColourOnId, Config::Colors::Button::exit);
+    }
+
     sendLookAndFeelChange();
     repaint();
 }
