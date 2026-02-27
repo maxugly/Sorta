@@ -45,15 +45,15 @@ void ZoomView::drawMouseCursor(juce::Graphics& g) {
     g.setColour(Config::Colors::playbackText);
     g.setFont(Config::Layout::Text::mouseCursorSize);
     g.drawText(state.amplitudeText, localMouseX + Config::Layout::Glow::mouseTextOffset,
-               (int)amplitudeY - Config::Layout::Text::mouseCursorSize, 100,
+               (int)amplitudeY - Config::Layout::Text::mouseCursorSize, 200,
                Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
     g.drawText(state.negAmplitudeText, localMouseX + Config::Layout::Glow::mouseTextOffset,
-               (int)bottomAmplitudeY, 100, Config::Layout::Text::mouseCursorSize,
+               (int)bottomAmplitudeY, 200, Config::Layout::Text::mouseCursorSize,
                juce::Justification::left, true);
 
     const juce::String timeText = state.mouseTimeText;
     g.drawText(timeText, localMouseX + Config::Layout::Glow::mouseTextOffset,
-               localMouseY + Config::Layout::Glow::mouseTextOffset, 100,
+               localMouseY + Config::Layout::Glow::mouseTextOffset, 200,
                Config::Layout::Text::mouseCursorSize, juce::Justification::left, true);
 
     g.setColour(state.cursorLineColor);
