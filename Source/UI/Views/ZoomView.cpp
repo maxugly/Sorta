@@ -28,42 +28,9 @@ void ZoomView::drawMouseCursor(juce::Graphics& g) {
     const int localMouseX = state.mouseX;
     const int localMouseY = state.mouseY;
 
-    if (state.placementMode == AppEnums::PlacementMode::CutIn ||
-        state.placementMode == AppEnums::PlacementMode::CutOut) {
-        
-        g.setColour(state.cursorGlowColor);
-        g.fillRect(localMouseX -
-                       (int)(state.cursorGlowThickness * Config::Layout::Glow::offsetFactor) - 1,
-                   waveformBounds.getY(),
-                   (int)state.cursorGlowThickness + Config::Layout::Glow::mousePadding,
-                   waveformBounds.getHeight());
-        g.fillRect(waveformBounds.getX(),
-                   localMouseY -
-                       (int)(state.cursorGlowThickness * Config::Layout::Glow::offsetFactor) - 1,
-                   waveformBounds.getWidth(),
-                   (int)state.cursorGlowThickness + Config::Layout::Glow::mousePadding);
-    }
-
-    g.setColour(state.cursorHighlightColor);
-    g.fillRect(localMouseX - Config::Layout::Glow::mouseHighlightOffset, waveformBounds.getY(),
-               Config::Layout::Glow::mouseHighlightSize, waveformBounds.getHeight());
-    g.fillRect(waveformBounds.getX(), localMouseY - Config::Layout::Glow::mouseHighlightOffset,
-               waveformBounds.getWidth(), Config::Layout::Glow::mouseHighlightSize);
-
     const float centerY = (float)waveformBounds.getCentreY();
     const float amplitudeY = state.amplitudeY;
     const float bottomAmplitudeY = state.bottomAmplitudeY;
-
-    // Replaced the transparent gradient with a solid color fill
-    g.setColour(state.cursorGlowColor);
-    g.fillRect(juce::Rectangle<float>(
-        (float)localMouseX - Config::Layout::Glow::mouseAmplitudeGlowThickness *
-                                 Config::Layout::Glow::offsetFactor,
-        amplitudeY, Config::Layout::Glow::mouseAmplitudeGlowThickness, centerY - amplitudeY));
-    g.fillRect(juce::Rectangle<float>(
-        (float)localMouseX - Config::Layout::Glow::mouseAmplitudeGlowThickness *
-                                 Config::Layout::Glow::offsetFactor,
-        centerY, Config::Layout::Glow::mouseAmplitudeGlowThickness, centerY - amplitudeY));
 
     g.setColour(Config::Colors::mouseAmplitudeLine);
     g.drawVerticalLine(localMouseX, amplitudeY, bottomAmplitudeY);
@@ -101,36 +68,39 @@ void ZoomView::drawZoomPopup(juce::Graphics& g) {
     const double startTime = state.startTime;
     const double endTime = state.endTime;
 
-    g.setColour(Config::Colors::solidBlack);
-    g.fillRect(popupBounds);
+    if (isCacheDirty || waveformCache.isNull() || 
+        waveformCache.getWidth() != popupBounds.getWidth() || 
+        waveformCache.getHeight() != popupBounds.getHeight()) 
+    {
+        waveformCache = juce::Image(juce::Image::ARGB, popupBounds.getWidth(), popupBounds.getHeight(), true);
+        juce::Graphics imgG(waveformCache);
 
-    juce::ColourGradient gradient(Config::Colors::waveformPeak, (float)popupBounds.getX(), (float)popupBounds.getY(),
-                                  Config::Colors::waveformPeak, (float)popupBounds.getX(), (float)popupBounds.getBottom(), false);
-    gradient.addColour(0.5, Config::Colors::waveformCore);
-    g.setGradientFill(gradient);
-    
-    if (state.channelMode == AppEnums::ChannelViewMode::Mono || state.numChannels == 1) {
-        state.thumbnail->drawChannel(g, popupBounds, startTime,
-                                                                    endTime, 0, 1.0f);
-        g.setColour(Config::Colors::zoomPopupZeroLine);
-        g.drawHorizontalLine(popupBounds.getCentreY(), (float)popupBounds.getX(),
-                             (float)popupBounds.getRight());
-    } else {
-        auto topBounds = popupBounds.withHeight(popupBounds.getHeight() / 2);
-        auto bottomBounds =
-            popupBounds.withTop(topBounds.getBottom()).withHeight(popupBounds.getHeight() / 2);
+        imgG.setColour(Config::Colors::solidBlack);
+        imgG.fillAll();
 
-        state.thumbnail->drawChannel(g, topBounds, startTime,
-                                                                    endTime, 0, 1.0f);
-        state.thumbnail->drawChannel(g, bottomBounds, startTime,
-                                                                    endTime, 1, 1.0f);
+        juce::ColourGradient gradient(Config::Colors::waveformPeak, 0, 0,
+                                      Config::Colors::waveformPeak, 0, (float)popupBounds.getHeight(), false);
+        gradient.addColour(0.5, Config::Colors::waveformCore);
+        imgG.setGradientFill(gradient);
 
-        g.setColour(Config::Colors::zoomPopupZeroLine);
-        g.drawHorizontalLine(topBounds.getCentreY(), (float)topBounds.getX(),
-                             (float)topBounds.getRight());
-        g.drawHorizontalLine(bottomBounds.getCentreY(), (float)bottomBounds.getX(),
-                             (float)bottomBounds.getRight());
+        auto localBounds = waveformCache.getBounds();
+        if (state.channelMode == AppEnums::ChannelViewMode::Mono || state.numChannels == 1) {
+            state.thumbnail->drawChannel(imgG, localBounds, startTime, endTime, 0, 1.0f);
+            imgG.setColour(Config::Colors::zoomPopupZeroLine);
+            imgG.drawHorizontalLine(localBounds.getCentreY(), 0.0f, (float)localBounds.getWidth());
+        } else {
+            auto topBounds = localBounds.withHeight(localBounds.getHeight() / 2);
+            auto bottomBounds = localBounds.withTop(topBounds.getBottom()).withHeight(localBounds.getHeight() / 2);
+            state.thumbnail->drawChannel(imgG, topBounds, startTime, endTime, 0, 1.0f);
+            state.thumbnail->drawChannel(imgG, bottomBounds, startTime, endTime, 1, 1.0f);
+            imgG.setColour(Config::Colors::zoomPopupZeroLine);
+            imgG.drawHorizontalLine(topBounds.getCentreY(), 0.0f, (float)topBounds.getWidth());
+            imgG.drawHorizontalLine(bottomBounds.getCentreY(), 0.0f, (float)bottomBounds.getWidth());
+        }
+        isCacheDirty = false;
     }
+
+    g.drawImageAt(waveformCache, popupBounds.getX(), popupBounds.getY());
 
     auto drawShadow = [&](float x1, float x2, juce::Colour color) {
         if (x1 >= x2) return;

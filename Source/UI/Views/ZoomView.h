@@ -68,7 +68,19 @@ class ZoomView : public juce::Component {
             state.isZKeyDown != newState.isZKeyDown ||
             state.placementMode != newState.placementMode ||
             state.audioLength != newState.audioLength ||
-            state.channelMode != newState.channelMode) {
+            state.channelMode != newState.channelMode ||
+            state.startTime != newState.startTime ||
+            state.endTime != newState.endTime ||
+            state.popupBounds != newState.popupBounds) {
+            
+            if (state.startTime != newState.startTime || 
+                state.endTime != newState.endTime || 
+                state.popupBounds != newState.popupBounds ||
+                state.channelMode != newState.channelMode) 
+            {
+                isCacheDirty = true;
+            }
+
             state = newState;
             repaint(); 
             return;
@@ -108,6 +120,8 @@ class ZoomView : public juce::Component {
 
     ControlPanel &owner;
     ZoomViewState state;
+    juce::Image waveformCache;
+    bool isCacheDirty{true};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ZoomView)
 };

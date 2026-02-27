@@ -105,25 +105,8 @@ void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {
 
     auto drawCutMarker = [&](float x, juce::Colour markerColor, float thickness, bool shouldPulse) {
         juce::ignoreUnused(shouldPulse);
-        const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
-        const float halfBoxWidth = boxWidth / 2.0f;
-        const float pillarHeight = (float)bounds.getHeight() * 0.15f;
-
-        // Top/Bottom Boxes
         g.setColour(markerColor);
-        g.drawRect(x - halfBoxWidth, (float)bounds.getY(), boxWidth, boxHeight, thickness);
-        g.drawRect(x - halfBoxWidth, (float)bounds.getBottom() - boxHeight, boxWidth, boxHeight,
-                   thickness);
-
-        // Precision Pillars (Thick segments at top and bottom)
-        g.fillRect(x - thickness * 0.5f, (float)bounds.getY() + boxHeight, thickness, pillarHeight);
-        g.fillRect(x - thickness * 0.5f, (float)bounds.getBottom() - boxHeight - pillarHeight, thickness, pillarHeight);
-
-        // Thin Center Line (Precision)
-        g.fillRect(x - Config::Layout::Glow::cutMarkerWidthThin * 0.5f,
-                   (float)bounds.getY() + boxHeight + pillarHeight, 
-                   Config::Layout::Glow::cutMarkerWidthThin,
-                   (float)bounds.getHeight() - (2.0f * (boxHeight + pillarHeight)));
+        g.fillRect(x - (thickness * 0.5f), (float)bounds.getY(), thickness, (float)bounds.getHeight());
     };
 
     drawCutMarker(state.inPixelX, state.inMarkerColor, state.inMarkerThickness, state.inMarkerShouldPulse);

@@ -25,6 +25,7 @@ class PlaybackCursorView : public juce::Component, public PlaybackTimerManager::
   private:
     ControlPanel &owner;
     int lastCursorX = -1;
+    float cachedX = 0.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaybackCursorView)
 };

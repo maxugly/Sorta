@@ -4,7 +4,6 @@
 #include "Core/AudioPlayer.h"
 #include "Core/WaveformManager.h"
 #include "UI/ControlPanel.h"
-#include "UI/Views/PlaybackCursorGlow.h"
 #include "Utils/Config.h"
 #include "Utils/CoordinateMapper.h"
 
@@ -25,10 +24,11 @@ void PlaybackCursorView::playbackTimerTick() {
         const auto &layout = owner.getWaveformBounds();
         const float x = CoordinateMapper::secondsToPixels(audioPlayer.getCurrentPosition(),
                                                           (float)layout.getWidth(), audioLength);
+        cachedX = x;
         const int currentX = juce::roundToInt(x);
 
         if (currentX != lastCursorX) {
-            const int glowWidth = juce::roundToInt(Config::Layout::Glow::thickness) + 1;
+            const int glowWidth = 2;
             if (lastCursorX >= 0)
                 repaint(lastCursorX - glowWidth, 0, glowWidth * 2, getHeight());
 
@@ -53,17 +53,10 @@ void PlaybackCursorView::playbackTimerTick() {
 }
 
 void PlaybackCursorView::paint(juce::Graphics &g) {
-    auto &audioPlayer = owner.getAudioPlayer();
-    const double audioLength = audioPlayer.getWaveformManager().getThumbnail().getTotalLength();
-    if (audioLength <= 0.0)
+    if (owner.getAudioPlayer().getWaveformManager().getThumbnail().getTotalLength() <= 0.0)
         return;
 
-    const auto waveformBounds = getLocalBounds();
-    const double drawPosition = audioPlayer.getCurrentPosition();
-    const float x = CoordinateMapper::secondsToPixels(
-        drawPosition, (float)waveformBounds.getWidth(), audioLength);
-
     const juce::Colour cursorColor = Config::Colors::playbackCursor;
-
-    PlaybackCursorGlow::renderGlow(g, juce::roundToInt(x), 0, getHeight(), cursorColor);
+    g.setColour(cursorColor);
+    g.drawVerticalLine(juce::roundToInt(cachedX), 0.0f, (float)getHeight());
 }
