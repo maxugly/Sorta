@@ -63,6 +63,7 @@ juce::Colour Colors::ZoomHud::textInactive = juce::Colours::lightgrey;
 juce::Colour volumeKnobFill = juce::Colours::orange;
 juce::Colour volumeKnobTrack = juce::Colours::darkgrey;
 juce::Colour volumeKnobPointer = juce::Colours::white;
+juce::Colour quaternary = juce::Colours::white;
 
 juce::Colour Colors::VolumeFlame::low = juce::Colours::red;
 juce::Colour Colors::VolumeFlame::mid = juce::Colours::orange;
@@ -289,14 +290,15 @@ void loadTheme(const juce::File& themeFile) {
     }
 
     if (obj->hasProperty("quaternaryColorHex")) {
-        auto quaternary = juce::Colour::fromString(obj->getProperty("quaternaryColorHex").toString());
-        Colors::cutText = quaternary;
-        Colors::playbackText = quaternary;
-        Colors::totalTimeText = quaternary.darker(0.4f);
-        Colors::HintVox::text = quaternary.brighter(0.2f);
-        Colors::cutLine = quaternary;
-        Colors::cutMarkerAuto = quaternary;
-        Colors::thresholdLine = quaternary;
+        auto qColor = juce::Colour::fromString(obj->getProperty("quaternaryColorHex").toString());
+        Colors::quaternary = qColor;
+        Colors::cutText = qColor;
+        Colors::playbackText = qColor;
+        Colors::totalTimeText = qColor.darker(0.4f);
+        Colors::HintVox::text = qColor.brighter(0.2f);
+        Colors::cutLine = qColor;
+        Colors::cutMarkerAuto = qColor;
+        Colors::thresholdLine = qColor;
     }
     // -----------------------------
 #endif

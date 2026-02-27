@@ -56,7 +56,22 @@ void PlaybackCursorView::paint(juce::Graphics &g) {
     if (owner.getAudioPlayer().getWaveformManager().getThumbnail().getTotalLength() <= 0.0)
         return;
 
-    const juce::Colour cursorColor = Config::Colors::playbackCursor;
+    const auto qColor = Config::Colors::quaternary;
+    const juce::Colour cursorColor = juce::Colour((juce::uint8)(255 - qColor.getRed()),
+                                                  (juce::uint8)(255 - qColor.getGreen()),
+                                                  (juce::uint8)(255 - qColor.getBlue()));
+    
+    const int x = juce::roundToInt(cachedX);
+    const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;
+    const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
+    const float halfBoxWidth = boxWidth / 2.0f;
+
+    // Green Top/Bottom Squares
+    g.setColour(juce::Colours::lime);
+    g.fillRect((float)x - halfBoxWidth, 0.0f, boxWidth, boxHeight);
+    g.fillRect((float)x - halfBoxWidth, (float)getHeight() - boxHeight, boxWidth, boxHeight);
+
+    // Inverted Quaternary Center Line
     g.setColour(cursorColor);
-    g.drawVerticalLine(juce::roundToInt(cachedX), 0.0f, (float)getHeight());
+    g.drawVerticalLine(x, boxHeight, (float)getHeight() - boxHeight);
 }

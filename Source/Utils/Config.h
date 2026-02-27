@@ -98,6 +98,7 @@ extern juce::Colour zoomPopupZeroLine;
 extern juce::Colour volumeKnobFill;
 extern juce::Colour volumeKnobTrack;
 extern juce::Colour volumeKnobPointer;
+extern juce::Colour quaternary;
 
 struct ZoomHud {
     static juce::Colour background;
