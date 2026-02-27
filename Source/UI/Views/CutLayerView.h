@@ -36,6 +36,9 @@ struct CutLayerState {
     float outMarkerThickness{0.0f};
     bool outMarkerShouldPulse{false};
 
+    juce::Colour inThresholdColor;
+    juce::Colour outThresholdColor;
+
     juce::Colour regionOutlineColor;
     float regionOutlineThickness{0.0f};
     bool regionShouldPulse{false};

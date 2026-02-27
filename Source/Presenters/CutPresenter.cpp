@@ -41,6 +41,12 @@ void CutPresenter::playbackTimerTick() {
 }
 
 void CutPresenter::updateAnimationState(CutLayerState& state) {
+    auto invertCol = [](juce::Colour c) {
+        return juce::Colour((juce::uint8)(255 - c.getRed()),
+                            (juce::uint8)(255 - c.getGreen()),
+                            (juce::uint8)(255 - c.getBlue()));
+    };
+
     // Also update marker interaction states high-frequency
     auto calcMarkerProps = [&](MarkerMouseHandler::CutMarkerHandle handle, bool isAuto) {
         juce::Colour color = isAuto ? Config::Colors::cutMarkerAuto : Config::Colors::cutLine;
@@ -50,45 +56,50 @@ void CutPresenter::updateAnimationState(CutLayerState& state) {
         const auto dragged = markerMouseHandler->getDraggedHandle();
         const auto hovered = markerMouseHandler->getHoveredHandle();
 
-        // Exact same logic as buttons: you are either being dragged (Down) or hovered (Over).
-        // If we are dragging something, ONLY that thing gets the drag color.
-        // If we are not dragging, ONLY the thing being hovered gets the hover color.
-        
         if (dragged != MarkerMouseHandler::CutMarkerHandle::None) {
             if (dragged == handle) {
-                color = Config::Colors::cutMarkerDrag;
+                color = invertCol(color);
                 thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
             }
         } else if (hovered == handle) {
-            color = Config::Colors::cutMarkerHover;
+            color = invertCol(color);
             thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
         }
 
         return std::make_tuple(color, thickness, pulse);
     };
 
+    const auto draggedHandle = markerMouseHandler->getDraggedHandle();
+    const auto hoveredHandle = markerMouseHandler->getHoveredHandle();
+
     auto inProps = calcMarkerProps(MarkerMouseHandler::CutMarkerHandle::In, sessionState.getCutPrefs().autoCut.inActive);
     state.inMarkerColor = std::get<0>(inProps);
     state.inMarkerThickness = std::get<1>(inProps);
     state.inMarkerShouldPulse = std::get<2>(inProps);
+    
+    // Threshold lines follow the same inversion logic as markers
+    state.inThresholdColor = Config::Colors::thresholdLine;
+    if (hoveredHandle == MarkerMouseHandler::CutMarkerHandle::In || draggedHandle == MarkerMouseHandler::CutMarkerHandle::In)
+        state.inThresholdColor = invertCol(state.inThresholdColor);
 
     auto outProps = calcMarkerProps(MarkerMouseHandler::CutMarkerHandle::Out, sessionState.getCutPrefs().autoCut.outActive);
     state.outMarkerColor = std::get<0>(outProps);
     state.outMarkerThickness = std::get<1>(outProps);
     state.outMarkerShouldPulse = std::get<2>(outProps);
 
-    const auto dragged = markerMouseHandler->getDraggedHandle();
-    const auto hovered = markerMouseHandler->getHoveredHandle();
-    
+    state.outThresholdColor = Config::Colors::thresholdLine;
+    if (hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Out || draggedHandle == MarkerMouseHandler::CutMarkerHandle::Out)
+        state.outThresholdColor = invertCol(state.outThresholdColor);
+
     state.regionOutlineColor = Config::Colors::cutLine;
     state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThickness;
     state.regionShouldPulse = false;
 
-    if (dragged == MarkerMouseHandler::CutMarkerHandle::Full) {
-        state.regionOutlineColor = Config::Colors::cutMarkerDrag;
+    if (draggedHandle == MarkerMouseHandler::CutMarkerHandle::Full) {
+        state.regionOutlineColor = invertCol(state.regionOutlineColor);
         state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
-    } else if (dragged == MarkerMouseHandler::CutMarkerHandle::None && hovered == MarkerMouseHandler::CutMarkerHandle::Full) {
-        state.regionOutlineColor = Config::Colors::cutMarkerHover;
+    } else if (draggedHandle == MarkerMouseHandler::CutMarkerHandle::None && hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Full) {
+        state.regionOutlineColor = invertCol(state.regionOutlineColor);
         state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
     }
 

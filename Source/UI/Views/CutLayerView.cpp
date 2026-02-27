@@ -64,7 +64,7 @@ void CutLayerView::paint(juce::Graphics &g) {
 
 void CutLayerView::drawThresholds(juce::Graphics& g) {
     const auto bounds = getLocalBounds();
-    auto drawThresholdVisualisation = [&](float xPos, float topThresholdY, float bottomThresholdY) {
+    auto drawThresholdVisualisation = [&](float xPos, float topThresholdY, float bottomThresholdY, juce::Colour color) {
         const float halfThresholdLineWidth = Config::Animation::thresholdLineWidth / 2.0f;
         float lineStartX = xPos - halfThresholdLineWidth;
         float lineEndX = xPos + halfThresholdLineWidth;
@@ -72,13 +72,13 @@ void CutLayerView::drawThresholds(juce::Graphics& g) {
         lineStartX = juce::jmax(lineStartX, (float)bounds.getX());
         lineEndX = juce::jmin(lineEndX, (float)bounds.getRight());
 
-        g.setColour(Config::Colors::thresholdLine);
+        g.setColour(color);
         g.drawHorizontalLine((int)topThresholdY, lineStartX, lineEndX);
         g.drawHorizontalLine((int)bottomThresholdY, lineStartX, lineEndX);
     };
 
-    drawThresholdVisualisation(state.inPixelX, state.inThresholdYTop, state.inThresholdYBottom);
-    drawThresholdVisualisation(state.outPixelX, state.outThresholdYTop, state.outThresholdYBottom);
+    drawThresholdVisualisation(state.inPixelX, state.inThresholdYTop, state.inThresholdYBottom, state.inThresholdColor);
+    drawThresholdVisualisation(state.outPixelX, state.outThresholdYTop, state.outThresholdYBottom, state.outThresholdColor);
 }
 
 void CutLayerView::drawFadeRegions(juce::Graphics& g) {

@@ -280,6 +280,7 @@ void loadTheme(const juce::File& themeFile) {
         Colors::mouseAmplitudeLine = secondary;
         Colors::mouseAmplitudeGlow = secondary;
         Colors::zoomPopupPlaybackLine = secondary;
+        Colors::thresholdLine = secondary;
     }
 
     if (obj->hasProperty("tertiaryColorHex")) {
@@ -293,6 +294,9 @@ void loadTheme(const juce::File& themeFile) {
         Colors::playbackText = quaternary;
         Colors::totalTimeText = quaternary.darker(0.4f);
         Colors::HintVox::text = quaternary.brighter(0.2f);
+        Colors::cutLine = quaternary;
+        Colors::cutMarkerAuto = quaternary;
+        Colors::thresholdLine = quaternary;
     }
     // -----------------------------
 #endif
