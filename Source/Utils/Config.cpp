@@ -164,62 +164,6 @@ void loadTheme(const juce::File& themeFile) {
     };
 
 #if !defined(JUCE_HEADLESS)
-    setCol("windowBackgroundHex", Colors::Window::background);
-    setCol("waveformBackgroundHex", Colors::solidBlack);
-    setCol("waveformPeakHex", Colors::waveformPeak);
-    setCol("waveformCoreHex", Colors::waveformCore);
-    setCol("playbackCursorHex", Colors::playbackCursor);
-    setCol("cutRegionHex", Colors::cutRegion);
-    setCol("cutLineHex", Colors::cutLine);
-    setCol("cutMarkerAutoHex", Colors::cutMarkerAuto);
-    setCol("cutMarkerHoverHex", Colors::cutMarkerHover);
-    setCol("cutMarkerDragHex", Colors::cutMarkerDrag);
-    setCol("buttonBaseHex", Colors::Button::base);
-    setCol("buttonOnHex", Colors::Button::on);
-    setCol("buttonTextHex", Colors::Button::text);
-    setCol("buttonOutlineHex", Colors::Button::outline);
-    setCol("buttonDisabledBackgroundHex", Colors::Button::disabledBackground);
-    setCol("buttonDisabledTextHex", Colors::Button::disabledText);
-    setCol("buttonExitHex", Colors::Button::exit);
-    setCol("buttonClearHex", Colors::Button::clear);
-    setCol("buttonCutPlacementHex", Colors::Button::cutPlacement);
-    setCol("buttonCutActiveHex", Colors::Button::cutActive);
-    setCol("playbackTextHex", Colors::playbackText);
-    setCol("textEditorBackgroundHex", Colors::textEditorBackground);
-    setCol("textEditorErrorHex", Colors::textEditorError);
-    setCol("textEditorWarningHex", Colors::textEditorWarning);
-    setCol("textEditorOutOfRangeHex", Colors::textEditorOutOfRange);
-    setCol("fpsBackgroundHex", Colors::fpsBackground);
-    setCol("fpsTextHex", Colors::fpsText);
-    setCol("mouseCursorLineHex", Colors::mouseCursorLine);
-    setCol("mouseCursorHighlightHex", Colors::mouseCursorHighlight);
-    setCol("mouseAmplitudeLineHex", Colors::mouseAmplitudeLine);
-    setCol("mousePlacementModeHex", Colors::mousePlacementMode);
-    setCol("thresholdLineHex", Colors::thresholdLine);
-    setCol("thresholdRegionHex", Colors::thresholdRegion);
-    setCol("statsBackgroundHex", Colors::statsBackground);
-    setCol("statsTextHex", Colors::statsText);
-    setCol("statsErrorTextHex", Colors::statsErrorText);
-    setCol("mouseAmplitudeGlowHex", Colors::mouseAmplitudeGlow);
-    setCol("placementModeGlowHex", Colors::placementModeGlow);
-    setCol("zoomPopupBorderHex", Colors::zoomPopupBorder);
-    setCol("zoomPopupTrackingLineHex", Colors::zoomPopupTrackingLine);
-    setCol("zoomPopupPlaybackLineHex", Colors::zoomPopupPlaybackLine);
-    setCol("zoomPopupZeroLineHex", Colors::zoomPopupZeroLine);
-    setCol("zoomHudBackgroundHex", Colors::ZoomHud::background);
-    setCol("zoomHudTextActiveHex", Colors::ZoomHud::textActive);
-    setCol("zoomHudTextInactiveHex", Colors::ZoomHud::textInactive);
-    setCol("volumeKnobFillHex", Colors::volumeKnobFill);
-    setCol("volumeKnobTrackHex", Colors::volumeKnobTrack);
-    setCol("volumeKnobPointerHex", Colors::volumeKnobPointer);
-    setCol("volumeFlameLowHex", Colors::VolumeFlame::low);
-    setCol("volumeFlameMidHex", Colors::VolumeFlame::mid);
-    setCol("volumeFlameHighHex", Colors::VolumeFlame::high);
-    setCol("volumeFlamePeakHex", Colors::VolumeFlame::peak);
-    setCol("hintVoxTextHex", Colors::HintVox::text);
-    setCol("matrixLedActiveHex", Colors::Matrix::ledActive);
-    setCol("matrixLedInactiveHex", Colors::Matrix::ledInactive);
-
     // --- MACRO THEME GENERATOR ---
     if (obj->hasProperty("primaryColorHex")) {
         auto primary = juce::Colour::fromString(obj->getProperty("primaryColorHex").toString());
@@ -300,6 +244,62 @@ void loadTheme(const juce::File& themeFile) {
         Colors::cutMarkerAuto = qColor;
         Colors::thresholdLine = qColor;
     }
+
+    setCol("windowBackgroundHex", Colors::Window::background);
+    setCol("waveformBackgroundHex", Colors::solidBlack);
+    setCol("waveformPeakHex", Colors::waveformPeak);
+    setCol("waveformCoreHex", Colors::waveformCore);
+    setCol("playbackCursorHex", Colors::playbackCursor);
+    setCol("cutRegionHex", Colors::cutRegion);
+    setCol("cutLineHex", Colors::cutLine);
+    setCol("cutMarkerAutoHex", Colors::cutMarkerAuto);
+    setCol("cutMarkerHoverHex", Colors::cutMarkerHover);
+    setCol("cutMarkerDragHex", Colors::cutMarkerDrag);
+    setCol("buttonBaseHex", Colors::Button::base);
+    setCol("buttonOnHex", Colors::Button::on);
+    setCol("buttonTextHex", Colors::Button::text);
+    setCol("buttonOutlineHex", Colors::Button::outline);
+    setCol("buttonDisabledBackgroundHex", Colors::Button::disabledBackground);
+    setCol("buttonDisabledTextHex", Colors::Button::disabledText);
+    setCol("buttonExitHex", Colors::Button::exit);
+    setCol("buttonClearHex", Colors::Button::clear);
+    setCol("buttonCutPlacementHex", Colors::Button::cutPlacement);
+    setCol("buttonCutActiveHex", Colors::Button::cutActive);
+    setCol("playbackTextHex", Colors::playbackText);
+    setCol("textEditorBackgroundHex", Colors::textEditorBackground);
+    setCol("textEditorErrorHex", Colors::textEditorError);
+    setCol("textEditorWarningHex", Colors::textEditorWarning);
+    setCol("textEditorOutOfRangeHex", Colors::textEditorOutOfRange);
+    setCol("fpsBackgroundHex", Colors::fpsBackground);
+    setCol("fpsTextHex", Colors::fpsText);
+    setCol("mouseCursorLineHex", Colors::mouseCursorLine);
+    setCol("mouseCursorHighlightHex", Colors::mouseCursorHighlight);
+    setCol("mouseAmplitudeLineHex", Colors::mouseAmplitudeLine);
+    setCol("mousePlacementModeHex", Colors::mousePlacementMode);
+    setCol("thresholdLineHex", Colors::thresholdLine);
+    setCol("thresholdRegionHex", Colors::thresholdRegion);
+    setCol("statsBackgroundHex", Colors::statsBackground);
+    setCol("statsTextHex", Colors::statsText);
+    setCol("statsErrorTextHex", Colors::statsErrorText);
+    setCol("mouseAmplitudeGlowHex", Colors::mouseAmplitudeGlow);
+    setCol("placementModeGlowHex", Colors::placementModeGlow);
+    setCol("zoomPopupBorderHex", Colors::zoomPopupBorder);
+    setCol("zoomPopupTrackingLineHex", Colors::zoomPopupTrackingLine);
+    setCol("zoomPopupPlaybackLineHex", Colors::zoomPopupPlaybackLine);
+    setCol("zoomPopupZeroLineHex", Colors::zoomPopupZeroLine);
+    setCol("zoomHudBackgroundHex", Colors::ZoomHud::background);
+    setCol("zoomHudTextActiveHex", Colors::ZoomHud::textActive);
+    setCol("zoomHudTextInactiveHex", Colors::ZoomHud::textInactive);
+    setCol("volumeKnobFillHex", Colors::volumeKnobFill);
+    setCol("volumeKnobTrackHex", Colors::volumeKnobTrack);
+    setCol("volumeKnobPointerHex", Colors::volumeKnobPointer);
+    setCol("volumeFlameLowHex", Colors::VolumeFlame::low);
+    setCol("volumeFlameMidHex", Colors::VolumeFlame::mid);
+    setCol("volumeFlameHighHex", Colors::VolumeFlame::high);
+    setCol("volumeFlamePeakHex", Colors::VolumeFlame::peak);
+    setCol("hintVoxTextHex", Colors::HintVox::text);
+    setCol("matrixLedActiveHex", Colors::Matrix::ledActive);
+    setCol("matrixLedInactiveHex", Colors::Matrix::ledInactive);
     // -----------------------------
 #endif
 }
