@@ -9,132 +9,165 @@
 #endif
 
 /**
- * @ingroup State
+ * @file Config.h
+ * @ingroup Helpers
  * @namespace Config
- * @brief Global configuration constants and settings.
- * @details This namespace contains static configuration for colors, layout, animation,
- *          and audio settings. It provides a centralized place to tweak the application's
- *          look and feel and behavior.
+ * @brief The central configuration hub for the Audiofiler application.
+ * 
+ * @details Architecturally, the Config namespace acts as a "Static Parameter Store" that 
+ *          centralizes all magic numbers, color palettes, and layout constants. By 
+ *          removing these values from the logic and view classes, we achieve a 
+ *          clean separation between "how things work" and "how things look."
+ * 
+ *          The namespace is organized into sub-namespaces:
+ *          - **UI**: Geometric units and spacing constants.
+ *          - **Colors**: The global theme palette (Window, Button, Waveform, etc.).
+ *          - **Layout**: Dynamic and static sizing for windows and components.
+ *          - **Animation**: Constants driving transition speeds and highlight intensities.
+ *          - **Audio**: Fallback sample rates and buffer sizes.
+ *          - **Labels**: Internationalizable string constants.
+ * 
+ * @see ModernLookAndFeel
+ * @see SessionState
  */
 namespace Config {
 
+/**
+ * @brief Initializes all dynamic configuration values to their factory defaults.
+ * @details This must be called early in the application lifecycle, typically within 
+ *          `MainComponent`'s constructor.
+ */
 void initializeConfigs();
+
+/**
+ * @brief Loads a visual theme from an external JSON or binary file.
+ * @param themeFile The file handle to the theme definition.
+ */
 void loadTheme(const juce::File& themeFile);
+
+/**
+ * @brief Serializes the current color palette to a named theme file.
+ * @param themeName The identifier for the theme.
+ */
 void saveCurrentTheme(const juce::String& themeName);
 
+/** @brief UI-specific geometric constants. */
 namespace UI {
-/** @brief The base thickness of the button border. */
-inline constexpr float ButtonOutlineThickness = 2.0f;
-/** @brief Standard corner rounding for all buttons. */
-inline constexpr float ButtonCornerSize = 6.0f;
-/** @brief Width for Cut In/Out buttons in units. */
-inline constexpr float CutButtonWidthUnits = 2.5f;
-/** @brief Width for Time Editors (Timers) in units. (220px / 32.0) */
-inline constexpr float TimerWidthUnits = 6.875f;
-/** @brief Width for Reset buttons in units. */
-inline constexpr float ResetButtonWidthUnits = 1.5f;
-/** @brief Width for Threshold editors in units. */
-inline constexpr float ThresholdWidthUnits = 1.5f;
-/** @brief The base unit for widgets. */
-inline constexpr float WidgetUnit = 32.0f;
-/** @brief The standard height for widgets. */
-inline constexpr float WidgetHeight = WidgetUnit;
-/** @brief The spacing between grouped buttons. */
-inline constexpr float GroupSpacing = 1.0f;
+    /** @brief The base thickness of the button border. */
+    inline constexpr float ButtonOutlineThickness = 2.0f;
+    /** @brief Standard corner rounding for all buttons. */
+    inline constexpr float ButtonCornerSize = 6.0f;
+    /** @brief Width for Cut In/Out buttons in units. */
+    inline constexpr float CutButtonWidthUnits = 2.5f;
+    /** @brief Width for Time Editors (Timers) in units. (220px / 32.0) */
+    inline constexpr float TimerWidthUnits = 6.875f;
+    /** @brief Width for Reset buttons in units. */
+    inline constexpr float ResetButtonWidthUnits = 1.5f;
+    /** @brief Width for Threshold editors in units. */
+    inline constexpr float ThresholdWidthUnits = 1.5f;
+    /** @brief The base unit for widgets (all dimensions are multiples of this). */
+    inline constexpr float WidgetUnit = 32.0f;
+    /** @brief The standard height for widgets. */
+    inline constexpr float WidgetHeight = WidgetUnit;
+    /** @brief The spacing between grouped buttons. */
+    inline constexpr float GroupSpacing = 1.0f;
 } // namespace UI
 
+/** @brief Global color palette for the application. */
 namespace Colors {
-struct Window {
-    static juce::Colour background;
-};
+    struct Window {
+        static juce::Colour background; /**< Main application background. */
+    };
 
-extern juce::Colour transparentBlack;
-extern juce::Colour solidBlack;
-extern juce::Colour transparentWhite;
+    extern juce::Colour transparentBlack; /**< Helper for alpha-blended shadows. */
+    extern juce::Colour solidBlack;       /**< Absolute black. */
+    extern juce::Colour transparentWhite; /**< Helper for alpha-blended highlights. */
 
-struct Button {
-    static juce::Colour base;
-    static juce::Colour on;
-    static juce::Colour text;
-    static juce::Colour outline;
-    static juce::Colour disabledBackground;
-    static juce::Colour disabledText;
-    static juce::Colour exit;
-    static juce::Colour exitText;
-    static juce::Colour clear;
-    static juce::Colour cutPlacement;
-    static juce::Colour cutActive;
-};
-extern juce::Colour playbackText;
-extern juce::Colour cutText;
-extern juce::Colour totalTimeText;
-extern juce::Colour textEditorBackground;
-extern juce::Colour textEditorError;
-extern juce::Colour textEditorWarning;
-extern juce::Colour textEditorOutOfRange;
-extern juce::Colour waveformPeak;
-extern juce::Colour waveformCore;
-extern juce::Colour playbackCursor;
-extern juce::Colour cutRegion;
-extern juce::Colour cutLine;
-extern juce::Colour cutMarkerAuto;
-extern juce::Colour cutMarkerHover;
-extern juce::Colour cutMarkerDrag;
-extern juce::Colour fpsBackground;
-extern juce::Colour fpsText;
-extern juce::Colour mouseCursorLine;
-extern juce::Colour mouseCursorHighlight;
-extern juce::Colour mouseAmplitudeLine;
-extern juce::Colour mousePlacementMode;
-extern juce::Colour thresholdLine;
-extern juce::Colour thresholdRegion;
-extern juce::Colour statsBackground;
-extern juce::Colour statsText;
-extern juce::Colour statsErrorText;
-extern juce::Colour mouseAmplitudeGlow;
-extern juce::Colour placementModeGlow;
-extern juce::Colour zoomPopupBorder;
-extern juce::Colour zoomPopupTrackingLine;
-extern juce::Colour zoomPopupPlaybackLine;
-extern juce::Colour zoomPopupZeroLine;
-extern juce::Colour volumeKnobFill;
-extern juce::Colour volumeKnobTrack;
-extern juce::Colour volumeKnobPointer;
-extern juce::Colour quaternary;
+    struct Button {
+        static juce::Colour base;               /**< Default button fill. */
+        static juce::Colour on;                 /**< Active/Toggled button fill. */
+        static juce::Colour text;               /**< Label color. */
+        static juce::Colour outline;            /**< Border color. */
+        static juce::Colour disabledBackground; /**< Fill for inactive buttons. */
+        static juce::Colour disabledText;       /**< Label for inactive buttons. */
+        static juce::Colour exit;               /**< High-visibility exit button. */
+        static juce::Colour exitText;           /**< Exit button label. */
+        static juce::Colour clear;              /**< Secondary action color. */
+        static juce::Colour cutPlacement;       /**< Highlight for marker placement. */
+        static juce::Colour cutActive;          /**< State color for active cuts. */
+    };
 
-struct ZoomHud {
-    static juce::Colour background;
-    static juce::Colour textActive;
-    static juce::Colour textInactive;
-};
+    extern juce::Colour playbackText;        /**< Color for the primary playhead timer. */
+    extern juce::Colour cutText;             /**< Color for cut boundary timers. */
+    extern juce::Colour totalTimeText;       /**< Color for total duration labels. */
+    extern juce::Colour textEditorBackground; /**< Field fill for text inputs. */
+    extern juce::Colour textEditorError;     /**< Border/Background for invalid inputs. */
+    extern juce::Colour textEditorWarning;   /**< Border for near-limit inputs. */
+    extern juce::Colour textEditorOutOfRange; /**< Highlight for clipped values. */
+    extern juce::Colour waveformPeak;        /**< Outer peak color of the waveform. */
+    extern juce::Colour waveformCore;        /**< Inner core color of the waveform. */
+    extern juce::Colour playbackCursor;      /**< The primary playhead line. */
+    extern juce::Colour cutRegion;           /**< Shaded overlay for the cut zone. */
+    extern juce::Colour cutLine;             /**< Boundary marker line. */
+    extern juce::Colour cutMarkerAuto;       /**< Color for markers set by the auto-engine. */
+    extern juce::Colour cutMarkerHover;      /**< Highlight color when mouse is over a marker. */
+    extern juce::Colour cutMarkerDrag;       /**< Active color during marker manipulation. */
+    extern juce::Colour fpsBackground;       /**< FPS counter backdrop. */
+    extern juce::Colour fpsText;             /**< FPS counter digits. */
+    extern juce::Colour mouseCursorLine;     /**< Vertical guide following the mouse. */
+    extern juce::Colour mouseCursorHighlight; /**< Visual cue for the mouse position. */
+    extern juce::Colour mouseAmplitudeLine;  /**< Horizontal amplitude guide. */
+    extern juce::Colour mousePlacementMode;  /**< Visual cue for active placement state. */
+    extern juce::Colour thresholdLine;       /**< Silence threshold indicator. */
+    extern juce::Colour thresholdRegion;     /**< Shaded area for the silence zone. */
+    extern juce::Colour statsBackground;     /**< Backdrop for the metadata panel. */
+    extern juce::Colour statsText;           /**< Text in the metadata panel. */
+    extern juce::Colour statsErrorText;      /**< Error text in the metadata panel. */
+    extern juce::Colour mouseAmplitudeGlow;  /**< Bloom effect for amplitude guides. */
+    extern juce::Colour placementModeGlow;   /**< Bloom effect for placement guides. */
+    extern juce::Colour zoomPopupBorder;     /**< Outline for the zoom preview window. */
+    extern juce::Colour zoomPopupTrackingLine; /**< Guide line in the zoom preview. */
+    extern juce::Colour zoomPopupPlaybackLine; /**< Playhead line in the zoom preview. */
+    extern juce::Colour zoomPopupZeroLine;    /**< Center line in the zoom preview. */
+    extern juce::Colour volumeKnobFill;      /**< Active track of the volume dial. */
+    extern juce::Colour volumeKnobTrack;     /**< Inactive track of the volume dial. */
+    extern juce::Colour volumeKnobPointer;   /**< Needle color for the volume dial. */
+    extern juce::Colour quaternary;          /**< Secondary auxiliary color. */
 
-struct VolumeFlame {
-    static juce::Colour low;
-    static juce::Colour mid;
-    static juce::Colour high;
-    static juce::Colour peak;
-};
+    struct ZoomHud {
+        static juce::Colour background;   /**< Backdrop for the zoom info display. */
+        static juce::Colour textActive;   /**< Active focus text. */
+        static juce::Colour textInactive; /**< Secondary info text. */
+    };
 
-struct HintVox {
-    static juce::Colour text;
-};
+    struct VolumeFlame {
+        static juce::Colour low;  /**< Low intensity meter color. */
+        static juce::Colour mid;  /**< Mid intensity meter color. */
+        static juce::Colour high; /**< High intensity meter color. */
+        static juce::Colour peak; /**< Peak/Clipped meter color. */
+    };
 
-struct Matrix {
-    static juce::Colour ledActive;
-    static juce::Colour ledInactive;
-};
+    struct HintVox {
+        static juce::Colour text; /**< Color for the status/hint text. */
+    };
+
+    struct Matrix {
+        static juce::Colour ledActive;   /**< Active LED indicator color. */
+        static juce::Colour ledInactive; /**< Inactive LED indicator color. */
+    };
 } // namespace Colors
 
+/** @brief Component sizing and positioning constants. */
 struct Layout {
     struct Window {
-        static int width;
-        static int height;
+        static int width;  /**< Default startup width. */
+        static int height; /**< Default startup height. */
     };
-    static constexpr int windowBorderMargins = 15;
-    static int buttonHeight;
-    static int buttonWidth;
-    static int clearButtonWidth;
-    static float buttonCornerRadius;
+    static constexpr int windowBorderMargins = 15; /**< Internal padding for main layout. */
+    static int buttonHeight;                       /**< Standard button height. */
+    static int buttonWidth;                        /**< Standard button width. */
+    static int clearButtonWidth;                   /**< Width for secondary actions. */
+    static float buttonCornerRadius;               /**< Corner rounding factor. */
     static constexpr float buttonOutlineThickness = 1.0f;
     static constexpr float connectorLineWidth = 2.0f;
     static constexpr float outlineThicknessMedium = 2.5f;
@@ -174,16 +207,16 @@ struct Layout {
     };
 
     struct Waveform {
-        static float heightScale;
-        static int pixelsPerSampleLow;
-        static int pixelsPerSampleMedium;
-        static int pixelsPerSampleHigh;
+        static float heightScale;             /**< Proportion of window occupied by waveform. */
+        static int pixelsPerSampleLow;       /**< Zoom resolution (Low). */
+        static int pixelsPerSampleMedium;    /**< Zoom resolution (Medium). */
+        static int pixelsPerSampleHigh;      /**< Zoom resolution (High). */
     };
 
     struct Glow {
         static constexpr float offsetFactor = 0.5f;
         static constexpr float mouseAlpha = 0.3f;
-        static constexpr float hitBoxTolerance = 20.0f;
+        static constexpr float hitBoxTolerance = 20.0f; /**< Precision for mouse-marker interaction. */
         static constexpr int mousePadding = 2;
         static constexpr int mouseHighlightOffset = 2;
         static constexpr int mouseHighlightSize = 5;
@@ -224,106 +257,110 @@ struct Layout {
     };
 
     struct Fps {
-        static constexpr int width = 125; // Widened to fit frame time
+        static constexpr int width = 125;
         static constexpr int height = 24;
         static constexpr int margin = 10;
         static constexpr float cornerRadius = 4.0f;
     };
 };
 
+/** @brief Timing and behavior constants for visual feedback. */
 namespace Animation {
-constexpr float buttonHighlightedBrightness = 0.1f;
-constexpr float buttonPressedDarkness = 0.1f;
-constexpr float mouseAmplitudeLineLength = 50.0f;
-constexpr float thresholdLineWidth = 100.0f;
+    constexpr float buttonHighlightedBrightness = 0.1f;
+    constexpr float buttonPressedDarkness = 0.1f;
+    constexpr float mouseAmplitudeLineLength = 50.0f;
+    constexpr float thresholdLineWidth = 100.0f;
 } // namespace Animation
 
+/** @brief Default technical parameters for the audio engine. */
 namespace Audio {
-constexpr int thumbnailCacheSize = 5;
-constexpr int thumbnailSizePixels = 512;
-static constexpr double fallbackSampleRate = 44100.0;
-constexpr double keyboardSkipSeconds = 5.0;
-constexpr double cutStepHours = 3600.0;
-constexpr double cutStepMinutes = 60.0;
-constexpr double cutStepSeconds = 1.0;
-constexpr double cutStepMilliseconds = 0.01;
-constexpr double cutStepMillisecondsFine = 0.001;
-constexpr int readAheadBufferSize = 32768;
-constexpr float silenceThresholdIn = 0.01f;
-constexpr float silenceThresholdOut = 0.01f;
-constexpr bool lockHandlesWhenAutoCutActive = false;
+    constexpr int thumbnailCacheSize = 5;
+    constexpr int thumbnailSizePixels = 512;
+    static constexpr double fallbackSampleRate = 44100.0;
+    constexpr double keyboardSkipSeconds = 5.0;
+    constexpr double cutStepHours = 3600.0;
+    constexpr double cutStepMinutes = 60.0;
+    constexpr double cutStepSeconds = 1.0;
+    constexpr double cutStepMilliseconds = 0.01;
+    constexpr double cutStepMillisecondsFine = 0.001;
+    constexpr int readAheadBufferSize = 32768;
+    constexpr float silenceThresholdIn = 0.01f;
+    constexpr float silenceThresholdOut = 0.01f;
+    constexpr bool lockHandlesWhenAutoCutActive = false;
 } // namespace Audio
 
+/** @brief User preferences and experimental features. */
 namespace Advanced {
-extern bool showFpsOverlay;
-extern int fpsOverlayX;
-extern int fpsOverlayY;
-extern juce::String fpsOverlayPosition;
-extern juce::String currentTheme;
+    extern bool showFpsOverlay;
+    extern int fpsOverlayX;
+    extern int fpsOverlayY;
+    extern juce::String fpsOverlayPosition;
+    extern juce::String currentTheme;
 } // namespace Advanced
 
+/** @brief Global string table for localization and UI consistency. */
 namespace Labels {
-extern juce::String appName;
-extern juce::String appVersion;
-extern juce::String defaultHint;
-extern juce::String openButton;
-extern juce::String selectAudio;
-extern juce::String timeSeparator;
-extern juce::String openBracket;
-extern juce::String closeBracket;
-extern juce::String playButton;
-extern juce::String stopButton;
-extern juce::String viewModeClassic;
-extern juce::String viewModeOverlay;
-extern juce::String channelViewMono;
-extern juce::String channelViewStereo;
-extern juce::String exitButton;
-extern juce::String statsButton;
-extern juce::String repeatButton;
-extern juce::String cutInButton;
-extern juce::String cutOutButton;
-extern juce::String clearButton;
-extern juce::String autoplayButton;
-extern juce::String autoCutInButton;
-extern juce::String autoCutOutButton;
-extern juce::String cutButton;
-extern juce::String themeUp;
-extern juce::String themeDown;
-extern juce::String lockLocked;
-extern juce::String lockUnlocked;
-extern juce::String silenceThresholdInTooltip;
-extern juce::String silenceThresholdOutTooltip;
-extern juce::String zoomPrefix;
-extern juce::String stepDefault;
-extern juce::String stepShift;
-extern juce::String stepAlt;
-extern juce::String stepCtrlShift;
-extern juce::String statsFile;
-extern juce::String statsSamples;
-extern juce::String statsRate;
-extern juce::String statsHz;
-extern juce::String statsChannels;
-extern juce::String statsLength;
-extern juce::String statsPeak0;
-extern juce::String statsPeak1;
-extern juce::String statsMin;
-extern juce::String statsMax;
-extern juce::String statsError;
-extern juce::String logNoAudio;
-extern juce::String logScanning;
-extern juce::String logSamplesFor;
-extern juce::String logBoundary;
-extern juce::String logZeroLength;
-extern juce::String logStartSet;
-extern juce::String logEndSet;
-extern juce::String logNoSound;
-extern juce::String logTooLarge;
-extern juce::String errorZeroLength;
-extern juce::String errorNoAudio;
-extern juce::String scanningCutPoints;
-extern juce::String noSilenceBoundaries;
-extern const char* const threadAudioReader;
-extern const char* const failGeneric;
+    extern juce::String appName;
+    extern juce::String appVersion;
+    extern juce::String defaultHint;
+    extern juce::String openButton;
+    extern juce::String selectAudio;
+    extern juce::String timeSeparator;
+    extern juce::String openBracket;
+    extern juce::String closeBracket;
+    extern juce::String playButton;
+    extern juce::String stopButton;
+    extern juce::String viewModeClassic;
+    extern juce::String viewModeOverlay;
+    extern juce::String channelViewMono;
+    extern juce::String channelViewStereo;
+    extern juce::String exitButton;
+    extern juce::String statsButton;
+    extern juce::String repeatButton;
+    extern juce::String cutInButton;
+    extern juce::String cutOutButton;
+    extern juce::String clearButton;
+    extern juce::String autoplayButton;
+    extern juce::String autoCutInButton;
+    extern juce::String autoCutOutButton;
+    extern juce::String cutButton;
+    extern juce::String themeUp;
+    extern juce::String themeDown;
+    extern juce::String lockLocked;
+    extern juce::String lockUnlocked;
+    extern juce::String silenceThresholdInTooltip;
+    extern juce::String silenceThresholdOutTooltip;
+    extern juce::String zoomPrefix;
+    extern juce::String stepDefault;
+    extern juce::String stepShift;
+    extern juce::String stepAlt;
+    extern juce::String stepCtrlShift;
+    extern juce::String statsFile;
+    extern juce::String statsSamples;
+    extern juce::String statsRate;
+    extern juce::String statsHz;
+    extern juce::String statsChannels;
+    extern juce::String statsLength;
+    extern juce::String statsPeak0;
+    extern juce::String statsPeak1;
+    extern juce::String statsMin;
+    extern juce::String statsMax;
+    extern juce::String statsError;
+    extern juce::String logNoAudio;
+    extern juce::String logScanning;
+    extern juce::String logSamplesFor;
+    extern juce::String logBoundary;
+    extern juce::String logZeroLength;
+    extern juce::String logStartSet;
+    extern juce::String logEndSet;
+    extern juce::String logNoSound;
+    extern juce::String logTooLarge;
+    extern juce::String errorZeroLength;
+    extern juce::String errorNoAudio;
+    extern juce::String scanningCutPoints;
+    extern juce::String noSilenceBoundaries;
+    extern const char* const threadAudioReader;
+    extern const char* const failGeneric;
 } // namespace Labels
 
 } // namespace Config

@@ -104,6 +104,8 @@ The application follows a strict top-down ownership hierarchy.
 Every commit must satisfy the Doxygen parser to maintain the Interactive Study Map:
 
 *   **`@file`**: Required at the top of every header file.
+*   **`@brief`**: Required for every class and public/protected method to explain what it does.
+*   **`@details`**: Required for every class to aggressively explain why it exists. This block must explicitly declare its architectural role (e.g., "Acts as the Presenter glue between Model and View per the MVP Law," "Passive dumb component," or "Thread-Safe background worker").
 *   **`@ingroup`**: Must assign the class to a logical module.
 *   **`@see`**: Mandatory for cross-referencing peer Presenters or related Models.
 

@@ -10,19 +10,34 @@
 #endif
 
 /**
- * @class UIAnimationHelper
- * @brief Header-only utility for normalized animation curves.
- *
- * Provides static methods to process a linear master phase into
- * periodic curves with zero dependency on UI components.
+ * @file UIAnimationHelper.h
+ * @ingroup UI
+ * @brief Header-only utility for normalized, periodic animation curves.
+ * 
+ * @details Architecturally, UIAnimationHelper is a "Pure Function Provider" 
+ *          that transforms a linear master phase into visually pleasing, 
+ *          periodic curves (e.g., sine pulses). By abstracting the 
+ *          trigonometric logic here, we ensure that UI components (like 
+ *          `PlaybackCursorGlow` or `TransportButton`) can implement 
+ *          sophisticated pulsing and highlighting without cluttering 
+ *          their `paint()` methods with complex math.
+ * 
+ *          The class follows a "Deterministic Animation" pattern—given the 
+ *          same master phase and multiplier, it will always return the 
+ *          exact same value, making it highly testable and resource-efficient.
  */
 class UIAnimationHelper {
   public:
     /**
-     * @brief Returns a 0.0 to 1.0 value mapped to a sine curve.
-     * @param masterPhase A value from 0.0 to 1.0 representing the master clock.
-     * @param multiplier Frequency multiplier for the pulse.
-     * @return A float between 0.0 and 1.0.
+     * @brief Transforms a linear clock phase into a periodic sine pulse.
+     * @details Mathematical approach: 
+     *          1. Calculate `sin(phase * multiplier * 2π)`.
+     *          2. Map the resulting range `[-1.0, 1.0]` to `[0.0, 1.0]`.
+     * 
+     * @param masterPhase A linear value from 0.0 to 1.0 representing 
+     *                    the current global clock state.
+     * @param multiplier The frequency factor (e.g., 2.0 doubles the pulse speed).
+     * @return A float value between 0.0 and 1.0 representing the pulse intensity.
      */
     static float getSinePulse(float masterPhase, float multiplier) {
         float rawSine = std::sin(masterPhase * multiplier * juce::MathConstants<float>::twoPi);
