@@ -201,10 +201,10 @@ void ControlPanel::resized() {
             int x = Config::Advanced::fpsOverlayX;
             int y = Config::Advanced::fpsOverlayY;
             
-            if (Config::Advanced::fpsOverlayPosition == "topC") {
+            if (Config::Advanced::fpsOverlayPosition == Config::Advanced::posTopCenter) {
                 x = (getWidth() - Config::Layout::Fps::width) / 2;
                 y = Config::Layout::Fps::margin;
-            } else if (Config::Advanced::fpsOverlayPosition == "btmC") {
+            } else if (Config::Advanced::fpsOverlayPosition == Config::Advanced::posBottomCenter) {
                 x = (getWidth() - Config::Layout::Fps::width) / 2;
                 y = getHeight() - Config::Layout::Fps::height - Config::Layout::Fps::margin;
             }

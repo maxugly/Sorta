@@ -25,6 +25,7 @@ juce::Colour Button::cutPlacement{0xffff1493};
 juce::Colour Button::cutActive = juce::Colours::black; 
 
 juce::Colour playbackText = juce::Colours::white;
+juce::Colour playbackCursorHead = juce::Colours::lime;
 juce::Colour cutText = juce::Colours::white;
 juce::Colour totalTimeText = juce::Colours::grey;
 juce::Colour textEditorBackground = juce::Colour(0xff333333);
@@ -138,6 +139,16 @@ juce::String errorZeroLength = "Error: Audio file has zero length.";
 juce::String errorNoAudio = "No audio loaded.";
 juce::String scanningCutPoints = "Scanning for Cut Points...";
 juce::String noSilenceBoundaries = "No Silence Boundaries detected.";
+juce::String hintViewPrefix = "View: ";
+juce::String hintViewClassic = "Classic";
+juce::String hintViewOverlay = "Overlay";
+juce::String hintChannelsPrefix = "Channels: ";
+juce::String hintChannelsStereo = "Stereo";
+juce::String hintChannelsMono = "Mono";
+juce::String selectTheme = "Select Theme...";
+juce::String fpsSuffix = " FPS (";
+juce::String fpsClose = ")";
+juce::String timePrefixPlus = "+";
 } // namespace Labels
 
 int Layout::Window::width = 1920;
@@ -459,6 +470,9 @@ int Advanced::fpsOverlayX = 10;
 int Advanced::fpsOverlayY = 10;
 juce::String Advanced::fpsOverlayPosition = "topC";
 juce::String Advanced::currentTheme = "default.conf";
+
+juce::String Advanced::posTopCenter = "topC";
+juce::String Advanced::posBottomCenter = "btmC";
 
 void saveCurrentTheme(const juce::String& themeName) {
     Advanced::currentTheme = themeName;

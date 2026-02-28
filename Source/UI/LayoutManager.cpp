@@ -60,7 +60,7 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int rowHeigh
 
     // --- NEW: Center the Cut Length Strip in the remaining space ---
     if (controlPanel.getCutLengthStrip() != nullptr) {
-        const int lengthWidth = 268; // 220 (editor) + 48 (lock button)
+        const int lengthWidth = Config::Layout::cutLengthStripWidth;
         controlPanel.getCutLengthStrip()->setBounds(cutRow.withSizeKeepingCentre(lengthWidth, height));
     }
 }

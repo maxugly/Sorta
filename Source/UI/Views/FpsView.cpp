@@ -6,7 +6,7 @@ FpsView::FpsView() {
 }
 
 void FpsView::setFps(int fps, double frameTimeMs) {
-    currentFpsText = juce::String(fps) + " FPS (" + juce::String(frameTimeMs, 1) + "ms)";
+    currentFpsText = juce::String(fps) + Config::Labels::fpsSuffix + juce::String(frameTimeMs, 1) + Config::Labels::fpsClose;
     repaint();
 }
 

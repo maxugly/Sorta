@@ -38,9 +38,11 @@ void HintPresenter::mouseExit(const juce::MouseEvent&) {
 }
 
 void HintPresenter::viewModeChanged(AppEnums::ViewMode newMode) {
-    hintView.setHint("View: " + juce::String(newMode == AppEnums::ViewMode::Classic ? "Classic" : "Overlay"));
+    hintView.setHint(Config::Labels::hintViewPrefix + 
+                    juce::String(newMode == AppEnums::ViewMode::Classic ? Config::Labels::hintViewClassic : Config::Labels::hintViewOverlay));
 }
 
 void HintPresenter::channelViewModeChanged(AppEnums::ChannelViewMode newMode) {
-    hintView.setHint("Channels: " + juce::String(newMode == AppEnums::ChannelViewMode::Stereo ? "Stereo" : "Mono"));
+    hintView.setHint(Config::Labels::hintChannelsPrefix + 
+                    juce::String(newMode == AppEnums::ChannelViewMode::Stereo ? Config::Labels::hintChannelsStereo : Config::Labels::hintChannelsMono));
 }

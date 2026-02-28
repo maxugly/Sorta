@@ -94,7 +94,7 @@ class ModernLookAndFeel : public juce::LookAndFeel_V4 {
             font.setHeight(buttonHeight * Config::Layout::Text::buttonHeightScale);
         }
 
-        if (button.getButtonText() == "EXIT") {
+        if (button.getButtonText() == Config::Labels::exitButton) {
             font.setBold(true);
         }
 

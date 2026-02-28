@@ -67,7 +67,7 @@ void PlaybackCursorView::paint(juce::Graphics &g) {
     const float halfBoxWidth = boxWidth / 2.0f;
 
     // Green Top/Bottom Squares
-    g.setColour(juce::Colours::lime);
+    g.setColour(Config::Colors::playbackCursorHead);
     g.fillRect((float)x - halfBoxWidth, 0.0f, boxWidth, boxHeight);
     g.fillRect((float)x - halfBoxWidth, (float)getHeight() - boxHeight, boxWidth, boxHeight);
 

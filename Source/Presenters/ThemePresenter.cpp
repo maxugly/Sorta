@@ -35,7 +35,7 @@ void ThemePresenter::scanThemes() {
                 break;
             }
         }
-        if (!found) tbv->themeSelector.setText("Select Theme...", juce::dontSendNotification);
+        if (!found) tbv->themeSelector.setText(Config::Labels::selectTheme, juce::dontSendNotification);
     }
 }
 

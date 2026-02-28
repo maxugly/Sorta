@@ -50,7 +50,8 @@ void TopBarView::resized() {
 
     // Transport Group (Modular TransportStrip)
     if (transportStrip != nullptr) {
-        const int stripWidth = (buttonWidth * 5) + (spacing * 4);
+        const int stripWidth = (buttonWidth * Config::Layout::TopBar::transportButtonsCount) + 
+                               (spacing * Config::Layout::TopBar::transportButtonsSpacingCount);
         transportStrip->setBounds(topRow.removeFromLeft(stripWidth));
     }
     topRow.removeFromLeft(margin);
@@ -63,18 +64,18 @@ void TopBarView::resized() {
     
     if (matrixView != nullptr) {
         const int sqSize = Config::Layout::Matrix::squareSize;
-        const int cols = 16;
-        const int padding = 8;
+        const int cols = Config::Layout::Matrix::columns;
+        const int padding = Config::Layout::Matrix::padding;
         const int matrixWidth = (cols * sqSize) + padding;
         matrixView->setBounds(topRow.removeFromLeft(matrixWidth));
     }
 
     if (hintView != nullptr) {
-        const int hintWidth = 150;
+        const int hintWidth = Config::Layout::TopBar::hintWidth;
         hintView->setBounds(topRow.removeFromLeft(hintWidth));
     }
 
-    themeSelector.setBounds(topRow.removeFromLeft(120));
+    themeSelector.setBounds(topRow.removeFromLeft(Config::Layout::TopBar::themeSelectorWidth));
     themeUpButton.setBounds(topRow.removeFromLeft(buttonWidth / 2));
     themeDownButton.setBounds(topRow.removeFromLeft(buttonWidth / 2));
 

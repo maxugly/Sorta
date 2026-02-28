@@ -98,6 +98,7 @@ namespace Colors {
     };
 
     extern juce::Colour playbackText;        /**< Color for the primary playhead timer. */
+    extern juce::Colour playbackCursorHead;  /**< Top/Bottom marker color for the playhead. */
     extern juce::Colour cutText;             /**< Color for cut boundary timers. */
     extern juce::Colour totalTimeText;       /**< Color for total duration labels. */
     extern juce::Colour textEditorBackground; /**< Field fill for text inputs. */
@@ -173,6 +174,7 @@ struct Layout {
     static constexpr float outlineThicknessMedium = 2.5f;
     static constexpr int cutTextWidth = 165;
     static constexpr int thresholdEditorWidth = 80;
+    static constexpr int cutLengthStripWidth = 268;
 
     struct VolumeKnob {
         static constexpr float outlineThickness = 2.0f;
@@ -249,11 +251,17 @@ struct Layout {
     struct Matrix {
         static constexpr int squareSize = 6;
         static constexpr int rows = 4;
+        static constexpr int columns = 16;
+        static constexpr int padding = 8;
         static constexpr int startX = 4;
     };
 
     struct TopBar {
         static constexpr int volumeKnobSize = 80;
+        static constexpr int themeSelectorWidth = 120;
+        static constexpr int hintWidth = 150;
+        static constexpr int transportButtonsCount = 5;
+        static constexpr int transportButtonsSpacingCount = 4;
     };
 
     struct Fps {
@@ -296,6 +304,9 @@ namespace Advanced {
     extern int fpsOverlayY;
     extern juce::String fpsOverlayPosition;
     extern juce::String currentTheme;
+
+    extern juce::String posTopCenter;
+    extern juce::String posBottomCenter;
 } // namespace Advanced
 
 /** @brief Global string table for localization and UI consistency. */
@@ -359,6 +370,16 @@ namespace Labels {
     extern juce::String errorNoAudio;
     extern juce::String scanningCutPoints;
     extern juce::String noSilenceBoundaries;
+    extern juce::String hintViewPrefix;
+    extern juce::String hintViewClassic;
+    extern juce::String hintViewOverlay;
+    extern juce::String hintChannelsPrefix;
+    extern juce::String hintChannelsStereo;
+    extern juce::String hintChannelsMono;
+    extern juce::String selectTheme;
+    extern juce::String fpsSuffix;
+    extern juce::String fpsClose;
+    extern juce::String timePrefixPlus;
     extern const char* const threadAudioReader;
     extern const char* const failGeneric;
 } // namespace Labels

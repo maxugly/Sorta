@@ -43,7 +43,7 @@ void CutLengthPresenter::updateEditor() {
     auto& length = owner.getCutLengthStrip()->getLengthEditor();
     if (!isEditingCutLength && !length.hasKeyboardFocus(true)) {
         double cutLen = std::abs(owner.getSessionState().getCutOut() - owner.getSessionState().getCutIn());
-        juce::String newText = "+" + TimeUtils::formatTime(cutLen, sampleRate);
+        juce::String newText = Config::Labels::timePrefixPlus + TimeUtils::formatTime(cutLen, sampleRate);
         if (length.getText() != newText)
             length.setText(newText, juce::dontSendNotification);
     }
