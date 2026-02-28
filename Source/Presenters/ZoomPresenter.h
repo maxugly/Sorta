@@ -10,30 +10,35 @@
 #include <JuceHeader.h>
 #endif
 
-class ControlPanel;
-
 /**
  * @file ZoomPresenter.h
  * @ingroup Logic
  * @brief Coordinates horizontal waveform scaling and zoom popup visualization.
+ */
+
+class ControlPanel;
+
+/**
+ * @class ZoomPresenter
+ * @brief Coordinates the horizontal waveform scaling and zoom popup visualization.
  * 
  * @details Architecturally, ZoomPresenter acts as the "Presenter Glue" that 
  *          manages the complex scaling logic for the application's waveform 
- *          rendering. It follows the MVP Law by translating user scroll and 
- *          keybind interactions into normalized zoom factors in `SessionState`.
+ *          rendering. It follows the Model-View-Presenter (MVP) law by translating 
+ *          user scroll and keybind interactions into normalized zoom factors in 
+ *          SessionState. By managing the transient UI states of zoom focus and 
+ *          preview popups, it keeps the View components focused purely on 
+ *          rendering, ensuring a decoupled and maintainable architecture.
  * 
  *          Key responsibilities:
- *          - **Real-time Zoom Tracking**: Monitors the `PlaybackTimerManager` 
+ *          - **Real-time Zoom Tracking**: Monitors the PlaybackTimerManager 
  *            to update the "Zoom HUD" and the secondary "Zoom Popup" preview.
  *          - **Contextual Scaling**: Calculates the optimal zoom range based 
  *            on the currently hovered time segment or active playback point.
  *          - **Boundary Synchronization**: Ensures that as the user zooms in, 
  *            the active marker or playhead remains centered and visually stable.
  * 
- * @see ZoomView
- * @see SessionState
- * @see InteractionCoordinator
- * @see CoordinateMapper
+ * @see SessionState, ControlPanel, InteractionCoordinator, CoordinateMapper
  */
 class ZoomPresenter final : public PlaybackTimerManager::Listener {
   public:
@@ -44,14 +49,15 @@ class ZoomPresenter final : public PlaybackTimerManager::Listener {
     explicit ZoomPresenter(ControlPanel& owner);
 
     /**
-     * @brief Unregisters from global timer and state notifications.
+     * @brief Destructor. Unregisters from global timer and state notifications.
      */
     ~ZoomPresenter() override;
 
     /**
      * @brief Periodic callback for updating high-frequency zoom visuals.
      * @details Used to refresh the dynamic bounds of the zoom preview popup 
-     *          at a consistent frame rate.
+     *          at a consistent frame rate, ensuring smooth visual feedback 
+     *          during zoom operations.
      */
     void playbackTimerTick() override;
 

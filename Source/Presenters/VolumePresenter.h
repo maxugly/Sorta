@@ -7,23 +7,28 @@
  * @file VolumePresenter.h
  * @ingroup Logic
  * @brief Presenter responsible for master volume logic and UI synchronization.
+ */
+
+/**
+ * @class VolumePresenter
+ * @brief Presenter responsible for master volume logic and UI synchronization.
  * 
  * @details Architecturally, VolumePresenter acts as the "Presenter Glue" between 
- *          the `SessionState` (Model) and the `VolumeView` (View). It follows 
- *          the MVP Law by ensuring that changes to the master gain in the 
- *          Model are instantly reflected in the visual state of the volume dial, 
- *          and vice-versa.
+ *          the SessionState (Model) and the VolumeView (View). It follows 
+ *          the Model-View-Presenter (MVP) law by ensuring that changes to the 
+ *          master gain in the Model are instantly reflected in the visual state 
+ *          of the volume dial, and vice-versa. By handling the synchronization 
+ *          between the underlying audio gain and the passive UI component, it 
+ *          keeps the VolumeView "dumb" and focused purely on rendering the dial.
  * 
  *          Key responsibilities:
- *          - **State Observation**: Monitors `SessionState::volumeChanged` to 
- *            update the `VolumeView` when the volume is adjusted via keybinds 
+ *          - **State Observation**: Monitors SessionState::volumeChanged to 
+ *            update the VolumeView when the volume is adjusted via keybinds 
  *            or external commands.
- *          - **User Input Handling**: Directs updates from the `VolumeView` 
- *            (e.g., dial turns) back into the `SessionState`.
+ *          - **User Input Handling**: Directs updates from the VolumeView 
+ *            (e.g., dial turns) back into the SessionState.
  * 
- * @see VolumeView
- * @see SessionState
- * @see AudioPlayer
+ * @see VolumeView, SessionState, AudioPlayer
  */
 class VolumePresenter final : public SessionState::Listener {
   public:
@@ -35,12 +40,12 @@ class VolumePresenter final : public SessionState::Listener {
     VolumePresenter(VolumeView &v, SessionState &s);
 
     /**
-     * @brief Unregisters as a listener to prevent dangling callbacks.
+     * @brief Destructor. Unregisters as a listener to prevent dangling callbacks.
      */
     ~VolumePresenter() override;
 
     /**
-     * @brief Reacts to global volume changes.
+     * @brief Reacts to global volume changes in the SessionState.
      * @param newVolume The new gain level (0.0 to 1.0).
      */
     void volumeChanged(float newVolume) override;
