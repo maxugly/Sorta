@@ -36,6 +36,7 @@ class ControlPanel;
  * @see TimeUtils
  * @see PlaybackTimerManager
  * @see SessionState
+ * @see ControlPanel
  */
 class PlaybackTextPresenter : public juce::TextEditor::Listener,
                               public juce::MouseListener,

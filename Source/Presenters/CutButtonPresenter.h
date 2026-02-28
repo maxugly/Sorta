@@ -13,6 +13,28 @@
 
 class ControlPanel;
 
+/**
+ * @file CutButtonPresenter.h
+ * @Source/Core/FileMetadata.h
+ * @ingroup UI
+ * @brief Presenter for managing the visual state and placement logic of the Cut button.
+ */
+
+class ControlPanel;
+
+/**
+ * @class CutButtonPresenter
+ * @brief Manages the interactive behavior and coloring of the main Cut engagement button.
+ * 
+ * @details Architecturally, this presenter synchronizes the Cut button's 
+ *          appearance with the current interaction mode (In/Out placement). 
+ *          It acts as an observer of the InteractionCoordinator to ensure 
+ *          the View reflects the active logical state.
+ * 
+ * @see SessionState
+ * @see ControlPanel
+ * @see InteractionCoordinator
+ */
 class CutButtonPresenter : public InteractionCoordinator::Listener {
   public:
     explicit CutButtonPresenter(ControlPanel &ownerPanel);

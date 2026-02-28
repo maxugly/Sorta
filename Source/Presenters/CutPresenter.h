@@ -30,7 +30,7 @@ class InteractionCoordinator;
  *          rendering component while the presenter handles the "glue" logic of 
  *          synchronizing playback, markers, and user input.
  * 
- * @see SessionState, CutLayerView, MarkerMouseHandler, WaveformMouseHandler, InteractionCoordinator
+ * @see SessionState, CutLayerView, MarkerMouseHandler, WaveformMouseHandler, InteractionCoordinator, ControlPanel
  */
 class CutPresenter : public SessionState::Listener,
                      public PlaybackTimerManager::Listener {

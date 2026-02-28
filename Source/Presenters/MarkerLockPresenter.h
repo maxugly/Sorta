@@ -9,6 +9,7 @@
  * 
  * @see MarkerStrip
  * @see SessionState
+ * @see ControlPanel
  */
 
 #pragma once

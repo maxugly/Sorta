@@ -13,6 +13,28 @@
 
 class AudioPlayer;
 
+/**
+ * @file PlaybackRepeatController.h
+ * @Source/Core/FileMetadata.h
+ * @ingroup Logic
+ * @brief Controller for managing automated playback repetition and auto-play logic.
+ */
+
+class AudioPlayer;
+
+/**
+ * @class PlaybackRepeatController
+ * @brief Orchestrates automated playback loops and auto-play triggers.
+ * 
+ * @details Architecturally, this controller (acting as a specialized 
+ *          presenter) monitors the SessionState (Model) for preference 
+ *          changes and coordinates with the AudioPlayer to enforce 
+ *          looping and automatic playback start on file load.
+ * 
+ * @see SessionState
+ * @see ControlPanel
+ * @see AudioPlayer
+ */
 class PlaybackRepeatController final : public SessionState::Listener,
                                        public juce::ChangeListener {
   public:

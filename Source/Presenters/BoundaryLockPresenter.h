@@ -10,6 +10,7 @@
  * 
  * @see CutLengthStrip
  * @see SessionState
+ * @see ControlPanel
  */
 
 #pragma once

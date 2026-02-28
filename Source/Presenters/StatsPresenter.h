@@ -116,6 +116,7 @@ class StatsOverlay : public juce::Component {
  * @see StatsOverlay
  * @see AudioPlayer
  * @see SessionState
+ * @see ControlPanel
  */
 class StatsPresenter final : public SessionState::Listener {
   public:

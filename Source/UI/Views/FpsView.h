@@ -5,6 +5,24 @@
 #include <JuceHeader.h>
 #endif
 
+/**
+ * @file FpsView.h
+ * @Source/Core/FileMetadata.h
+ * @ingroup UI
+ * @brief Passive view for displaying frame-rate performance statistics.
+ */
+
+/**
+ * @class FpsView
+ * @brief A passive UI component for displaying current FPS and frame times.
+ * 
+ * @details Architecturally, FpsView is a "Passive View" in the Model-View-Presenter (MVP) 
+ *          hierarchy. It merely displays the performance data calculated 
+ *          and pushed by the FpsPresenter. It contains no business logic 
+ *          regarding performance metrics.
+ * 
+ * @see FpsPresenter
+ */
 class FpsView final : public juce::Component {
 public:
     FpsView();

@@ -16,6 +16,28 @@ class AudioPlayer;
  * @class RepeatButtonPresenter
  * @brief Manages the "Repeat" toggle button logic and state.
  */
+/**
+ * @file RepeatButtonPresenter.h
+ * @Source/Core/FileMetadata.h
+ * @ingroup UI
+ * @brief Presenter for managing the repeat/loop toggle button.
+ */
+
+class ControlPanel;
+class AudioPlayer;
+
+/**
+ * @class RepeatButtonPresenter
+ * @brief Manages the visual and logical state of the transport's repeat button.
+ * 
+ * @details Architecturally, this presenter synchronizes the loop preference 
+ *          in the SessionState (Model) with the Repeat button in the 
+ *          TransportStrip (View). It ensures the button reflects the 
+ *          active loop state and dispatches user clicks back to the Model.
+ * 
+ * @see SessionState
+ * @see ControlPanel
+ */
 class RepeatButtonPresenter : public SessionState::Listener {
   public:
     RepeatButtonPresenter(ControlPanel &ownerPanel, AudioPlayer &player, SessionState &state);

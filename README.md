@@ -103,11 +103,12 @@ The application follows a strict top-down ownership hierarchy.
 ## 📈 VII. Documentation Requirements
 Every commit must satisfy the Doxygen parser to maintain the Interactive Study Map:
 
-*   **`@file`**: Required at the top of every header file.
+*   **`@file`**: Required at the top of every header file (e.g., `@Source/Core/FileMetadata.h`).
 *   **`@brief`**: Required for every class and public/protected method to explain what it does.
-*   **`@details`**: Required for every class to aggressively explain why it exists. This block must explicitly declare its architectural role (e.g., "Acts as the Presenter glue between Model and View per the MVP Law," "Passive dumb component," or "Thread-Safe background worker").
-*   **`@ingroup`**: Must assign the class to a logical module.
-*   **`@see`**: Mandatory for cross-referencing peer Presenters or related Models.
+*   **`@details`**: Required for every class to aggressively explain why it exists. This block must explicitly declare its architectural role (e.g., "Acts as the Presenter glue between Model and View per the MVP Law", "Passive View/Dumb component", or "Thread-Safe background worker"). Also required above complex algorithmic loops in `.cpp` files to explain mathematical intent.
+*   **`@ingroup`**: Must assign the class to a logical module (e.g., Logic, UI, or Helpers).
+*   **`@see`**: Mandatory for cross-referencing peer Presenters, related Models, or Views.
+*   **`@param` & `@return`**: Mandatory for all methods to explicitly document inputs and outputs.
 
 ---
 
@@ -122,6 +123,9 @@ Run through every item before submitting any change. A single **NO** is a blocke
 *   [ ] Does the background worker touch any UI pointer directly? *(Must be No)*
 *   [ ] Do all Presenters communicate via `SessionState` rather than direct references?
 *   [ ] Is every new feature class wired in via `std::unique_ptr`?
+*   [ ] Did I include `@Source/Core/FileMetadata.h` and `@ingroup` at the top of my new file? *(Must be Yes)*
+*   [ ] Does my class have a highly verbose `@details` block explaining its architectural role (e.g., MVP)? *(Must be Yes)*
+*   [ ] Did I use `@param` and `@return` for every new method? *(Must be Yes)*
 
 ---
 

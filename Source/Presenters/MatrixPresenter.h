@@ -10,6 +10,29 @@
 class ControlPanel;
 class AudioPlayer;
 
+/**
+ * @file MatrixPresenter.h
+ * @Source/Core/FileMetadata.h
+ * @ingroup UI
+ * @brief Presenter for orchestrating the visual state of the status LED matrix.
+ */
+
+class ControlPanel;
+class AudioPlayer;
+
+/**
+ * @class MatrixPresenter
+ * @brief Manages the logic for the auxiliary LED-style status grid.
+ * 
+ * @details Architecturally, this presenter acts as a bridge between the 
+ *          various system states (Model/SessionState) and the MatrixView. 
+ *          It aggregates information from playback, volume, and view modes 
+ *          to determine which LEDs should be illuminated.
+ * 
+ * @see SessionState
+ * @see ControlPanel
+ * @see MatrixView
+ */
 class MatrixPresenter final : public PlaybackTimerManager::Listener,
                               public SessionState::Listener,
                               public InteractionCoordinator::Listener,

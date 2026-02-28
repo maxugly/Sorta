@@ -11,6 +11,18 @@
  * @ingroup UI
  * @brief Passive view for the master volume control.
  */
+/**
+ * @class VolumeView
+ * @brief A passive UI component for the master volume knob.
+ * 
+ * @details Architecturally, VolumeView adheres to the Model-View-Presenter (MVP) law 
+ *          as a "Passive View." it contains zero business logic and only handles 
+ *          rendering and basic JUCE component lifecycle methods like paint() 
+ *          and resized(). It relies entirely on the VolumePresenter to 
+ *          synchronize its state with the underlying audio engine and SessionState.
+ * 
+ * @see VolumePresenter
+ */
 class VolumeView final : public juce::Component {
   public:
     VolumeView();
