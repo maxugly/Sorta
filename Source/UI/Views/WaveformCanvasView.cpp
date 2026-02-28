@@ -9,7 +9,7 @@
 WaveformCanvasView::WaveformCanvasView(ControlPanel& owner) {
     setInterceptsMouseClicks(false, false);
 
-    waveformView = std::make_unique<WaveformView>(owner.getAudioPlayer().getWaveformManager());
+    waveformView = std::make_unique<WaveformView>();
     addAndMakeVisible(waveformView.get());
     waveformView->setInterceptsMouseClicks(false, false);
 

@@ -98,9 +98,7 @@ juce::MouseCursor ControlPanel::getMouseCursor() {
 }
 
 void ControlPanel::setupListeners() {
-    playbackTimerManager->addListener(&waveformCanvasView->getPlaybackCursorView());
     playbackTimerManager->addListener(&getPresenterCore().getZoomPresenter());
-    playbackTimerManager->addListener(overlayView.get());
     playbackTimerManager->addListener(&getPlaybackTextPresenter());
 
     playbackTimerManager->setZoomPointProvider([this]() {

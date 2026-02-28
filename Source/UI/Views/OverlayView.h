@@ -17,16 +17,12 @@ class ControlPanel;
  *
  * This view sits at the top of the ControlPanel stack and reacts to animation heartbeats.
  */
-class OverlayView : public juce::Component, public PlaybackTimerManager::Listener {
+class OverlayView : public juce::Component {
   public:
     explicit OverlayView(ControlPanel &owner);
     ~OverlayView() override;
 
     void paint(juce::Graphics &g) override;
-
-    // PlaybackTimerManager::Listener
-    void playbackTimerTick() override {
-    }
 
   private:
     ControlPanel &owner;

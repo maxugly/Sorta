@@ -86,9 +86,6 @@ void ControlButtonsPresenter::initialiseChannelViewButton() {
                     : Config::Labels::channelViewStereo);
         }
 
-        if (owner.waveformCanvasView != nullptr)
-            owner.waveformCanvasView->getWaveformView().setChannelMode(newMode);
-
         owner.repaint();
     };
 }

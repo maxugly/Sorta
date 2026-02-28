@@ -1,8 +1,6 @@
 #include "UI/Views/OverlayView.h"
-#include "Core/AudioPlayer.h"
 #include "UI/ControlPanel.h"
 #include "Utils/Config.h"
-#include "Utils/CoordinateMapper.h"
 #include <vector>
 
 OverlayView::OverlayView(ControlPanel &ownerIn) : owner(ownerIn) {
@@ -10,9 +8,7 @@ OverlayView::OverlayView(ControlPanel &ownerIn) : owner(ownerIn) {
     setOpaque(false);
 }
 
-OverlayView::~OverlayView() {
-    owner.getPlaybackTimerManager().removeListener(this);
-}
+OverlayView::~OverlayView() = default;
 
 void OverlayView::paint(juce::Graphics &g) {
     juce::ignoreUnused(g);

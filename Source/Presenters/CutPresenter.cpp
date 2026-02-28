@@ -9,17 +9,24 @@
 #include "Utils/CoordinateMapper.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/WaveformView.h"
+#include "UI/Views/PlaybackCursorView.h"
 
 CutPresenter::CutPresenter(ControlPanel &controlPanel, SessionState &sessionStateIn,
+                           WaveformView &waveformViewIn,
                            CutLayerView &cutLayerViewIn,
+                           PlaybackCursorView &playbackCursorViewIn,
                            InteractionCoordinator &interactionCoordinatorIn,
                            PlaybackTimerManager &playbackTimerManagerIn)
-    : sessionState(sessionStateIn), cutLayerView(cutLayerViewIn),
+    : sessionState(sessionStateIn), 
+      waveformView(waveformViewIn),
+      cutLayerView(cutLayerViewIn),
+      playbackCursorView(playbackCursorViewIn),
       interactionCoordinator(interactionCoordinatorIn),
       playbackTimerManager(playbackTimerManagerIn) {
     markerMouseHandler = std::make_unique<MarkerMouseHandler>(controlPanel);
     waveformMouseHandler = std::make_unique<WaveformMouseHandler>(controlPanel);
     sessionState.addListener(this);
+    controlPanel.getAudioPlayer().getWaveformManager().addChangeListener(this);
     playbackTimerManager.addListener(this);
 
     refreshMarkersVisibility();
@@ -28,6 +35,7 @@ CutPresenter::CutPresenter(ControlPanel &controlPanel, SessionState &sessionStat
 
 CutPresenter::~CutPresenter() {
     playbackTimerManager.removeListener(this);
+    cutLayerView.getOwner().getAudioPlayer().getWaveformManager().removeChangeListener(this);
     sessionState.removeListener(this);
 }
 
@@ -104,6 +112,43 @@ void CutPresenter::updateAnimationState(CutLayerState& state) {
     }
 
     cutLayerView.updateState(state);
+
+    // --- Waveform State Logic ---
+    WaveformViewState waveformState;
+    waveformState.thumbnail = &cutLayerView.getOwner().getAudioPlayer().getWaveformManager().getThumbnail();
+    waveformState.totalLength = waveformState.thumbnail->getTotalLength();
+    waveformState.channelMode = cutLayerView.getOwner().getChannelViewMode();
+    waveformView.updateState(waveformState);
+
+    // --- Playhead State Logic ---
+    PlaybackCursorViewState cursorState;
+    const double audioLength = waveformState.totalLength;
+    if (audioLength > 0.0) {
+        const auto &layout = cutLayerView.getOwner().getWaveformBounds();
+        cursorState.playheadX = CoordinateMapper::secondsToPixels(
+            cutLayerView.getOwner().getAudioPlayer().getCurrentPosition(),
+            (float)layout.getWidth(), audioLength);
+
+        const auto activePoint = interactionCoordinator.getActiveZoomPoint();
+        const bool isZooming = playbackTimerManager.isZKeyDown() || activePoint != AppEnums::ActiveZoomPoint::None;
+
+        if (isZooming && interactionCoordinator.getZoomPopupBounds()
+                             .translated(-layout.getX(), -layout.getY())
+                             .contains(juce::roundToInt(cursorState.playheadX), 10)) {
+            cursorState.isVisible = false;
+        } else {
+            cursorState.isVisible = true;
+        }
+
+        const auto qColor = Config::Colors::quaternary;
+        cursorState.centerLineColor = juce::Colour((juce::uint8)(255 - qColor.getRed()),
+                                                   (juce::uint8)(255 - qColor.getGreen()),
+                                                   (juce::uint8)(255 - qColor.getBlue()));
+        cursorState.headColor = Config::Colors::playbackCursorHead;
+    } else {
+        cursorState.isVisible = false;
+    }
+    playbackCursorView.updateState(cursorState);
 }
 
 void CutPresenter::pushStateToView() {
@@ -149,4 +194,10 @@ void CutPresenter::pushStateToView() {
 
 void CutPresenter::refreshMarkersVisibility() {
     // This is now handled via pushStateToView and state.markersVisible
+}
+
+void CutPresenter::changeListenerCallback(juce::ChangeBroadcaster *source) {
+    if (source == &cutLayerView.getOwner().getAudioPlayer().getWaveformManager().getThumbnail()) {
+        waveformView.clearCaches();
+    }
 }

@@ -12,39 +12,46 @@
  * @brief Coordinator and presenter for the visual representation of audio cuts.
  */
 
+class WaveformView;
 class CutLayerView;
+class PlaybackCursorView;
 struct CutLayerState;
 class ControlPanel;
 class InteractionCoordinator;
 
 /**
  * @class CutPresenter
- * @brief Orchestrates the visual state and interaction for audio cut boundaries.
+ * @brief Orchestrates the visual state and interaction for audio cut boundaries, the playback playhead, and the base waveform.
  * 
  * @details In the Model-View-Presenter (MVP) architecture, CutPresenter acts as a high-level 
- *          coordinator that bridges the SessionState (Model) and the CutLayerView (View). 
- *          It owns and delegates granular mouse interactions to specialized handlers 
- *          (MarkerMouseHandler and WaveformMouseHandler), effectively centralizing the 
- *          logic for how cut markers and waveform highlights should behave. By pushing 
- *          calculated states to the CutLayerView, it ensures the view remains a pure 
- *          rendering component while the presenter handles the "glue" logic of 
+ *          coordinator that bridges the SessionState (Model) and the WaveformView, CutLayerView, 
+ *          and PlaybackCursorView (Views). It owns and delegates granular mouse interactions 
+ *          to specialized handlers (MarkerMouseHandler and WaveformMouseHandler), effectively 
+ *          centralizing the logic for how cut markers, waveform highlights, the base waveform, 
+ *          and the playhead should behave. By pushing calculated states to the Views, it ensures 
+ *          they remain pure rendering components while the presenter handles the "glue" logic of 
  *          synchronizing playback, markers, and user input.
  * 
- * @see SessionState, CutLayerView, MarkerMouseHandler, WaveformMouseHandler, InteractionCoordinator, ControlPanel
+ * @see SessionState, WaveformView, CutLayerView, PlaybackCursorView, MarkerMouseHandler, WaveformMouseHandler, InteractionCoordinator, ControlPanel
  */
 class CutPresenter : public SessionState::Listener,
-                     public PlaybackTimerManager::Listener {
+                     public PlaybackTimerManager::Listener,
+                     public juce::ChangeListener {
   public:
     /**
      * @brief Constructs a new CutPresenter.
      * @param controlPanel The parent control panel.
      * @param sessionStateIn The application session state.
+     * @param waveformViewIn The view responsible for rendering the base waveform.
      * @param cutLayerViewIn The view responsible for rendering cut layers.
+     * @param playbackCursorViewIn The view responsible for rendering the playhead.
      * @param interactionCoordinatorIn Coordinates interactions across multiple presenters.
      * @param playbackTimerManagerIn Manages playback timing for synchronizing visuals.
      */
     CutPresenter(ControlPanel &controlPanel, SessionState &sessionStateIn,
+                 WaveformView &waveformViewIn,
                  CutLayerView &cutLayerViewIn,
+                 PlaybackCursorView &playbackCursorViewIn,
                  InteractionCoordinator &interactionCoordinatorIn,
                  PlaybackTimerManager &playbackTimerManagerIn);
 
@@ -90,6 +97,9 @@ class CutPresenter : public SessionState::Listener,
      */
     void playbackTimerTick() override;
 
+    /** @brief Triggered when the thumbnail broadcasts new data. */
+    void changeListenerCallback(juce::ChangeBroadcaster *source) override;
+
   private:
     /** @brief Updates the visibility of markers based on current state (e.g., file loaded). */
     void refreshMarkersVisibility();
@@ -102,7 +112,9 @@ class CutPresenter : public SessionState::Listener,
 
   private:
     SessionState &sessionState;
+    WaveformView &waveformView;
     CutLayerView &cutLayerView;
+    PlaybackCursorView &playbackCursorView;
     InteractionCoordinator &interactionCoordinator;
 
     PlaybackTimerManager &playbackTimerManager;

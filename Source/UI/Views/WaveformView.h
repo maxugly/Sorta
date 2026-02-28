@@ -17,7 +17,18 @@
  * @brief View component responsible for rendering the base audio waveform.
  */
 
-class WaveformManager;
+/**
+ * @struct WaveformViewState
+ * @brief Encapsulates the visual data required to render the base waveform.
+ */
+struct WaveformViewState {
+    /** @brief Pointer to the audio thumbnail provider. */
+    juce::AudioThumbnail* thumbnail{nullptr};
+    /** @brief The total duration of the audio in seconds. */
+    double totalLength{0.0};
+    /** @brief The current channel view mode. */
+    AppEnums::ChannelViewMode channelMode{AppEnums::ChannelViewMode::Mono};
+};
 
 /**
  * @class WaveformView
@@ -25,40 +36,31 @@ class WaveformManager;
  * 
  * @details Architecturally, the WaveformView is a "Passive View" or "Dumb Component" 
  *          within the Model-View-Presenter (MVP) law. It contains zero business 
- *          logic and exists purely to render the audio data provided by the 
- *          WaveformManager (the data model for visual waveform data). It 
- *          employs an image-based caching strategy to ensure efficient 
- *          repainting during UI interactions. It relies entirely on external 
- *          triggers (via WaveformManager changes) to invalidate its cache 
- *          and redraw.
+ *          logic and exists purely to render the audio data provided by its 
+ *          associated state struct. It employs an image-based caching strategy 
+ *          for efficient repainting. It relies entirely on the CutPresenter 
+ *          to push updates via updateState().
  * 
- * @see WaveformManager, WaveformCanvasView, ControlPanel
+ * @see CutPresenter, WaveformCanvasView, ControlPanel, WaveformViewState
  */
-class WaveformView : public juce::Component, public juce::ChangeListener {
+class WaveformView : public juce::Component {
   public:
     /**
      * @brief Constructs a new WaveformView.
-     * @param waveformManager Reference to the data provider for waveform rendering.
      */
-    explicit WaveformView(WaveformManager &waveformManager);
+    WaveformView();
 
     /** @brief Destructor. */
     ~WaveformView() override;
-
-    /** 
-     * @brief Sets whether the waveform should display mono or stereo channels. 
-     * @param channelMode The new channel view mode.
-     */
-    void setChannelMode(AppEnums::ChannelViewMode channelMode);
 
     /** @brief Standard JUCE paint callback, utilizing the cached waveform image. */
     void paint(juce::Graphics &g) override;
 
     /** 
-     * @brief Standard JUCE change listener callback. 
-     * @param source The broadcaster that triggered the change, typically WaveformManager.
+     * @brief Updates the view's internal state and marks the cache as dirty. 
+     * @param newState The new visual state to apply.
      */
-    void changeListenerCallback(juce::ChangeBroadcaster *source) override;
+    void updateState(const WaveformViewState& newState);
 
     /** @brief Force-clears the internal image cache and marks the view for redrawing. */
     void clearCaches();
@@ -70,9 +72,7 @@ class WaveformView : public juce::Component, public juce::ChangeListener {
      */
     void drawWaveform(juce::Graphics &g);
 
-    WaveformManager &waveformManager;
-    AppEnums::ChannelViewMode currentChannelMode = AppEnums::ChannelViewMode::Mono;
-
+    WaveformViewState state;
     juce::Image cachedWaveform;
     bool isCacheDirty{true};
 

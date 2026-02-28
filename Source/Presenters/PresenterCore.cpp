@@ -58,7 +58,10 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     buttonPresenter->initialiseAllButtons();
 
     cutPresenter = std::make_unique<CutPresenter>(
-        owner, owner.getSessionState(), owner.waveformCanvasView->getCutLayerView(),
+        owner, owner.getSessionState(), 
+        owner.waveformCanvasView->getWaveformView(),
+        owner.waveformCanvasView->getCutLayerView(),
+        owner.waveformCanvasView->getPlaybackCursorView(),
         owner.getInteractionCoordinator(),
         owner.getPlaybackTimerManager());
 

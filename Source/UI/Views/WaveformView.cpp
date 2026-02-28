@@ -1,30 +1,21 @@
 #include "UI/Views/WaveformView.h"
-#include "Core/WaveformManager.h"
 #include "Utils/Config.h"
 #include "Utils/CoordinateMapper.h"
 
-WaveformView::WaveformView(WaveformManager &waveformManagerIn)
-    : waveformManager(waveformManagerIn) {
-    waveformManager.addChangeListener(this);
+WaveformView::WaveformView() {
     setInterceptsMouseClicks(false, false);
     setOpaque(true);
 }
 
-WaveformView::~WaveformView() {
-    waveformManager.removeChangeListener(this);
-}
+WaveformView::~WaveformView() = default;
 
-void WaveformView::changeListenerCallback(juce::ChangeBroadcaster *source) {
-    if (source == &waveformManager.getThumbnail()) {
+void WaveformView::updateState(const WaveformViewState& newState) {
+    if (state.thumbnail != newState.thumbnail || 
+        state.totalLength != newState.totalLength || 
+        state.channelMode != newState.channelMode) {
         isCacheDirty = true;
-        repaint();
     }
-}
-
-void WaveformView::setChannelMode(AppEnums::ChannelViewMode channelMode) {
-    if (currentChannelMode == channelMode) return;
-    currentChannelMode = channelMode;
-    isCacheDirty = true;
+    state = newState;
     repaint();
 }
 
@@ -39,9 +30,8 @@ void WaveformView::paint(juce::Graphics &g) {
         juce::Graphics ig(cachedWaveform);
 
         ig.fillAll(Config::Colors::solidBlack);
-        auto &thumbnail = waveformManager.getThumbnail();
         
-        if (thumbnail.getTotalLength() > 0.0) {
+        if (state.thumbnail != nullptr && state.totalLength > 0.0) {
             const auto bounds = getLocalBounds().toFloat();
             juce::ColourGradient gradient(Config::Colors::waveformPeak, bounds.getX(), bounds.getY(),
                                           Config::Colors::waveformPeak, bounds.getX(), bounds.getBottom(), false);
@@ -55,8 +45,9 @@ void WaveformView::paint(juce::Graphics &g) {
 }
 
 void WaveformView::drawWaveform(juce::Graphics &g) {
-    const auto &thumbnail = waveformManager.getThumbnail();
-    const auto totalLength = (float)thumbnail.getTotalLength();
+    if (state.thumbnail == nullptr) return;
+
+    const auto totalLength = (float)state.totalLength;
     const auto bounds = getLocalBounds().toFloat();
     const auto width = bounds.getWidth();
     const auto centerY = bounds.getCentreY();
@@ -71,7 +62,7 @@ void WaveformView::drawWaveform(juce::Graphics &g) {
         const double endTime = CoordinateMapper::pixelsToSeconds(x + step, width, totalLength);
 
         float minVal = 0.0f, maxVal = 0.0f;
-        thumbnail.getApproximateMinMax(startTime, endTime, 0, minVal, maxVal);
+        state.thumbnail->getApproximateMinMax(startTime, endTime, 0, minVal, maxVal);
 
         const float top = centerY - (maxVal * halfHeight);
         const float bottom = centerY - (minVal * halfHeight);

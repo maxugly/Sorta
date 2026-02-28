@@ -1,8 +1,5 @@
-
-
 #include "UI/Views/CutLayerView.h"
 
-#include "Core/SessionState.h"
 #include "Core/WaveformManager.h"
 #include "UI/ControlPanel.h"
 #include "UI/Handlers/MarkerMouseHandler.h"
