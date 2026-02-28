@@ -1,11 +1,36 @@
+/**
+ * @file TimeUtilsTest.cpp
+ * @Source/Core/FileMetadata.h
+ * @ingroup Tests
+ * @brief Verifies mathematical time conversions, string formatting, and parsing accuracy.
+ */
+
 #include "Utils/TimeUtils.h"
 #include <juce_core/juce_core.h>
 
+/**
+ * @class TimeUtilsTest
+ * @brief Test suite for timecode-to-seconds and seconds-to-timecode conversion math.
+ * 
+ * @details Architecturally, this test suite validates the "Headless Portability" law, 
+ *          proving that all mathematical transformations and string representations 
+ *          function perfectly without any GUI components or visual editors attached.
+ * 
+ *          These tests verify mathematical precision (e.g., converting fractions of 
+ *          seconds into exact sample counts) and robust fallback mechanisms (e.g., 
+ *          handling negative input or invalid timecode strings). This ensures the 
+ *          foundation of our frame-accurate editing is consistent and deterministic.
+ */
 class TimeUtilsTest : public juce::UnitTest {
   public:
     TimeUtilsTest() : juce::UnitTest("TimeUtils Testing") {
     }
 
+    /** 
+     * @brief Executes conversion accuracy and formatting tests.
+     * @details Covers basic time formatting, sample-accurate truncation, negative 
+     *          input sanitization, and complex HH:MM:SS:Samples round-trip parsing.
+     */
     void runTest() override {
         const double sr = 44100.0;
         beginTest("formatTime handles basic times");

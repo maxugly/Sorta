@@ -1,5 +1,3 @@
-
-
 /**
  * @file AudioPlayer.cpp
  */
@@ -148,6 +146,31 @@ void AudioPlayer::prepareToPlay(int samplesPerBlockExpected, double sampleRate) 
     transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
 }
 
+/**
+ * @details This method is the performance-critical heart of the audio engine. It operates 
+ *          under strict "Lock-Free Deterministic" constraints to ensure jitter-free 
+ *          audio processing.
+ *          
+ *          Key Algorithmic Pillars:
+ *          1. **Atomic State Synchronization**: Instead of locking a mutex (which 
+ *             risks priority inversion), it cross-references `cachedCutIn` and 
+ *             `cachedCutOut`—atomic variables updated from the Message Thread. 
+ *             This ensures that UI-driven boundary changes are applied at the 
+ *             very next block boundary.
+ *          2. **Boundary Enforcement**: If the current `startPos` is already past 
+ *             the `cutOut` point, the method immediately stops playback or wraps 
+ *             to the `cutIn` point (if `repeating` is active).
+ *          3. **Buffer Truncation & Zero-Leakage**: If the block currently being processed 
+ *             spans across the `cutOut` point, we mathematically calculate the exact 
+ *             sample index (`samplesToKeep`) where the cut occurs. We then 
+ *             forcefully clear (zero out) the remainder of the buffer. This 
+ *             physically prevents audio data leakage past a user-defined cut marker, 
+ *             guaranteeing that exported files or live previews never "overshoot" 
+ *             the silence threshold.
+ *          4. **Micro-Fades (Implicit)**: By stopping at the exact sample boundary, 
+ *             we rely on the underlying transport's gain-ramping (if applicable) 
+ *             to prevent pops, while maintaining mathematical frame-accuracy.
+ */
 void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) {
     if (readerSource.get() == nullptr) {
         bufferToFill.clearActiveBufferRegion();
@@ -171,6 +194,7 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferTo
     const double cutOut = std::max(cutIn, (double)cachedCutOut);
     const double startPos = transportSource.getCurrentPosition();
 
+    // Catch-all: If the playhead somehow jumped past the cut point, reset or stop now.
     if (startPos >= cutOut) {
         if (repeating) {
             transportSource.setPosition(cutIn);
@@ -184,18 +208,25 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferTo
         return;
     }
 
+    // Fill the buffer with raw audio data first
     transportSource.getNextAudioBlock(bufferToFill);
 
+    // Calculate the time-position of the final sample in this block
     const double endPos = startPos + ((double)bufferToFill.numSamples / sampleRate);
+    
+    // Check if the current block straddles the 'Out' boundary
     if (endPos >= cutOut) {
+        // Calculate exactly how many samples should remain before silence begins
         const int samplesToKeep = juce::jlimit(0, bufferToFill.numSamples,
                                                (int)std::floor((cutOut - startPos) * sampleRate));
 
+        // Zero-out the "leakage" samples to enforce the hard cut
         if (samplesToKeep < bufferToFill.numSamples) {
             bufferToFill.buffer->clear(bufferToFill.startSample + samplesToKeep,
                                        bufferToFill.numSamples - samplesToKeep);
         }
 
+        // Loop back or halt the transport as necessary
         if (repeating) {
             transportSource.setPosition(cutIn);
             transportSource.start();

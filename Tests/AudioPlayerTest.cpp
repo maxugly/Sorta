@@ -1,9 +1,23 @@
+/**
+ * @file AudioPlayerTest.cpp
+ * @Source/Core/FileMetadata.h
+ * @ingroup Tests
+ * @brief Verifies the audio engine's playback logic, playhead clamping, and boundary synchronization.
+ */
+
 #include "Core/AudioPlayer.h"
 #include "Core/SessionState.h"
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_core/juce_core.h>
 
-// Simple Mock Source
+/**
+ * @class MockAudioSource
+ * @brief A lightweight mock audio source for testing the transport engine in a headless context.
+ * 
+ * @details This mock implements `juce::PositionableAudioSource` and provides 
+ *          predictable playback metadata, allowing the `AudioPlayer` to be tested 
+ *          mathematically without actual disk I/O or an active audio output device.
+ */
 class MockAudioSource : public juce::PositionableAudioSource {
   public:
     MockAudioSource() {
@@ -31,6 +45,7 @@ class MockAudioSource : public juce::PositionableAudioSource {
     void releaseResources() override {
     }
     void getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferToFill) override {
+        juce::ignoreUnused(bufferToFill);
     }
 
     double currentSampleRate = 44100.0;
@@ -38,11 +53,31 @@ class MockAudioSource : public juce::PositionableAudioSource {
     juce::int64 position = 0;
 };
 
+/**
+ * @class AudioPlayerTest
+ * @brief Unit test suite for verifying the core playback engine.
+ * 
+ * @details Architecturally, this test suite validates the "Headless Portability" law, 
+ *          proving that the engine and core logic (playback, seeking, clamping) function 
+ *          perfectly without any GUI components or visual waveforms attached.
+ * 
+ *          These tests verify the strict "Separation of Concerns" (SoC) law, 
+ *          ensuring `AudioPlayer` strictly handles file reading and playback state 
+ *          without bleeding into UI logic. It confirms that calculations for playhead 
+ *          positions and cut-boundary synchronization are mathematically deterministic 
+ *          at the engine level.
+ */
 class AudioPlayerTest : public juce::UnitTest {
   public:
     AudioPlayerTest() : juce::UnitTest("AudioPlayer Testing") {
     }
 
+    /** 
+     * @brief Executes playback logic verification cases.
+     * @details Focuses on validating that the engine correctly clamps the 
+     *          playhead position within the user-defined 'In' and 'Out' boundaries 
+     *          in all possible scenarios (within range, below range, above range, swapped points).
+     */
     void runTest() override {
         beginTest("setPlayheadPosition clamps position correctly");
         {

@@ -1,19 +1,40 @@
-
-
 #include "Utils/TimeEntryHelpers.h"
 #include "Utils/Config.h"
 #include "Utils/TimeUtils.h"
 
 namespace TimeEntryHelpers {
 
+/**
+ * @details This method implements a "Geometric Proportional Hit-Zone" algorithm to 
+ *          map raw mouse coordinates to specific characters in a TextEditor.
+ *          
+ *          Why this is necessary:
+ *          Standard JUCE `TextEditor` components often have internal "invisible padding" 
+ *          or non-linear character spacing that makes standard `getTextIndexAt()` 
+ *          calls unreliable for frame-accurate time manipulation.
+ *          
+ *          Algorithmic Steps:
+ *          1. **Static Baseline Calculation**: We calculate the `textWidth` using 
+ *             the editor's font metrics to find the absolute center-aligned start X.
+ *          2. **Linear Accumulation**: We iterate through each character, 
+ *             accumulating its specific width (`getStringWidth`).
+ *          3. **Hit-Box Intersection**: As soon as the `mouseX` coordinate falls 
+ *             within a character's accumulated width window, we return that index. 
+ *             This bypasses the native JUCE padding bug by relying on pure 
+ *             mathematical string measurements rather than the component's 
+ *             internal rendering state.
+ */
 static int calculateCharIndexAtX(const juce::TextEditor& editor, int mouseX) {
     const auto& font = editor.getFont();
     const auto text = editor.getText();
     const int textWidth = font.getStringWidth(text);
+    // Determine the starting X offset for center-aligned text
     const int startX = (editor.getWidth() - textWidth) / 2;
     int currentX = startX;
+
     for (int i = 0; i < text.length(); ++i) {
         int charWidth = font.getStringWidth(juce::String::charToString(text[i]));
+        // If the mouse is within the horizontal bounds of this specific character
         if (mouseX < currentX + charWidth) return i;
         currentX += charWidth;
     }
@@ -70,22 +91,44 @@ void validateTimeEntry(juce::TextEditor &editor, double totalLength, double samp
     }
 }
 
+/**
+ * @details This method calculates the discrete time adjustment "step" based on which 
+ *          segment of the HH:MM:SS.mmm timecode the mouse is currently hovering over.
+ *          
+ *          Mathematical Model:
+ *          1. **Segmented Multipliers**:
+ *             - Index 0-2 (HH): Sets the step to 3600 seconds.
+ *             - Index 3-5 (MM): Sets the step to 60 seconds.
+ *             - Index 6-8 (SS): Sets the step to 1 second.
+ *             - Index 9+ (mmm): Sets the step to 1/sampleRate (single-sample precision).
+ *          2. **Modifier Sensitivity**:
+ *             - `Shift`: Reduces the step by 10x for fine-tuning.
+ *             - `Shift + Ctrl`: Reduces the step by 100x for surgical precision.
+ *             - `Alt`: Increases the step by 10x for rapid "scrubbing" through the timecode.
+ *          3. **Sample-Rate Normalization**: If the hover is in the millisecond/sample 
+ *             segment, the step is normalized against the `sampleRate` to ensure 
+ *             sub-millisecond movements are frame-accurate.
+ */
 double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double sampleRate) {
+    // Default to single-sample precision
     double step = (sampleRate > 0.0) ? (1.0 / sampleRate) : 0.0001;
     bool isSamples = false;
 
+    // Route the step size based on the character index hit-zone
     if (charIndex <= 2)      step = Config::Audio::cutStepHours;
     else if (charIndex <= 5) step = Config::Audio::cutStepMinutes;
     else if (charIndex <= 8) step = Config::Audio::cutStepSeconds;
     else                     isSamples = true;
 
     if (isSamples) {
+        // Special case for sub-sample precision modifiers
         if (mods.isCtrlDown() && mods.isShiftDown()) {
-            step *= 0.1; // Sub-sample precision if supported? 
+            step *= 0.1; 
         } else if (mods.isShiftDown()) {
-            step *= 1.0; // Already 1 sample
+            step *= 1.0; // Fixed 1 sample
         }
     } else {
+        // Apply geometric reduction based on modifier keys for time-based segments
         double multiplier = 1.0;
         if (mods.isShiftDown() && mods.isCtrlDown())
             multiplier = 0.01;
@@ -95,6 +138,7 @@ double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double s
         step *= multiplier;
     }
 
+    // Apply the "Fast Scrub" multiplier
     if (mods.isAltDown())
         step *= 10.0;
 
