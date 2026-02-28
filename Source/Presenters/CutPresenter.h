@@ -35,8 +35,7 @@ class InteractionCoordinator;
  * @see SessionState, WaveformView, CutLayerView, PlaybackCursorView, MarkerMouseHandler, WaveformMouseHandler, InteractionCoordinator, ControlPanel
  */
 class CutPresenter : public SessionState::Listener,
-                     public PlaybackTimerManager::Listener,
-                     public juce::ChangeListener {
+                     public PlaybackTimerManager::Listener {
   public:
     /**
      * @brief Constructs a new CutPresenter.
@@ -96,9 +95,6 @@ class CutPresenter : public SessionState::Listener,
      *          necessary visual animations.
      */
     void playbackTimerTick() override;
-
-    /** @brief Triggered when the thumbnail broadcasts new data. */
-    void changeListenerCallback(juce::ChangeBroadcaster *source) override;
 
   private:
     /** @brief Updates the visibility of markers based on current state (e.g., file loaded). */

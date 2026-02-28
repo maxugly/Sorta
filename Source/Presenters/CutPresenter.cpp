@@ -26,7 +26,6 @@ CutPresenter::CutPresenter(ControlPanel &controlPanel, SessionState &sessionStat
     markerMouseHandler = std::make_unique<MarkerMouseHandler>(controlPanel);
     waveformMouseHandler = std::make_unique<WaveformMouseHandler>(controlPanel);
     sessionState.addListener(this);
-    controlPanel.getAudioPlayer().getWaveformManager().addChangeListener(this);
     playbackTimerManager.addListener(this);
 
     refreshMarkersVisibility();
@@ -35,7 +34,6 @@ CutPresenter::CutPresenter(ControlPanel &controlPanel, SessionState &sessionStat
 
 CutPresenter::~CutPresenter() {
     playbackTimerManager.removeListener(this);
-    cutLayerView.getOwner().getAudioPlayer().getWaveformManager().removeChangeListener(this);
     sessionState.removeListener(this);
 }
 
@@ -194,10 +192,4 @@ void CutPresenter::pushStateToView() {
 
 void CutPresenter::refreshMarkersVisibility() {
     // This is now handled via pushStateToView and state.markersVisible
-}
-
-void CutPresenter::changeListenerCallback(juce::ChangeBroadcaster *source) {
-    if (source == &cutLayerView.getOwner().getAudioPlayer().getWaveformManager().getThumbnail()) {
-        waveformView.clearCaches();
-    }
 }

@@ -10,9 +10,10 @@ WaveformView::WaveformView() {
 WaveformView::~WaveformView() = default;
 
 void WaveformView::updateState(const WaveformViewState& newState) {
-    if (state.thumbnail != newState.thumbnail || 
-        state.totalLength != newState.totalLength || 
-        state.channelMode != newState.channelMode) {
+    if (state.thumbnail != newState.thumbnail ||
+        state.totalLength != newState.totalLength ||
+        state.channelMode != newState.channelMode ||
+        (newState.thumbnail != nullptr && !newState.thumbnail->isFullyLoaded())) {
         isCacheDirty = true;
     }
     state = newState;
