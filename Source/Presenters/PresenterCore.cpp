@@ -14,6 +14,7 @@
 #include "Presenters/CutResetPresenter.h"
 #include "Presenters/PlaybackRepeatController.h"
 #include "Presenters/PlaybackTextPresenter.h"
+#include "Presenters/CutLengthPresenter.h"
 #include "Presenters/RepeatButtonPresenter.h"
 #include "Presenters/SilenceDetectionPresenter.h"
 #include "Presenters/StatsPresenter.h"
@@ -38,6 +39,9 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     
     playbackTextPresenter = std::make_unique<PlaybackTextPresenter>(owner);
     playbackTextPresenter->initialiseEditors();
+    
+    cutLengthPresenter = std::make_unique<CutLengthPresenter>(owner);
+    cutLengthPresenter->initialiseEditors();
     
     repeatButtonPresenter = std::make_unique<RepeatButtonPresenter>(owner, owner.getAudioPlayer(), owner.getSessionState());
     if (auto* ts = owner.getTransportStrip())

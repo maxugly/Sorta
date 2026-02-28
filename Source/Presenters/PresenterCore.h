@@ -14,6 +14,7 @@ class ControlPanel;
 class StatsPresenter;
 class SilenceDetectionPresenter;
 class PlaybackTextPresenter;
+class CutLengthPresenter;
 class RepeatButtonPresenter;
 class BoundaryLogicPresenter;
 class ControlButtonsPresenter;
@@ -41,6 +42,7 @@ class PresenterCore final {
     StatsPresenter& getStatsPresenter() { return *statsPresenter; }
     SilenceDetectionPresenter& getSilenceDetectionPresenter() { return *silenceDetectionPresenter; }
     PlaybackTextPresenter& getPlaybackTextPresenter() { return *playbackTextPresenter; }
+    CutLengthPresenter& getCutLengthPresenter() { return *cutLengthPresenter; }
     RepeatButtonPresenter& getRepeatButtonPresenter() { return *repeatButtonPresenter; }
     BoundaryLogicPresenter& getBoundaryLogicPresenter() { return *boundaryLogicPresenter; }
     BoundaryLockPresenter& getBoundaryLockPresenter() { return *boundaryLockPresenter; }
@@ -64,6 +66,7 @@ class PresenterCore final {
     std::unique_ptr<StatsPresenter> statsPresenter;
     std::unique_ptr<SilenceDetectionPresenter> silenceDetectionPresenter;
     std::unique_ptr<PlaybackTextPresenter> playbackTextPresenter;
+    std::unique_ptr<CutLengthPresenter> cutLengthPresenter;
     std::unique_ptr<RepeatButtonPresenter> repeatButtonPresenter;
     std::unique_ptr<BoundaryLogicPresenter> boundaryLogicPresenter;
     std::unique_ptr<BoundaryLockPresenter> boundaryLockPresenter;

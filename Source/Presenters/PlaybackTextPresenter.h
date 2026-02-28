@@ -38,14 +38,12 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
     void fileChanged(const juce::String &filePath) override {
         juce::ignoreUnused(filePath);
         updateEditors();
-        updateLengthEditor();
     }
-    void cutInChanged(double) override { updateLengthEditor(); }
-    void cutOutChanged(double) override { updateLengthEditor(); }
-    void cutPreferenceChanged(const MainDomain::CutPreferences&) override { updateLengthEditor(); }
+    void cutInChanged(double) override {}
+    void cutOutChanged(double) override {}
+    void cutPreferenceChanged(const MainDomain::CutPreferences&) override {}
 
   private:
-    void updateLengthEditor();
     void textEditorTextChanged(juce::TextEditor &editor) override;
 
     void textEditorReturnKeyPressed(juce::TextEditor &editor) override;
@@ -70,7 +68,6 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
 
     bool isEditingElapsed{false};
     bool isEditingRemaining{false};
-    bool isEditingCutLength{false};
     int tickCounter{0};
 
     void mouseDown(const juce::MouseEvent &event) override;

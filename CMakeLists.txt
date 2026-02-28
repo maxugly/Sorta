@@ -98,6 +98,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/ControlStatePresenter.cpp
             Source/Presenters/CutButtonPresenter.h
             Source/Presenters/CutButtonPresenter.cpp
+            Source/Presenters/CutLengthPresenter.h
+            Source/Presenters/CutLengthPresenter.cpp
             Source/Presenters/CutPresenter.h
             Source/Presenters/CutPresenter.cpp
             Source/Presenters/CutResetPresenter.h
