@@ -56,7 +56,7 @@ void PlaybackTextPresenter::updateEditors() {
     double sampleRate = 0.0;
     juce::int64 dummyLength = 0;
     owner.getAudioPlayer().getReaderInfo(sampleRate, dummyLength);
-    if (sampleRate <= 0) sampleRate = 44100.0;
+    if (sampleRate <= 0) sampleRate = Config::Audio::fallbackSampleRate;
 
     auto totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
     owner.playbackTimeView->updateTimes(
@@ -95,7 +95,7 @@ void PlaybackTextPresenter::updateLengthEditor() {
     double sampleRate = 0.0;
     juce::int64 dummyLength = 0;
     owner.getAudioPlayer().getReaderInfo(sampleRate, dummyLength);
-    if (sampleRate <= 0) sampleRate = 44100.0;
+    if (sampleRate <= 0) sampleRate = Config::Audio::fallbackSampleRate;
 
     auto &length = owner.getCutLengthStrip()->getLengthEditor();
     if (!isEditingCutLength && !length.hasKeyboardFocus(true)) {
@@ -118,7 +118,7 @@ void PlaybackTextPresenter::textEditorTextChanged(juce::TextEditor &editor) {
     double sampleRate = 0.0;
     juce::int64 length = 0;
     owner.getAudioPlayer().getReaderInfo(sampleRate, length);
-    if (sampleRate <= 0) sampleRate = 44100.0;
+    if (sampleRate <= 0) sampleRate = Config::Audio::fallbackSampleRate;
 
     const double totalLength = owner.getAudioPlayer().getThumbnail().getTotalLength();
 
@@ -169,7 +169,7 @@ void PlaybackTextPresenter::applyTimeEdit(juce::TextEditor &editor) {
     double sampleRate = 0.0;
     juce::int64 dummyLength = 0;
     owner.getAudioPlayer().getReaderInfo(sampleRate, dummyLength);
-    if (sampleRate <= 0) sampleRate = 44100.0;
+    if (sampleRate <= 0) sampleRate = Config::Audio::fallbackSampleRate;
 
     double newTime = TimeUtils::parseTime(editor.getText(), sampleRate);
     if (newTime < 0.0)
@@ -221,7 +221,7 @@ void PlaybackTextPresenter::syncEditorToPosition(juce::TextEditor &editor, doubl
     double sampleRate = 0.0;
     juce::int64 dummyLength = 0;
     owner.getAudioPlayer().getReaderInfo(sampleRate, dummyLength);
-    if (sampleRate <= 0) sampleRate = 44100.0;
+    if (sampleRate <= 0) sampleRate = Config::Audio::fallbackSampleRate;
 
     juce::String text = TimeUtils::formatTime(positionSeconds, sampleRate);
     if (isRemaining)
@@ -284,7 +284,7 @@ void PlaybackTextPresenter::mouseWheelMove(const juce::MouseEvent &event,
     double sampleRate = 0.0;
     juce::int64 length = 0;
     owner.getAudioPlayer().getReaderInfo(sampleRate, length);
-    if (sampleRate <= 0) sampleRate = 44100.0;
+    if (sampleRate <= 0) sampleRate = Config::Audio::fallbackSampleRate;
 
     double currentVal = TimeUtils::parseTime(editor->getText(), sampleRate);
     if (currentVal < 0.0)

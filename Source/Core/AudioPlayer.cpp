@@ -16,7 +16,7 @@ AudioPlayer::AudioPlayer(SessionState &state)
 #else
     :
 #endif
-      readAheadThread("Audio File Reader"), sessionState(state) {
+      readAheadThread(Config::Labels::threadAudioReader), sessionState(state) {
     formatManager.registerBasicFormats();
     sessionState.addListener(this);
     readAheadThread.startThread();
@@ -83,7 +83,7 @@ juce::Result AudioPlayer::loadFile(const juce::File &file) {
         return juce::Result::ok();
     }
 
-    return juce::Result::fail("Failed to read audio file: " + file.getFileName());
+    return juce::Result::fail(Config::Labels::failGeneric);
 }
 
 juce::File AudioPlayer::getLoadedFile() const {

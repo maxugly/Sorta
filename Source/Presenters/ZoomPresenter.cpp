@@ -53,7 +53,7 @@ void ZoomPresenter::playbackTimerTick() {
         double sampleRate = 0.0;
         juce::int64 length = 0;
         owner.getAudioPlayer().getReaderInfo(sampleRate, length);
-        if (sampleRate <= 0) sampleRate = 44100.0;
+        if (sampleRate <= 0) sampleRate = Config::Audio::fallbackSampleRate;
 
         state.mouseTimeText = TimeUtils::formatTime(state.mouseTime, sampleRate);
 

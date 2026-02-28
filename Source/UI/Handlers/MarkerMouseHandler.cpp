@@ -76,7 +76,7 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
                                                               cpt - tr.first, (float)zb.getWidth(),
                                                               tr.second - tr.first);
 
-                    if (std::abs(event.x - (int)indicatorX) < 20) {
+                    if (std::abs(event.x - (int)indicatorX) < Config::Layout::Glow::hitBoxTolerance) {
                         draggedHandle = (azp == AppEnums::ActiveZoomPoint::In)
                                             ? CutMarkerHandle::In
                                             : CutMarkerHandle::Out;

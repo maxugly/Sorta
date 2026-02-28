@@ -183,6 +183,7 @@ struct Layout {
     struct Glow {
         static constexpr float offsetFactor = 0.5f;
         static constexpr float mouseAlpha = 0.3f;
+        static constexpr float hitBoxTolerance = 20.0f;
         static constexpr int mousePadding = 2;
         static constexpr int mouseHighlightOffset = 2;
         static constexpr int mouseHighlightSize = 5;
@@ -238,6 +239,7 @@ constexpr float thresholdLineWidth = 100.0f;
 namespace Audio {
 constexpr int thumbnailCacheSize = 5;
 constexpr int thumbnailSizePixels = 512;
+static constexpr double fallbackSampleRate = 44100.0;
 constexpr double keyboardSkipSeconds = 5.0;
 constexpr double cutStepHours = 3600.0;
 constexpr double cutStepMinutes = 60.0;
@@ -318,6 +320,8 @@ extern juce::String errorZeroLength;
 extern juce::String errorNoAudio;
 extern juce::String scanningCutPoints;
 extern juce::String noSilenceBoundaries;
+extern const char* const threadAudioReader;
+extern const char* const failGeneric;
 } // namespace Labels
 
 } // namespace Config

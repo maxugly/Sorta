@@ -1,13 +1,14 @@
 
 
 #include "Utils/TimeUtils.h"
+#include "Utils/Config.h"
 
 juce::String TimeUtils::formatTime(double seconds, double sampleRate) {
     if (seconds < 0)
         seconds = 0;
 
     if (sampleRate <= 0)
-        sampleRate = 44100.0;
+        sampleRate = Config::Audio::fallbackSampleRate;
 
     auto totalSamples = (long long)(seconds * sampleRate + 0.0001);
     auto samplesPerSecond = (long long)sampleRate;
@@ -26,7 +27,7 @@ juce::String TimeUtils::formatTime(double seconds, double sampleRate) {
 
 double TimeUtils::parseTime(const juce::String &timeString, double sampleRate) {
     if (sampleRate <= 0)
-        sampleRate = 44100.0;
+        sampleRate = Config::Audio::fallbackSampleRate;
 
     juce::String cleanTime = timeString.trimCharactersAtStart("+-");
 

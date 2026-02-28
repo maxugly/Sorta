@@ -484,4 +484,7 @@ void saveCurrentTheme(const juce::String& themeName) {
     settingsFile.replaceWithText(juce::JSON::toString(obj.get(), false));
 }
 
+const char* const Labels::threadAudioReader = "Audio File Reader";
+const char* const Labels::failGeneric = "Failed to load audio file.";
+
 } // namespace Config
