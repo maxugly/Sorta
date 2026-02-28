@@ -75,6 +75,7 @@ class WaveformView : public juce::Component {
     WaveformViewState state;
     juce::Image cachedWaveform;
     bool isCacheDirty{true};
+    int loadingTickCounter{0};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(WaveformView)
 };

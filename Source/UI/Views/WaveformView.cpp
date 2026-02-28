@@ -10,12 +10,25 @@ WaveformView::WaveformView() {
 WaveformView::~WaveformView() = default;
 
 void WaveformView::updateState(const WaveformViewState& newState) {
-    if (state.thumbnail != newState.thumbnail ||
-        state.totalLength != newState.totalLength ||
-        state.channelMode != newState.channelMode ||
-        (newState.thumbnail != nullptr && !newState.thumbnail->isFullyLoaded())) {
+    // 1. Check if core parameters changed (requires immediate redraw)
+    bool majorChange = (state.thumbnail != newState.thumbnail ||
+                        state.totalLength != newState.totalLength ||
+                        state.channelMode != newState.channelMode);
+
+    // 2. Check if the background thread is still building the waveform
+    bool isActivelyLoading = (newState.thumbnail != nullptr && !newState.thumbnail->isFullyLoaded());
+
+    if (majorChange) {
         isCacheDirty = true;
+        loadingTickCounter = 0; 
+    } else if (isActivelyLoading) {
+        loadingTickCounter++;
+        // Throttle the heavy image cache rebuild to exactly 10 FPS (assuming 60Hz input)
+        if (loadingTickCounter % 6 == 0) {
+            isCacheDirty = true;
+        }
     }
+
     state = newState;
     repaint();
 }
