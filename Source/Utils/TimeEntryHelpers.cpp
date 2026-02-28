@@ -5,27 +5,38 @@
 #include "Utils/TimeUtils.h"
 
 namespace TimeEntryHelpers {
+
+static int calculateCharIndexAtX(const juce::TextEditor& editor, int mouseX) {
+    const auto& font = editor.getFont();
+    const auto text = editor.getText();
+    const int textWidth = font.getStringWidth(text);
+    const int startX = (editor.getWidth() - textWidth) / 2;
+    int currentX = startX;
+    for (int i = 0; i < text.length(); ++i) {
+        int charWidth = font.getStringWidth(juce::String::charToString(text[i]));
+        if (mouseX < currentX + charWidth) return i;
+        currentX += charWidth;
+    }
+    return text.length() - 1;
+}
+
 void handleTimeSegmentHighlight(const juce::MouseEvent &event) {
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
-    if (editor == nullptr)
-        return;
+    if (editor == nullptr) return;
 
     const bool isNegative = editor->getText().startsWith("-");
     const int offset = isNegative ? 1 : 0;
-    const int charIndex = editor->getTextIndexAt(event.getPosition());
-    if (charIndex < 0)
-        return;
-
-    const int effectiveIndex = charIndex - offset;
+    const int charIndex = calculateCharIndexAtX(*editor, event.x);
+    const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
     juce::Range<int> newRange;
 
-    if (effectiveIndex <= 1)
+    if (effectiveIndex <= 2)
         newRange = juce::Range<int>(0 + offset, 2 + offset);
-    else if (effectiveIndex >= 3 && effectiveIndex <= 4)
+    else if (effectiveIndex >= 3 && effectiveIndex <= 5)
         newRange = juce::Range<int>(3 + offset, 5 + offset);
-    else if (effectiveIndex >= 6 && effectiveIndex <= 7)
+    else if (effectiveIndex >= 6 && effectiveIndex <= 8)
         newRange = juce::Range<int>(6 + offset, 8 + offset);
-    else if (effectiveIndex >= 9 && effectiveIndex <= 13)
+    else if (effectiveIndex >= 9)
         newRange = juce::Range<int>(9 + offset, 14 + offset);
     else
         return;
@@ -38,17 +49,14 @@ void handleTimeSegmentHighlight(const juce::MouseEvent &event) {
 
 double handleTimeStep(const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel,
                       double currentVal, double sampleRate) {
-    if (wheel.deltaY == 0.0f)
-        return currentVal;
-
+    if (wheel.deltaY == 0.0f) return currentVal;
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
-    if (editor == nullptr)
-        return currentVal;
+    if (editor == nullptr) return currentVal;
 
     const bool isNegative = editor->getText().startsWith("-");
     const int offset = isNegative ? 1 : 0;
-    const int charIndex = editor->getTextIndexAt(event.getPosition());
-    const int effectiveIndex = charIndex - offset;
+    const int charIndex = calculateCharIndexAtX(*editor, event.x);
+    const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
 
     const double step = calculateStepSize(effectiveIndex, event.mods, sampleRate);
     const double direction = (wheel.deltaY > 0) ? 1.0 : -1.0;
@@ -105,26 +113,17 @@ double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double s
 
 float getZoomFactorForPosition(const juce::MouseEvent &event) {
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
-    if (editor == nullptr)
-        return 10.0f;
+    if (editor == nullptr) return 10.0f;
 
     const bool isNegative = editor->getText().startsWith("-");
     const int offset = isNegative ? 1 : 0;
-    const int charIndex = editor->getTextIndexAt(event.getPosition());
-    if (charIndex < 0)
-        return 10.0f;
+    const int charIndex = calculateCharIndexAtX(*editor, event.x);
+    const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
 
-    const int effectiveIndex = charIndex - offset;
-
-    // Based on TimeUtils::formatTime result: "HH:MM:SS:sssss"
-    if (effectiveIndex <= 1)
-        return 1.0f;
-    if (effectiveIndex >= 3 && effectiveIndex <= 4)
-        return 10.0f;
-    if (effectiveIndex >= 6 && effectiveIndex <= 7)
-        return 100.0f;
-    if (effectiveIndex >= 9)
-        return 10000.0f;
+    if (effectiveIndex <= 2) return 1.0f;
+    if (effectiveIndex >= 3 && effectiveIndex <= 5) return 10.0f;
+    if (effectiveIndex >= 6 && effectiveIndex <= 8) return 100.0f;
+    if (effectiveIndex >= 9) return 10000.0f;
 
     return 10.0f;
 }

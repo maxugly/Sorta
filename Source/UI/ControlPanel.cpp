@@ -135,7 +135,6 @@ void ControlPanel::initialiseLookAndFeel() {
     modernLF.setColour(juce::ComboBox::arrowColourId, Config::Colors::Button::text);
 
     modernLF.setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
-    modernLF.setColour(juce::TextEditor::textColourId, juce::Colours::transparentBlack);
     modernLF.setColour(juce::TextEditor::outlineColourId, Config::Colors::Button::outline);
 }
 
