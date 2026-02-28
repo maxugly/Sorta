@@ -209,6 +209,8 @@ struct Layout {
         static constexpr int hudPadding = 10;
         static constexpr int hudFontSize = 18;
         static constexpr int hudLineSpacing = 22;
+        static constexpr float zoomStepIn = 1.1f;
+        static constexpr float zoomStepOut = 0.9f;
     };
 
     struct Matrix {

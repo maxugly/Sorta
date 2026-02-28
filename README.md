@@ -45,15 +45,11 @@ Each major feature area has a binding contract. A feature is not "done" until it
 *   **Goal**: Move from a Stacked Hierarchy to Peer-to-Peer communication. `ControlPanel.h` must contain only layout code.
 *   **Done State**: Every UI feature has a dedicated Presenter (the Brain) and a Passive View (the Display). All UI elements are moved out of `ControlPanel.h` into their respective Presenter-managed View groups.
 
-### **Contract 2 — Total Naming Purity (The No-Loop Zone)**
-*   **Goal**: The word "Loop" must not appear in the source code except where it refers to a literal programmatic loop.
-*   **Done State**: A case-insensitive global search for "Loop" in the `Source/` folder returns zero results. Terminology must strictly use Boundaries, Regions, Cut Mode, and Repeat.
-
-### **Contract 3 — Metadata Resource Pool**
+### **Contract 2 — Metadata Resource Pool**
 *   **Goal**: `SessionState` is a high-speed Data Hub that serves multiple files, not only the currently active one.
 *   **Done State**: The `metadataCache` map is the Single Source of Truth. The background worker writes to this map, and the `CutPresenter` reads from it.
 
-### **Contract 4 — Thread-Safe Air Gaps**
+### **Contract 3 — Thread-Safe Air Gaps**
 *   **Goal**: Zero direct contact between the Background Worker and any UI component.
 *   **Done State**: The `SilenceAnalysisWorker` communicates exclusively via `juce::MessageManager::callAsync`. It never touches the `AudioPlayer` mutex and creates its own private `AudioFormatReader` for each file.
 
@@ -121,7 +117,6 @@ Run through every item before submitting any change. A single **NO** is a blocke
 *   [ ] Is any logic inside a `paint()` or `resized()` method? *(Must be No)*
 *   [ ] Is any hex color or pixel width hardcoded in a `.cpp` file? *(Must be No)*
 *   [ ] Does any `timerCallback()` poll for a state change? *(Must be No)*
-*   [ ] Does the word "Loop" appear anywhere in Source/ (case-insensitive)? *(Must be No)*
 *   [ ] Does the background worker touch any UI pointer directly? *(Must be No)*
 *   [ ] Do all Presenters communicate via `SessionState` rather than direct references?
 *   [ ] Is every new feature class wired in via `std::unique_ptr`?

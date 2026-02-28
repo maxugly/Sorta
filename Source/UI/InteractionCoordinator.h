@@ -103,6 +103,9 @@ class InteractionCoordinator {
     void constrainFullRegionMove(double &newIn, double &newOut, double length,
                                  double duration) const;
 
+    /** @brief Handles mouse-wheel zoom logic by updating SessionState. */
+    void handleMouseWheelZoom(const juce::MouseWheelDetails &wheel, class SessionState &state) const;
+
   private:
     juce::ListenerList<Listener> listeners;
     AppEnums::ActiveZoomPoint m_activeZoomPoint = AppEnums::ActiveZoomPoint::None;

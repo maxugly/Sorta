@@ -202,7 +202,7 @@ void WaveformMouseHandler::mouseWheelMove(const juce::MouseEvent &event,
         return;
 
     if (event.mods.isCtrlDown() && !event.mods.isShiftDown()) {
-        owner.getSessionState().setZoomFactor(owner.getSessionState().getZoomFactor() * (wheel.deltaY > 0 ? 1.1f : 0.9f));
+        owner.getInteractionCoordinator().handleMouseWheelZoom(wheel, owner.getSessionState());
         return;
     }
 

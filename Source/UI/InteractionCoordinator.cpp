@@ -1,4 +1,6 @@
 #include "UI/InteractionCoordinator.h"
+#include "Core/SessionState.h"
+#include "Utils/Config.h"
 #include <algorithm>
 #include <cmath>
 
@@ -42,4 +44,11 @@ void InteractionCoordinator::constrainFullRegionMove(double &newIn, double &newO
         newOut = duration;
         newIn = duration - length;
     }
+}
+
+void InteractionCoordinator::handleMouseWheelZoom(const juce::MouseWheelDetails &wheel,
+                                                  SessionState &state) const {
+    const float step = (wheel.deltaY > 0) ? Config::Layout::Zoom::zoomStepIn
+                                          : Config::Layout::Zoom::zoomStepOut;
+    state.setZoomFactor(state.getZoomFactor() * step);
 }
