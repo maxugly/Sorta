@@ -202,7 +202,23 @@ void PlaybackTextPresenter::mouseUp(const juce::MouseEvent &event) {
 }
 
 void PlaybackTextPresenter::mouseMove(const juce::MouseEvent &event) {
-    owner.getSessionState().setZoomFactor(TimeEntryHelpers::getZoomFactorForPosition(event));
+    if (TimeEntryHelpers::shouldShowZoomPopup(event)) {
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Playback);
+        owner.getSessionState().setZoomFactor(TimeEntryHelpers::getZoomFactorForPosition(event));
+    } else {
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
+    }
+}
+
+void PlaybackTextPresenter::mouseEnter(const juce::MouseEvent &event) {
+    if (TimeEntryHelpers::shouldShowZoomPopup(event))
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Playback);
+}
+
+void PlaybackTextPresenter::mouseExit(const juce::MouseEvent &event) {
+    auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
+    if (editor != nullptr && !editor->hasKeyboardFocus(false))
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
 }
 
 void PlaybackTextPresenter::mouseWheelMove(const juce::MouseEvent &event,

@@ -57,6 +57,9 @@ double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double s
  * @return The zoom factor (e.g. 1.0 for HH, 1000.0 for ms).
  */
 float getZoomFactorForPosition(const juce::MouseEvent &event);
+
+/** @brief Returns true if the current mouse position in the editor warrants a zoom popup. */
+bool shouldShowZoomPopup(const juce::MouseEvent &event);
 } // namespace TimeEntryHelpers
 
 #endif

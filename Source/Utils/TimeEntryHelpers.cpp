@@ -115,4 +115,14 @@ float getZoomFactorForPosition(const juce::MouseEvent &event) {
     if (effectiveIndex <= 8) return 100.0f;
     return 10000.0f;
 }
+
+bool shouldShowZoomPopup(const juce::MouseEvent &event) {
+    auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
+    if (editor == nullptr) return false;
+    const bool isNegative = editor->getText().startsWith("-");
+    const int offset = isNegative ? 1 : 0;
+    const int charIndex = calculateCharIndexAtX(*editor, event.x);
+    const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
+    return effectiveIndex >= 6;
+}
 } // namespace TimeEntryHelpers

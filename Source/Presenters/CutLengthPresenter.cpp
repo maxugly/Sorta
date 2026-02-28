@@ -144,7 +144,9 @@ void CutLengthPresenter::mouseUp(const juce::MouseEvent& event) {
 }
 
 void CutLengthPresenter::mouseMove(const juce::MouseEvent& event) {
-    owner.getSessionState().setZoomFactor(TimeEntryHelpers::getZoomFactorForPosition(event));
+    if (TimeEntryHelpers::shouldShowZoomPopup(event)) {
+        owner.getSessionState().setZoomFactor(TimeEntryHelpers::getZoomFactorForPosition(event));
+    }
 }
 
 void CutLengthPresenter::mouseWheelMove(const juce::MouseEvent& event,

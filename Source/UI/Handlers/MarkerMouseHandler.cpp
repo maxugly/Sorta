@@ -70,6 +70,11 @@ void MarkerMouseHandler::mouseDown(const juce::MouseEvent &event) {
                 const auto pm = coordinator.getPlacementMode();
                 if (pm == AppEnums::PlacementMode::None) {
                     const auto azp = coordinator.getActiveZoomPoint();
+                    if (azp == AppEnums::ActiveZoomPoint::Playback) {
+                        owner.getAudioPlayer().setPlayheadPosition(zoomedTime);
+                        return;
+                    }
+
                     double cpt = (azp == AppEnums::ActiveZoomPoint::In) ? owner.getSessionState().getCutIn()
                                                                         : owner.getSessionState().getCutOut();
                     float indicatorX = (float)zb.getX() + CoordinateMapper::secondsToPixels(

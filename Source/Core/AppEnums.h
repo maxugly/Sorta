@@ -9,7 +9,7 @@ enum class PlacementMode { None, CutIn, CutOut };
 
 enum class ChannelViewMode { Mono, Stereo };
 
-enum class ActiveZoomPoint { None, In, Out };
+enum class ActiveZoomPoint { None, In, Out, Playback };
 
 enum class GroupPosition { Alone, Left, Middle, Right };
 } // namespace AppEnums

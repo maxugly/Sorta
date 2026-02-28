@@ -76,6 +76,13 @@ void WaveformMouseHandler::mouseDown(const juce::MouseEvent &event) {
                     return;
                 } else {
                     const auto azp = coordinator.getActiveZoomPoint();
+                    if (azp == AppEnums::ActiveZoomPoint::Playback) {
+                        owner.getAudioPlayer().setPlayheadPosition(zoomedTime);
+                        isDraggingFlag = isScrubbingState = true;
+                        mouseDragStartX = event.x;
+                        return;
+                    }
+
                     double cpt = (azp == AppEnums::ActiveZoomPoint::In) ? owner.getSessionState().getCutIn()
                                                                         : owner.getSessionState().getCutOut();
                     float indicatorX = (float)zb.getX() + CoordinateMapper::secondsToPixels(

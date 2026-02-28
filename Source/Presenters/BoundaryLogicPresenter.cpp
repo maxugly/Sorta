@@ -140,10 +140,12 @@ void BoundaryLogicPresenter::mouseUp(const juce::MouseEvent &event) {
 }
 
 void BoundaryLogicPresenter::mouseEnter(const juce::MouseEvent &event) {
-    if (event.eventComponent == &cutInEditor)
-        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::In);
-    else if (event.eventComponent == &cutOutEditor)
-        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
+    if (TimeEntryHelpers::shouldShowZoomPopup(event)) {
+        if (event.eventComponent == &cutInEditor)
+            owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::In);
+        else if (event.eventComponent == &cutOutEditor)
+            owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
+    }
 }
 
 void BoundaryLogicPresenter::mouseExit(const juce::MouseEvent &event) {
@@ -153,7 +155,16 @@ void BoundaryLogicPresenter::mouseExit(const juce::MouseEvent &event) {
 }
 
 void BoundaryLogicPresenter::mouseMove(const juce::MouseEvent &event) {
-    owner.getSessionState().setZoomFactor(TimeEntryHelpers::getZoomFactorForPosition(event));
+    if (TimeEntryHelpers::shouldShowZoomPopup(event)) {
+        if (event.eventComponent == &cutInEditor)
+            owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::In);
+        else if (event.eventComponent == &cutOutEditor)
+            owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::Out);
+
+        owner.getSessionState().setZoomFactor(TimeEntryHelpers::getZoomFactorForPosition(event));
+    } else {
+        owner.getInteractionCoordinator().setManualZoomPoint(AppEnums::ActiveZoomPoint::None);
+    }
 }
 
 void BoundaryLogicPresenter::mouseWheelMove(const juce::MouseEvent &event,

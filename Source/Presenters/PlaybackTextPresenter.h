@@ -58,6 +58,8 @@ class PlaybackTextPresenter : public juce::TextEditor::Listener,
     void mouseUp(const juce::MouseEvent &event) override;
 
     void mouseMove(const juce::MouseEvent &event) override;
+    void mouseEnter(const juce::MouseEvent &event) override;
+    void mouseExit(const juce::MouseEvent &event) override;
 
     void applyTimeEdit(juce::TextEditor &editor);
     void syncEditorToPosition(juce::TextEditor &editor, double positionSeconds,
