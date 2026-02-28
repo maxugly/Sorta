@@ -30,16 +30,10 @@ void handleTimeSegmentHighlight(const juce::MouseEvent &event) {
     const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
     juce::Range<int> newRange;
 
-    if (effectiveIndex <= 2)
-        newRange = juce::Range<int>(0 + offset, 2 + offset);
-    else if (effectiveIndex >= 3 && effectiveIndex <= 5)
-        newRange = juce::Range<int>(3 + offset, 5 + offset);
-    else if (effectiveIndex >= 6 && effectiveIndex <= 8)
-        newRange = juce::Range<int>(6 + offset, 8 + offset);
-    else if (effectiveIndex >= 9)
-        newRange = juce::Range<int>(9 + offset, 14 + offset);
-    else
-        return;
+    if (effectiveIndex <= 2)      newRange = juce::Range<int>(0 + offset, 2 + offset);
+    else if (effectiveIndex <= 5) newRange = juce::Range<int>(3 + offset, 5 + offset);
+    else if (effectiveIndex <= 8) newRange = juce::Range<int>(6 + offset, 8 + offset);
+    else                          newRange = juce::Range<int>(9 + offset, 14 + offset);
 
     juce::MessageManager::callAsync([editor, newRange] {
         if (editor != nullptr)
@@ -80,14 +74,10 @@ double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double s
     double step = (sampleRate > 0.0) ? (1.0 / sampleRate) : 0.0001;
     bool isSamples = false;
 
-    if (charIndex >= 0 && charIndex <= 1)
-        step = Config::Audio::cutStepHours;
-    else if (charIndex >= 3 && charIndex <= 4)
-        step = Config::Audio::cutStepMinutes;
-    else if (charIndex >= 6 && charIndex <= 7)
-        step = Config::Audio::cutStepSeconds;
-    else if (charIndex >= 9)
-        isSamples = true;
+    if (charIndex <= 2)      step = Config::Audio::cutStepHours;
+    else if (charIndex <= 5) step = Config::Audio::cutStepMinutes;
+    else if (charIndex <= 8) step = Config::Audio::cutStepSeconds;
+    else                     isSamples = true;
 
     if (isSamples) {
         if (mods.isCtrlDown() && mods.isShiftDown()) {
@@ -121,10 +111,8 @@ float getZoomFactorForPosition(const juce::MouseEvent &event) {
     const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
 
     if (effectiveIndex <= 2) return 1.0f;
-    if (effectiveIndex >= 3 && effectiveIndex <= 5) return 10.0f;
-    if (effectiveIndex >= 6 && effectiveIndex <= 8) return 100.0f;
-    if (effectiveIndex >= 9) return 10000.0f;
-
-    return 10.0f;
+    if (effectiveIndex <= 5) return 10.0f;
+    if (effectiveIndex <= 8) return 100.0f;
+    return 10000.0f;
 }
 } // namespace TimeEntryHelpers
