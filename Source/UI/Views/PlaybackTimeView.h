@@ -45,6 +45,12 @@ class PlaybackTimeView final : public juce::Component {
     void resized() override;
 
     /** 
+     * @brief Toggles the layout mode between centered and split (corners).
+     * @param shouldSplit True to snap editors to corners, false to center.
+     */
+    void setSplitLayout(bool shouldSplit);
+
+    /** 
      * @brief Sets the static total time string. 
      * @param text The formatted total time string.
      */
@@ -82,6 +88,8 @@ class PlaybackTimeView final : public juce::Component {
 
     juce::String currentTimeString;
     juce::String totalTimeString;
+
+    bool isSplit{false};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaybackTimeView)
 };

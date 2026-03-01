@@ -66,18 +66,19 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int rowHeigh
 }
 
 void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, int rowHeight) {
+    juce::ignoreUnused(rowHeight);
     const int margin = Config::Layout::windowBorderMargins;
 
-    auto bottomRow = bounds.removeFromBottom(rowHeight).reduced(margin);
-    
+    // Do not chop off the bottom row anymore; let the waveform use this space!
     controlPanel.layoutCache.contentAreaBounds = bounds.reduced(margin);
-
     const auto fullBounds = controlPanel.getLocalBounds();
 
     if (controlPanel.playbackTimeView != nullptr) {
-        const int textY = bottomRow.getY() - Config::Layout::Text::playbackOffsetY;
-        controlPanel.playbackTimeView->setBounds(0, textY, fullBounds.getWidth(),
-                                                Config::Layout::Text::playbackHeight);
+        // Float the text view right over the bottom of the remaining waveform bounds
+        const int textHeight = Config::Layout::Text::playbackHeight;
+        const int textY = bounds.getBottom() - textHeight - margin;
+        
+        controlPanel.playbackTimeView->setBounds(0, textY, fullBounds.getWidth(), textHeight);
     }
 }
 
