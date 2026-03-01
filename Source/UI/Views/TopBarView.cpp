@@ -28,10 +28,14 @@ TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
     addAndMakeVisible(hintView.get());
 
     addAndMakeVisible(themeSelector);
-    themeSelector.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
-
+    themeSelector.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
+    
     addAndMakeVisible(themeUpButton);
+    themeUpButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
+    
     addAndMakeVisible(themeDownButton);
+    themeDownButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
+    
     themeUpButton.setButtonText(Config::Labels::themeUp);
     themeDownButton.setButtonText(Config::Labels::themeDown);
 }

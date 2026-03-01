@@ -23,10 +23,22 @@ PlaybackTimeView::PlaybackTimeView() {
 
 PlaybackTimeView::~PlaybackTimeView() = default;
 
-void PlaybackTimeView::setSplitLayout(bool shouldSplit) {
-    if (isSplit != shouldSplit) {
-        isSplit = shouldSplit;
-        resized();
+void PlaybackTimeView::setCutModeLayout(bool isCutMode) {
+    if (cutModeActive != isCutMode) {
+        cutModeActive = isCutMode;
+        totalTimeEditor.setVisible(!isCutMode);
+        
+        if (isCutMode) {
+            // Snap flat edges to the outer window borders
+            elapsedTimeEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
+            remainingTimeEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
+        } else {
+            // Restore normal centered strip behavior
+            elapsedTimeEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
+            remainingTimeEditor.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
+        }
+        
+        resized(); // Force a layout recalculation
     }
 }
 
@@ -40,7 +52,7 @@ void PlaybackTimeView::resized() {
     const int margin = Config::Layout::windowBorderMargins;
     auto bounds = getLocalBounds();
 
-    if (isSplit) {
+    if (cutModeActive) {
         // Hide total time entirely during cut mode to clear the center!
         totalTimeEditor.setVisible(false);
         elapsedTimeEditor.setBounds(bounds.removeFromLeft(playbackWidth).withSizeKeepingCentre(playbackWidth, playbackHeight).translated(margin, 0));

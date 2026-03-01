@@ -167,5 +167,5 @@ void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, boo
         owner.outStrip->updateAutoCutState(owner.getSessionState().getCutPrefs().autoCut.outActive);
 
     if (owner.playbackTimeView != nullptr)
-        owner.playbackTimeView->setSplitLayout(isCutModeActive);
+        owner.playbackTimeView->setCutModeLayout(isCutModeActive);
 }
