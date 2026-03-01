@@ -104,7 +104,7 @@ void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {
         juce::ignoreUnused(shouldPulse);
         const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
         const float halfBoxWidth = boxWidth / 2.0f;
-        const float pillarHeight = (float)bounds.getHeight() * 0.15f;
+        const float pillarHeight = (float)bounds.getHeight() * 0.35f;
 
         g.setColour(markerColor);
         

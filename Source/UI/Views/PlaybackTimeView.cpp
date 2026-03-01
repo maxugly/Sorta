@@ -41,11 +41,12 @@ void PlaybackTimeView::resized() {
     auto bounds = getLocalBounds();
 
     if (isSplit) {
-        const int duoWidth = playbackWidth * 2;
-        elapsedTimeEditor.setBounds(bounds.removeFromLeft(duoWidth).withSizeKeepingCentre(duoWidth, playbackHeight).removeFromLeft(playbackWidth).translated(margin, 0));
-        totalTimeEditor.setBounds(bounds.removeFromLeft(playbackWidth).withSizeKeepingCentre(playbackWidth, playbackHeight).translated(margin, 0));
+        // Hide total time entirely during cut mode to clear the center!
+        totalTimeEditor.setVisible(false);
+        elapsedTimeEditor.setBounds(bounds.removeFromLeft(playbackWidth).withSizeKeepingCentre(playbackWidth, playbackHeight).translated(margin, 0));
         remainingTimeEditor.setBounds(bounds.removeFromRight(playbackWidth).withSizeKeepingCentre(playbackWidth, playbackHeight).translated(-margin, 0));
     } else {
+        totalTimeEditor.setVisible(true);
         const int totalWidth = playbackWidth * 3;
         auto groupBounds = bounds.withSizeKeepingCentre(totalWidth, playbackHeight);
 
