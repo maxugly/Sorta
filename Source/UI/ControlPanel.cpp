@@ -17,7 +17,7 @@
 #include "Utils/Config.h"
 
 ControlPanel::ControlPanel(MainComponent &o, SessionState &s) : owner(o), sessionState(s), modernLF(), layoutManager(std::make_unique<LayoutManager>(*this)) {
-    addAndMakeVisible(fileQueuePlaceholder); addAndMakeVisible(directoryRoutingView);
+    addAndMakeVisible(fileQueuePlaceholder); addAndMakeVisible(directoryRoutingView); addAndMakeVisible(exitButton);
     verticalResizer = std::make_unique<XPResizerBar>(&verticalLayoutManager, 1, false); addAndMakeVisible(verticalResizer.get());
     horizontalResizer = std::make_unique<XPResizerBar>(&horizontalLayoutManager, 1, true); addAndMakeVisible(horizontalResizer.get());
     verticalLayoutManager.setItemLayout(0, -0.3, -1.0, -0.7); verticalLayoutManager.setItemLayout(1, 8, 8, 8); verticalLayoutManager.setItemLayout(2, -0.1, -0.5, -0.3);

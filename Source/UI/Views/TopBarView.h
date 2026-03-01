@@ -66,8 +66,6 @@ class TopBarView final : public juce::Component {
     TransportButton openButton;
     /** @brief The button used to toggle between different application modes. */
     TransportButton modeButton;
-    /** @brief The button used to exit the application. */
-    TransportButton exitButton;
     /** @brief The button used to toggle the statistics display. */
     TransportButton statsButton;
     /** @brief The button used to toggle between Mono/Stereo channel views. */

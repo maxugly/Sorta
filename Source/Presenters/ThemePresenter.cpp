@@ -116,18 +116,19 @@ void ThemePresenter::applyTheme() {
         cls->getLockButton().setColour(juce::TextButton::textColourOnId, Config::Colors::Button::textActive);
     }
 
+    auto setBtn = [&](juce::TextButton& b, juce::Colour off, juce::Colour on) {
+        b.setColour(juce::TextButton::textColourOffId, off);
+        b.setColour(juce::TextButton::textColourOnId, on);
+    };
+    setBtn(owner.exitButton, Config::Colors::Button::exitText, Config::Colors::Button::exitText);
+
     if (auto* tbv = owner.getTopBarView()) {
-        auto setBtn = [&](juce::TextButton& b, juce::Colour off, juce::Colour on) {
-            b.setColour(juce::TextButton::textColourOffId, off);
-            b.setColour(juce::TextButton::textColourOnId, on);
-        };
         setBtn(tbv->openButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
         setBtn(tbv->modeButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
         setBtn(tbv->statsButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
         setBtn(tbv->channelViewButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
         setBtn(tbv->themeUpButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
         setBtn(tbv->themeDownButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
-        setBtn(tbv->exitButton, Config::Colors::Button::exitText, Config::Colors::Button::exitText);
 
         if (auto* ts = tbv->transportStrip.get()) {
             setBtn(ts->getPlayStopButton(), Config::Colors::Button::text, Config::Colors::Button::textActive);

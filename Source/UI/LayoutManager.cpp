@@ -14,16 +14,35 @@ LayoutManager::LayoutManager(ControlPanel &controlPanelIn) : controlPanel(contro
 }
 
 void LayoutManager::performLayout() {
-    auto bounds = controlPanel.getLocalBounds();
+    auto fullBounds = controlPanel.getLocalBounds();
     const int margin = Config::Layout::windowBorderMargins;
+
+    // 1. Execute the horizontal split on the ENTIRE window first.
+    // This defines the boundary between all controls/waveform (left) and DirectoryRouting/Exit (right).
+    // Note: comps array is: dummy (left-container-math), resizer, directoryRoutingView
+    juce::Component* hComps[] = { nullptr, controlPanel.horizontalResizer.get(), &controlPanel.directoryRoutingView };
+    controlPanel.horizontalLayoutManager.layOutComponents(hComps, 3, fullBounds.getX(), fullBounds.getY(), fullBounds.getWidth(), fullBounds.getHeight(), false, true);
+
+    // 2. Adjust right side for Exit Button.
+    // Fixed buttonWidth ensures it does not stretch.
+    const int buttonWidth = Config::Layout::buttonWidth;
+    controlPanel.exitButton.setBounds(fullBounds.getRight() - buttonWidth - margin, margin, 
+                                      buttonWidth, (int)Config::UI::WidgetHeight);
+    
+    // DirectoryRoutingView fills the rest of the right column below the exit button
+    auto routingBounds = controlPanel.directoryRoutingView.getBounds();
+    routingBounds.setTop(controlPanel.exitButton.getBottom() + margin);
+    controlPanel.directoryRoutingView.setBounds(routingBounds);
+
+    // Everything on the left is constrained by the main container's new bounds.
+    auto leftBounds = fullBounds.withWidth(controlPanel.horizontalResizer->getX());
+
+    // 3. Perform standard vertical layout inside the leftBounds.
+    auto bounds = leftBounds;
     const int rowHeight = (int)Config::UI::WidgetHeight + margin * 2;
-
     layoutTopRowButtons(bounds, rowHeight);
-
     layoutCutControls(bounds, rowHeight);
-
     layoutBottomRowAndTextDisplay(bounds, rowHeight);
-
     layoutWaveformAndStats(bounds);
 }
 
@@ -91,17 +110,15 @@ void LayoutManager::layoutWaveformArea() {
     auto* wcv = controlPanel.getWaveformCanvasView();
     if (wcv == nullptr) return;
 
-    juce::Component* hComps[] = { wcv, controlPanel.horizontalResizer.get(), &controlPanel.directoryRoutingView };
-    controlPanel.horizontalLayoutManager.layOutComponents(hComps, 3, controlPanel.layoutCache.waveformBounds.getX(), controlPanel.layoutCache.waveformBounds.getY(), controlPanel.layoutCache.waveformBounds.getWidth(), controlPanel.layoutCache.waveformBounds.getHeight(), false, true);
-
-    auto leftArea = wcv->getBounds();
+    // Inside the already-constrained waveformBounds, only do the vertical split
+    auto wb = controlPanel.layoutCache.waveformBounds;
     juce::Component* vComps[] = { wcv, controlPanel.verticalResizer.get(), &controlPanel.fileQueuePlaceholder };
-    controlPanel.verticalLayoutManager.layOutComponents(vComps, 3, leftArea.getX(), leftArea.getY(), leftArea.getWidth(), leftArea.getHeight(), true, true);
+    controlPanel.verticalLayoutManager.layOutComponents(vComps, 3, wb.getX(), wb.getY(), wb.getWidth(), wb.getHeight(), true, true);
     
     if (auto* ptv = controlPanel.getPlaybackTimeView()) {
-        auto wb = wcv->getBounds();
+        auto viewBounds = wcv->getBounds();
         const int textHeight = Config::Layout::Text::playbackHeight;
         const int margin = Config::Layout::windowBorderMargins;
-        ptv->setBounds(0, wb.getBottom() - textHeight - margin, leftArea.getWidth(), textHeight);
+        ptv->setBounds(viewBounds.getX(), viewBounds.getBottom() - textHeight - margin, viewBounds.getWidth(), textHeight);
     }
 }

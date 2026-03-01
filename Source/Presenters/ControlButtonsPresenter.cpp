@@ -91,8 +91,7 @@ void ControlButtonsPresenter::initialiseChannelViewButton() {
 }
 
 void ControlButtonsPresenter::initialiseExitButton() {
-    if (owner.topBarView == nullptr) return;
-    auto& btn = owner.topBarView->exitButton;
+    auto& btn = owner.exitButton;
     btn.setButtonText(Config::Labels::exitButton);
     btn.setColour(juce::TextButton::buttonColourId, Config::Colors::Button::exit);
     btn.onClick = [] { juce::JUCEApplication::getInstance()->systemRequestedQuit(); };

@@ -102,8 +102,8 @@ void ControlStatePresenter::cutOutChanged(double value) {
 void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
     if (owner.topBarView != nullptr) {
         owner.topBarView->openButton.setEnabled(true);
-        owner.topBarView->exitButton.setEnabled(true);
     }
+    owner.exitButton.setEnabled(true);
 
     if (auto *ts = owner.getTransportStrip()) {
         ts->getRepeatButton().setEnabled(true);

@@ -245,6 +245,8 @@ class ControlPanel final : public juce::Component {
     /** @brief Triggers the owner's file open dialog. */
     void invokeOwnerOpenDialog();
 
+    TransportButton exitButton;
+
     /** @brief Initialises the custom modern look and feel. */
     void initialiseLookAndFeel();
 
