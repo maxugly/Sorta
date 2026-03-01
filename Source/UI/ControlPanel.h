@@ -269,6 +269,10 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<MarkerStrip> inStrip, outStrip;
     std::unique_ptr<CutLengthStrip> cutLengthStrip;
 
+    juce::Component fileQueuePlaceholder;
+    juce::StretchableLayoutManager verticalLayoutManager;
+    std::unique_ptr<juce::StretchableLayoutResizerBar> verticalResizer;
+
     LayoutCache layoutCache;
 
     /** @brief Sets up and child views. */

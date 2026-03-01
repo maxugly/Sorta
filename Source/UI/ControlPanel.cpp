@@ -36,6 +36,14 @@
 ControlPanel::ControlPanel(MainComponent &ownerComponent, SessionState &sessionStateIn)
     : owner(ownerComponent), sessionState(sessionStateIn), modernLF(),
       layoutManager(std::make_unique<LayoutManager>(*this)) {
+    addAndMakeVisible(fileQueuePlaceholder);
+    verticalResizer = std::make_unique<juce::StretchableLayoutResizerBar>(&verticalLayoutManager, 1, false);
+    addAndMakeVisible(verticalResizer.get());
+
+    verticalLayoutManager.setItemLayout(0, -0.3, -1.0, -0.7); // Waveform: 70%
+    verticalLayoutManager.setItemLayout(1, 4, 4, 4);          // Resizer Bar: 4px
+    verticalLayoutManager.setItemLayout(2, -0.1, -0.5, -0.3); // File Queue: 30%
+
     initialiseLookAndFeel();
     setupViews();
     setupStrips();
@@ -239,8 +247,17 @@ void ControlPanel::resized() {
     if (layoutManager != nullptr)
         layoutManager->performLayout();
 
-    if (waveformCanvasView != nullptr)
-        waveformCanvasView->setBounds(layoutCache.waveformBounds);
+    if (waveformCanvasView != nullptr) {
+        juce::Component* comps[] = { waveformCanvasView.get(), verticalResizer.get(), &fileQueuePlaceholder };
+        verticalLayoutManager.layOutComponents(comps, 3, layoutCache.waveformBounds.getX(), layoutCache.waveformBounds.getY(), layoutCache.waveformBounds.getWidth(), layoutCache.waveformBounds.getHeight(), true, true);
+        
+        if (playbackTimeView != nullptr) {
+            auto wb = waveformCanvasView->getBounds();
+            const int textHeight = Config::Layout::Text::playbackHeight;
+            const int margin = Config::Layout::windowBorderMargins;
+            playbackTimeView->setBounds(0, wb.getBottom() - textHeight - margin, getWidth(), textHeight);
+        }
+    }
 
     if (overlayView != nullptr)
         overlayView->setBounds(getLocalBounds());
