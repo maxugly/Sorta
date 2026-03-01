@@ -30,7 +30,12 @@ void WaveformView::updateState(const WaveformViewState& newState) {
     }
 
     state = newState;
-    repaint();
+    
+    // 3. ONLY trigger the massive UI redraw if the cache was actually dirtied!
+    // This ignores 60Hz ticks and mouse drags once the file is fully loaded!
+    if (isCacheDirty) {
+        repaint();
+    }
 }
 
 void WaveformView::clearCaches() {
