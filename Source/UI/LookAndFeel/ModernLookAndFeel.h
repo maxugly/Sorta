@@ -18,8 +18,7 @@ class ModernLookAndFeel : public juce::LookAndFeel_V4 {
         setColour(juce::TextButton::buttonOnColourId, Config::Colors::Button::on);
 
         setColour(juce::TextButton::textColourOffId, Config::Colors::Button::text);
-
-        setColour(juce::TextButton::textColourOnId, Config::Colors::Button::text);
+        setColour(juce::TextButton::textColourOnId, Config::Colors::Button::textActive);
     }
 
     void setBaseOffColor(juce::Colour color) {
@@ -32,6 +31,9 @@ class ModernLookAndFeel : public juce::LookAndFeel_V4 {
 
     void setTextColor(juce::Colour color) {
         setColour(juce::TextButton::textColourOffId, color);
+    }
+
+    void setTextActiveColor(juce::Colour color) {
         setColour(juce::TextButton::textColourOnId, color);
     }
 
@@ -113,6 +115,8 @@ class ModernLookAndFeel : public juce::LookAndFeel_V4 {
             textColourToUse =
                 button.findColour(button.getToggleState() ? juce::TextButton::textColourOnId
                                                           : juce::TextButton::textColourOffId);
+            if (shouldDrawButtonAsDown)
+                textColourToUse = Config::Colors::Button::textActive;
         }
         g.setColour(textColourToUse);
         g.drawText(button.getButtonText(), button.getLocalBounds(), juce::Justification::centred,

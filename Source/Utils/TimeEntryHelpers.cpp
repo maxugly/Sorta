@@ -45,8 +45,9 @@ void handleTimeSegmentHighlight(const juce::MouseEvent &event) {
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
     if (editor == nullptr) return;
 
-    const bool isNegative = editor->getText().startsWith("-");
-    const int offset = isNegative ? 1 : 0;
+    const auto text = editor->getText();
+    const bool hasPrefix = text.startsWith("-") || text.startsWith("+");
+    const int offset = hasPrefix ? 1 : 0;
     const int charIndex = calculateCharIndexAtX(*editor, event.x);
     const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
     juce::Range<int> newRange;
@@ -68,8 +69,9 @@ double handleTimeStep(const juce::MouseEvent &event, const juce::MouseWheelDetai
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
     if (editor == nullptr) return currentVal;
 
-    const bool isNegative = editor->getText().startsWith("-");
-    const int offset = isNegative ? 1 : 0;
+    const auto text = editor->getText();
+    const bool hasPrefix = text.startsWith("-") || text.startsWith("+");
+    const int offset = hasPrefix ? 1 : 0;
     const int charIndex = calculateCharIndexAtX(*editor, event.x);
     const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
 
@@ -149,8 +151,9 @@ float getZoomFactorForPosition(const juce::MouseEvent &event) {
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
     if (editor == nullptr) return 10.0f;
 
-    const bool isNegative = editor->getText().startsWith("-");
-    const int offset = isNegative ? 1 : 0;
+    const auto text = editor->getText();
+    const bool hasPrefix = text.startsWith("-") || text.startsWith("+");
+    const int offset = hasPrefix ? 1 : 0;
     const int charIndex = calculateCharIndexAtX(*editor, event.x);
     const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
 
@@ -163,8 +166,9 @@ float getZoomFactorForPosition(const juce::MouseEvent &event) {
 bool shouldShowZoomPopup(const juce::MouseEvent &event) {
     auto *editor = dynamic_cast<juce::TextEditor *>(event.eventComponent);
     if (editor == nullptr) return false;
-    const bool isNegative = editor->getText().startsWith("-");
-    const int offset = isNegative ? 1 : 0;
+    const auto text = editor->getText();
+    const bool hasPrefix = text.startsWith("-") || text.startsWith("+");
+    const int offset = hasPrefix ? 1 : 0;
     const int charIndex = calculateCharIndexAtX(*editor, event.x);
     const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
     return effectiveIndex >= 6;

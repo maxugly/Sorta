@@ -15,6 +15,7 @@ juce::Colour transparentWhite = juce::Colours::transparentWhite;
 juce::Colour Button::base{0xff5a5a5a};
 juce::Colour Button::on{juce::Colours::orange}; 
 juce::Colour Button::text{0xFF34FA11};
+juce::Colour Button::textActive{juce::Colours::white};
 juce::Colour Button::outline{0xff808080};
 juce::Colour Button::disabledBackground{0xff2a2a2a};
 juce::Colour Button::disabledText{0xff4a4a4a};
@@ -220,6 +221,7 @@ void loadTheme(const juce::File& themeFile) {
         Colors::playbackCursor = secondary.brighter(0.4f);
         
         Colors::Button::text = secondary;
+        Colors::Button::textActive = juce::Colours::white;
         Colors::Button::on = secondary;
         Colors::playbackText = secondary;
         Colors::cutText = secondary;
@@ -272,6 +274,7 @@ void loadTheme(const juce::File& themeFile) {
     setCol("buttonBaseHex", Colors::Button::base);
     setCol("buttonOnHex", Colors::Button::on);
     setCol("buttonTextHex", Colors::Button::text);
+    setCol("buttonTextActiveHex", Colors::Button::textActive);
     setCol("buttonOutlineHex", Colors::Button::outline);
     setCol("buttonDisabledBackgroundHex", Colors::Button::disabledBackground);
     setCol("buttonDisabledTextHex", Colors::Button::disabledText);
@@ -401,6 +404,7 @@ void initializeConfigs() {
         obj->setProperty("buttonBaseHex", Colors::Button::base.toDisplayString(true));
         obj->setProperty("buttonOnHex", Colors::Button::on.toDisplayString(true));
         obj->setProperty("buttonTextHex", Colors::Button::text.toDisplayString(true));
+        obj->setProperty("buttonTextActiveHex", Colors::Button::textActive.toDisplayString(true));
         obj->setProperty("buttonOutlineHex", Colors::Button::outline.toDisplayString(true));
         obj->setProperty("buttonDisabledBackgroundHex", Colors::Button::disabledBackground.toDisplayString(true));
         obj->setProperty("buttonDisabledTextHex", Colors::Button::disabledText.toDisplayString(true));

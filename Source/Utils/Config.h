@@ -87,6 +87,7 @@ namespace Colors {
         static juce::Colour base;               /**< Default button fill. */
         static juce::Colour on;                 /**< Active/Toggled button fill. */
         static juce::Colour text;               /**< Label color. */
+        static juce::Colour textActive;         /**< Label color when pressed. */
         static juce::Colour outline;            /**< Border color. */
         static juce::Colour disabledBackground; /**< Fill for inactive buttons. */
         static juce::Colour disabledText;       /**< Label for inactive buttons. */
