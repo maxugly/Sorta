@@ -102,26 +102,49 @@ void CutLayerView::drawMarkersAndRegion(juce::Graphics& g) {
 
     auto drawCutMarker = [&](float x, juce::Colour markerColor, float thickness, bool shouldPulse) {
         juce::ignoreUnused(shouldPulse);
+        const int ix = juce::roundToInt(x); // Snap to integer grid for razor-sharp 1px line
+        const float h = (float)bounds.getHeight();
+        const float centerY = (float)bounds.getCentreY();
+
+        const float boxHeight = (float)Config::Layout::Glow::cutMarkerBoxHeight;
         const float boxWidth = Config::Layout::Glow::cutMarkerBoxWidth;
         const float halfBoxWidth = boxWidth / 2.0f;
-        const float pillarHeight = (float)bounds.getHeight() * 0.35f;
+
+        // Dynamic thicknesses
+        const float thickThickness = thickness; 
+        const float medThickness = thickness * 0.5f;
+
+        // Y Coordinates with safety clamps
+        const float capTopY = (float)bounds.getY();
+        const float capBottomY = capTopY + boxHeight;
+        const float capBottomEndTop = (float)bounds.getBottom() - boxHeight;
+
+        // Exactly +/- 10% distance from the zero-crossing line (20% total span)
+        float thinTopY = centerY - (h * 0.10f);
+        float thinBottomY = centerY + (h * 0.10f);
+        thinTopY = juce::jmax(thinTopY, capBottomY);
+        thinBottomY = juce::jmin(thinBottomY, capBottomEndTop);
+
+        // Dynamic split for thick -> med stages
+        const float thickBottomY = capBottomY + (thinTopY - capBottomY) * 0.5f;
+        const float bottomThickTopY = thinBottomY + (capBottomEndTop - thinBottomY) * 0.5f;
 
         g.setColour(markerColor);
-        
-        // Top/Bottom Squares
-        g.fillRect(x - halfBoxWidth, (float)bounds.getY(), boxWidth, boxHeight);
-        g.fillRect(x - halfBoxWidth, (float)bounds.getBottom() - boxHeight, boxWidth, boxHeight);
+
+        // Caps
+        g.fillRect(x - halfBoxWidth, capTopY, boxWidth, boxHeight);
+        g.fillRect(x - halfBoxWidth, capBottomEndTop, boxWidth, boxHeight);
 
         // Thick Pillars
-        g.fillRect(x - (thickness * 0.5f), (float)bounds.getY() + boxHeight, thickness, pillarHeight);
-        g.fillRect(x - (thickness * 0.5f), (float)bounds.getBottom() - boxHeight - pillarHeight, thickness, pillarHeight);
+        g.fillRect(x - (thickThickness * 0.5f), capBottomY, thickThickness, thickBottomY - capBottomY);
+        g.fillRect(x - (thickThickness * 0.5f), bottomThickTopY, thickThickness, capBottomEndTop - bottomThickTopY);
 
-        // Thin Center Line
-        const float thinThickness = Config::Layout::Glow::cutMarkerWidthThin;
-        g.fillRect(x - (thinThickness * 0.5f), 
-                   (float)bounds.getY() + boxHeight + pillarHeight, 
-                   thinThickness, 
-                   (float)bounds.getHeight() - (2.0f * (boxHeight + pillarHeight)));
+        // Medium Pillars
+        g.fillRect(x - (medThickness * 0.5f), thickBottomY, medThickness, thinTopY - thickBottomY);
+        g.fillRect(x - (medThickness * 0.5f), thinBottomY, medThickness, bottomThickTopY - thinBottomY);
+
+        // Razor-Sharp 1-Pixel Center Line
+        g.drawVerticalLine(ix, thinTopY, thinBottomY);
     };
 
     drawCutMarker(state.inPixelX, state.inMarkerColor, state.inMarkerThickness, state.inMarkerShouldPulse);
