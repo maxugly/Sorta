@@ -137,6 +137,10 @@ namespace Colors {
     extern juce::Colour volumeKnobPointer;   /**< Needle color for the volume dial. */
     extern juce::Colour quaternary;          /**< Secondary auxiliary color. */
 
+    extern juce::Colour resizerBase;         /**< XP-style 3D bevel base color. */
+    extern juce::Colour resizerLight;        /**< XP-style 3D bevel highlight color. */
+    extern juce::Colour resizerDark;         /**< XP-style 3D bevel shadow color. */
+
     struct ZoomHud {
         static juce::Colour background;   /**< Backdrop for the zoom info display. */
         static juce::Colour textActive;   /**< Active focus text. */

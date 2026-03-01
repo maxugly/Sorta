@@ -5,6 +5,8 @@
 #include "Presenters/PlaybackTextPresenter.h"
 #include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
+#include "UI/Views/WaveformCanvasView.h"
+#include "UI/Views/PlaybackTimeView.h"
 #include "Utils/Config.h"
 #include "Utils/TimeUtils.h"
 
@@ -83,4 +85,23 @@ void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {
 
     controlPanel.getPresenterCore().getStatsPresenter().layoutWithin(
         controlPanel.layoutCache.contentAreaBounds);
+}
+
+void LayoutManager::layoutWaveformArea() {
+    auto* wcv = controlPanel.getWaveformCanvasView();
+    if (wcv == nullptr) return;
+
+    juce::Component* hComps[] = { wcv, controlPanel.horizontalResizer.get(), &controlPanel.directoryRoutingView };
+    controlPanel.horizontalLayoutManager.layOutComponents(hComps, 3, controlPanel.layoutCache.waveformBounds.getX(), controlPanel.layoutCache.waveformBounds.getY(), controlPanel.layoutCache.waveformBounds.getWidth(), controlPanel.layoutCache.waveformBounds.getHeight(), false, true);
+
+    auto leftArea = wcv->getBounds();
+    juce::Component* vComps[] = { wcv, controlPanel.verticalResizer.get(), &controlPanel.fileQueuePlaceholder };
+    controlPanel.verticalLayoutManager.layOutComponents(vComps, 3, leftArea.getX(), leftArea.getY(), leftArea.getWidth(), leftArea.getHeight(), true, true);
+    
+    if (auto* ptv = controlPanel.getPlaybackTimeView()) {
+        auto wb = wcv->getBounds();
+        const int textHeight = Config::Layout::Text::playbackHeight;
+        const int margin = Config::Layout::windowBorderMargins;
+        ptv->setBounds(0, wb.getBottom() - textHeight - margin, leftArea.getWidth(), textHeight);
+    }
 }

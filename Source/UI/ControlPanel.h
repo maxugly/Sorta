@@ -18,6 +18,7 @@ class FocusManager;
 #include "UI/Components/CutLengthStrip.h"
 #include "UI/Views/PlaybackTimeView.h"
 #include "UI/Views/TopBarView.h"
+#include "UI/Views/DirectoryRoutingView.h"
 #include "UI/Handlers/MarkerMouseHandler.h"
 #include "UI/Handlers/WaveformMouseHandler.h"
 #include "UI/LookAndFeel/ModernLookAndFeel.h"
@@ -62,6 +63,19 @@ class PlaybackRepeatController;
 class TransportStrip;
 class MarkerStrip;
 class OverlayView;
+
+class XPResizerBar final : public juce::StretchableLayoutResizerBar {
+  public:
+    using StretchableLayoutResizerBar::StretchableLayoutResizerBar;
+    void paint(juce::Graphics &g) override {
+        auto b = getLocalBounds().toFloat();
+        g.fillAll(Config::Colors::resizerBase);
+        g.setColour(Config::Colors::resizerLight);
+        g.drawLine(b.getX(), b.getY(), b.getRight(), b.getY(), 2.0f);
+        g.setColour(Config::Colors::resizerDark);
+        g.drawLine(b.getX(), b.getBottom(), b.getRight(), b.getBottom(), 2.0f);
+    }
+};
 
 /**
  * @class ControlPanel
@@ -248,6 +262,7 @@ class ControlPanel final : public juce::Component {
     friend class RepeatButtonPresenter;
     friend class BoundaryLogicPresenter;
     friend class ZoomPresenter;
+    friend class ThemePresenter;
     friend class PresenterCore;
 
     MainComponent &owner;
@@ -270,8 +285,11 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<CutLengthStrip> cutLengthStrip;
 
     juce::Component fileQueuePlaceholder;
+    DirectoryRoutingView directoryRoutingView;
     juce::StretchableLayoutManager verticalLayoutManager;
-    std::unique_ptr<juce::StretchableLayoutResizerBar> verticalResizer;
+    juce::StretchableLayoutManager horizontalLayoutManager;
+    std::unique_ptr<XPResizerBar> verticalResizer;
+    std::unique_ptr<XPResizerBar> horizontalResizer;
 
     LayoutCache layoutCache;
 

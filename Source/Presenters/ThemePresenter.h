@@ -30,6 +30,7 @@ class ThemePresenter final : public juce::ComboBox::Listener {
     ~ThemePresenter() override;
 
     void comboBoxChanged(juce::ComboBox* comboBox) override;
+    void applyTheme();
 
   private:
     ControlPanel& owner;

@@ -40,6 +40,9 @@ class LayoutManager final {
      */
     void performLayout();
 
+    /** @brief Lays out the waveform area with horizontal and vertical splits. */
+    void layoutWaveformArea();
+
   private:
     /** 
      * @brief Lays out the top row of buttons (Open, Settings, etc.). 

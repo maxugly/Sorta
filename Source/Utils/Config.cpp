@@ -69,6 +69,10 @@ juce::Colour volumeKnobTrack = juce::Colours::darkgrey;
 juce::Colour volumeKnobPointer = juce::Colours::white;
 juce::Colour quaternary = juce::Colours::white;
 
+juce::Colour resizerBase = juce::Colours::lightgrey;
+juce::Colour resizerLight = juce::Colours::white;
+juce::Colour resizerDark = juce::Colours::grey;
+
 juce::Colour Colors::VolumeFlame::low = juce::Colours::red;
 juce::Colour Colors::VolumeFlame::mid = juce::Colours::orange;
 juce::Colour Colors::VolumeFlame::high = juce::Colours::orange.brighter(0.3f);
@@ -318,6 +322,9 @@ void loadTheme(const juce::File& themeFile) {
     setCol("hintVoxTextHex", Colors::HintVox::text);
     setCol("matrixLedActiveHex", Colors::Matrix::ledActive);
     setCol("matrixLedInactiveHex", Colors::Matrix::ledInactive);
+    setCol("resizerBaseHex", Colors::resizerBase);
+    setCol("resizerLightHex", Colors::resizerLight);
+    setCol("resizerDarkHex", Colors::resizerDark);
     // -----------------------------
 #endif
 }
@@ -449,6 +456,9 @@ void initializeConfigs() {
         obj->setProperty("hintVoxTextHex", Colors::HintVox::text.toDisplayString(true));
         obj->setProperty("matrixLedActiveHex", Colors::Matrix::ledActive.toDisplayString(true));
         obj->setProperty("matrixLedInactiveHex", Colors::Matrix::ledInactive.toDisplayString(true));
+        obj->setProperty("resizerBaseHex", Colors::resizerBase.toDisplayString(true));
+        obj->setProperty("resizerLightHex", Colors::resizerLight.toDisplayString(true));
+        obj->setProperty("resizerDarkHex", Colors::resizerDark.toDisplayString(true));
 #endif
         themeFile.replaceWithText(juce::JSON::toString(obj.get(), false));
     }
