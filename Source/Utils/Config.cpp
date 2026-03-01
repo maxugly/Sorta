@@ -27,6 +27,7 @@ juce::Colour Button::cutActive = juce::Colours::black;
 juce::Colour playbackText = juce::Colours::white;
 juce::Colour playbackCursorHead = juce::Colours::lime;
 juce::Colour cutText = juce::Colours::white;
+juce::Colour thresholdText = juce::Colours::white;
 juce::Colour totalTimeText = juce::Colours::grey;
 juce::Colour textEditorBackground = juce::Colour(0xff333333);
 juce::Colour textEditorError = juce::Colours::red;
@@ -222,6 +223,7 @@ void loadTheme(const juce::File& themeFile) {
         Colors::Button::on = secondary;
         Colors::playbackText = secondary;
         Colors::cutText = secondary;
+        Colors::thresholdText = secondary;
         Colors::totalTimeText = secondary.darker(0.4f);
         Colors::HintVox::text = secondary.brighter(0.2f);
         Colors::Button::text = secondary;
@@ -249,6 +251,7 @@ void loadTheme(const juce::File& themeFile) {
         Colors::quaternary = qColor;
         Colors::cutText = qColor;
         Colors::playbackText = qColor;
+        Colors::thresholdText = qColor;
         Colors::totalTimeText = qColor.darker(0.4f);
         Colors::HintVox::text = qColor.brighter(0.2f);
         Colors::cutLine = qColor;
@@ -276,6 +279,8 @@ void loadTheme(const juce::File& themeFile) {
     setCol("buttonCutPlacementHex", Colors::Button::cutPlacement);
     setCol("buttonCutActiveHex", Colors::Button::cutActive);
     setCol("playbackTextHex", Colors::playbackText);
+    setCol("cutTextHex", Colors::cutText);
+    setCol("thresholdTextHex", Colors::thresholdText);
     setCol("textEditorBackgroundHex", Colors::textEditorBackground);
     setCol("textEditorErrorHex", Colors::textEditorError);
     setCol("textEditorWarningHex", Colors::textEditorWarning);
@@ -404,6 +409,8 @@ void initializeConfigs() {
         obj->setProperty("buttonCutPlacementHex", Colors::Button::cutPlacement.toDisplayString(true));
         obj->setProperty("buttonCutActiveHex", Colors::Button::cutActive.toDisplayString(true));
         obj->setProperty("playbackTextHex", Colors::playbackText.toDisplayString(true));
+        obj->setProperty("cutTextHex", Colors::cutText.toDisplayString(true));
+        obj->setProperty("thresholdTextHex", Colors::thresholdText.toDisplayString(true));
         obj->setProperty("textEditorBackgroundHex", Colors::textEditorBackground.toDisplayString(true));
         obj->setProperty("textEditorErrorHex", Colors::textEditorError.toDisplayString(true));
         obj->setProperty("textEditorWarningHex", Colors::textEditorWarning.toDisplayString(true));

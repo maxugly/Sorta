@@ -100,6 +100,7 @@ namespace Colors {
     extern juce::Colour playbackText;        /**< Color for the primary playhead timer. */
     extern juce::Colour playbackCursorHead;  /**< Top/Bottom marker color for the playhead. */
     extern juce::Colour cutText;             /**< Color for cut boundary timers. */
+    extern juce::Colour thresholdText;       /**< Color for the silence threshold boxes. */
     extern juce::Colour totalTimeText;       /**< Color for total duration labels. */
     extern juce::Colour textEditorBackground; /**< Field fill for text inputs. */
     extern juce::Colour textEditorError;     /**< Border/Background for invalid inputs. */

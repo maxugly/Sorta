@@ -146,17 +146,17 @@ void ControlPanel::refreshThemeLive() {
     stats.updateStats();
 
     if (playbackTimeView) {
-        playbackTimeView->getElapsedEditor().setCustomTextColor(Config::Colors::cutText);
-        playbackTimeView->getRemainingEditor().setCustomTextColor(Config::Colors::cutText);
+        playbackTimeView->getElapsedEditor().setCustomTextColor(Config::Colors::playbackText);
+        playbackTimeView->getRemainingEditor().setCustomTextColor(Config::Colors::playbackText);
         playbackTimeView->getTotalTimeEditor().setCustomTextColor(Config::Colors::totalTimeText);
     }
     if (inStrip) {
         inStrip->getTimerEditor().setCustomTextColor(Config::Colors::cutText);
-        inStrip->getThresholdEditor().setCustomTextColor(Config::Colors::cutText);
+        inStrip->getThresholdEditor().setCustomTextColor(Config::Colors::thresholdText);
     }
     if (outStrip) {
         outStrip->getTimerEditor().setCustomTextColor(Config::Colors::cutText);
-        outStrip->getThresholdEditor().setCustomTextColor(Config::Colors::cutText);
+        outStrip->getThresholdEditor().setCustomTextColor(Config::Colors::thresholdText);
     }
     if (cutLengthStrip) {
         cutLengthStrip->getLengthEditor().setCustomTextColor(Config::Colors::cutText);
