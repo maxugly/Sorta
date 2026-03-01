@@ -28,7 +28,7 @@ TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
     addAndMakeVisible(hintView.get());
 
     addAndMakeVisible(themeSelector);
-    themeSelector.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
+    themeSelector.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     
     addAndMakeVisible(themeUpButton);
     themeUpButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
