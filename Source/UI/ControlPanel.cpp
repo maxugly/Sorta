@@ -84,3 +84,7 @@ juce::TextEditor &ControlPanel::getStatsDisplay() { return getPresenterCore().ge
 const juce::LookAndFeel &ControlPanel::getLookAndFeel() const { return modernLF; }
 void ControlPanel::invokeOwnerOpenDialog() { owner.openButtonClicked(); }
 juce::MouseCursor ControlPanel::getMouseCursor() { return (getInteractionCoordinator().getPlacementMode() != AppEnums::PlacementMode::None) ? juce::MouseCursor::PointingHandCursor : juce::MouseCursor::CrosshairCursor; }
+
+juce::Rectangle<int> ControlPanel::getWaveformBounds() const {
+    return (waveformCanvasView != nullptr) ? waveformCanvasView->getBounds() : layoutCache.waveformBounds;
+}

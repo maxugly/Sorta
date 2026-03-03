@@ -150,8 +150,8 @@ class ControlPanel final : public juce::Component {
     /** @return Reference to the 'Out' point auto-cut button. */
     juce::TextButton &getAutoCutOutButton() { return outStrip->getAutoCutButton(); }
 
-    /** @return The pre-calculated waveform bounds from the layout cache. */
-    juce::Rectangle<int> getWaveformBounds() const { return layoutCache.waveformBounds; }
+    /** @return The physical bounds of the active waveform canvas. */
+    juce::Rectangle<int> getWaveformBounds() const;
 
     /** @return Reference to the active audio player engine. */
     AudioPlayer &getAudioPlayer();

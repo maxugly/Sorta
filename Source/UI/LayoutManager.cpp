@@ -96,11 +96,10 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, 
 
 void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {
     const int margin = Config::Layout::windowBorderMargins;
-    if (controlPanel.getSessionState().getViewMode() == AppEnums::ViewMode::Overlay) {
-        controlPanel.layoutCache.waveformBounds = controlPanel.getLocalBounds();
-    } else {
-        controlPanel.layoutCache.waveformBounds = bounds.reduced(margin);
-    }
+
+    // Always use the Classic bounds as the structural anchor.
+    // We will dynamically stretch the visual View later in layoutWaveformArea.
+    controlPanel.layoutCache.waveformBounds = bounds.reduced(margin);
 
     controlPanel.getPresenterCore().getStatsPresenter().layoutWithin(
         controlPanel.layoutCache.contentAreaBounds);
@@ -110,15 +109,40 @@ void LayoutManager::layoutWaveformArea() {
     auto* wcv = controlPanel.getWaveformCanvasView();
     if (wcv == nullptr) return;
 
-    // Inside the already-constrained waveformBounds, only do the vertical split
-    auto wb = controlPanel.layoutCache.waveformBounds;
+    const int margin = Config::Layout::windowBorderMargins;
+    auto fullWidthBounds = controlPanel.getLocalBounds().withWidth(controlPanel.horizontalResizer->getX());
+
+    // 1. Execute Vertical Layout using the FULL width, but ALWAYS use the Classic Y and Height
+    // from the pre-calculated waveformBounds so the resizer bar stays mathematically anchored!
     juce::Component* vComps[] = { wcv, controlPanel.verticalResizer.get(), &controlPanel.fileQueuePlaceholder };
-    controlPanel.verticalLayoutManager.layOutComponents(vComps, 3, wb.getX(), wb.getY(), wb.getWidth(), wb.getHeight(), true, true);
-    
+    controlPanel.verticalLayoutManager.layOutComponents(vComps, 3,
+        0,
+        controlPanel.layoutCache.waveformBounds.getY(),
+        fullWidthBounds.getWidth(),
+        controlPanel.layoutCache.waveformBounds.getHeight(),
+        true, true);
+
+    // 2. Adjust margins and bounds based on the View Mode
+    if (controlPanel.getSessionState().getViewMode() == AppEnums::ViewMode::Overlay) {
+        // Overlay Mode: Pull the top of the waveform flush to the absolute ceiling (0)
+        // so it slides underneath the top controls. Leave the bottom anchored at the resizer bar.
+        wcv->setBounds(wcv->getBounds().withTop(0));
+
+        // Only apply horizontal margins to the file queue
+        controlPanel.fileQueuePlaceholder.setBounds(controlPanel.fileQueuePlaceholder.getBounds().reduced(margin, 0));
+    } else {
+        // Classic Mode: Re-apply the left/right margins to both child views
+        wcv->setBounds(wcv->getBounds().reduced(margin, 0));
+        controlPanel.fileQueuePlaceholder.setBounds(controlPanel.fileQueuePlaceholder.getBounds().reduced(margin, 0));
+    }
+
+    // 3. Anchor playback timers securely inside the active waveform view bounds
     if (auto* ptv = controlPanel.getPlaybackTimeView()) {
-        auto viewBounds = wcv->getBounds();
+        auto wb = wcv->getBounds();
         const int textHeight = Config::Layout::Text::playbackHeight;
-        const int margin = Config::Layout::windowBorderMargins;
-        ptv->setBounds(viewBounds.getX(), viewBounds.getBottom() - textHeight - margin, viewBounds.getWidth(), textHeight);
+        ptv->setBounds(wb.getX(),
+                       wb.getBottom() - textHeight - margin,
+                       wb.getWidth(),
+                       textHeight);
     }
 }
