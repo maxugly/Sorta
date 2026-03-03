@@ -74,20 +74,55 @@ void MainComponent::resized() {
 
 void MainComponent::openButtonClicked() {
     chooser = std::make_unique<juce::FileChooser>(
-        Config::Labels::selectAudio, juce::File::getSpecialLocation(juce::File::userHomeDirectory),
-        audioPlayer->getFormatManager().getWildcardForAllFormats());
+        Config::Labels::selectAudio, 
+        juce::File::getSpecialLocation(juce::File::userHomeDirectory),
+        "*" // Allow selecting anything; we will filter manually for robustness
+    );
 
-    auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles;
+    auto flags = juce::FileBrowserComponent::openMode | 
+                 juce::FileBrowserComponent::canSelectDirectories | 
+                 juce::FileBrowserComponent::canSelectFiles;
 
     chooser->launchAsync(flags, [this](const juce::FileChooser &fc) {
-        auto file = fc.getResult();
-        if (file.exists()) {
-            auto result = audioPlayer->loadFile(file);
-            if (result.wasOk()) {
-                // Success - PlaybackTextPresenter handles UI updates
+        auto result = fc.getResult();
+        if (result.exists()) {
+            juce::Array<juce::File> audioFiles;
+            auto& formatManager = audioPlayer->getFormatManager();
+
+            if (result.isDirectory()) {
+                // Safe, format-aware directory scan
+                auto allFiles = result.findChildFiles(juce::File::findFiles, false, "*");
+                for (const auto& f : allFiles) {
+                    if (formatManager.findFormatForFileExtension(f.getFileExtension()) != nullptr) {
+                        audioFiles.add(f);
+                    }
+                }
+                audioFiles.sort(); // Ensure consistent alphabetical ordering
             } else {
+                if (formatManager.findFormatForFileExtension(result.getFileExtension()) != nullptr) {
+                    audioFiles.add(result);
+                }
+            }
+
+            if (!audioFiles.isEmpty()) {
+                // 1. Load the first file immediately for playback
+                auto loadResult = audioPlayer->loadFile(audioFiles.getFirst());
+                
+                if (loadResult.wasOk()) {
+                    // 2. Queue the remaining files for the background worker
+                    std::vector<juce::String> queue;
+                    for (int i = 1; i < audioFiles.size(); ++i) {
+                        queue.push_back(audioFiles[i].getFullPathName());
+                    }
+                    sessionState.setFileQueue(queue);
+                } else {
+                    dependencyContainer->getStatsPresenter().setDisplayText(
+                        loadResult.getErrorMessage(), Config::Colors::statsErrorText);
+                }
+            } else {
+                // Alert the user if they opened an empty or unsupported folder
                 dependencyContainer->getStatsPresenter().setDisplayText(
-                    result.getErrorMessage(), Config::Colors::statsErrorText);
+                    Config::Labels::errorNoValidFiles, Config::Colors::statsErrorText);
             }
         }
 

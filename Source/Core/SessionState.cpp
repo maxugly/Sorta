@@ -270,3 +270,17 @@ void SessionState::setChannelViewMode(AppEnums::ChannelViewMode mode) {
         listeners.call([mode](Listener &l) { l.channelViewModeChanged(mode); });
     }
 }
+
+void SessionState::setFileQueue(const std::vector<juce::String> &newQueue) {
+    const juce::ScopedLock lock(stateLock);
+    if (fileQueue != newQueue) {
+        fileQueue = newQueue;
+        auto queueCopy = fileQueue;
+        listeners.call([queueCopy](Listener &l) { l.queueChanged(queueCopy); });
+    }
+}
+
+std::vector<juce::String> SessionState::getFileQueue() const {
+    const juce::ScopedLock lock(stateLock);
+    return fileQueue;
+}

@@ -5,6 +5,7 @@
 #include "MainDomain.h"
 #include <juce_core/juce_core.h>
 #include <map>
+#include <vector>
 
 /**
  * @file SessionState.h
@@ -99,6 +100,14 @@ class SessionState {
          */
         virtual void channelViewModeChanged(AppEnums::ChannelViewMode newMode) {
             juce::ignoreUnused(newMode);
+        }
+
+        /**
+         * @brief Called when the preload file queue is updated.
+         * @param newQueue The new set of queued file paths.
+         */
+        virtual void queueChanged(const std::vector<juce::String> &newQueue) {
+            juce::ignoreUnused(newQueue);
         }
     };
 
@@ -308,6 +317,18 @@ class SessionState {
      */
     void setChannelViewMode(AppEnums::ChannelViewMode mode);
 
+    /**
+     * @brief Updates the preload file queue.
+     * @param newQueue The list of file paths to preload.
+     */
+    void setFileQueue(const std::vector<juce::String> &newQueue);
+
+    /**
+     * @brief Gets the current preload file queue.
+     * @return Vector of file paths.
+     */
+    std::vector<juce::String> getFileQueue() const;
+
   private:
     MainDomain::CutPreferences cutPrefs;                /**< Current user preferences for the cutting engine. */
     juce::String currentFilePath;                        /**< Path to the currently loaded audio asset. */
@@ -319,6 +340,7 @@ class SessionState {
     float m_masterVolume{1.0f};                        /**< Master gain level (0.0 to 1.0). */
     AppEnums::ViewMode currentMode{AppEnums::ViewMode::Classic}; /**< Active layout mode for the UI. */
     AppEnums::ChannelViewMode currentChannelViewMode{AppEnums::ChannelViewMode::Mono}; /**< Active channel rendering mode. */
+    std::vector<juce::String> fileQueue;
 
     mutable juce::CriticalSection stateLock;            /**< Mutex protecting multi-threaded access to state data. */
 };

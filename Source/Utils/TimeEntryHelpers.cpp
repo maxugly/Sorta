@@ -27,16 +27,34 @@ namespace TimeEntryHelpers {
 static int calculateCharIndexAtX(const juce::TextEditor& editor, int mouseX) {
     const auto& font = editor.getFont();
     const auto text = editor.getText();
-    const int textWidth = font.getStringWidth(text);
-    // Determine the starting X offset for center-aligned text
-    const int startX = (editor.getWidth() - textWidth) / 2;
-    int currentX = startX;
+    if (text.isEmpty())
+        return 0;
 
-    for (int i = 0; i < text.length(); ++i) {
-        int charWidth = font.getStringWidth(juce::String::charToString(text[i]));
+    juce::GlyphArrangement glyphs;
+    glyphs.addLineOfText(font, text, 0.0f, 0.0f);
+    const int glyphCount = glyphs.getNumGlyphs();
+    const float textWidth = (glyphCount > 0)
+        ? glyphs.getBoundingBox(0, glyphCount, true).getWidth()
+        : 0.0f;
+    // Determine the starting X offset for center-aligned text
+    const int startX = (int)((editor.getWidth() - textWidth) / 2.0f);
+    float currentX = (float)startX;
+
+    auto mapGlyphToCharIndex = [&](int glyphIndex) {
+        if (glyphCount <= 0)
+            return 0;
+        if (glyphCount == text.length())
+            return glyphIndex;
+        return juce::jlimit(0, text.length() - 1, (glyphIndex * text.length()) / glyphCount);
+    };
+
+    for (int i = 0; i < glyphCount; ++i) {
+        const auto glyphBounds = glyphs.getBoundingBox(i, i + 1, true);
+        const float glyphWidth = glyphBounds.getWidth();
         // If the mouse is within the horizontal bounds of this specific character
-        if (mouseX < currentX + charWidth) return i;
-        currentX += charWidth;
+        if (mouseX < currentX + glyphWidth)
+            return mapGlyphToCharIndex(i);
+        currentX += glyphWidth;
     }
     return text.length() - 1;
 }

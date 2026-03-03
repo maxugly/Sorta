@@ -326,6 +326,10 @@ namespace Labels {
     extern juce::String defaultHint;
     extern juce::String openButton;
     extern juce::String selectAudio;
+    extern juce::String queueHeaderFile;
+    extern juce::String queueHeaderSize;
+    extern juce::String queueHeaderDate;
+    extern juce::String errorNoValidFiles;
     extern juce::String timeSeparator;
     extern juce::String openBracket;
     extern juce::String closeBracket;
