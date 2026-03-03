@@ -81,7 +81,7 @@ void LayoutManager::layoutWaveformArea() {
     auto fullLeftArea = controlPanel.leftWorkspaceAnchor.getBounds();
 
     // 1. Math Phase: Execute Vertical Layout
-    juce::Component* vComps[] = { &controlPanel.waveformLayoutAnchor, controlPanel.verticalResizer.get(), &controlPanel.fileQueuePlaceholder };
+    juce::Component* vComps[] = { &controlPanel.waveformLayoutAnchor, controlPanel.verticalResizer.get(), &controlPanel.getFileQueueView() };
     controlPanel.verticalLayoutManager.layOutComponents(vComps, 3,
         fullLeftArea.getX(), contentArea.getY(), fullLeftArea.getWidth(), contentArea.getHeight(), true, true);
 
@@ -98,8 +98,8 @@ void LayoutManager::layoutWaveformArea() {
     }
 
     // Pad the file queue so it perfectly aligns with the UI columns above it
-    auto queueBounds = controlPanel.fileQueuePlaceholder.getBounds();
-    controlPanel.fileQueuePlaceholder.setBounds(queueBounds.withTrimmedLeft(margin).withTrimmedRight(margin).withTrimmedTop(margin));
+    auto queueBounds = controlPanel.getFileQueueView().getBounds();
+    controlPanel.getFileQueueView().setBounds(queueBounds.withTrimmedLeft(margin).withTrimmedRight(margin).withTrimmedTop(margin));
 
     // 3. Anchor playback timers securely inside the visual bounds
     if (auto* ptv = controlPanel.getPlaybackTimeView()) {

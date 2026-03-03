@@ -24,6 +24,7 @@ class SilenceThresholdPresenter;
 class KeybindPresenter;
 class FpsPresenter;
 class ThemePresenter;
+class PreloadPresenter;
 #include "Presenters/HintPresenter.h"
 #include "Presenters/ZoomPresenter.h"
 
@@ -112,6 +113,7 @@ class DependencyContainer final {
     std::unique_ptr<HintPresenter> hintPresenter;                 /**< Logic for the interactive status bar. */
     std::unique_ptr<FpsPresenter> fpsPresenter;                   /**< Logic for performance monitoring display. */
     std::unique_ptr<ThemePresenter> themePresenter;               /**< Logic for the palette switching engine. */
+    std::unique_ptr<PreloadPresenter> preloadPresenter;           /**< Logic for the metadata pre-loading queue. */
 
     ControlPanel &owner;                                          /**< The root View container (MVP View). */
 

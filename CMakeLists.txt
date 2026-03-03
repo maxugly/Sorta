@@ -139,6 +139,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Presenters/FpsPresenter.cpp
             Source/Presenters/ThemePresenter.h
             Source/Presenters/ThemePresenter.cpp
+            Source/Presenters/PreloadPresenter.h
+            Source/Presenters/PreloadPresenter.cpp
 
             # UI
             Source/UI/ControlPanel.h
@@ -190,6 +192,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Views/PlaybackCursorView.cpp
             Source/UI/Views/PlaybackCursorGlow.h
             Source/UI/Views/PlaybackCursorGlow.cpp
+            Source/UI/Views/FileQueueView.h
+            Source/UI/Views/FileQueueView.cpp
             Source/UI/Views/MatrixView.h
             Source/UI/Views/MatrixView.cpp
             Source/UI/Views/VolumeView.h

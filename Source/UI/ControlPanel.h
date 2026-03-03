@@ -19,6 +19,7 @@ class FocusManager;
 #include "UI/Views/PlaybackTimeView.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/Views/DirectoryRoutingView.h"
+#include "UI/Views/FileQueueView.h"
 #include "UI/Handlers/MarkerMouseHandler.h"
 #include "UI/Handlers/WaveformMouseHandler.h"
 #include "UI/LookAndFeel/ModernLookAndFeel.h"
@@ -241,6 +242,8 @@ class ControlPanel final : public juce::Component {
     /** @return Reference to the FPS display view. */
     FpsView& getFpsView() { return *fpsView; }
 
+    FileQueueView& getFileQueueView() { return *fileQueueView; }
+
     /** @brief Triggers the owner's file open dialog. */
     void invokeOwnerOpenDialog();
 
@@ -285,7 +288,7 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<CutLengthStrip> cutLengthStrip;
 
     juce::Component leftWorkspaceAnchor, waveformLayoutAnchor;
-    juce::Component fileQueuePlaceholder;
+    std::unique_ptr<FileQueueView> fileQueueView;
     DirectoryRoutingView directoryRoutingView;
     juce::StretchableLayoutManager verticalLayoutManager;
     juce::StretchableLayoutManager horizontalLayoutManager;
