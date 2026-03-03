@@ -86,44 +86,53 @@ void MainComponent::openButtonClicked() {
     chooser->launchAsync(flags, [this](const juce::FileChooser &fc) {
         auto result = fc.getResult();
         if (result.exists()) {
-            juce::Array<juce::File> audioFiles;
-            auto& formatManager = audioPlayer->getFormatManager();
+            
+            // 1. Immediately update the UI so it doesn't feel frozen
+            dependencyContainer->getStatsPresenter().setDisplayText(
+                "Scanning directory...", Config::Colors::statsText);
 
-            if (result.isDirectory()) {
-                // Safe, format-aware directory scan
-                auto allFiles = result.findChildFiles(juce::File::findFiles, false, "*");
-                for (const auto& f : allFiles) {
-                    if (formatManager.findFormatForFileExtension(f.getFileExtension()) != nullptr) {
-                        audioFiles.add(f);
-                    }
-                }
-                audioFiles.sort(); // Ensure consistent alphabetical ordering
-            } else {
-                if (formatManager.findFormatForFileExtension(result.getFileExtension()) != nullptr) {
-                    audioFiles.add(result);
-                }
-            }
+            // 2. Offload the heavy file I/O to a fire-and-forget background thread
+            juce::Thread::launch([this, result]() {
+                juce::Array<juce::File> audioFiles;
+                auto& formatManager = audioPlayer->getFormatManager();
 
-            if (!audioFiles.isEmpty()) {
-                // 1. Load the first file immediately for playback
-                auto loadResult = audioPlayer->loadFile(audioFiles.getFirst());
-                
-                if (loadResult.wasOk()) {
-                    // 2. Queue the remaining files for the background worker
-                    std::vector<juce::String> queue;
-                    for (int i = 1; i < audioFiles.size(); ++i) {
-                        queue.push_back(audioFiles[i].getFullPathName());
+                if (result.isDirectory()) {
+                    auto allFiles = result.findChildFiles(juce::File::findFiles, false, "*");
+                    for (const auto& f : allFiles) {
+                        if (formatManager.findFormatForFileExtension(f.getFileExtension()) != nullptr) {
+                            audioFiles.add(f);
+                        }
                     }
-                    sessionState.setFileQueue(queue);
+                    audioFiles.sort(); // Crucial: Ensure alphabetical order
                 } else {
-                    dependencyContainer->getStatsPresenter().setDisplayText(
-                        loadResult.getErrorMessage(), Config::Colors::statsErrorText);
+                    if (formatManager.findFormatForFileExtension(result.getFileExtension()) != nullptr) {
+                        audioFiles.add(result);
+                    }
                 }
-            } else {
-                // Alert the user if they opened an empty or unsupported folder
-                dependencyContainer->getStatsPresenter().setDisplayText(
-                    Config::Labels::errorNoValidFiles, Config::Colors::statsErrorText);
-            }
+
+                // 3. Return safely to the Message Thread to trigger UI and Audio changes
+                juce::MessageManager::callAsync([this, audioFiles]() {
+                    if (!audioFiles.isEmpty()) {
+                        auto loadResult = audioPlayer->loadFile(audioFiles.getFirst());
+                        
+                        if (loadResult.wasOk()) {
+                            std::vector<juce::String> queue;
+                            for (int i = 1; i < audioFiles.size(); ++i) {
+                                queue.push_back(audioFiles[i].getFullPathName());
+                            }
+                            sessionState.setFileQueue(queue);
+                            dependencyContainer->getStatsPresenter().setDisplayText(
+                                "Ready.", Config::Colors::statsText);
+                        } else {
+                            dependencyContainer->getStatsPresenter().setDisplayText(
+                                loadResult.getErrorMessage(), Config::Colors::statsErrorText);
+                        }
+                    } else {
+                        dependencyContainer->getStatsPresenter().setDisplayText(
+                            Config::Labels::errorNoValidFiles, Config::Colors::statsErrorText);
+                    }
+                });
+            });
         }
 
         grabKeyboardFocus();
