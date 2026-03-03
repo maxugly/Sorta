@@ -29,11 +29,11 @@ MainComponent::MainComponent() {
     focusManager = std::make_unique<FocusManager>(*controlPanel);
     controlPanel->setFocusManager(*focusManager);
     
-    presenterCore = std::make_unique<PresenterCore>(*controlPanel);
-    controlPanel->setPresenterCore(*presenterCore);
+    dependencyContainer = std::make_unique<DependencyContainer>(*controlPanel);
+    controlPanel->setDependencies(*dependencyContainer);
     
     // 5. Finalise setup now that all dependencies are present
-    controlPanel->injectLogic(*interactionCoordinator, *playbackTimerManager, *presenterCore, *focusManager);
+    controlPanel->injectLogic(*interactionCoordinator, *playbackTimerManager, *dependencyContainer, *focusManager);
     
     addAndMakeVisible(controlPanel.get());
 
@@ -86,7 +86,7 @@ void MainComponent::openButtonClicked() {
             if (result.wasOk()) {
                 // Success - PlaybackTextPresenter handles UI updates
             } else {
-                presenterCore->getStatsPresenter().setDisplayText(
+                dependencyContainer->getStatsPresenter().setDisplayText(
                     result.getErrorMessage(), Config::Colors::statsErrorText);
             }
         }
@@ -97,6 +97,6 @@ void MainComponent::openButtonClicked() {
 
 bool MainComponent::keyPressed(const juce::KeyPress &key) {
     if (controlPanel != nullptr)
-        return controlPanel->getPresenterCore().getKeybindPresenter().handleKeyPress(key);
+        return controlPanel->getDependencies().getKeybindPresenter().handleKeyPress(key);
     return false;
 }

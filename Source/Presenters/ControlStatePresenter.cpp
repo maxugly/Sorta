@@ -117,7 +117,7 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
         owner.topBarView->modeButton.setEnabled(true);
         owner.topBarView->statsButton.setEnabled(true);
         owner.topBarView->statsButton.setToggleState(
-            owner.getPresenterCore().getStatsPresenter().isShowingStats(),
+            owner.getDependencies().getStatsPresenter().isShowingStats(),
             juce::dontSendNotification);
         owner.topBarView->channelViewButton.setEnabled(true);
     }
@@ -132,7 +132,7 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
         remaining.setVisible(enabled);
     }
 
-    owner.getPresenterCore().getStatsPresenter().setDisplayEnabled(enabled);
+    owner.getDependencies().getStatsPresenter().setDisplayEnabled(enabled);
 }
 
 void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, bool enabled) {

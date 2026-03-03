@@ -96,7 +96,7 @@ void SilenceDetectionPresenter::startSilenceAnalysis(float threshold, bool detec
 
 void SilenceDetectionPresenter::logStatusMessage(const juce::String &message, bool isError) {
     const auto color = isError ? Config::Colors::statsErrorText : Config::Colors::statsText;
-    owner.getPresenterCore().getStatsPresenter().setDisplayText(message, color);
+    owner.getDependencies().getStatsPresenter().setDisplayText(message, color);
     owner.getHintView().setHint(message);
 }
 

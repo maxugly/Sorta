@@ -65,8 +65,8 @@ bool KeybindPresenter::handlePlaybackKeybinds(const juce::KeyPress &key) {
 bool KeybindPresenter::handleUIToggleKeybinds(const juce::KeyPress &key) {
     const auto keyChar = key.getTextCharacter();
     if (keyChar == 's' || keyChar == 'S') {
-        owner.getPresenterCore().getStatsPresenter().toggleVisibility();
-        owner.getPresenterCore().getControlStatePresenter().refreshStates();
+        owner.getDependencies().getStatsPresenter().toggleVisibility();
+        owner.getDependencies().getControlStatePresenter().refreshStates();
         return true;
     }
     if (keyChar == 'v' || keyChar == 'V') {
@@ -82,7 +82,7 @@ bool KeybindPresenter::handleUIToggleKeybinds(const juce::KeyPress &key) {
     if (keyChar == 'r' || keyChar == 'R') {
         auto& audioPlayer = owner.getAudioPlayer();
         audioPlayer.setRepeating(!audioPlayer.isRepeating());
-        owner.getPresenterCore().getControlStatePresenter().refreshStates();
+        owner.getDependencies().getControlStatePresenter().refreshStates();
         return true;
     }
     return false;
@@ -111,11 +111,11 @@ bool KeybindPresenter::handleCutKeybinds(const juce::KeyPress &key) {
         }
     }
     if (keyChar == 'u' || keyChar == 'U') {
-        owner.getPresenterCore().getCutResetPresenter().resetIn();
+        owner.getDependencies().getCutResetPresenter().resetIn();
         return true;
     }
     if (keyChar == 'p' || keyChar == 'P') {
-        owner.getPresenterCore().getCutResetPresenter().resetOut();
+        owner.getDependencies().getCutResetPresenter().resetOut();
         return true;
     }
     return false;

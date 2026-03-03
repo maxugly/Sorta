@@ -1,5 +1,5 @@
-#ifndef AUDIOFILER_PRESENTERCORE_H
-#define AUDIOFILER_PRESENTERCORE_H
+#ifndef AUDIOFILER_DEPENDENCYCONTAINER_H
+#define AUDIOFILER_DEPENDENCYCONTAINER_H
 
 #include <memory>
 
@@ -28,11 +28,11 @@ class ThemePresenter;
 #include "Presenters/ZoomPresenter.h"
 
 /**
- * @file PresenterCore.h
+ * @file DependencyContainer.h
  * @ingroup Logic
- * @brief The central aggregator and lifecycle manager for all UI Presenters.
+ * @brief Inversion of Control (IoC) container responsible for constructing and wiring all peer Presenters.
  * 
- * @details Architecturally, PresenterCore serves as a "Dependency Container" 
+ * @details Architecturally, DependencyContainer serves as a "Dependency Container" 
  *          that eliminates pointer bloat within the `ControlPanel`. It acts 
  *          as the orchestration layer, responsible for constructing, 
  *          initializing, and wiring all individual Presenters to their 
@@ -42,24 +42,24 @@ class ThemePresenter;
  *          ensures that the "Glue" logic (the Presenters) has a single, 
  *          controlled point of origin, preventing scattered initialization 
  *          and memory leaks. It enforces the "Lego Standard" by treating 
- *          each feature presenter as a self-contained brick owned by this core.
+ *          each feature presenter as a self-contained brick owned by this container.
  * 
  * @see ControlPanel
  * @see SessionState
- * @see PresenterCore
+ * @see DependencyContainer
  */
-class PresenterCore final {
+class DependencyContainer final {
   public:
     /**
-     * @brief Constructs the core and triggers the instantiation of all sub-presenters.
+     * @brief Constructs the container and triggers the instantiation of all sub-presenters.
      * @param cp Reference to the parent ControlPanel (the View shell).
      */
-    explicit PresenterCore(ControlPanel &cp);
+    explicit DependencyContainer(ControlPanel &cp);
 
     /**
      * @brief Ensures all presenters are cleanly deallocated in the correct order.
      */
-    ~PresenterCore();
+    ~DependencyContainer();
 
     /** @name Presenter Accessors
      *  Provides type-safe access to individual feature presenters.
@@ -117,7 +117,7 @@ class PresenterCore final {
 
     /**
      * @brief Internal helper to allocate and configure all presenters.
-     * @details Called by the constructor to ensure atomic initialization of the core.
+     * @details Called by the constructor to ensure atomic initialization of the container.
      */
     void setupPresenters();
 };

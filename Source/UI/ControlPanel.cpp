@@ -24,8 +24,8 @@ ControlPanel::ControlPanel(MainComponent &o, SessionState &s) : owner(o), sessio
     initialiseLookAndFeel(); setupViews(); setupStrips(); setMouseCursor(juce::MouseCursor::CrosshairCursor);
 }
 
-void ControlPanel::injectLogic(InteractionCoordinator& ic, PlaybackTimerManager& ptm, PresenterCore& pc, FocusManager& fm) {
-    interactionCoordinator = &ic; playbackTimerManager = &ptm; presenterCore = &pc; focusManager = &fm; setupListeners(); finaliseSetup();
+void ControlPanel::injectLogic(InteractionCoordinator& ic, PlaybackTimerManager& ptm, DependencyContainer& dc, FocusManager& fm) {
+    interactionCoordinator = &ic; playbackTimerManager = &ptm; dependencyContainer = &dc; focusManager = &fm; setupListeners(); finaliseSetup();
 #if !defined(JUCE_HEADLESS)
     playbackTimerManager->attachToVBlank(this);
 #endif
@@ -46,7 +46,7 @@ void ControlPanel::setupStrips() {
 }
 
 void ControlPanel::setupListeners() {
-    playbackTimerManager->addListener(&getPresenterCore().getZoomPresenter());
+    playbackTimerManager->addListener(&getDependencies().getZoomPresenter());
     playbackTimerManager->addListener(&getPlaybackTextPresenter());
     playbackTimerManager->setZoomPointProvider([this]() {
         auto d = getMarkerMouseHandler().getDraggedHandle();
@@ -57,8 +57,8 @@ void ControlPanel::setupListeners() {
 }
 
 void ControlPanel::initialiseLookAndFeel() { setLookAndFeel(&modernLF); }
-void ControlPanel::refreshThemeLive() { getPresenterCore().getThemePresenter().applyTheme(); }
-void ControlPanel::finaliseSetup() { getPlaybackTextPresenter().initialiseEditors(); getPresenterCore().getControlStatePresenter().refreshStates(); getPresenterCore().getMatrixPresenter().fullMatrixUpdate(); refreshThemeLive(); }
+void ControlPanel::refreshThemeLive() { getDependencies().getThemePresenter().applyTheme(); }
+void ControlPanel::finaliseSetup() { getPlaybackTextPresenter().initialiseEditors(); getDependencies().getControlStatePresenter().refreshStates(); getDependencies().getMatrixPresenter().fullMatrixUpdate(); refreshThemeLive(); }
 
 void ControlPanel::resized() {
     if (layoutManager) { layoutManager->performLayout(); layoutManager->layoutWaveformArea(); }
@@ -74,11 +74,11 @@ ControlPanel::~ControlPanel() { setLookAndFeel(nullptr); }
 
 AudioPlayer &ControlPanel::getAudioPlayer() { return *owner.getAudioPlayer(); }
 AudioPlayer &ControlPanel::getAudioPlayer() const { return *owner.getAudioPlayer(); }
-const MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() const { return getPresenterCore().getCutPresenter().getMarkerMouseHandler(); }
-MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() { return getPresenterCore().getCutPresenter().getMarkerMouseHandler(); }
-const WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() const { return getPresenterCore().getCutPresenter().getWaveformMouseHandler(); }
-WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() { return getPresenterCore().getCutPresenter().getWaveformMouseHandler(); }
-juce::TextEditor &ControlPanel::getStatsDisplay() { return getPresenterCore().getStatsPresenter().getDisplay(); }
+const MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() const { return getDependencies().getCutPresenter().getMarkerMouseHandler(); }
+MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() { return getDependencies().getCutPresenter().getMarkerMouseHandler(); }
+const WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() const { return getDependencies().getCutPresenter().getWaveformMouseHandler(); }
+WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() { return getDependencies().getCutPresenter().getWaveformMouseHandler(); }
+juce::TextEditor &ControlPanel::getStatsDisplay() { return getDependencies().getStatsPresenter().getDisplay(); }
 const juce::LookAndFeel &ControlPanel::getLookAndFeel() const { return modernLF; }
 void ControlPanel::invokeOwnerOpenDialog() { owner.openButtonClicked(); }
 juce::MouseCursor ControlPanel::getMouseCursor() { return (getInteractionCoordinator().getPlacementMode() != AppEnums::PlacementMode::None) ? juce::MouseCursor::PointingHandCursor : juce::MouseCursor::CrosshairCursor; }

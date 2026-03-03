@@ -69,7 +69,7 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int height) 
 void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {
     // The bounds are now perfectly prepared. Cache them.
     controlPanel.layoutCache.contentAreaBounds = bounds;
-    controlPanel.getPresenterCore().getStatsPresenter().layoutWithin(bounds);
+    controlPanel.getDependencies().getStatsPresenter().layoutWithin(bounds);
 }
 
 void LayoutManager::layoutWaveformArea() {

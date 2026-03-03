@@ -2,7 +2,7 @@
 #define AUDIOFILER_CONTROLPANEL_H
 
 #include "Presenters/PlaybackTimerManager.h"
-#include "Presenters/PresenterCore.h"
+#include "Core/DependencyContainer.h"
 #include "UI/InteractionCoordinator.h"
 #include "UI/Views/MatrixView.h"
 #include "UI/Views/HintView.h"
@@ -117,10 +117,10 @@ class ControlPanel final : public juce::Component {
      * @brief Injects the required logic managers into the panel. 
      * @param ic The interaction coordinator.
      * @param ptm The playback timer manager.
-     * @param pc The core presenter suite.
+     * @param dc The dependency container.
      * @param fm The focus manager.
      */
-    void injectLogic(InteractionCoordinator& ic, PlaybackTimerManager& ptm, PresenterCore& pc, FocusManager& fm);
+    void injectLogic(InteractionCoordinator& ic, PlaybackTimerManager& ptm, DependencyContainer& dc, FocusManager& fm);
 
     /** @brief Sets the interaction coordinator manually. */
     void setInteractionCoordinator(InteractionCoordinator& ic) { interactionCoordinator = &ic; }
@@ -128,8 +128,8 @@ class ControlPanel final : public juce::Component {
     /** @brief Sets the playback timer manager manually. */
     void setPlaybackTimerManager(PlaybackTimerManager& ptm) { playbackTimerManager = &ptm; }
 
-    /** @brief Sets the core presenter suite manually. */
-    void setPresenterCore(PresenterCore& pc) { presenterCore = &pc; }
+    /** @brief Sets the dependency container manually. */
+    void setDependencies(DependencyContainer& dc) { dependencyContainer = &dc; }
 
     /** @brief Sets the focus manager manually. */
     void setFocusManager(FocusManager& fm) { focusManager = &fm; }
@@ -200,7 +200,7 @@ class ControlPanel final : public juce::Component {
 
     /** @return Pointer to the silence detection presenter. */
     SilenceDetectionPresenter *getSilenceDetectionPresenter() {
-        return presenterCore != nullptr ? &presenterCore->getSilenceDetectionPresenter() : nullptr;
+        return dependencyContainer != nullptr ? &dependencyContainer->getSilenceDetectionPresenter() : nullptr;
     }
 
     /** @return Reference to the statistics text editor. */
@@ -215,16 +215,16 @@ class ControlPanel final : public juce::Component {
     /** @return Reference to the playback timer manager. */
     PlaybackTimerManager &getPlaybackTimerManager() { return *playbackTimerManager; }
 
-    /** @return Reference to the core presenter suite. */
-    PresenterCore &getPresenterCore() { return *presenterCore; }
-    /** @return Const reference to the core presenter suite. */
-    const PresenterCore &getPresenterCore() const { return *presenterCore; }
+    /** @return Reference to the dependency container. */
+    DependencyContainer &getDependencies() { return *dependencyContainer; }
+    /** @return Const reference to the dependency container. */
+    const DependencyContainer &getDependencies() const { return *dependencyContainer; }
 
     /** @return Reference to the boundary logic presenter. */
-    BoundaryLogicPresenter &getBoundaryLogicPresenter() { return presenterCore->getBoundaryLogicPresenter(); }
+    BoundaryLogicPresenter &getBoundaryLogicPresenter() { return dependencyContainer->getBoundaryLogicPresenter(); }
 
     /** @return Reference to the repeat button presenter. */
-    RepeatButtonPresenter &getRepeatButtonPresenter() { return presenterCore->getRepeatButtonPresenter(); }
+    RepeatButtonPresenter &getRepeatButtonPresenter() { return dependencyContainer->getRepeatButtonPresenter(); }
 
     /** @return Reference to the matrix view. */
     MatrixView& getMatrixView() { return topBarView->getMatrixView(); }
@@ -233,7 +233,7 @@ class ControlPanel final : public juce::Component {
     HintView& getHintView() { return topBarView->getHintView(); }
 
     /** @return Reference to the playback text presenter. */
-    PlaybackTextPresenter &getPlaybackTextPresenter() { return presenterCore->getPlaybackTextPresenter(); }
+    PlaybackTextPresenter &getPlaybackTextPresenter() { return dependencyContainer->getPlaybackTextPresenter(); }
 
     /** @return Pointer to the waveform canvas view. */
     WaveformCanvasView* getWaveformCanvasView() { return waveformCanvasView.get(); }
@@ -264,7 +264,7 @@ class ControlPanel final : public juce::Component {
     friend class BoundaryLogicPresenter;
     friend class ZoomPresenter;
     friend class ThemePresenter;
-    friend class PresenterCore;
+    friend class DependencyContainer;
 
     MainComponent &owner;
     SessionState &sessionState;
@@ -272,7 +272,7 @@ class ControlPanel final : public juce::Component {
 
     InteractionCoordinator* interactionCoordinator{nullptr};
     PlaybackTimerManager* playbackTimerManager{nullptr};
-    PresenterCore* presenterCore{nullptr};
+    DependencyContainer* dependencyContainer{nullptr};
     FocusManager* focusManager{nullptr};
 
     std::unique_ptr<LayoutManager> layoutManager;

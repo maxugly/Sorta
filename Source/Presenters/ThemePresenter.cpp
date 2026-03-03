@@ -84,7 +84,7 @@ void ThemePresenter::applyTheme() {
 
     if (auto* wcv = owner.getWaveformCanvasView()) wcv->getWaveformView().clearCaches();
     
-    auto& stats = owner.getPresenterCore().getStatsPresenter();
+    auto& stats = owner.getDependencies().getStatsPresenter();
     stats.getDisplay().setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
     stats.getDisplay().setColour(juce::TextEditor::textColourId, Config::Colors::statsText);
     stats.updateStats();

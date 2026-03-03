@@ -105,8 +105,8 @@ void ControlButtonsPresenter::initialiseStatsButton() {
     btn.setClickingTogglesState(true);
     btn.onClick = [this] {
         if (owner.topBarView == nullptr) return;
-        owner.getPresenterCore().getStatsPresenter().setShouldShowStats(owner.topBarView->statsButton.getToggleState());
-        owner.getPresenterCore().getControlStatePresenter().refreshStates();
+        owner.getDependencies().getStatsPresenter().setShouldShowStats(owner.topBarView->statsButton.getToggleState());
+        owner.getDependencies().getControlStatePresenter().refreshStates();
     };
 }
 
@@ -170,7 +170,7 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
             owner.getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutIn);
         };
         inStrip->getResetButton().onClick = [this] {
-            owner.getPresenterCore().getCutResetPresenter().resetIn();
+            owner.getDependencies().getCutResetPresenter().resetIn();
         };
         inStrip->getAutoCutButton().onClick = [this, inStrip, &sessionState] {
             sessionState.setAutoCutInActive(inStrip->getAutoCutButton().getToggleState());
@@ -185,7 +185,7 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
             owner.getInteractionCoordinator().setPlacementMode(AppEnums::PlacementMode::CutOut);
         };
         outStrip->getResetButton().onClick = [this] {
-            owner.getPresenterCore().getCutResetPresenter().resetOut();
+            owner.getDependencies().getCutResetPresenter().resetOut();
         };
         outStrip->getAutoCutButton().onClick = [this, outStrip, &sessionState] {
             sessionState.setAutoCutOutActive(outStrip->getAutoCutButton().getToggleState());

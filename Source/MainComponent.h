@@ -14,7 +14,7 @@
 #include "UI/ControlPanel.h"
 #include "UI/InteractionCoordinator.h"
 #include "Presenters/PlaybackTimerManager.h"
-#include "Presenters/PresenterCore.h"
+#include "Core/DependencyContainer.h"
 #include "UI/FocusManager.h"
 
 /**
@@ -49,7 +49,7 @@ class MainComponent : public juce::AudioAppComponent {
     // Core Logic Managers (Owned by the Shell)
     std::unique_ptr<InteractionCoordinator> interactionCoordinator;
     std::unique_ptr<PlaybackTimerManager> playbackTimerManager;
-    std::unique_ptr<PresenterCore> presenterCore;
+    std::unique_ptr<DependencyContainer> dependencyContainer;
     std::unique_ptr<FocusManager> focusManager;
 
     std::unique_ptr<juce::FileChooser> chooser;

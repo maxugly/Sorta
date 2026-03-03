@@ -1,8 +1,8 @@
 /**
- * @file PresenterCore.cpp
+ * @file DependencyContainer.cpp
  */
 
-#include "Presenters/PresenterCore.h"
+#include "Core/DependencyContainer.h"
 #include "UI/ControlPanel.h"
 
 #include "Presenters/BoundaryLogicPresenter.h"
@@ -31,7 +31,7 @@
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/CutLayerView.h"
 
-PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
+DependencyContainer::DependencyContainer(ControlPanel &cp) : owner(cp) {
     playbackRepeatController = std::make_unique<PlaybackRepeatController>(owner.getAudioPlayer(), owner.getSessionState());
     
     statsPresenter = std::make_unique<StatsPresenter>(owner);
@@ -84,4 +84,4 @@ PresenterCore::PresenterCore(ControlPanel &cp) : owner(cp) {
     themePresenter = std::make_unique<ThemePresenter>(owner);
 }
 
-PresenterCore::~PresenterCore() = default;
+DependencyContainer::~DependencyContainer() = default;

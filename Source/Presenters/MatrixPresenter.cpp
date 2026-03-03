@@ -1,5 +1,5 @@
-
 #include "Presenters/MatrixPresenter.h"
+#include "Core/DependencyContainer.h"
 #include "Core/AudioPlayer.h"
 #include "Core/SessionState.h"
 #include "Presenters/SilenceDetectionPresenter.h"
@@ -11,7 +11,6 @@
 #include "UI/Views/PlaybackTimeView.h"
 #include "UI/Components/MarkerStrip.h"
 #include "Presenters/StatsPresenter.h"
-#include "Presenters/PresenterCore.h"
 #include "Core/WaveformManager.h"
 #include "Utils/Config.h"
 #include "UI/FocusManager.h"
@@ -101,7 +100,7 @@ void MatrixPresenter::fullMatrixUpdate() {
     state.ledColors.push_back(flameColor);
 
     // 33. Stats Overlay Active
-    state.ledColors.push_back(owner.getPresenterCore().getStatsPresenter().isShowingStats() ? active : inactive);
+    state.ledColors.push_back(owner.getDependencies().getStatsPresenter().isShowingStats() ? active : inactive);
 
     // 34. Dragging full cut region
     state.ledColors.push_back(markerMouseHandler.isHandleActive(MarkerMouseHandler::CutMarkerHandle::Full) ? active : inactive);
