@@ -59,13 +59,6 @@ class LayoutManager final {
     void layoutCutControls(juce::Rectangle<int> &bounds, int rowHeight);
 
     /** 
-     * @brief Lays out the transport controls and playback text display. 
-     * @param bounds The available drawing area, updated after allocation.
-     * @param rowHeight The preferred height for this row.
-     */
-    void layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, int rowHeight);
-
-    /** 
      * @brief Lays out the primary waveform area and any overlay stats. 
      * @param bounds The remaining available drawing area.
      */

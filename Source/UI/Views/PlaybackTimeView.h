@@ -38,9 +38,6 @@ class PlaybackTimeView final : public juce::Component {
     /** @brief Destructor. */
     ~PlaybackTimeView() override;
 
-    /** @brief Standard JUCE paint callback. */
-    void paint(juce::Graphics &g) override;
-
     /** @brief Standard JUCE resized callback, organizing the time display editors. */
     void resized() override;
 

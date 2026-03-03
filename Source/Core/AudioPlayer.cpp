@@ -192,9 +192,15 @@ void AudioPlayer::getNextAudioBlock(const juce::AudioSourceChannelInfo &bufferTo
 
     const double cutIn = cachedCutIn;
     const double cutOut = std::max(cutIn, (double)cachedCutOut);
-    const double startPos = transportSource.getCurrentPosition();
+    double startPos = transportSource.getCurrentPosition();
 
-    // Catch-all: If the playhead somehow jumped past the cut point, reset or stop now.
+    // 1. Instantaneous Guardrail: If playhead is behind the cut-in, push it forward.
+    if (startPos < cutIn) {
+        transportSource.setPosition(cutIn);
+        startPos = cutIn;
+    }
+
+    // 2. Catch-all: If the playhead somehow jumped past the cut point, reset or stop now.
     if (startPos >= cutOut) {
         if (repeating) {
             transportSource.setPosition(cutIn);
@@ -258,14 +264,18 @@ void AudioPlayer::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) 
     cachedCutActive = prefs.active;
     cachedCutIn = prefs.cutIn;
     cachedCutOut = prefs.cutOut;
+
+    setPlayheadPosition(getCurrentPosition());
 }
 
 void AudioPlayer::cutInChanged(double value) {
     cachedCutIn = value;
+    setPlayheadPosition(getCurrentPosition());
 }
 
 void AudioPlayer::cutOutChanged(double value) {
     cachedCutOut = value;
+    setPlayheadPosition(getCurrentPosition());
 }
 
 void AudioPlayer::volumeChanged(float newVolume) {

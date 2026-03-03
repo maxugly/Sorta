@@ -180,8 +180,6 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Views/PlaybackCursorView.cpp
             Source/UI/Views/PlaybackCursorGlow.h
             Source/UI/Views/PlaybackCursorGlow.cpp
-            Source/UI/Views/OverlayView.h
-            Source/UI/Views/OverlayView.cpp
             Source/UI/Views/MatrixView.h
             Source/UI/Views/MatrixView.cpp
             Source/UI/Views/VolumeView.h

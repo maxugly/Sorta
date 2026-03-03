@@ -42,10 +42,6 @@ void PlaybackTimeView::setCutModeLayout(bool isCutMode) {
     }
 }
 
-void PlaybackTimeView::paint(juce::Graphics &g) {
-    juce::ignoreUnused(g);
-}
-
 void PlaybackTimeView::resized() {
     const int playbackWidth = Config::Layout::Text::playbackWidth;
     const int playbackHeight = Config::Layout::Text::playbackHeight;
