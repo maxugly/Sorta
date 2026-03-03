@@ -58,7 +58,6 @@ void WaveformMouseHandler::mouseDown(const juce::MouseEvent &event) {
                 tr.first;
 
             if (event.mods.isLeftButtonDown()) {
-                coordinator.setNeedsJumpToCutIn(true);
                 const auto pm = coordinator.getPlacementMode();
                 if (pm != AppEnums::PlacementMode::None) {
                     auto marker = (pm == AppEnums::PlacementMode::CutIn)
@@ -164,8 +163,6 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
 
     if (isDraggingFlag) {
         isDraggingFlag = isScrubbingState = false;
-        owner.getAudioPlayer().setPlayheadPosition(owner.getSessionState().getCutIn());
-        owner.getInteractionCoordinator().setNeedsJumpToCutIn(false);
     }
 
     const auto wb = owner.getWaveformBounds();
@@ -186,8 +183,6 @@ void WaveformMouseHandler::mouseUp(const juce::MouseEvent &event) {
                 owner.getSessionState().setCutOut(t);
                 owner.getSessionState().setAutoCutOutActive(false);
             }
-            owner.getAudioPlayer().setPlayheadPosition(owner.getSessionState().getCutIn());
-            owner.getInteractionCoordinator().setNeedsJumpToCutIn(false);
             coordinator.setPlacementMode(AppEnums::PlacementMode::None);
 
         } else if (mouseDragStartX == event.x) {
