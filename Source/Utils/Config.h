@@ -79,7 +79,8 @@ namespace Colors {
 
     struct Button {
         static juce::Colour base;               /**< Default button fill. */
-        static juce::Colour on;                 /**< Active/Toggled button fill. */
+        static juce::Colour on;
+        static juce::Colour highlightedBackground;                 /**< Active/Toggled button fill. */
         static juce::Colour text;               /**< Label color. */
         static juce::Colour textActive;         /**< Label color when pressed. */
         static juce::Colour outline;            /**< Border color. */

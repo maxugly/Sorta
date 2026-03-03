@@ -4,6 +4,7 @@
 #include "Core/AudioPlayer.h"
 #include "Presenters/ControlStatePresenter.h"
 #include "Presenters/CutResetPresenter.h"
+#include "Presenters/DirectoryPresenter.h"
 #include "Presenters/StatsPresenter.h"
 #include "UI/ControlPanel.h"
 #include "UI/Views/TopBarView.h"
@@ -23,6 +24,8 @@ bool KeybindPresenter::handleKeyPress(const juce::KeyPress &key) {
         if (handleUIToggleKeybinds(key))
             return true;
         if (handleCutKeybinds(key))
+            return true;
+        if (handleRoutingKeybinds(key))
             return true;
     }
     return false;
@@ -119,4 +122,20 @@ bool KeybindPresenter::handleCutKeybinds(const juce::KeyPress &key) {
         return true;
     }
     return false;
+}
+
+bool KeybindPresenter::handleRoutingKeybinds(const juce::KeyPress &key) {
+    const juce::juce_wchar keyChar = key.getTextCharacter();
+    int slotIndex = -1;
+
+    if (keyChar >= '1' && keyChar <= '9') {
+        slotIndex = static_cast<int>(keyChar - '1');
+    } else if (keyChar == '0') {
+        slotIndex = 9;
+    } else {
+        return false;
+    }
+
+    owner.getDependencies().getDirectoryPresenter().routeToDestination(slotIndex);
+    return true;
 }

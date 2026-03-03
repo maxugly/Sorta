@@ -17,17 +17,17 @@ void LayoutManager::performLayout() {
     const int height = (int)Config::UI::WidgetHeight;
 
     // 1. Horizontal Split: All controls/waveform (left) vs Sidebar (right)
-    juce::Component* hComps[] = { &controlPanel.leftWorkspaceAnchor, controlPanel.horizontalResizer.get(), &controlPanel.directoryRoutingView };
+    juce::Component* hComps[] = { &controlPanel.leftWorkspaceAnchor, controlPanel.horizontalResizer.get(), &controlPanel.getDirectoryRoutingView() };
     controlPanel.horizontalLayoutManager.layOutComponents(hComps, 3, 
         fullBounds.getX(), fullBounds.getY(), fullBounds.getWidth(), fullBounds.getHeight(), false, true);
 
     // 2. Adjust right side for Exit Button
-    auto rightBounds = controlPanel.directoryRoutingView.getBounds();
+    auto rightBounds = controlPanel.getDirectoryRoutingView().getBounds();
     auto exitRow = rightBounds.removeFromTop(height + margin * 2);
     controlPanel.exitButton.setBounds(exitRow.getRight() - Config::Layout::buttonWidth - margin, 
                                       exitRow.getY() + margin, 
                                       Config::Layout::buttonWidth, height);
-    controlPanel.directoryRoutingView.setBounds(rightBounds); 
+    controlPanel.getDirectoryRoutingView().setBounds(rightBounds);
 
     // 3. Lay out left side using a single, globally padded internal container
     auto bounds = controlPanel.leftWorkspaceAnchor.getBounds().reduced(margin);

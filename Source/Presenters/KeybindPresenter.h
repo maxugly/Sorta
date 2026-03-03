@@ -57,6 +57,8 @@ class KeybindPresenter final {
 
     /** @brief Handles shortcuts for manipulating cut boundaries. */
     bool handleCutKeybinds(const juce::KeyPress &key);
+    /** @brief Handles shortcuts for directory routing slots. */
+    bool handleRoutingKeybinds(const juce::KeyPress &key);
 
     ControlPanel &owner;
 };

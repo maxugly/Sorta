@@ -243,6 +243,7 @@ class ControlPanel final : public juce::Component {
     FpsView& getFpsView() { return *fpsView; }
 
     FileQueueView& getFileQueueView() { return *fileQueueView; }
+    DirectoryRoutingView& getDirectoryRoutingView() { return *directoryRoutingView; }
 
     /** @brief Triggers the owner's file open dialog. */
     void invokeOwnerOpenDialog();
@@ -289,7 +290,7 @@ class ControlPanel final : public juce::Component {
 
     juce::Component leftWorkspaceAnchor, waveformLayoutAnchor;
     std::unique_ptr<FileQueueView> fileQueueView;
-    DirectoryRoutingView directoryRoutingView;
+    std::unique_ptr<DirectoryRoutingView> directoryRoutingView;
     juce::StretchableLayoutManager verticalLayoutManager;
     juce::StretchableLayoutManager horizontalLayoutManager;
     std::unique_ptr<XPResizerBar> verticalResizer;

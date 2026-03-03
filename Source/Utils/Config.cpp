@@ -13,7 +13,8 @@ juce::Colour solidBlack = juce::Colours::black;
 juce::Colour transparentWhite = juce::Colours::transparentWhite;
 
 juce::Colour Button::base{0xff5a5a5a};
-juce::Colour Button::on{juce::Colours::orange}; 
+juce::Colour Button::on{juce::Colours::orange};
+juce::Colour Button::highlightedBackground{0xff3a3a3a};
 juce::Colour Button::text{0xFF34FA11};
 juce::Colour Button::textActive{juce::Colours::white};
 juce::Colour Button::outline{0xff808080};

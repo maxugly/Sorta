@@ -25,6 +25,9 @@ class KeybindPresenter;
 class FpsPresenter;
 class ThemePresenter;
 class PreloadPresenter;
+class DirectoryPresenter;
+class DirectoryState;
+class RoutingWorker;
 #include "Presenters/HintPresenter.h"
 #include "Presenters/ZoomPresenter.h"
 
@@ -88,6 +91,9 @@ class DependencyContainer final {
     KeybindPresenter& getKeybindPresenter() { return *keybindPresenter; }
     FpsPresenter& getFpsPresenter() { return *fpsPresenter; }
     ThemePresenter& getThemePresenter() { return *themePresenter; }
+    DirectoryState& getDirectoryState() { return *directoryState; }
+    RoutingWorker& getRoutingWorker() { return *routingWorker; }
+    DirectoryPresenter& getDirectoryPresenter() { return *directoryPresenter; }
     /**@}*/
 
   private:
@@ -114,6 +120,9 @@ class DependencyContainer final {
     std::unique_ptr<FpsPresenter> fpsPresenter;                   /**< Logic for performance monitoring display. */
     std::unique_ptr<ThemePresenter> themePresenter;               /**< Logic for the palette switching engine. */
     std::unique_ptr<PreloadPresenter> preloadPresenter;           /**< Logic for the metadata pre-loading queue. */
+    std::unique_ptr<DirectoryState> directoryState;               /**< Logic for directory routing state. */
+    std::unique_ptr<RoutingWorker> routingWorker;                 /**< Logic for background directory routing. */
+    std::unique_ptr<DirectoryPresenter> directoryPresenter;       /**< Logic for directory routing control. */
 
     ControlPanel &owner;                                          /**< The root View container (MVP View). */
 
