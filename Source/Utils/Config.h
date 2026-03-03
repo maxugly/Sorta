@@ -295,6 +295,15 @@ namespace Audio {
     constexpr float silenceThresholdIn = 0.01f;
     constexpr float silenceThresholdOut = 0.01f;
     constexpr bool lockHandlesWhenAutoCutActive = false;
+
+    /** @brief Format indices for HH:MM:SS.mmm timecode segments. */
+    struct TimecodeLayout {
+        static constexpr int hoursEnd = 2;
+        static constexpr int minutesEnd = 5;
+        static constexpr int secondsEnd = 8;
+        static constexpr int millisStart = 9;
+        static constexpr int totalLength = 12;
+    };
 } // namespace Audio
 
 /** @brief User preferences and experimental features. */

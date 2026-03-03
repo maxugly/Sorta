@@ -52,10 +52,11 @@ void handleTimeSegmentHighlight(const juce::MouseEvent &event) {
     const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
     juce::Range<int> newRange;
 
-    if (effectiveIndex <= 2)      newRange = juce::Range<int>(0 + offset, 2 + offset);
-    else if (effectiveIndex <= 5) newRange = juce::Range<int>(3 + offset, 5 + offset);
-    else if (effectiveIndex <= 8) newRange = juce::Range<int>(6 + offset, 8 + offset);
-    else                          newRange = juce::Range<int>(9 + offset, 14 + offset);
+    using Layout = Config::Audio::TimecodeLayout;
+    if (effectiveIndex <= Layout::hoursEnd)      newRange = juce::Range<int>(0 + offset, Layout::hoursEnd + offset);
+    else if (effectiveIndex <= Layout::minutesEnd) newRange = juce::Range<int>(Layout::hoursEnd + 1 + offset, Layout::minutesEnd + offset);
+    else if (effectiveIndex <= Layout::secondsEnd) newRange = juce::Range<int>(Layout::minutesEnd + 1 + offset, Layout::secondsEnd + offset);
+    else                          newRange = juce::Range<int>(Layout::millisStart + offset, Layout::totalLength + offset);
 
     juce::MessageManager::callAsync([editor, newRange] {
         if (editor != nullptr)
@@ -117,9 +118,10 @@ double calculateStepSize(int charIndex, const juce::ModifierKeys &mods, double s
     bool isSamples = false;
 
     // Route the step size based on the character index hit-zone
-    if (charIndex <= 2)      step = Config::Audio::cutStepHours;
-    else if (charIndex <= 5) step = Config::Audio::cutStepMinutes;
-    else if (charIndex <= 8) step = Config::Audio::cutStepSeconds;
+    using Layout = Config::Audio::TimecodeLayout;
+    if (charIndex <= Layout::hoursEnd)      step = Config::Audio::cutStepHours;
+    else if (charIndex <= Layout::minutesEnd) step = Config::Audio::cutStepMinutes;
+    else if (charIndex <= Layout::secondsEnd) step = Config::Audio::cutStepSeconds;
     else                     isSamples = true;
 
     if (isSamples) {
@@ -157,9 +159,10 @@ float getZoomFactorForPosition(const juce::MouseEvent &event) {
     const int charIndex = calculateCharIndexAtX(*editor, event.x);
     const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
 
-    if (effectiveIndex <= 2) return 1.0f;
-    if (effectiveIndex <= 5) return 10.0f;
-    if (effectiveIndex <= 8) return 100.0f;
+    using Layout = Config::Audio::TimecodeLayout;
+    if (effectiveIndex <= Layout::hoursEnd) return 1.0f;
+    if (effectiveIndex <= Layout::minutesEnd) return 10.0f;
+    if (effectiveIndex <= Layout::secondsEnd) return 100.0f;
     return 10000.0f;
 }
 
@@ -171,6 +174,6 @@ bool shouldShowZoomPopup(const juce::MouseEvent &event) {
     const int offset = hasPrefix ? 1 : 0;
     const int charIndex = calculateCharIndexAtX(*editor, event.x);
     const int effectiveIndex = juce::jlimit(0, (int)editor->getText().length() - 1, charIndex) - offset;
-    return effectiveIndex >= 6;
+    return effectiveIndex >= Config::Audio::TimecodeLayout::minutesEnd + 1;
 }
 } // namespace TimeEntryHelpers
