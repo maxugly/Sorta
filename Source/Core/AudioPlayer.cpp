@@ -265,17 +265,20 @@ void AudioPlayer::cutPreferenceChanged(const MainDomain::CutPreferences &prefs) 
     cachedCutIn = prefs.cutIn;
     cachedCutOut = prefs.cutOut;
 
-    setPlayheadPosition(getCurrentPosition());
+    if (cachedCutActive)
+        setPlayheadPosition(getCurrentPosition());
 }
 
 void AudioPlayer::cutInChanged(double value) {
     cachedCutIn = value;
-    setPlayheadPosition(getCurrentPosition());
+    if (cachedCutActive)
+        setPlayheadPosition(getCurrentPosition());
 }
 
 void AudioPlayer::cutOutChanged(double value) {
     cachedCutOut = value;
-    setPlayheadPosition(getCurrentPosition());
+    if (cachedCutActive)
+        setPlayheadPosition(getCurrentPosition());
 }
 
 void AudioPlayer::volumeChanged(float newVolume) {

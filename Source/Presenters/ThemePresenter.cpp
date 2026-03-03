@@ -8,6 +8,7 @@
 #include "UI/Components/CutLengthStrip.h"
 #include "Presenters/StatsPresenter.h"
 #include "Utils/Config.h"
+#include "Utils/ThemeLoader.h"
 
 ThemePresenter::ThemePresenter(ControlPanel& cp) : owner(cp) {
     if (auto* tbv = owner.getTopBarView()) {
@@ -51,7 +52,7 @@ void ThemePresenter::comboBoxChanged(juce::ComboBox* comboBox) {
         if (comboBox == &tbv->themeSelector) {
             int index = comboBox->getSelectedItemIndex();
             if (index >= 0 && index < themeFiles.size()) {
-                Config::loadTheme(themeFiles[index]);
+                ThemeLoader::loadTheme(themeFiles[index]);
                 Config::saveCurrentTheme(themeFiles[index].getFileName());
                 owner.refreshThemeLive();
             }

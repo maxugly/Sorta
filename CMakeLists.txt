@@ -60,6 +60,8 @@ if (NOT BUILD_TESTS_ONLY)
             # Utils
             Source/Utils/Config.h
             Source/Utils/Config.cpp
+            Source/Utils/ThemeLoader.h
+            Source/Utils/ThemeLoader.cpp
             Source/Utils/TimeUtils.h
             Source/Utils/TimeUtils.cpp
             Source/Utils/UIAnimationHelper.h
@@ -219,6 +221,7 @@ add_executable(tests
     Source/Core/AudioPlayer.cpp
     Tests/AudioPlayerTest.cpp
     Source/Utils/Config.cpp
+    Source/Utils/ThemeLoader.cpp
     Source/Core/SessionState.cpp
     Source/Workers/SilenceAnalysisAlgorithms.cpp
     Source/Core/SilenceAnalysisWorker.cpp
