@@ -84,6 +84,7 @@ namespace Colors {
         static juce::Colour textActive;         /**< Label color when pressed. */
         static juce::Colour outline;            /**< Border color. */
         static juce::Colour disabledBackground; /**< Fill for inactive buttons. */
+        static juce::Colour disabledBackgroundAlt; /**< Alternate fill for inactive buttons. */
         static juce::Colour disabledText;       /**< Label for inactive buttons. */
         static juce::Colour exit;               /**< High-visibility exit button. */
         static juce::Colour exitText;           /**< Exit button label. */

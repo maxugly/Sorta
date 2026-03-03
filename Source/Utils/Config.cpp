@@ -18,6 +18,7 @@ juce::Colour Button::text{0xFF34FA11};
 juce::Colour Button::textActive{juce::Colours::white};
 juce::Colour Button::outline{0xff808080};
 juce::Colour Button::disabledBackground{0xff2a2a2a};
+juce::Colour Button::disabledBackgroundAlt{0xff1a1a1a};
 juce::Colour Button::disabledText{0xff4a4a4a};
 juce::Colour Button::exit{juce::Colours::red};
 juce::Colour Button::exitText{juce::Colours::white};

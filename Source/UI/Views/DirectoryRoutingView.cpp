@@ -15,7 +15,7 @@ void DirectoryRoutingView::paint(juce::Graphics& g) {
         if (i % 2 == 0) {
             g.fillAll(Config::Colors::Button::disabledBackground);
         } else {
-            g.fillAll(Config::Colors::Button::disabledBackground.darker(0.2f));
+            g.fillAll(Config::Colors::Button::disabledBackgroundAlt);
         }
         
         // Draw slot dividers
@@ -28,8 +28,4 @@ void DirectoryRoutingView::paint(juce::Graphics& g) {
         g.setFont(juce::Font(juce::FontOptions((float)Config::Layout::Text::mouseCursorSize)));
         g.drawText(label, slot, juce::Justification::centred, false);
     }
-}
-
-void DirectoryRoutingView::resized() {
-    // Passive view: no child components to lay out yet
 }
