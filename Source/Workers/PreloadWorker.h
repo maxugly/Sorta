@@ -1,5 +1,13 @@
 #pragma once
+
+#if defined(JUCE_HEADLESS)
+#include <juce_core/juce_core.h>
+#include <juce_events/juce_events.h>
+#include <juce_audio_formats/juce_audio_formats.h>
+#else
 #include <JuceHeader.h>
+#endif
+
 #include <queue>
 #include <mutex>
 #include "Core/FileMetadata.h"
