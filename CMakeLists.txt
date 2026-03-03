@@ -164,8 +164,15 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Components/StyledTextEditor.cpp
 
             # UI/Views
+            Source/UI/Views/CutLayerState.h
             Source/UI/Views/CutLayerView.h
             Source/UI/Views/CutLayerView.cpp
+            Source/UI/Views/CutFadeView.h
+            Source/UI/Views/CutFadeView.cpp
+            Source/UI/Views/CutThresholdsView.h
+            Source/UI/Views/CutThresholdsView.cpp
+            Source/UI/Views/CutMarkersView.h
+            Source/UI/Views/CutMarkersView.cpp
             Source/UI/Views/WaveformCanvasView.h
             Source/UI/Views/WaveformCanvasView.cpp
             Source/UI/Views/TopBarView.h
