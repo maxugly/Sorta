@@ -88,6 +88,7 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Workers/SilenceAnalysisAlgorithms.cpp
             Source/Workers/SilenceDetectionLogger.h
             Source/Workers/SilenceDetectionLogger.cpp
+            Source/Workers/PreloadWorker.cpp
 
             # Presenters
             Source/Presenters/ControlButtonsPresenter.h
@@ -233,6 +234,7 @@ add_executable(tests
     Source/Workers/SilenceAnalysisAlgorithms.cpp
     Source/Core/SilenceAnalysisWorker.cpp
     Source/Workers/SilenceDetectionLogger.cpp
+            Source/Workers/PreloadWorker.cpp
     Tests/SilenceAnalysisTest.cpp
     Tests/ConfigPersistenceTest.cpp
 )
