@@ -119,13 +119,23 @@ void LayoutManager::layoutWaveformArea() {
     // 2. Extract the uncorrupted structural bounds
     auto waveAnchorBounds = controlPanel.waveformLayoutAnchor.getBounds();
 
-    // 3. Visual Phase: Apply horizontal margins for the visual components
-    auto waveVisualBounds = waveAnchorBounds.reduced(margin, 0);
+    // 3. Visual Phase: Conditionally apply margins based on View Mode
+    juce::Rectangle<int> waveVisualBounds;
     
-    // Also apply horizontal margins to the file queue so it perfectly aligns with the waveform
+    if (controlPanel.getSessionState().getViewMode() == AppEnums::ViewMode::Overlay) {
+        // Overlay Mode: True edge-to-edge. 
+        // Keep the full width (no horizontal margins) and stretch flush to the absolute ceiling (0).
+        waveVisualBounds = waveAnchorBounds;
+        waveVisualBounds.setTop(0); 
+    } else {
+        // Classic Mode: Apply horizontal margins for the padded look.
+        waveVisualBounds = waveAnchorBounds.reduced(margin, 0);
+    }
+    
+    // The file queue ALWAYS gets horizontal margins so it stays neatly padded at the bottom
     controlPanel.fileQueuePlaceholder.setBounds(controlPanel.fileQueuePlaceholder.getBounds().reduced(margin, 0));
 
-    // 4. Anchor playback timers securely to the visual bounds BEFORE we stretch the top
+    // 4. Anchor playback timers securely to the visual bounds BEFORE we push them to the canvas
     if (auto* ptv = controlPanel.getPlaybackTimeView()) {
         const int textHeight = Config::Layout::Text::playbackHeight;
         ptv->setBounds(waveVisualBounds.getX(), 
@@ -134,12 +144,7 @@ void LayoutManager::layoutWaveformArea() {
                        textHeight);
     }
 
-    // 5. Adjust vertical stretching for Overlay Mode
-    if (controlPanel.getSessionState().getViewMode() == AppEnums::ViewMode::Overlay) {
-        waveVisualBounds.setTop(0); // Stretch flush to the absolute ceiling
-    }
-
-    // 6. Push the mathematically perfect bounds to the Canvas View
+    // 5. Push the mathematically perfect bounds to the Canvas View
     wcv->setBounds(waveVisualBounds);
     controlPanel.layoutCache.waveformBounds = waveVisualBounds;
 }
