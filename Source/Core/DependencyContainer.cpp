@@ -94,7 +94,8 @@ DependencyContainer::DependencyContainer(ControlPanel &cp) : owner(cp) {
         owner.getSessionState(),
         owner.getAudioPlayer(),
         *directoryState,
-        *routingWorker);
+        *routingWorker,
+        owner.getDirectoryRoutingView());
 }
 
 DependencyContainer::~DependencyContainer() = default;
