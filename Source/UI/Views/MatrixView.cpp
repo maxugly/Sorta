@@ -1,5 +1,6 @@
 
 #include "UI/Views/MatrixView.h"
+#include "Core/AppEnums.h"
 #include "Utils/Config.h"
 
 MatrixView::MatrixView() {
@@ -14,18 +15,21 @@ void MatrixView::updateState(const MatrixViewState& newState) {
 }
 
 void MatrixView::paint(juce::Graphics& g) {
-    // 1. Draw the Button Background (GroupPosition::Middle style)
     auto bounds = getLocalBounds().toFloat().reduced(Config::UI::ButtonOutlineThickness / 2.0f);
     auto cornerSize = Config::UI::ButtonCornerSize;
-    
+
+    // 1. Determine Corner Shapes based on GroupPosition
+    const int pos = getProperties().getWithDefault("GroupPosition", (int)AppEnums::GroupPosition::Left);
+    const bool roundLeft = (pos == (int)AppEnums::GroupPosition::Left || pos == (int)AppEnums::GroupPosition::Alone);
+    const bool roundRight = (pos == (int)AppEnums::GroupPosition::Right || pos == (int)AppEnums::GroupPosition::Alone);
+
     juce::Path p;
-    // Corners: sharp all (Middle)
     p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-                          cornerSize, cornerSize, false, false, false, false);
-                          
+                          cornerSize, cornerSize, roundLeft, roundRight, roundLeft, roundRight);
+
     g.setColour(Config::Colors::Button::base);
     g.fillPath(p);
-    
+
     g.setColour(Config::Colors::Button::outline);
     g.strokePath(p, juce::PathStrokeType(Config::UI::ButtonOutlineThickness));
     

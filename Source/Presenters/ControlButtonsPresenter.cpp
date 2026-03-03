@@ -42,7 +42,7 @@ void ControlButtonsPresenter::initialiseModeButton() {
     if (owner.topBarView == nullptr) return;
     auto& btn = owner.topBarView->modeButton;
     btn.setButtonText(Config::Labels::viewModeClassic);
-    btn.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
+    btn.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     btn.setClickingTogglesState(true);
     btn.onClick = [this] { 
         auto& session = owner.getSessionState();

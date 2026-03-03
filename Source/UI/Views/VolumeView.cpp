@@ -1,4 +1,5 @@
 #include "UI/Views/VolumeView.h"
+#include "Core/AppEnums.h"
 #include "Utils/Config.h"
 
 class KnobLookAndFeel : public juce::LookAndFeel_V4 {
@@ -64,10 +65,14 @@ void VolumeView::paint(juce::Graphics &g) {
     auto bounds = getLocalBounds().toFloat().reduced(Config::UI::ButtonOutlineThickness / 2.0f);
     auto cornerSize = Config::UI::ButtonCornerSize;
 
+    // 1. Determine Corner Shapes based on GroupPosition
+    const int pos = getProperties().getWithDefault("GroupPosition", (int)AppEnums::GroupPosition::Left);
+    const bool roundLeft = (pos == (int)AppEnums::GroupPosition::Left || pos == (int)AppEnums::GroupPosition::Alone);
+    const bool roundRight = (pos == (int)AppEnums::GroupPosition::Right || pos == (int)AppEnums::GroupPosition::Alone);
+
     juce::Path p;
-    // GroupPosition::Left style: rounded left, sharp right
     p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-                          cornerSize, cornerSize, true, false, true, false);
+                          cornerSize, cornerSize, roundLeft, roundRight, roundLeft, roundRight);
 
     g.setColour(Config::Colors::Button::base);
     g.fillPath(p);

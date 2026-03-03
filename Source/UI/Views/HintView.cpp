@@ -1,4 +1,5 @@
 #include "UI/Views/HintView.h"
+#include "Core/AppEnums.h"
 #include "Utils/Config.h"
 
 HintView::HintView() { 
@@ -16,15 +17,19 @@ void HintView::setHint(const juce::String& text) {
 void HintView::paint(juce::Graphics& g) {
     auto bounds = getLocalBounds().toFloat().reduced(Config::UI::ButtonOutlineThickness / 2.0f);
     auto cornerSize = Config::UI::ButtonCornerSize;
-    
-    // Draw Button Background (GroupPosition::Middle - sharp all)
+
+    // 1. Determine Corner Shapes based on GroupPosition
+    const int pos = getProperties().getWithDefault("GroupPosition", (int)AppEnums::GroupPosition::Right);
+    const bool roundLeft = (pos == (int)AppEnums::GroupPosition::Left || pos == (int)AppEnums::GroupPosition::Alone);
+    const bool roundRight = (pos == (int)AppEnums::GroupPosition::Right || pos == (int)AppEnums::GroupPosition::Alone);
+
     juce::Path p;
     p.addRoundedRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(),
-                          cornerSize, cornerSize, false, false, false, false);
-    
+                          cornerSize, cornerSize, roundLeft, roundRight, roundLeft, roundRight);
+
     g.setColour(Config::Colors::Button::base);
     g.fillPath(p);
-    
+
     g.setColour(Config::Colors::Button::outline);
     g.strokePath(p, juce::PathStrokeType(Config::UI::ButtonOutlineThickness));
     

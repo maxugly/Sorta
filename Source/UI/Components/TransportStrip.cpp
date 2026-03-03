@@ -33,7 +33,7 @@ void TransportStrip::initialiseButtons() {
     // Cut Button
     addAndMakeVisible(cutButton);
     cutButton.setButtonText(Config::Labels::cutButton);
-    cutButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
+    cutButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     cutButton.setClickingTogglesState(true);
 }
 

@@ -19,21 +19,24 @@ TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
 
     volumeView = std::make_unique<VolumeView>();
     addAndMakeVisible(volumeView.get());
+    volumeView->getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
 
     matrixView = std::make_unique<MatrixView>();
     addAndMakeVisible(matrixView.get());
+    matrixView->getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
 
     hintView = std::make_unique<HintView>();
     addAndMakeVisible(hintView.get());
+    hintView->getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
 
     addAndMakeVisible(themeSelector);
-    themeSelector.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
+    themeSelector.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Left);
     
     addAndMakeVisible(themeUpButton);
     themeUpButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     
     addAndMakeVisible(themeDownButton);
-    themeDownButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Right);
+    themeDownButton.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Middle);
     
     themeUpButton.setButtonText(Config::Labels::themeUp);
     themeDownButton.setButtonText(Config::Labels::themeDown);
@@ -47,38 +50,37 @@ void TopBarView::resized() {
     const int buttonWidth = Config::Layout::buttonWidth;
     const int spacing = (int)Config::UI::GroupSpacing;
 
-    // 1. Left Anchored: Open and Transport
+    // 1. Left Strip: [Open] [Play | Stop | Auto | Repeat | Cut | Volume]
     openButton.setBounds(topRow.removeFromLeft(buttonWidth));
-    topRow.removeFromLeft(margin);
+    topRow.removeFromLeft(margin); // Structural gap after Open
 
+    const int knobSize = Config::Layout::TopBar::volumeKnobSize;
     if (transportStrip != nullptr) {
-        const int stripWidth = (buttonWidth * Config::Layout::TopBar::transportButtonsCount) + 
-                               (spacing * Config::Layout::TopBar::transportButtonsSpacingCount);
-        transportStrip->setBounds(topRow.removeFromLeft(stripWidth));
+        const int stripWidth = (buttonWidth * 5) + (spacing * 5) + knobSize;
+        auto leftGroup = topRow.removeFromLeft(stripWidth);
+        
+        transportStrip->setBounds(leftGroup.removeFromLeft(leftGroup.getWidth() - knobSize));
+        if (volumeView) volumeView->setBounds(leftGroup);
     }
 
-    // 2. Right Anchored: View Mode controls
+    // 2. Right Strip: [Theme Controls | Mode | Stats | Channels]
     channelViewButton.setBounds(topRow.removeFromRight(buttonWidth));
     topRow.removeFromRight(spacing);
     statsButton.setBounds(topRow.removeFromRight(buttonWidth));
     topRow.removeFromRight(spacing);
     modeButton.setBounds(topRow.removeFromRight(buttonWidth));
-    topRow.removeFromRight(margin);
+    topRow.removeFromRight(spacing);
     
     themeDownButton.setBounds(topRow.removeFromRight(buttonWidth / 2));
+    topRow.removeFromRight(0); // No gap between up/down
     themeUpButton.setBounds(topRow.removeFromRight(buttonWidth / 2));
+    topRow.removeFromRight(0); // No gap between selector/up
     themeSelector.setBounds(topRow.removeFromRight(Config::Layout::TopBar::themeSelectorWidth));
 
-    // 3. Centered Strip: [Volume | Matrix | Hint]
-    const int knobSize = Config::Layout::TopBar::volumeKnobSize;
+    // 3. Center Strip: [Matrix | Hint]
+    topRow.reduce(margin, 0); // Structural padding before the center strip
     const int matrixWidth = (Config::Layout::Matrix::columns * Config::Layout::Matrix::squareSize) + Config::Layout::Matrix::padding;
-    const int hintWidth = Config::Layout::TopBar::hintWidth;
-    const int totalCenterWidth = knobSize + spacing + matrixWidth + spacing + hintWidth;
-
-    auto centerArea = getLocalBounds().withSizeKeepingCentre(totalCenterWidth, getHeight());
-    if (volumeView) volumeView->setBounds(centerArea.removeFromLeft(knobSize));
-    centerArea.removeFromLeft(spacing);
-    if (matrixView) matrixView->setBounds(centerArea.removeFromLeft(matrixWidth));
-    centerArea.removeFromLeft(spacing);
-    if (hintView) hintView->setBounds(centerArea.removeFromLeft(hintWidth));
+    
+    if (matrixView) matrixView->setBounds(topRow.removeFromLeft(matrixWidth));
+    if (hintView) hintView->setBounds(topRow);
 }
