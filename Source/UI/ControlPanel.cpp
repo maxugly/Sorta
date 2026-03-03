@@ -33,6 +33,7 @@ void ControlPanel::injectLogic(InteractionCoordinator& ic, PlaybackTimerManager&
 }
 
 void ControlPanel::setupViews() {
+    addChildComponent(leftWorkspaceAnchor); addChildComponent(waveformLayoutAnchor);
     waveformCanvasView = std::make_unique<WaveformCanvasView>(*this); addAndMakeVisible(waveformCanvasView.get());
     overlayView = std::make_unique<OverlayView>(*this); addAndMakeVisible(overlayView.get());
     topBarView = std::make_unique<TopBarView>(*this); addAndMakeVisible(topBarView.get());

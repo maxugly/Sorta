@@ -17,28 +17,22 @@ void LayoutManager::performLayout() {
     auto fullBounds = controlPanel.getLocalBounds();
     const int margin = Config::Layout::windowBorderMargins;
 
-    // 1. Execute the horizontal split on the ENTIRE window first.
-    // This defines the boundary between all controls/waveform (left) and DirectoryRouting/Exit (right).
+    // 1. Structural Horizontal Split: All controls/waveform (left) vs Sidebar (right)
     // Note: comps array is: dummy (left-container-math), resizer, directoryRoutingView
-    juce::Component* hComps[] = { nullptr, controlPanel.horizontalResizer.get(), &controlPanel.directoryRoutingView };
+    juce::Component* hComps[] = { &controlPanel.leftWorkspaceAnchor, controlPanel.horizontalResizer.get(), &controlPanel.directoryRoutingView };
     controlPanel.horizontalLayoutManager.layOutComponents(hComps, 3, fullBounds.getX(), fullBounds.getY(), fullBounds.getWidth(), fullBounds.getHeight(), false, true);
 
-    // 2. Adjust right side for Exit Button.
-    // Fixed buttonWidth ensures it does not stretch.
+    // 2. Adjust right side for Exit Button
     const int buttonWidth = Config::Layout::buttonWidth;
     controlPanel.exitButton.setBounds(fullBounds.getRight() - buttonWidth - margin, margin, 
                                       buttonWidth, (int)Config::UI::WidgetHeight);
     
-    // DirectoryRoutingView fills the rest of the right column below the exit button
     auto routingBounds = controlPanel.directoryRoutingView.getBounds();
     routingBounds.setTop(controlPanel.exitButton.getBottom() + margin);
     controlPanel.directoryRoutingView.setBounds(routingBounds);
 
-    // Everything on the left is constrained by the main container's new bounds.
-    auto leftBounds = fullBounds.withWidth(controlPanel.horizontalResizer->getX());
-
-    // 3. Perform standard vertical layout inside the leftBounds.
-    auto bounds = leftBounds;
+    // 3. Vertical layout inside the left workspace anchor
+    auto bounds = controlPanel.leftWorkspaceAnchor.getBounds();
     const int rowHeight = (int)Config::UI::WidgetHeight + margin * 2;
     layoutTopRowButtons(bounds, rowHeight);
     layoutCutControls(bounds, rowHeight);
@@ -96,10 +90,9 @@ void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, 
 
 void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {
     const int margin = Config::Layout::windowBorderMargins;
-
-    // Always use the Classic bounds as the structural anchor.
-    // We will dynamically stretch the visual View later in layoutWaveformArea.
-    controlPanel.layoutCache.waveformBounds = bounds.reduced(margin);
+    
+    // Always use the structural center cut-out as the content anchor
+    controlPanel.layoutCache.contentAreaBounds = bounds.reduced(margin);
 
     controlPanel.getPresenterCore().getStatsPresenter().layoutWithin(
         controlPanel.layoutCache.contentAreaBounds);
@@ -110,39 +103,43 @@ void LayoutManager::layoutWaveformArea() {
     if (wcv == nullptr) return;
 
     const int margin = Config::Layout::windowBorderMargins;
-    auto fullWidthBounds = controlPanel.getLocalBounds().withWidth(controlPanel.horizontalResizer->getX());
+    auto contentArea = controlPanel.layoutCache.contentAreaBounds;
+    auto fullLeftArea = controlPanel.leftWorkspaceAnchor.getBounds();
 
-    // 1. Execute Vertical Layout using the FULL width, but ALWAYS use the Classic Y and Height
-    // from the pre-calculated waveformBounds so the resizer bar stays mathematically anchored!
-    juce::Component* vComps[] = { wcv, controlPanel.verticalResizer.get(), &controlPanel.fileQueuePlaceholder };
+    // 1. Math Phase: Execute Vertical Layout on the invisible ANCHOR component
+    // We use the FULL width of the left area so the resizer bar shoots edge-to-edge!
+    juce::Component* vComps[] = { &controlPanel.waveformLayoutAnchor, controlPanel.verticalResizer.get(), &controlPanel.fileQueuePlaceholder };
     controlPanel.verticalLayoutManager.layOutComponents(vComps, 3,
-        0,
-        controlPanel.layoutCache.waveformBounds.getY(),
-        fullWidthBounds.getWidth(),
-        controlPanel.layoutCache.waveformBounds.getHeight(),
+        fullLeftArea.getX(), 
+        contentArea.getY(), 
+        fullLeftArea.getWidth(), 
+        contentArea.getHeight(), 
         true, true);
 
-    // 2. Adjust margins and bounds based on the View Mode
-    if (controlPanel.getSessionState().getViewMode() == AppEnums::ViewMode::Overlay) {
-        // Overlay Mode: Pull the top of the waveform flush to the absolute ceiling (0)
-        // so it slides underneath the top controls. Leave the bottom anchored at the resizer bar.
-        wcv->setBounds(wcv->getBounds().withTop(0));
+    // 2. Extract the uncorrupted structural bounds
+    auto waveAnchorBounds = controlPanel.waveformLayoutAnchor.getBounds();
 
-        // Only apply horizontal margins to the file queue
-        controlPanel.fileQueuePlaceholder.setBounds(controlPanel.fileQueuePlaceholder.getBounds().reduced(margin, 0));
-    } else {
-        // Classic Mode: Re-apply the left/right margins to both child views
-        wcv->setBounds(wcv->getBounds().reduced(margin, 0));
-        controlPanel.fileQueuePlaceholder.setBounds(controlPanel.fileQueuePlaceholder.getBounds().reduced(margin, 0));
-    }
+    // 3. Visual Phase: Apply horizontal margins for the visual components
+    auto waveVisualBounds = waveAnchorBounds.reduced(margin, 0);
+    
+    // Also apply horizontal margins to the file queue so it perfectly aligns with the waveform
+    controlPanel.fileQueuePlaceholder.setBounds(controlPanel.fileQueuePlaceholder.getBounds().reduced(margin, 0));
 
-    // 3. Anchor playback timers securely inside the active waveform view bounds
+    // 4. Anchor playback timers securely to the visual bounds BEFORE we stretch the top
     if (auto* ptv = controlPanel.getPlaybackTimeView()) {
-        auto wb = wcv->getBounds();
         const int textHeight = Config::Layout::Text::playbackHeight;
-        ptv->setBounds(wb.getX(),
-                       wb.getBottom() - textHeight - margin,
-                       wb.getWidth(),
+        ptv->setBounds(waveVisualBounds.getX(), 
+                       waveVisualBounds.getBottom() - textHeight - margin, 
+                       waveVisualBounds.getWidth(), 
                        textHeight);
     }
+
+    // 5. Adjust vertical stretching for Overlay Mode
+    if (controlPanel.getSessionState().getViewMode() == AppEnums::ViewMode::Overlay) {
+        waveVisualBounds.setTop(0); // Stretch flush to the absolute ceiling
+    }
+
+    // 6. Push the mathematically perfect bounds to the Canvas View
+    wcv->setBounds(waveVisualBounds);
+    controlPanel.layoutCache.waveformBounds = waveVisualBounds;
 }

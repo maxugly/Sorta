@@ -286,6 +286,7 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<MarkerStrip> inStrip, outStrip;
     std::unique_ptr<CutLengthStrip> cutLengthStrip;
 
+    juce::Component leftWorkspaceAnchor, waveformLayoutAnchor;
     juce::Component fileQueuePlaceholder;
     DirectoryRoutingView directoryRoutingView;
     juce::StretchableLayoutManager verticalLayoutManager;
