@@ -1,5 +1,3 @@
-
-
 #include "UI/LayoutManager.h"
 
 #include "Presenters/PlaybackTextPresenter.h"
@@ -16,56 +14,45 @@ LayoutManager::LayoutManager(ControlPanel &controlPanelIn) : controlPanel(contro
 void LayoutManager::performLayout() {
     auto fullBounds = controlPanel.getLocalBounds();
     const int margin = Config::Layout::windowBorderMargins;
+    const int height = (int)Config::UI::WidgetHeight;
 
-    // 1. Structural Horizontal Split: All controls/waveform (left) vs Sidebar (right)
-    // Note: comps array is: dummy (left-container-math), resizer, directoryRoutingView
+    // 1. Horizontal Split: All controls/waveform (left) vs Sidebar (right)
     juce::Component* hComps[] = { &controlPanel.leftWorkspaceAnchor, controlPanel.horizontalResizer.get(), &controlPanel.directoryRoutingView };
-    controlPanel.horizontalLayoutManager.layOutComponents(hComps, 3, fullBounds.getX(), fullBounds.getY(), fullBounds.getWidth(), fullBounds.getHeight(), false, true);
+    controlPanel.horizontalLayoutManager.layOutComponents(hComps, 3, 
+        fullBounds.getX(), fullBounds.getY(), fullBounds.getWidth(), fullBounds.getHeight(), false, true);
 
     // 2. Adjust right side for Exit Button
-    const int buttonWidth = Config::Layout::buttonWidth;
-    controlPanel.exitButton.setBounds(fullBounds.getRight() - buttonWidth - margin, margin, 
-                                      buttonWidth, (int)Config::UI::WidgetHeight);
-    
-    auto routingBounds = controlPanel.directoryRoutingView.getBounds();
-    routingBounds.setTop(controlPanel.exitButton.getBottom() + margin);
-    controlPanel.directoryRoutingView.setBounds(routingBounds);
+    auto rightBounds = controlPanel.directoryRoutingView.getBounds();
+    auto exitRow = rightBounds.removeFromTop(height + margin * 2);
+    controlPanel.exitButton.setBounds(exitRow.getRight() - Config::Layout::buttonWidth - margin, 
+                                      exitRow.getY() + margin, 
+                                      Config::Layout::buttonWidth, height);
+    controlPanel.directoryRoutingView.setBounds(rightBounds); 
 
-    // 3. Vertical layout inside the left workspace anchor
-    auto bounds = controlPanel.leftWorkspaceAnchor.getBounds();
-    const int rowHeight = (int)Config::UI::WidgetHeight + margin * 2;
-    layoutTopRowButtons(bounds, rowHeight);
-    layoutCutControls(bounds, rowHeight);
-    layoutBottomRowAndTextDisplay(bounds, rowHeight);
+    // 3. Lay out left side using a single, globally padded internal container
+    auto bounds = controlPanel.leftWorkspaceAnchor.getBounds().reduced(margin);
+
+    layoutTopRowButtons(bounds, height);
+    layoutCutControls(bounds, height);
+    layoutBottomRowAndTextDisplay(bounds, height);
     layoutWaveformAndStats(bounds);
 }
 
-void LayoutManager::layoutTopRowButtons(juce::Rectangle<int> &bounds, int rowHeight) {
-    juce::ignoreUnused(rowHeight);
-    const int margin = Config::Layout::windowBorderMargins;
-    const int height = (int)Config::UI::WidgetHeight;
-
-    auto topRow = bounds.removeFromTop(height + margin * 2).reduced(margin);
-    topRow.setHeight(height);
-
+void LayoutManager::layoutTopRowButtons(juce::Rectangle<int> &bounds, int height) {
+    auto topRow = bounds.removeFromTop(height);
     if (controlPanel.topBarView != nullptr)
         controlPanel.topBarView->setBounds(topRow);
+        
+    bounds.removeFromTop(Config::Layout::windowBorderMargins); // 15px gap between rows
 }
 
-void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int rowHeight) {
-    juce::ignoreUnused(rowHeight);
-    const int margin = Config::Layout::windowBorderMargins;
+void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int height) {
     const float unit = Config::UI::WidgetUnit;
     const int spacing = (int)Config::UI::GroupSpacing;
-    const int height = (int)Config::UI::WidgetHeight;
+    auto cutRow = bounds.removeFromTop(height);
 
-    auto cutRow = bounds.removeFromTop(height + margin * 2).reduced(margin);
-    cutRow.setHeight(height);
-
-    const int stripWidth =
-        (int)((Config::UI::CutButtonWidthUnits * 2 + Config::UI::TimerWidthUnits +
-               Config::UI::ResetButtonWidthUnits * 2 + Config::UI::ThresholdWidthUnits) *
-              unit) + (spacing * 5);
+    const int stripWidth = (int)((Config::UI::CutButtonWidthUnits * 2 + Config::UI::TimerWidthUnits + 
+                                  Config::UI::ResetButtonWidthUnits * 2 + Config::UI::ThresholdWidthUnits) * unit) + (spacing * 5);
 
     if (controlPanel.inStrip != nullptr)
         controlPanel.inStrip->setBounds(cutRow.removeFromLeft(stripWidth));
@@ -73,29 +60,21 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int rowHeigh
     if (controlPanel.outStrip != nullptr)
         controlPanel.outStrip->setBounds(cutRow.removeFromRight(stripWidth));
 
-    // --- NEW: Center the Cut Length Strip in the remaining space ---
     if (controlPanel.getCutLengthStrip() != nullptr) {
-        const int lengthWidth = Config::Layout::cutLengthStripWidth;
-        controlPanel.getCutLengthStrip()->setBounds(cutRow.withSizeKeepingCentre(lengthWidth, height));
+        controlPanel.getCutLengthStrip()->setBounds(cutRow.withSizeKeepingCentre(Config::Layout::cutLengthStripWidth, height));
     }
+    
+    bounds.removeFromTop(Config::Layout::windowBorderMargins); // 15px gap before waveform
 }
 
-void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int> &bounds, int rowHeight) {
-    juce::ignoreUnused(rowHeight);
-    const int margin = Config::Layout::windowBorderMargins;
-
-    // Do not chop off the bottom row anymore; let the waveform use this space!
-    controlPanel.layoutCache.contentAreaBounds = bounds.reduced(margin);
+void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int>&, int) {
+    // Obsolete: Playback timers are now dynamically anchored inside the waveform area.
 }
 
 void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {
-    const int margin = Config::Layout::windowBorderMargins;
-    
-    // Always use the structural center cut-out as the content anchor
-    controlPanel.layoutCache.contentAreaBounds = bounds.reduced(margin);
-
-    controlPanel.getPresenterCore().getStatsPresenter().layoutWithin(
-        controlPanel.layoutCache.contentAreaBounds);
+    // The bounds are now perfectly prepared. Cache them.
+    controlPanel.layoutCache.contentAreaBounds = bounds;
+    controlPanel.getPresenterCore().getStatsPresenter().layoutWithin(bounds);
 }
 
 void LayoutManager::layoutWaveformArea() {
@@ -106,45 +85,34 @@ void LayoutManager::layoutWaveformArea() {
     auto contentArea = controlPanel.layoutCache.contentAreaBounds;
     auto fullLeftArea = controlPanel.leftWorkspaceAnchor.getBounds();
 
-    // 1. Math Phase: Execute Vertical Layout on the invisible ANCHOR component
-    // We use the FULL width of the left area so the resizer bar shoots edge-to-edge!
+    // 1. Math Phase: Execute Vertical Layout
     juce::Component* vComps[] = { &controlPanel.waveformLayoutAnchor, controlPanel.verticalResizer.get(), &controlPanel.fileQueuePlaceholder };
     controlPanel.verticalLayoutManager.layOutComponents(vComps, 3,
-        fullLeftArea.getX(), 
-        contentArea.getY(), 
-        fullLeftArea.getWidth(), 
-        contentArea.getHeight(), 
-        true, true);
+        fullLeftArea.getX(), contentArea.getY(), fullLeftArea.getWidth(), contentArea.getHeight(), true, true);
 
-    // 2. Extract the uncorrupted structural bounds
     auto waveAnchorBounds = controlPanel.waveformLayoutAnchor.getBounds();
-
-    // 3. Visual Phase: Conditionally apply margins based on View Mode
     juce::Rectangle<int> waveVisualBounds;
-    
-    if (controlPanel.getSessionState().getViewMode() == AppEnums::ViewMode::Overlay) {
-        // Overlay Mode: True edge-to-edge. 
-        // Keep the full width (no horizontal margins) and stretch flush to the absolute ceiling (0).
-        waveVisualBounds = waveAnchorBounds;
-        waveVisualBounds.setTop(0); 
-    } else {
-        // Classic Mode: Apply horizontal margins for the padded look.
-        waveVisualBounds = waveAnchorBounds.reduced(margin, 0);
-    }
-    
-    // The file queue ALWAYS gets horizontal margins so it stays neatly padded at the bottom
-    controlPanel.fileQueuePlaceholder.setBounds(controlPanel.fileQueuePlaceholder.getBounds().reduced(margin, 0));
 
-    // 4. Anchor playback timers securely to the visual bounds BEFORE we push them to the canvas
+    // 2. Visual Phase: Mode-specific padding
+    if (controlPanel.getSessionState().getViewMode() == AppEnums::ViewMode::Overlay) {
+        waveVisualBounds = waveAnchorBounds;
+        waveVisualBounds.setTop(0); // Stretch flush to ceiling
+    } else {
+        // Classic Mode: Trim the sides and the bottom to create uniform padding around the resizer
+        waveVisualBounds = waveAnchorBounds.withTrimmedLeft(margin).withTrimmedRight(margin).withTrimmedBottom(margin);
+    }
+
+    // Pad the file queue so it perfectly aligns with the UI columns above it
+    auto queueBounds = controlPanel.fileQueuePlaceholder.getBounds();
+    controlPanel.fileQueuePlaceholder.setBounds(queueBounds.withTrimmedLeft(margin).withTrimmedRight(margin).withTrimmedTop(margin));
+
+    // 3. Anchor playback timers securely inside the visual bounds
     if (auto* ptv = controlPanel.getPlaybackTimeView()) {
         const int textHeight = Config::Layout::Text::playbackHeight;
-        ptv->setBounds(waveVisualBounds.getX(), 
-                       waveVisualBounds.getBottom() - textHeight - margin, 
-                       waveVisualBounds.getWidth(), 
-                       textHeight);
+        ptv->setBounds(waveVisualBounds.getX(), waveVisualBounds.getBottom() - textHeight - margin, 
+                       waveVisualBounds.getWidth(), textHeight);
     }
 
-    // 5. Push the mathematically perfect bounds to the Canvas View
     wcv->setBounds(waveVisualBounds);
     controlPanel.layoutCache.waveformBounds = waveVisualBounds;
 }
