@@ -28,9 +28,12 @@
 #include "Presenters/FpsPresenter.h"
 #include "Presenters/ThemePresenter.h"
 #include "Presenters/PreloadPresenter.h"
+#include "Presenters/DirectoryPresenter.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/Views/WaveformCanvasView.h"
 #include "UI/Views/CutLayerView.h"
+#include "Core/DirectoryState.h"
+#include "Workers/RoutingWorker.h"
 
 DependencyContainer::DependencyContainer(ControlPanel &cp) : owner(cp) {
     playbackRepeatController = std::make_unique<PlaybackRepeatController>(owner.getAudioPlayer(), owner.getSessionState());
@@ -84,6 +87,14 @@ DependencyContainer::DependencyContainer(ControlPanel &cp) : owner(cp) {
     fpsPresenter = std::make_unique<FpsPresenter>(owner, owner.getFpsView());
     themePresenter = std::make_unique<ThemePresenter>(owner);
     preloadPresenter = std::make_unique<PreloadPresenter>(owner, owner.getFileQueueView());
+
+    directoryState = std::make_unique<DirectoryState>();
+    routingWorker = std::make_unique<RoutingWorker>();
+    directoryPresenter = std::make_unique<DirectoryPresenter>(
+        owner.getSessionState(),
+        owner.getAudioPlayer(),
+        *directoryState,
+        *routingWorker);
 }
 
 DependencyContainer::~DependencyContainer() = default;
