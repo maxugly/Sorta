@@ -27,10 +27,7 @@ void RoutingWorker::run() {
         }
 
         if (!job.destinationDir.exists()) {
-            if (!job.destinationDir.createDirectory().wasOk()) {
-                // Directory creation failed. Consider reporting this error.
-                continue;
-            }
+            job.destinationDir.createDirectory();
         }
 
         juce::File targetFile = job.destinationDir.getChildFile(job.sourceFile.getFileName());

@@ -9,6 +9,8 @@
  */
 class DirectoryState {
 public:
+    DirectoryState() = default;
+
     class Listener {
     public:
         virtual ~Listener() = default;

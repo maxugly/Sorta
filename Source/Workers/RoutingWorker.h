@@ -27,7 +27,6 @@ private:
 
     std::queue<RoutingJob> jobQueue;
     std::mutex queueMutex;
-    /** @brief Controls the lifetime of async callbacks, ensuring they don't execute after the worker is destroyed. */
     std::shared_ptr<bool> lifeToken;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RoutingWorker)
