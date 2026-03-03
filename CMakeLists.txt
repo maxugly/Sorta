@@ -95,6 +95,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Workers/RoutingWorker.cpp
 
             # Presenters
+            Source/Presenters/DirectoryPresenter.h
+            Source/Presenters/DirectoryPresenter.cpp
             Source/Presenters/ControlButtonsPresenter.h
             Source/Presenters/ControlButtonsPresenter.cpp
             Source/Presenters/BoundaryLockPresenter.h
