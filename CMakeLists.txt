@@ -76,6 +76,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Core/AudioPlayer.cpp
             Source/Core/SessionState.h
             Source/Core/SessionState.cpp
+            Source/Core/DirectoryState.h
+            Source/Core/DirectoryState.cpp
             Source/Core/AppEnums.h
             Source/Core/SilenceAnalysisWorker.h
             Source/Core/SilenceAnalysisWorker.cpp
@@ -89,6 +91,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/Workers/SilenceDetectionLogger.h
             Source/Workers/SilenceDetectionLogger.cpp
             Source/Workers/PreloadWorker.cpp
+            Source/Workers/RoutingWorker.h
+            Source/Workers/RoutingWorker.cpp
 
             # Presenters
             Source/Presenters/ControlButtonsPresenter.h
