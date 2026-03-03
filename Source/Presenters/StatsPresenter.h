@@ -83,11 +83,7 @@ class StatsOverlay : public juce::Component {
         auto handleArea = b.removeFromBottom(Config::Layout::Stats::handleAreaHeight);
         statsDisplay.setBounds(b.reduced(Config::Layout::Stats::internalPadding));
         resizer.setBounds(handleArea);
-        if (onHeightChanged)
-            onHeightChanged(getHeight());
     }
-
-    std::function<void(int)> onHeightChanged; /**< Callback for persistent height tracking. */
     juce::TextEditor statsDisplay;           /**< The actual read-only text container. */
     juce::ResizableEdgeComponent resizer;     /**< Interactive handle for height adjustment. */
 
@@ -118,7 +114,7 @@ class StatsOverlay : public juce::Component {
  * @see SessionState
  * @see ControlPanel
  */
-class StatsPresenter final : public SessionState::Listener {
+class StatsPresenter final : public SessionState::Listener, public juce::ComponentListener {
   public:
     /**
      * @brief Constructs the presenter and wires it to the parent view.
@@ -189,6 +185,8 @@ class StatsPresenter final : public SessionState::Listener {
      * @brief Triggers a stats refresh when a new file is loaded.
      * @param filePath Path to the new asset.
      */
+    void componentMovedOrResized(juce::Component& component, bool wasMoved, bool wasResized) override;
+
     void fileChanged(const juce::String &filePath) override;
 
   private:
@@ -196,7 +194,7 @@ class StatsPresenter final : public SessionState::Listener {
      * @brief Mathematical internal helper to construct the technical summary.
      * @return Formatted multi-line string.
      */
-    juce::String buildStatsString() const;
+    juce::String buildStatsString();
 
     /**
      * @brief Synchronizes the StatsOverlay's visibility with the internal state.

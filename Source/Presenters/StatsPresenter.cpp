@@ -18,11 +18,12 @@ StatsPresenter::StatsPresenter(ControlPanel &ownerIn) : owner(ownerIn) {
     statsDisplay.setColour(juce::TextEditor::textColourId, Config::Colors::statsText);
     statsOverlay.setVisible(false);
 
-    statsOverlay.onHeightChanged = [this](int newHeight) { currentHeight = newHeight; };
+    statsOverlay.addComponentListener(this);
     owner.getSessionState().addListener(this);
 }
 
 StatsPresenter::~StatsPresenter() {
+    statsOverlay.removeComponentListener(this);
     owner.getSessionState().removeListener(this);
 }
 
@@ -75,13 +76,14 @@ void StatsPresenter::setDisplayEnabled(bool shouldEnable) {
     statsOverlay.statsDisplay.setEnabled(shouldEnable);
 }
 
-juce::String StatsPresenter::buildStatsString() const {
+juce::String StatsPresenter::buildStatsString() {
     juce::String stats;
     AudioPlayer &audioPlayer = owner.getAudioPlayer();
-    auto &thumbnail = audioPlayer.getThumbnail();
     double sampleRate = 0.0;
     juce::int64 lengthInSamples = 0;
 
+#if !defined(JUCE_HEADLESS)
+    auto &thumbnail = audioPlayer.getThumbnail();
     if (thumbnail.getTotalLength() > 0.0 &&
         audioPlayer.getReaderInfo(sampleRate, lengthInSamples)) {
         stats << Config::Labels::statsFile << audioPlayer.getLoadedFile().getFileName() << "\n";
@@ -105,6 +107,15 @@ juce::String StatsPresenter::buildStatsString() const {
     } else {
         stats << Config::Labels::statsError;
     }
+#else
+    if (audioPlayer.getReaderInfo(sampleRate, lengthInSamples)) {
+        stats << Config::Labels::statsFile << audioPlayer.getLoadedFile().getFileName() << "\n";
+        stats << Config::Labels::statsSamples << lengthInSamples << "\n";
+        stats << Config::Labels::statsRate << sampleRate << Config::Labels::statsHz << "\n";
+    } else {
+        stats << Config::Labels::statsError;
+    }
+#endif
 
     return stats;
 }
@@ -113,4 +124,11 @@ void StatsPresenter::updateVisibility() {
     statsOverlay.setVisible(showStats);
     if (showStats)
         statsOverlay.toFront(true);
+}
+
+void StatsPresenter::componentMovedOrResized(juce::Component& component, bool wasMoved, bool wasResized) {
+    juce::ignoreUnused(component, wasMoved);
+    if (wasResized) {
+        currentHeight = statsOverlay.getHeight();
+    }
 }
