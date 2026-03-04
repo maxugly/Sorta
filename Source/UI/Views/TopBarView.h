@@ -62,8 +62,6 @@ class TopBarView final : public juce::Component {
     /** @return Reference to the contextual hint view. */
     HintView& getHintView() { return *hintView; }
 
-    /** @brief The button used to open new audio files. */
-    TransportButton openButton;
     /** @brief The button used to toggle between different application modes. */
     TransportButton modeButton;
     /** @brief The button used to toggle the statistics display. */

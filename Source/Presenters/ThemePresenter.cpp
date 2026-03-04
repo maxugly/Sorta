@@ -123,7 +123,6 @@ void ThemePresenter::applyTheme() {
     setBtn(owner.exitButton, Config::Colors::Button::exitText, Config::Colors::Button::exitText);
 
     if (auto* tbv = owner.getTopBarView()) {
-        setBtn(tbv->openButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
         setBtn(tbv->modeButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
         setBtn(tbv->statsButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
         setBtn(tbv->channelViewButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
@@ -137,6 +136,10 @@ void ThemePresenter::applyTheme() {
             setBtn(ts->getRepeatButton(), Config::Colors::Button::text, Config::Colors::Button::textActive);
             setBtn(ts->getCutButton(), Config::Colors::Button::text, Config::Colors::Button::textActive);
         }
+    }
+
+    if (auto* bpv = owner.bottomPanelView.get()) {
+        setBtn(bpv->openButton, Config::Colors::Button::text, Config::Colors::Button::textActive);
     }
     owner.sendLookAndFeelChange();
     owner.repaint();

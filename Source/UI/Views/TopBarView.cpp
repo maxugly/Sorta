@@ -9,7 +9,6 @@
 #include "Utils/Config.h"
 
 TopBarView::TopBarView(ControlPanel &cp) : controlPanel(cp) {
-    addAndMakeVisible(openButton);
     addAndMakeVisible(modeButton);
     addAndMakeVisible(statsButton);
     addAndMakeVisible(channelViewButton);
@@ -50,10 +49,7 @@ void TopBarView::resized() {
     const int buttonWidth = Config::Layout::buttonWidth;
     const int spacing = (int)Config::UI::GroupSpacing;
 
-    // 1. Left Strip: [Open] [Play | Stop | Auto | Repeat | Cut | Volume]
-    openButton.setBounds(topRow.removeFromLeft(buttonWidth));
-    topRow.removeFromLeft(margin); // Structural gap after Open
-
+    // 1. Left Strip: [Transport (Play | Stop | etc)] + [Volume]
     const int knobSize = Config::Layout::TopBar::volumeKnobSize;
     if (transportStrip != nullptr) {
         const int stripWidth = (buttonWidth * 5) + (spacing * 5) + knobSize;

@@ -155,6 +155,7 @@ juce::String selectTheme = "Select Theme...";
 juce::String fpsSuffix = " FPS (";
 juce::String fpsClose = ")";
 juce::String timePrefixPlus = "+";
+juce::String folderPrefix = "Folder ";
 } // namespace Labels
 
 int Layout::Window::width = 1920;

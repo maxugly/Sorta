@@ -31,8 +31,8 @@ void ControlButtonsPresenter::initialiseAllButtons() {
 }
 
 void ControlButtonsPresenter::initialiseOpenButton() {
-    if (owner.topBarView == nullptr) return;
-    auto& btn = owner.topBarView->openButton;
+    if (owner.bottomPanelView == nullptr) return;
+    auto& btn = owner.bottomPanelView->openButton;
     btn.setButtonText(Config::Labels::openButton);
     btn.getProperties().set("GroupPosition", (int)AppEnums::GroupPosition::Alone);
     btn.onClick = [this] { owner.invokeOwnerOpenDialog(); };

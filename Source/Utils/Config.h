@@ -391,6 +391,7 @@ namespace Labels {
     extern juce::String fpsSuffix;
     extern juce::String fpsClose;
     extern juce::String timePrefixPlus;
+    extern juce::String folderPrefix;
     extern const char* const threadAudioReader;
     extern const char* const failGeneric;
 } // namespace Labels

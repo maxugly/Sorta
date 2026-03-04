@@ -23,7 +23,7 @@ void DirectoryRoutingView::paint(juce::Graphics& g) {
         g.drawRect(slot, 1);
         
         // Label them 1-9, terminating in 0
-        juce::String label = "Folder " + juce::String(i == 9 ? 0 : i + 1);
+        juce::String label = Config::Labels::folderPrefix + juce::String(i == 9 ? 0 : i + 1);
         g.setColour(Config::Colors::Button::text);
         g.setFont(juce::Font(juce::FontOptions((float)Config::Layout::Text::mouseCursorSize)));
         g.drawText(label, slot, juce::Justification::centred, false);

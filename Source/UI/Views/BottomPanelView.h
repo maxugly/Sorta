@@ -7,6 +7,7 @@
 #endif
 
 #include "UI/Components/StyledTextEditor.h"
+#include "UI/Components/TransportButton.h"
 
 /**
  * @file BottomPanelView.h
@@ -24,6 +25,8 @@ public:
     ~BottomPanelView() override = default;
 
     void resized() override;
+
+    TransportButton openButton;
 
 private:
     StyledTextEditor placeholderEditor;
