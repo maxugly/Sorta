@@ -3,7 +3,6 @@
 #include "MainComponent.h"
 #include "UI/LayoutManager.h"
 #include "UI/Views/WaveformCanvasView.h"
-#include "UI/Views/OverlayView.h"
 #include "UI/Views/PlaybackTimeView.h"
 #include "UI/Views/FpsView.h"
 #include "Presenters/StatsPresenter.h"
@@ -35,7 +34,6 @@ void ControlPanel::injectLogic(InteractionCoordinator& ic, PlaybackTimerManager&
 void ControlPanel::setupViews() {
     addChildComponent(leftWorkspaceAnchor); addChildComponent(waveformLayoutAnchor);
     waveformCanvasView = std::make_unique<WaveformCanvasView>(*this); addAndMakeVisible(waveformCanvasView.get());
-    overlayView = std::make_unique<OverlayView>(*this); addAndMakeVisible(overlayView.get());
     topBarView = std::make_unique<TopBarView>(*this); addAndMakeVisible(topBarView.get());
     playbackTimeView = std::make_unique<PlaybackTimeView>(); addAndMakeVisible(playbackTimeView.get());
     fpsView = std::make_unique<FpsView>(); addAndMakeVisible(fpsView.get()); fpsView->toFront(false);
@@ -64,7 +62,6 @@ void ControlPanel::finaliseSetup() { getPlaybackTextPresenter().initialiseEditor
 
 void ControlPanel::resized() {
     if (layoutManager) { layoutManager->performLayout(); layoutManager->layoutWaveformArea(); }
-    if (overlayView) overlayView->setBounds(getLocalBounds());
     if (fpsView && Config::Advanced::showFpsOverlay) {
         int x = (Config::Advanced::fpsOverlayPosition == Config::Advanced::posTopCenter || Config::Advanced::fpsOverlayPosition == Config::Advanced::posBottomCenter) ? (getWidth() - Config::Layout::Fps::width) / 2 : Config::Advanced::fpsOverlayX;
         int y = (Config::Advanced::fpsOverlayPosition == Config::Advanced::posTopCenter) ? Config::Layout::Fps::margin : (Config::Advanced::fpsOverlayPosition == Config::Advanced::posBottomCenter) ? getHeight() - Config::Layout::Fps::height - Config::Layout::Fps::margin : Config::Advanced::fpsOverlayY;

@@ -19,7 +19,3 @@ void CutLengthStrip::resized() {
     lockButton.setBounds(b.removeFromRight(lockWidth));
     lengthEditor.setBounds(b);
 }
-
-void CutLengthStrip::paint(juce::Graphics& g) {
-    juce::ignoreUnused(g);
-}

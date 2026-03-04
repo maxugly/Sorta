@@ -34,7 +34,6 @@ void LayoutManager::performLayout() {
 
     layoutTopRowButtons(bounds, height);
     layoutCutControls(bounds, height);
-    layoutBottomRowAndTextDisplay(bounds, height);
     layoutWaveformAndStats(bounds);
 }
 
@@ -65,10 +64,6 @@ void LayoutManager::layoutCutControls(juce::Rectangle<int> &bounds, int height) 
     }
     
     bounds.removeFromTop(Config::Layout::windowBorderMargins); // 15px gap before waveform
-}
-
-void LayoutManager::layoutBottomRowAndTextDisplay(juce::Rectangle<int>&, int) {
-    // Obsolete: Playback timers are now dynamically anchored inside the waveform area.
 }
 
 void LayoutManager::layoutWaveformAndStats(juce::Rectangle<int> &bounds) {

@@ -29,9 +29,6 @@ public:
     /** @brief Constructs a new CutLengthStrip and initialises its sub-components. */
     CutLengthStrip();
 
-    /** @brief Standard JUCE paint callback. */
-    void paint(juce::Graphics& g) override;
-
     /** @brief Standard JUCE resized callback, organizing the editor and lock button. */
     void resized() override;
 

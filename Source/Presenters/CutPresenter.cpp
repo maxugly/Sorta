@@ -47,13 +47,7 @@ void CutPresenter::playbackTimerTick() {
 }
 
 void CutPresenter::updateAnimationState(CutLayerState& state) {
-    auto invertCol = [](juce::Colour c) {
-        return juce::Colour((juce::uint8)(255 - c.getRed()),
-                            (juce::uint8)(255 - c.getGreen()),
-                            (juce::uint8)(255 - c.getBlue()));
-    };
-
-    // Also update marker interaction states high-frequency
+    // Rely strictly on centralized theme colors, no raw math.
     auto calcMarkerProps = [&](MarkerMouseHandler::CutMarkerHandle handle, bool isAuto) {
         juce::Colour color = isAuto ? Config::Colors::cutMarkerAuto : Config::Colors::cutLine;
         float thickness = Config::Layout::Glow::cutBoxOutlineThickness;
@@ -64,11 +58,11 @@ void CutPresenter::updateAnimationState(CutLayerState& state) {
 
         if (dragged != MarkerMouseHandler::CutMarkerHandle::None) {
             if (dragged == handle) {
-                color = invertCol(color);
+                color = Config::Colors::cutMarkerDrag;
                 thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
             }
         } else if (hovered == handle) {
-            color = invertCol(color);
+            color = Config::Colors::cutMarkerHover;
             thickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
         }
 
@@ -78,34 +72,36 @@ void CutPresenter::updateAnimationState(CutLayerState& state) {
     const auto draggedHandle = markerMouseHandler->getDraggedHandle();
     const auto hoveredHandle = markerMouseHandler->getHoveredHandle();
 
+    // 1. Apply Marker Props
     auto inProps = calcMarkerProps(MarkerMouseHandler::CutMarkerHandle::In, sessionState.getCutPrefs().autoCut.inActive);
     state.inMarkerColor = std::get<0>(inProps);
     state.inMarkerThickness = std::get<1>(inProps);
     state.inMarkerShouldPulse = std::get<2>(inProps);
-    
-    // Threshold lines follow the same inversion logic as markers
-    state.inThresholdColor = Config::Colors::thresholdLine;
-    if (hoveredHandle == MarkerMouseHandler::CutMarkerHandle::In || draggedHandle == MarkerMouseHandler::CutMarkerHandle::In)
-        state.inThresholdColor = invertCol(state.inThresholdColor);
 
     auto outProps = calcMarkerProps(MarkerMouseHandler::CutMarkerHandle::Out, sessionState.getCutPrefs().autoCut.outActive);
     state.outMarkerColor = std::get<0>(outProps);
     state.outMarkerThickness = std::get<1>(outProps);
     state.outMarkerShouldPulse = std::get<2>(outProps);
 
+    // 2. Threshold Lines
+    state.inThresholdColor = Config::Colors::thresholdLine;
+    if (hoveredHandle == MarkerMouseHandler::CutMarkerHandle::In || draggedHandle == MarkerMouseHandler::CutMarkerHandle::In)
+        state.inThresholdColor = Config::Colors::cutMarkerHover;
+
     state.outThresholdColor = Config::Colors::thresholdLine;
     if (hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Out || draggedHandle == MarkerMouseHandler::CutMarkerHandle::Out)
-        state.outThresholdColor = invertCol(state.outThresholdColor);
+        state.outThresholdColor = Config::Colors::cutMarkerHover;
 
+    // 3. Region Outline
     state.regionOutlineColor = Config::Colors::cutLine;
     state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThickness;
     state.regionShouldPulse = false;
 
     if (draggedHandle == MarkerMouseHandler::CutMarkerHandle::Full) {
-        state.regionOutlineColor = invertCol(state.regionOutlineColor);
+        state.regionOutlineColor = Config::Colors::cutMarkerDrag;
         state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
     } else if (draggedHandle == MarkerMouseHandler::CutMarkerHandle::None && hoveredHandle == MarkerMouseHandler::CutMarkerHandle::Full) {
-        state.regionOutlineColor = invertCol(state.regionOutlineColor);
+        state.regionOutlineColor = Config::Colors::cutMarkerHover;
         state.regionOutlineThickness = Config::Layout::Glow::cutBoxOutlineThicknessInteracting;
     }
 
@@ -121,6 +117,7 @@ void CutPresenter::updateAnimationState(CutLayerState& state) {
     // --- Playhead State Logic ---
     PlaybackCursorViewState cursorState;
     const double audioLength = waveformState.totalLength;
+
     if (audioLength > 0.0) {
         const auto &layout = cutLayerView.getOwner().getWaveformBounds();
         cursorState.playheadX = CoordinateMapper::secondsToPixels(
@@ -138,14 +135,13 @@ void CutPresenter::updateAnimationState(CutLayerState& state) {
             cursorState.isVisible = true;
         }
 
-        const auto qColor = Config::Colors::quaternary;
-        cursorState.centerLineColor = juce::Colour((juce::uint8)(255 - qColor.getRed()),
-                                                   (juce::uint8)(255 - qColor.getGreen()),
-                                                   (juce::uint8)(255 - qColor.getBlue()));
+        // Strictly use Theme Colors instead of inverted math!
+        cursorState.centerLineColor = Config::Colors::playbackCursor;
         cursorState.headColor = Config::Colors::playbackCursorHead;
     } else {
         cursorState.isVisible = false;
     }
+
     playbackCursorView.updateState(cursorState);
 }
 

@@ -86,7 +86,7 @@ void MatrixPresenter::fullMatrixUpdate() {
 
     state.ledColors.push_back((inStrip && inStrip->getThresholdEditor().hasKeyboardFocus(false)) ? active : inactive);
     state.ledColors.push_back((outStrip && outStrip->getThresholdEditor().hasKeyboardFocus(false)) ? active : inactive);
-    state.ledColors.push_back(active); // Light 31 (Original Flag)
+    state.ledColors.push_back(active);
 
     // 32. Volume Flame Indicator
     float vol = sessionState.getVolume();
@@ -194,11 +194,8 @@ void MatrixPresenter::fullMatrixUpdate() {
     // 63. Entire File Selected
     state.ledColors.push_back((sessionState.getCutIn() == 0.0 && sessionState.getCutOut() >= sessionState.getTotalDuration() && sessionState.getTotalDuration() > 0.0) ? active : inactive);
 
-    // 64. Heartbeat removed
     state.ledColors.push_back(inactive);
-
-    cachedState = state;
-    matrixView.updateState(cachedState);
+    matrixView.updateState(state);
 }
 
 void MatrixPresenter::playbackTimerTick() {

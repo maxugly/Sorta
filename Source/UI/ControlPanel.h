@@ -62,7 +62,6 @@ class ZoomView;
 class PlaybackRepeatController;
 class TransportStrip;
 class MarkerStrip;
-class OverlayView;
 
 class XPResizerBar final : public juce::StretchableLayoutResizerBar {
   public:
@@ -278,7 +277,6 @@ class ControlPanel final : public juce::Component {
 
     std::unique_ptr<LayoutManager> layoutManager;
     std::unique_ptr<WaveformCanvasView> waveformCanvasView;
-    std::unique_ptr<OverlayView> overlayView;
     std::unique_ptr<FpsView> fpsView;
 
     std::unique_ptr<TopBarView> topBarView;
