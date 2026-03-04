@@ -170,6 +170,8 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Views/TopBarView.cpp
             Source/UI/Views/DirectoryRoutingView.h
             Source/UI/Views/DirectoryRoutingView.cpp
+            Source/UI/Views/BottomPanelView.h
+            Source/UI/Views/BottomPanelView.cpp
             Source/UI/Views/PlaybackTimeView.h
             Source/UI/Views/PlaybackTimeView.cpp
             Source/UI/Views/WaveformView.h

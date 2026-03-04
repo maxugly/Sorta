@@ -276,6 +276,11 @@ struct Layout {
         static constexpr int margin = 10;
         static constexpr float cornerRadius = 4.0f;
     };
+
+    struct BottomBar {
+        static constexpr int height = 40;
+        static constexpr int verticalMargin = 5;
+    };
 };
 
 /** @brief Timing and behavior constants for visual feedback. */

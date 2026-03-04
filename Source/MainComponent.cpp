@@ -39,7 +39,7 @@ MainComponent::MainComponent() {
 
     setAudioChannels(0, 2);
 
-    setSize(Config::Layout::Window::width, Config::Layout::Window::height);
+    setSize(Config::Layout::Window::width, Config::Layout::Window::height + Config::Layout::BottomBar::height);
 
     setWantsKeyboardFocus(true);
     openGLContext.attachTo(*this);

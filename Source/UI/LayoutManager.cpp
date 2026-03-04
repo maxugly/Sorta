@@ -16,6 +16,11 @@ void LayoutManager::performLayout() {
     const int margin = Config::Layout::windowBorderMargins;
     const int height = (int)Config::UI::WidgetHeight;
 
+    // 0. Reserve space for the new bottom panel
+    auto bottomBounds = fullBounds.removeFromBottom(Config::Layout::BottomBar::height);
+    if (controlPanel.bottomPanelView != nullptr)
+        controlPanel.bottomPanelView->setBounds(bottomBounds);
+
     // 1. Horizontal Split: All controls/waveform (left) vs Sidebar (right)
     juce::Component* hComps[] = { &controlPanel.leftWorkspaceAnchor, controlPanel.horizontalResizer.get(), &controlPanel.directoryRoutingView };
     controlPanel.horizontalLayoutManager.layOutComponents(hComps, 3, 

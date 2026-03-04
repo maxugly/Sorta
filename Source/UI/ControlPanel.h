@@ -19,6 +19,7 @@ class FocusManager;
 #include "UI/Views/PlaybackTimeView.h"
 #include "UI/Views/TopBarView.h"
 #include "UI/Views/DirectoryRoutingView.h"
+#include "UI/Views/BottomPanelView.h"
 #include "UI/Handlers/MarkerMouseHandler.h"
 #include "UI/Handlers/WaveformMouseHandler.h"
 #include "UI/LookAndFeel/ModernLookAndFeel.h"
@@ -282,6 +283,7 @@ class ControlPanel final : public juce::Component {
     std::unique_ptr<FpsView> fpsView;
 
     std::unique_ptr<TopBarView> topBarView;
+    std::unique_ptr<BottomPanelView> bottomPanelView;
     std::unique_ptr<PlaybackTimeView> playbackTimeView;
     std::unique_ptr<MarkerStrip> inStrip, outStrip;
     std::unique_ptr<CutLengthStrip> cutLengthStrip;

@@ -37,6 +37,7 @@ void ControlPanel::setupViews() {
     waveformCanvasView = std::make_unique<WaveformCanvasView>(*this); addAndMakeVisible(waveformCanvasView.get());
     overlayView = std::make_unique<OverlayView>(*this); addAndMakeVisible(overlayView.get());
     topBarView = std::make_unique<TopBarView>(*this); addAndMakeVisible(topBarView.get());
+    bottomPanelView = std::make_unique<BottomPanelView>(); addAndMakeVisible(bottomPanelView.get());
     playbackTimeView = std::make_unique<PlaybackTimeView>(); addAndMakeVisible(playbackTimeView.get());
     fpsView = std::make_unique<FpsView>(); addAndMakeVisible(fpsView.get()); fpsView->toFront(false);
 }
