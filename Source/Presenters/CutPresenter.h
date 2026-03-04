@@ -81,7 +81,7 @@ class CutPresenter : public SessionState::Listener,
     void cutPreferenceChanged(const MainDomain::CutPreferences &prefs) override;
 
     /** @brief Triggered when the 'In' point changes in the SessionState. */
-    void cutInChanged(double value) override { juce::ignoreUnused(value); pushStateToView(); }
+    void cutInChanged(double value) override;
 
     /** @brief Triggered when the 'Out' point changes in the SessionState. */
     void cutOutChanged(double value) override { juce::ignoreUnused(value); pushStateToView(); }

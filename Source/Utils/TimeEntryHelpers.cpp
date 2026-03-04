@@ -17,7 +17,7 @@ namespace TimeEntryHelpers {
  *          1. **Static Baseline Calculation**: We calculate the `textWidth` using 
  *             the editor's font metrics to find the absolute center-aligned start X.
  *          2. **Linear Accumulation**: We iterate through each character, 
- *             accumulating its specific width (`getStringWidth`).
+ *             accumulating its specific width (using `GlyphArrangement`).
  *          3. **Hit-Box Intersection**: As soon as the `mouseX` coordinate falls 
  *             within a character's accumulated width window, we return that index. 
  *             This bypasses the native JUCE padding bug by relying on pure 
@@ -27,16 +27,20 @@ namespace TimeEntryHelpers {
 static int calculateCharIndexAtX(const juce::TextEditor& editor, int mouseX) {
     const auto& font = editor.getFont();
     const auto text = editor.getText();
-    const int textWidth = font.getStringWidth(text);
-    // Determine the starting X offset for center-aligned text
-    const int startX = (editor.getWidth() - textWidth) / 2;
-    int currentX = startX;
+    if (text.isEmpty()) return 0;
 
-    for (int i = 0; i < text.length(); ++i) {
-        int charWidth = font.getStringWidth(juce::String::charToString(text[i]));
+    juce::GlyphArrangement ga;
+    ga.addLineOfText (font, text, 0.0f, 0.0f);
+    
+    const float textWidth = ga.getBoundingBox (0, -1, true).getWidth();
+    // Determine the starting X offset for center-aligned text
+    const float startX = (static_cast<float>(editor.getWidth()) - textWidth) / 2.0f;
+
+    for (int i = 0; i < ga.getNumGlyphs(); ++i) {
+        const auto& glyph = ga.getGlyph (i);
         // If the mouse is within the horizontal bounds of this specific character
-        if (mouseX < currentX + charWidth) return i;
-        currentX += charWidth;
+        if (static_cast<float>(mouseX) < startX + glyph.getRight()) 
+            return i;
     }
     return text.length() - 1;
 }

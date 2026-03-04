@@ -2,48 +2,6 @@
 #include "Core/AppEnums.h"
 #include "Utils/Config.h"
 
-class KnobLookAndFeel : public juce::LookAndFeel_V4 {
-  public:
-    void drawRotarySlider(juce::Graphics &g, int x, int y, int width, int height,
-                          float sliderPos, const float rotaryStartAngle,
-                          const float rotaryEndAngle, juce::Slider &slider) override {
-        auto outlineThickness = Config::Layout::VolumeKnob::outlineThickness;
-        auto radius = (float)juce::jmin(width / 2, height / 2) - outlineThickness * 2.0f;
-        auto centreX = (float)x + (float)width * 0.5f;
-        auto centreY = (float)y + (float)height * 0.5f;
-        auto rx = centreX - radius;
-        auto ry = centreY - radius;
-        auto rw = radius * 2.0f;
-        auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-
-        // 1. Draw Knob Body
-        g.setColour(Config::Colors::Button::base);
-        g.fillEllipse(rx, ry, rw, rw);
-        
-        // 2. Draw Track
-        g.setColour(slider.findColour(juce::Slider::rotarySliderOutlineColourId));
-        g.drawEllipse(rx, ry, rw, rw, outlineThickness);
-
-        // 3. Draw Filled Area
-        juce::Path valueArc;
-        valueArc.addCentredArc(centreX, centreY, radius, radius, 0.0f, rotaryStartAngle, angle, true);
-        g.setColour(slider.findColour(juce::Slider::rotarySliderFillColourId));
-        g.strokePath(valueArc, juce::PathStrokeType(outlineThickness * 2.0f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
-
-        // 4. Draw Pointer
-        juce::Path p;
-        auto pointerLength = radius * Config::Layout::VolumeKnob::pointerLengthProportion;
-        auto pointerThickness = Config::Layout::VolumeKnob::pointerThickness;
-        p.addRoundedRectangle(-pointerThickness * 0.5f, -radius, pointerThickness, pointerLength, 1.0f);
-        p.applyTransform(juce::AffineTransform::rotation(angle).translated(centreX, centreY));
-
-        g.setColour(Config::Colors::volumeKnobPointer);
-        g.fillPath(p);
-    }
-};
-
-static KnobLookAndFeel knobLF;
-
 VolumeView::VolumeView() {
     addAndMakeVisible(volumeKnob);
     volumeKnob.setLookAndFeel(&knobLF);
@@ -54,6 +12,10 @@ VolumeView::VolumeView() {
     volumeKnob.setColour(juce::Slider::rotarySliderFillColourId, Config::Colors::volumeKnobFill);
     volumeKnob.setColour(juce::Slider::rotarySliderOutlineColourId, Config::Colors::volumeKnobTrack);
     volumeKnob.setColour(juce::Slider::thumbColourId, Config::Colors::volumeKnobPointer);
+}
+
+VolumeView::~VolumeView() {
+    volumeKnob.setLookAndFeel(nullptr);
 }
 
 void VolumeView::resized() {

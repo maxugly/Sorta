@@ -42,6 +42,14 @@ void CutPresenter::cutPreferenceChanged(const MainDomain::CutPreferences &) {
     pushStateToView();
 }
 
+void CutPresenter::cutInChanged(double newTime) {
+    auto& audioPlayer = cutLayerView.getOwner().getAudioPlayer();
+    if (audioPlayer.getCurrentPosition() < newTime) {
+        audioPlayer.setPlayheadPosition(newTime);
+    }
+    pushStateToView();
+}
+
 void CutPresenter::playbackTimerTick() {
     pushStateToView();
 }
