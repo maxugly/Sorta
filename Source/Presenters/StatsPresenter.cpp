@@ -27,7 +27,7 @@ StatsPresenter::~StatsPresenter() {
 }
 
 void StatsPresenter::fileChanged(const juce::String &filePath) {
-    juce::ignoreUnused(filePath);
+    setDisplayEnabled(filePath.isNotEmpty());
     updateStats();
 }
 
@@ -65,10 +65,6 @@ void StatsPresenter::layoutWithin(const juce::Rectangle<int> &contentAreaBounds)
 void StatsPresenter::setDisplayText(const juce::String &text, juce::Colour color) {
     statsOverlay.statsDisplay.setText(text, juce::dontSendNotification);
     statsOverlay.statsDisplay.setColour(juce::TextEditor::textColourId, color);
-}
-
-juce::TextEditor &StatsPresenter::getDisplay() {
-    return statsOverlay.statsDisplay;
 }
 
 void StatsPresenter::setDisplayEnabled(bool shouldEnable) {

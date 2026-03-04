@@ -83,10 +83,7 @@ void ThemePresenter::applyTheme() {
 
     if (auto* wcv = owner.getWaveformCanvasView()) wcv->getWaveformView().clearCaches();
     
-    auto& stats = owner.getPresenterCore().getStatsPresenter();
-    stats.getDisplay().setColour(juce::TextEditor::backgroundColourId, Config::Colors::textEditorBackground);
-    stats.getDisplay().setColour(juce::TextEditor::textColourId, Config::Colors::statsText);
-    stats.updateStats();
+    owner.getPresenterCore().getStatsPresenter().updateStats();
 
     if (auto* ptv = owner.getPlaybackTimeView()) {
         ptv->getElapsedEditor().setCustomTextColor(Config::Colors::playbackText);

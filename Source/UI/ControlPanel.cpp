@@ -82,7 +82,6 @@ const MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() const { return g
 MarkerMouseHandler &ControlPanel::getMarkerMouseHandler() { return getPresenterCore().getCutPresenter().getMarkerMouseHandler(); }
 const WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() const { return getPresenterCore().getCutPresenter().getWaveformMouseHandler(); }
 WaveformMouseHandler &ControlPanel::getWaveformMouseHandler() { return getPresenterCore().getCutPresenter().getWaveformMouseHandler(); }
-juce::TextEditor &ControlPanel::getStatsDisplay() { return getPresenterCore().getStatsPresenter().getDisplay(); }
 const juce::LookAndFeel &ControlPanel::getLookAndFeel() const { return modernLF; }
 void ControlPanel::invokeOwnerOpenDialog() { owner.openButtonClicked(); }
 juce::MouseCursor ControlPanel::getMouseCursor() { return (getInteractionCoordinator().getPlacementMode() != AppEnums::PlacementMode::None) ? juce::MouseCursor::PointingHandCursor : juce::MouseCursor::CrosshairCursor; }

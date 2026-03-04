@@ -34,14 +34,12 @@ void ControlStatePresenter::refreshStates() {
     updateGeneralButtonStates(enabled);
     updateCutModeControlStates(owner.getSessionState().getCutPrefs().active, enabled);
 
-    owner.getBoundaryLogicPresenter().refreshLabels();
-    owner.getPlaybackTextPresenter().updateEditors();
     owner.getRepeatButtonPresenter().cutPreferenceChanged(owner.getSessionState().getCutPrefs());
 }
 
 void ControlStatePresenter::fileChanged(const juce::String &filePath) {
     juce::ignoreUnused(filePath);
-    updateUIFromState();
+    refreshStates();
 }
 
 void ControlStatePresenter::updateUIFromState() {
@@ -67,9 +65,6 @@ void ControlStatePresenter::updateUIFromState() {
         owner.getOutStrip()->getThresholdEditor().setText(juce::String(outPercent), juce::dontSendNotification);
 
     refreshStates();
-
-    owner.getBoundaryLogicPresenter().refreshLabels();
-    owner.getPlaybackTextPresenter().updateEditors();
 
     if (owner.waveformCanvasView != nullptr)
         owner.waveformCanvasView->getZoomView().repaint();
@@ -128,8 +123,6 @@ void ControlStatePresenter::updateGeneralButtonStates(bool enabled) {
         elapsed.setVisible(enabled);
         remaining.setVisible(enabled);
     }
-
-    owner.getPresenterCore().getStatsPresenter().setDisplayEnabled(enabled);
 }
 
 void ControlStatePresenter::updateCutModeControlStates(bool isCutModeActive, bool enabled) {

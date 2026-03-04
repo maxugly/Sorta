@@ -205,9 +205,6 @@ class ControlPanel final : public juce::Component {
         return presenterCore != nullptr ? &presenterCore->getSilenceDetectionPresenter() : nullptr;
     }
 
-    /** @return Reference to the statistics text editor. */
-    juce::TextEditor &getStatsDisplay();
-
     /** @return Const reference to the panel's look and feel. */
     const juce::LookAndFeel &getLookAndFeel() const;
 

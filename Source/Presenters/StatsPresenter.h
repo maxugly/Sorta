@@ -175,12 +175,6 @@ class StatsPresenter final : public SessionState::Listener {
     void setDisplayText(const juce::String &text, juce::Colour color = Config::Colors::statsText);
 
     /**
-     * @brief Provides direct access to the internal TextEditor.
-     * @return Reference to the overlay's display component.
-     */
-    juce::TextEditor &getDisplay();
-
-    /**
      * @brief Toggles whether the display component can receive focus.
      */
     void setDisplayEnabled(bool shouldEnable);
