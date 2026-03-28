@@ -40,12 +40,6 @@ namespace Config {
 void initializeConfigs();
 
 /**
- * @brief Loads a visual theme from an external JSON or binary file.
- * @param themeFile The file handle to the theme definition.
- */
-void loadTheme(const juce::File& themeFile);
-
-/**
  * @brief Serializes the current color palette to a named theme file.
  * @param themeName The identifier for the theme.
  */

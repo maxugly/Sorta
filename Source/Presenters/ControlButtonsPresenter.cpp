@@ -192,6 +192,3 @@ void ControlButtonsPresenter::initialiseMarkerButtons() {
         };
     }
 }
-
-void ControlButtonsPresenter::refreshStates() {
-}

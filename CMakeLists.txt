@@ -60,6 +60,8 @@ if (NOT BUILD_TESTS_ONLY)
             # Utils
             Source/Utils/Config.h
             Source/Utils/Config.cpp
+            Source/Utils/ThemeLoader.h
+            Source/Utils/ThemeLoader.cpp
             Source/Utils/TimeUtils.h
             Source/Utils/TimeUtils.cpp
             Source/Utils/UIAnimationHelper.h
@@ -182,8 +184,6 @@ if (NOT BUILD_TESTS_ONLY)
             Source/UI/Views/PlaybackCursorView.cpp
             Source/UI/Views/PlaybackCursorGlow.h
             Source/UI/Views/PlaybackCursorGlow.cpp
-            Source/UI/Views/OverlayView.h
-            Source/UI/Views/OverlayView.cpp
             Source/UI/Views/MatrixView.h
             Source/UI/Views/MatrixView.cpp
             Source/UI/Views/VolumeView.h
@@ -223,6 +223,7 @@ add_executable(tests
     Source/Core/AudioPlayer.cpp
     Tests/AudioPlayerTest.cpp
     Source/Utils/Config.cpp
+    Source/Utils/ThemeLoader.cpp
     Source/Core/SessionState.cpp
     Source/Workers/SilenceAnalysisAlgorithms.cpp
     Source/Core/SilenceAnalysisWorker.cpp

@@ -33,8 +33,6 @@ class ControlButtonsPresenter final {
 
     void initialiseAllButtons();
 
-    void refreshStates();
-
   private:
     void initialiseOpenButton();
 
